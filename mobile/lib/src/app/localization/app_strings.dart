@@ -79,8 +79,6 @@ class AppStrings {
   String get announcements => isArabic ? 'Announcements' : 'Announcements';
   String get pinnedAnnouncements =>
       isArabic ? 'Pinned announcements' : 'Pinned announcements';
-  String get noAnnouncementsYet =>
-      isArabic ? 'No announcements yet.' : 'No announcements yet.';
   String get announcementTitle =>
       isArabic ? 'Announcement title' : 'Announcement title';
   String get announcementTitleRequired => isArabic
