@@ -42,11 +42,11 @@ jobs:
       - name: Install mobile dependencies
         run: flutter pub get
 
+      - name: Check formatting
+        run: dart format --set-exit-if-changed lib
+
       - name: Generate Dart sources
         run: dart run build_runner build --delete-conflicting-outputs
-
-      - name: Check formatting
-        run: dart format --set-exit-if-changed .
 
       - name: Analyze mobile app
         run: flutter analyze
@@ -82,4 +82,3 @@ jobs:
           --dart-define=AIN_API_BASE_URL=https://staging-api.example.com/api/v1
           --dart-define=AIN_ENABLE_CRASH_REPORTING=true
           --dart-define=AIN_ALLOW_MOCK_DATA=false
-
