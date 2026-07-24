@@ -1,0 +1,179 @@
+import { analytics, files, members, notifications, roles, rooms, tenants } from "../data/mockData";
+import { httpClient, shouldUseMockApi } from "./httpClient";
+
+const delay = (value) => new Promise((resolve) => {
+  window.setTimeout(() => resolve(value), 120);
+});
+
+function camelKey(key) {
+  return key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+}
+
+function camelize(value) {
+  if (Array.isArray(value)) return value.map(camelize);
+  if (!value || typeof value !== "object") return value;
+  return Object.fromEntries(Object.entries(value).map(([key, item]) => [camelKey(key), camelize(item)]));
+}
+
+function endpoint(path, mockValue) {
+  if (shouldUseMockApi()) return delay(mockValue);
+  return httpClient(path).then(camelize);
+}
+
+function organizationPath(organizationId, resource) {
+  if (!organizationId) return null;
+  return `/organizations/${organizationId}/${resource}`;
+}
+
+export const api = {
+  getRoles: () => shouldUseMockApi() ? delay(roles) : Promise.resolve([]),
+  getRooms: (organizationId) => organizationId
+    ? endpoint(`${organizationPath(organizationId, "rooms")}?perPage=100`, rooms).then((items) => items.map((room) => ({
+      ...room,
+      members: room.membershipsCount || 0,
+      files: room.filesCount || 0,
+      status: room.status === "active" ? "Active" : room.status
+    })))
+    : Promise.resolve([]),
+  getFiles: (organizationId) => organizationId
+    ? endpoint(`${organizationPath(organizationId, "content")}?perPage=100`, files).then((items) => items.map((item) => ({
+      ...item,
+      name: item.title,
+      room: item.room?.name || item.roomId,
+      uploadedBy: item.creator?.name || "",
+      date: item.createdAt ? new Intl.DateTimeFormat(document.documentElement.lang || "en", { dateStyle: "medium" }).format(new Date(item.createdAt)) : "",
+      views: Number(item.views || 0),
+      size: item.fileAsset?.sizeBytes ? `${(item.fileAsset.sizeBytes / 1048576).toFixed(1)} MB` : "",
+      protected: !item.downloadAllowed
+    })))
+    : Promise.resolve([]),
+  getMembers: (organizationId) => organizationId
+    ? endpoint(`${organizationPath(organizationId, "members")}?perPage=100`, members).then((items) => items.map((item) => ({
+      ...item,
+      name: item.user?.name || "",
+      email: item.user?.email || "",
+      role: item.role?.name || "",
+      status: item.status === "active" ? "Active" : item.status
+    })))
+    : Promise.resolve([]),
+  getTenants: (platformAdmin) => platformAdmin
+    ? endpoint("/admin/organizations?perPage=100", tenants).then((items) => items.map((item) => {
+      const subscription = item.subscriptions?.[0];
+      return {
+        ...item,
+        plan: subscription?.plan?.name || subscription?.plan?.code || "—",
+        users: item.membershipsCount || 0,
+        rooms: item.roomsCount || 0,
+        files: item.filesCount || 0,
+        revenue: null,
+        expiresAt: subscription?.currentPeriodEndsAt || null,
+        subscriptionStatus: subscription?.status || "none",
+        status: item.status || "inactive"
+      };
+    }))
+    : Promise.resolve([]),
+  getNotifications: (organizationId) => endpoint(
+    `/notifications?perPage=100${organizationId ? `&organizationId=${organizationId}` : ""}`,
+    notifications
+  ).then((items) => items.map((item) => ({
+    ...item,
+    unread: item.status === "unread",
+    title: item.title || item.data?.title || "Notification",
+    titleAr: item.titleAr || item.data?.titleAr,
+    body: item.body || item.data?.body || "",
+    bodyAr: item.bodyAr || item.data?.bodyAr,
+    target: item.target || item.data?.target || "/",
+    type: item.type || item.data?.type || "Workspace",
+    time: item.createdAt
+  }))),
+  getAnalytics: (scope, organizationId) => {
+    const path = scope === "platform"
+      ? "/admin/analytics/overview"
+      : organizationId
+        ? `${organizationPath(organizationId, "analytics/overview")}`
+        : null;
+    return path ? endpoint(path, analytics[scope] || []) : Promise.resolve([]);
+  },
+  createRoom: (organizationId, payload) => httpClient(organizationPath(organizationId, "rooms"), {
+    method: "POST",
+    body: JSON.stringify({
+      name: payload.name,
+      description: payload.description || null,
+      accessType: payload.type === "Upload + read" ? "collaborative" : "read_only",
+      status: "active"
+    })
+  }).then(camelize),
+  createEvent: (organizationId, payload) => httpClient(organizationPath(organizationId, "events"), {
+    method: "POST",
+    body: JSON.stringify(payload)
+  }).then(camelize),
+  inviteMember: (organizationId, payload) => httpClient(organizationPath(organizationId, "invitations"), {
+    method: "POST",
+    body: JSON.stringify(payload)
+  }).then(camelize),
+  uploadContent: (organizationId, payload) => {
+    const body = new FormData();
+    body.set("roomId", payload.roomId);
+    body.set("title", payload.file.name);
+    body.set("type", payload.type);
+    body.set("file", payload.file);
+    body.set("downloadAllowed", payload.downloadAllowed ? "1" : "0");
+    body.set("watermarkEnabled", payload.watermarkEnabled === false ? "0" : "1");
+    body.set("status", "published");
+    return httpClient(organizationPath(organizationId, "content"), { method: "POST", body }).then(camelize);
+  },
+  deleteRoom: (organizationId, roomId) => httpClient(`${organizationPath(organizationId, "rooms")}/${roomId}`, { method: "DELETE" }),
+  deleteContent: (organizationId, contentId) => httpClient(`${organizationPath(organizationId, "content")}/${contentId}`, { method: "DELETE" }),
+  removeMember: (organizationId, membershipId) => httpClient(`${organizationPath(organizationId, "members")}/${membershipId}`, { method: "DELETE" }),
+  markNotificationRead: (notificationId) => httpClient(`/notifications/${notificationId}/read`, { method: "POST", body: "{}" }),
+  markAllNotificationsRead: () => httpClient("/notifications/read-all", { method: "POST", body: "{}" }),
+  getInstructorSlots: (organizationId) => endpoint(
+    organizationPath(organizationId, "instructor-slots?perPage=100"),
+    []
+  ),
+  createInstructorSlot: (organizationId, payload) => httpClient(
+    organizationPath(organizationId, "instructor-slots"),
+    { method: "POST", body: JSON.stringify(payload) }
+  ).then(camelize),
+  submitCourseForReview: (organizationId, courseId) => httpClient(
+    `${organizationPath(organizationId, "courses")}/${courseId}/submit-review`,
+    { method: "POST", body: "{}" }
+  ).then(camelize),
+  getInvitationPreview: (token) => endpoint(`/public/invitations/${encodeURIComponent(token)}`, null),
+  getPublicInstructors: () => endpoint("/public/instructors?perPage=100", []).then((items) => items.map((item) => ({
+    ...item,
+    nameAr: item.nameAr || item.name,
+    title: item.specialties?.join(", ") || "Instructor",
+    titleAr: item.specialties?.join("، ") || "مدرس",
+    subjects: (item.specialties || []).map((subject) => subject.toLowerCase().replace(/\s+/g, "-")),
+    levels: ["beginner", "intermediate", "advanced"],
+    formats: [...new Set((item.availabilitySlots || []).map((slot) => slot.deliveryType))],
+    price: Number(item.availabilitySlots?.[0]?.priceMinor || 0) / 100,
+    duration: item.availabilitySlots?.[0]
+      ? Math.round((new Date(item.availabilitySlots[0].endsAt) - new Date(item.availabilitySlots[0].startsAt)) / 60000)
+      : 60,
+    slots: (item.availabilitySlots || []).map((slot) => ({
+      ...slot,
+      date: slot.startsAt.slice(0, 10),
+      time: new Date(slot.startsAt).toLocaleTimeString("en", { hour: "2-digit", minute: "2-digit", hour12: false })
+    }))
+  }))),
+  getLessonBookings: () => endpoint("/student/lesson-bookings?perPage=100", []).then((items) => items.map((item) => ({
+    ...item,
+    teacherId: item.instructorId,
+    teacherName: item.instructor?.name,
+    teacherNameAr: item.instructor?.nameAr || item.instructor?.name,
+    subjectName: item.subject,
+    subjectNameAr: item.subject,
+    date: item.slot?.startsAt?.slice(0, 10),
+    time: item.slot?.startsAt ? new Date(item.slot.startsAt).toLocaleTimeString("en", { hour: "2-digit", minute: "2-digit", hour12: false }) : "",
+    duration: item.slot ? Math.round((new Date(item.slot.endsAt) - new Date(item.slot.startsAt)) / 60000) : 0,
+    format: item.slot?.deliveryType,
+    price: Number(item.amountMinor || 0) / 100
+  }))),
+  reserveLesson: (payload) => httpClient("/student/lesson-bookings", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  }).then(camelize),
+  cancelLesson: (bookingId) => httpClient(`/student/lesson-bookings/${bookingId}/cancel`, { method: "POST", body: "{}" }).then(camelize)
+};

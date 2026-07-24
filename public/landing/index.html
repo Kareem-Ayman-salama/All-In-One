@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All In One (AIO) — منصة المحتوى الآمنة لشركتك</title>
+  <meta name="description" content="All In One (AIO) is a secure SaaS workspace for protected files, private rooms, employee access, subscriptions, notifications, and analytics.">
+  <link rel="icon" type="image/png" href="/images/aio-logo-64.png">
+  <link rel="apple-touch-icon" href="/images/aio-logo-192.png">
+  <meta name="theme-color" content="#4F46E5">
+  <link rel="canonical" href="/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="All In One (AIO) — Secure SaaS Workspace">
+  <meta property="og:description" content="منصة SaaS آمنة لإدارة الملفات والرومات والموظفين والاشتراكات من مكان واحد.">
+  <meta property="og:locale" content="ar_EG">
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "All In One (AIO)",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "description": "Secure SaaS workspace for protected content, rooms, subscriptions, and analytics.",
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": "EGP",
+        "price": "500"
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+  <link rel="stylesheet" href="/landing/style.css">
+</head>
+<body>
+
+<!-- NAV  -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <div class="nav-mark"><img src="/images/aio-logo-64.png" alt="" /></div>
+      <span>All In One (AIO)</span>
+    </div>
+    <div class="nav-links">
+      <a class="nav-link" href="/courses">استكشف الكورسات</a>
+      <span class="nav-link" onclick="scrollToId('how')">إزاي بيشتغل</span>
+      <span class="nav-link" onclick="scrollToId('features')">المميزات</span>
+      <span class="nav-link" onclick="scrollToId('usecases')">لمين؟</span>
+      <span class="nav-link" onclick="scrollToId('pricing')">الأسعار</span>
+    </div>
+    <div class="nav-actions">
+      <a class="btn btn-g" href="/courses">للطلبة</a>
+      <button class="btn btn-g" onclick="openAuth('login')">تسجيل الدخول</button>
+      <button class="btn btn-p" onclick="openAuth('signup')" aria-label="ابدأ مجاناً" title="ابدأ مجاناً">
+        <i class="ti ti-rocket"></i> ابدأ مجاناً
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN MARKETING PAGE -->
+<div id="marketing-page">
+
+  <!--  HERO -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="hero-badge">
+          <i class="ti ti-shield-check"></i> بديل آمن لواتساب وجروبات العمل
+        </div>
+        <h1>بيانات شركتك، <span>محمية معاك دايماً</span></h1>
+        <p class="hero-sub">
+          All In One (AIO) منصة بتحول الواتساب والجروبات الفوضوية لبيئة عمل منظمة وآمنة —
+          كل ملف، كل موظف، كل روم في مكانها الصح، بحماية كاملة من التسريب.
+        </p>
+        <div class="hero-cta">
+          <button class="btn btn-p btn-lg" onclick="openAuth('signup')">
+            <i class="ti ti-rocket"></i> ابدأ مجاناً الآن
+          </button>
+          <button class="btn btn-o btn-lg" onclick="scrollToId('how')">
+            <i class="ti ti-player-play"></i> شاهد إزاي بيشتغل
+          </button>
+        </div>
+        <div class="hero-trust">
+          <span><i class="ti ti-circle-check"></i> بدون بطاقة ائتمان</span>
+          <span><i class="ti ti-circle-check"></i> أول شهر مجاناً</span>
+          <span><i class="ti ti-circle-check"></i> إعداد في 5 دقائق</span>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="mock-card">
+          <div class="mock-screen">
+            <div class="mock-bar">
+              <div class="mock-dot" style="background:#EF4444"></div>
+              <div class="mock-dot" style="background:#F59E0B"></div>
+              <div class="mock-dot" style="background:#10B981"></div>
+            </div>
+            <div class="mock-body">
+              <div class="mock-stat-row">
+                <div class="mock-stat">
+                  <div class="mock-stat-v">48</div>
+                  <div class="mock-stat-l">الموظفين</div>
+                </div>
+                <div class="mock-stat">
+                  <div class="mock-stat-v">5</div>
+                  <div class="mock-stat-l">الرومات</div>
+                </div>
+              </div>
+              <div class="mock-row">
+                <div class="mock-av" style="background:#4F46E5"></div>
+                <div style="flex:1">
+                  <div class="mock-line" style="width:70%;margin-bottom:5px"></div>
+                  <div class="mock-line" style="width:40%;background:#EEF2FF"></div>
+                </div>
+              </div>
+              <div class="mock-row">
+                <div class="mock-av" style="background:#06B6D4"></div>
+                <div style="flex:1">
+                  <div class="mock-line" style="width:55%;margin-bottom:5px"></div>
+                  <div class="mock-line" style="width:35%;background:#EEF2FF"></div>
+                </div>
+              </div>
+              <div class="mock-row">
+                <div class="mock-av" style="background:#10B981"></div>
+                <div style="flex:1">
+                  <div class="mock-line" style="width:65%;margin-bottom:5px"></div>
+                  <div class="mock-line" style="width:30%;background:#EEF2FF"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="float-card float-1"><i class="ti ti-shield-lock"></i> حماية نشطة</div>
+        <div class="float-card float-2"><i class="ti ti-chart-line"></i> Dashboard مباشر</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCT COMMAND CENTER -->
+  <section class="proof-strip">
+    <div class="wrap proof-grid">
+      <div class="proof-item"><strong>70%</strong><span>فوضى أقل في مشاركة المحتوى</span></div>
+      <div class="proof-item"><strong>5 min</strong><span>إعداد سريع لشركة أو أكاديمية</span></div>
+      <div class="proof-item"><strong>1 hub</strong><span>رومات، ملفات، اشتراكات، وتنبيهات</span></div>
+      <div class="proof-item"><strong>AIO</strong><span>Secure SaaS workspace</span></div>
+    </div>
+  </section>
+
+  <section class="section command-section" id="platform">
+    <div class="wrap">
+      <div class="sec-head wide">
+        <div class="sec-eyebrow">AIO Command Center</div>
+        <div class="sec-title">كل عمليات المحتوى الآمن في منصة واحدة</div>
+        <p class="sec-sub">
+          مستوحى من أفضل تجارب SaaS: واجهة واضحة، مسارات عمل سريعة، وداشبورد تجمع الرومات والملفات والاشتراكات والتنبيهات بدون تشتيت.
+        </p>
+      </div>
+
+      <div class="platform-tabs" aria-label="AIO product areas">
+        <button class="platform-tab on" type="button"><i class="ti ti-shield-lock"></i> Secure rooms</button>
+        <button class="platform-tab" type="button"><i class="ti ti-files"></i> Protected files</button>
+        <button class="platform-tab" type="button"><i class="ti ti-bell"></i> Smart alerts</button>
+        <button class="platform-tab" type="button"><i class="ti ti-credit-card"></i> Subscriptions</button>
+      </div>
+
+      <div class="command-grid">
+        <div class="command-preview">
+          <div class="command-top">
+            <div>
+              <span>All In One (AIO)</span>
+              <strong>Secure workspace overview</strong>
+            </div>
+            <div class="command-status">Live</div>
+          </div>
+          <div class="command-stats">
+            <div><strong>142</strong><span>Protected files</span></div>
+            <div><strong>48</strong><span>Active members</span></div>
+            <div><strong>5</strong><span>Private rooms</span></div>
+          </div>
+          <div class="command-lanes">
+            <div class="lane">
+              <span class="lane-title">Content pipeline</span>
+              <div class="lane-card"><i class="ti ti-upload"></i> Upload signed file</div>
+              <div class="lane-card"><i class="ti ti-eye-check"></i> Watermark preview</div>
+            </div>
+            <div class="lane">
+              <span class="lane-title">Access control</span>
+              <div class="lane-card"><i class="ti ti-user-plus"></i> Invite employee</div>
+              <div class="lane-card"><i class="ti ti-device-mobile-check"></i> One device policy</div>
+            </div>
+            <div class="lane">
+              <span class="lane-title">Operations</span>
+              <div class="lane-card"><i class="ti ti-calendar-event"></i> Renewal reminder</div>
+              <div class="lane-card"><i class="ti ti-chart-line"></i> Activity report</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="command-copy">
+          <div class="value-card">
+            <i class="ti ti-lock-check"></i>
+            <div>
+              <strong>مش مجرد UI، ده flow كامل</strong>
+              <span>كل إشعار أو حدث يودّي المستخدم للمكان الصح: ملف، روم، اشتراك، أو مراجعة أمان.</span>
+            </div>
+          </div>
+          <div class="value-card">
+            <i class="ti ti-sparkles"></i>
+            <div>
+              <strong>Premium experience</strong>
+              <span>Cards، states، hover، dark/light، وسهولة استخدام قريبة من منتجات SaaS الحديثة.</span>
+            </div>
+          </div>
+          <div class="integration-cloud">
+            <span>Works with</span>
+            <div class="integration-chips">
+              <b>Paymob</b><b>Email</b><b>Push</b><b>Analytics</b><b>Drive migration</b><b>WhatsApp replacement</b>
+            </div>
+          </div>
+          <button class="btn btn-p btn-lg" onclick="openAuth('signup')">
+            <i class="ti ti-arrow-up-right"></i> جرّب تجربة AIO
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!--  PROBLEM / SOLUTION -->
+  <section class="section">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-eyebrow">المشكلة والحل</div>
+        <div class="sec-title">واتساب مش مكان لشغلك</div>
+        <p class="sec-sub">
+          معظم الشركات والأكاديميات بتسيب أهم حاجة عندها — بياناتها —
+          على واتساب بدون أي حماية حقيقية
+        </p>
+      </div>
+      <div class="ps-grid">
+        <div class="ps-col">
+          <div class="ps-card ps-bad">
+            <div class="ps-icon"><i class="ti ti-alert-triangle"></i></div>
+            <div class="ps-text">
+              <strong>تسريب الملفات</strong>
+              <span>أي حد ينسخ ويبعت لأي حد</span>
+            </div>
+          </div>
+          <div class="ps-card ps-bad">
+            <div class="ps-icon"><i class="ti ti-users-group"></i></div>
+            <div class="ps-text">
+              <strong>مشاركة الحسابات</strong>
+              <span>مافيش رقابة على مين بيشوف إيه</span>
+            </div>
+          </div>
+          <div class="ps-card ps-bad">
+            <div class="ps-icon"><i class="ti ti-eye-off"></i></div>
+            <div class="ps-text">
+              <strong>صفر تتبع</strong>
+              <span>مش عارف مين شاف المحتوى ومتى</span>
+            </div>
+          </div>
+        </div>
+        <div class="ps-arrow"><i class="ti ti-arrow-left"></i></div>
+        <div class="ps-col">
+          <div class="ps-card ps-good">
+            <div class="ps-icon"><i class="ti ti-lock"></i></div>
+            <div class="ps-text">
+              <strong>رومات مغلقة وآمنة</strong>
+              <span>Watermark + منع تحميل تلقائي</span>
+            </div>
+          </div>
+          <div class="ps-card ps-good">
+            <div class="ps-icon"><i class="ti ti-device-mobile"></i></div>
+            <div class="ps-text">
+              <strong>جهاز واحد لكل حساب</strong>
+              <span>مستحيل حد يشارك حسابه</span>
+            </div>
+          </div>
+          <div class="ps-card ps-good">
+            <div class="ps-icon"><i class="ti ti-chart-bar"></i></div>
+            <div class="ps-text">
+              <strong>تتبع كامل</strong>
+              <span>تقرير لكل مشاهدة ولكل ملف</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!--  HOW IT WORKS -->
+  <section class="section section-alt" id="how">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-eyebrow">إزاي بيشتغل</div>
+        <div class="sec-title">3 خطوات وتبدأ</div>
+        <p class="sec-sub">من التسجيل لحد ما فريقك يشتغل بأمان، الموضوع بياخد دقايق معدودة</p>
+      </div>
+      <div class="how-grid">
+        <div class="how-card">
+          <div class="how-num">1</div>
+          <div class="how-title">سجّل شركتك</div>
+          <div class="how-desc">اعمل حساب، ارفع لوجو شركتك، اكتب نبذة عنها، واختار اللون اللي يميزكم</div>
+          <span class="how-role">إنت — صاحب الشركة</span>
+        </div>
+        <div class="how-card">
+          <div class="how-num">2</div>
+          <div class="how-title">اعمل رومات وادعُ فريقك</div>
+          <div class="how-desc">اعمل روم لكل قسم (HR، Sales...) وادعُ موظفينك بالإيميل بس — هما مش هيحتاجوا يعملوا حاجة معقدة</div>
+          <span class="how-role">إنت — Admin الشركة</span>
+        </div>
+        <div class="how-card">
+          <div class="how-num">3</div>
+          <div class="how-title">فريقك يشتغل بأمان</div>
+          <div class="how-desc">كل موظف يفتح رابط الدعوة، يسجل بسرعة، ويشوف بس المحتوى اللي يخصه — محمي بالكامل</div>
+          <span class="how-role">فريقك — End Users</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!--  FEATURES  -->
+  <section class="section" id="features">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-eyebrow">المميزات</div>
+        <div class="sec-title">كل اللي تحتاجه في مكان واحد</div>
+      </div>
+      <div class="feat-grid">
+        <div class="feat-card">
+          <div class="feat-icon" style="background:#EEF2FF;color:#4F46E5"><i class="ti ti-shield-lock"></i></div>
+          <div class="feat-title">حماية من التسريب</div>
+          <div class="feat-desc">Watermark تلقائي باسم كل موظف + منع تحميل + منع تصوير الشاشة</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon" style="background:#ECFEFF;color:#06B6D4"><i class="ti ti-layout-grid"></i></div>
+          <div class="feat-title">رومات منعزلة</div>
+          <div class="feat-desc">كل قسم أو فريق له مساحته الخاصة بصلاحيات مخصصة</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon" style="background:#D1FAE5;color:#10B981"><i class="ti ti-device-mobile"></i></div>
+          <div class="feat-title">جهاز واحد لكل حساب</div>
+          <div class="feat-desc">مستحيل أي حد يشارك حسابه — كل حساب مربوط بجهاز واحد</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon" style="background:#FEF3C7;color:#F59E0B"><i class="ti ti-bell"></i></div>
+          <div class="feat-title">إشعارات فورية</div>
+          <div class="feat-desc">Push وEmail تلقائي عند أي محتوى جديد أو موعد مهم</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon" style="background:#FEE2E2;color:#EF4444"><i class="ti ti-chart-bar"></i></div>
+          <div class="feat-title">تحليلات كاملة</div>
+          <div class="feat-desc">شوف مين بيشتغل ومين لأ، ومين شاف إيه ومتى</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon" style="background:#EDE9FE;color:#8B5CF6"><i class="ti ti-palette"></i></div>
+          <div class="feat-title">هوية بصرية خاصة</div>
+          <div class="feat-desc">لوجو، اسم، ولون شركتك — موظفينك يشوفوا براندك إنت مش حد تاني</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!--  USE CASES  -->
+  <section class="section section-alt" id="usecases">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-eyebrow">لمين All In One (AIO)؟</div>
+        <div class="sec-title">مصمم لأي فريق محتاج أمان</div>
+      </div>
+      <div class="uc-grid">
+        <div class="uc-card" style="border-color:#4F46E5">
+          <span class="uc-emoji">🎓</span>
+          <div class="uc-title">أكاديميات الكورسات</div>
+          <div class="uc-desc">احمِ محتواك التعليمي من التسريب وتابع تقدم طلابك</div>
+        </div>
+        <div class="uc-card" style="border-color:#06B6D4">
+          <span class="uc-emoji">🏢</span>
+          <div class="uc-title">الشركات والمؤسسات</div>
+          <div class="uc-desc">شارك الملفات السرية بين الموظفين بدون قلق</div>
+        </div>
+        <div class="uc-card" style="border-color:#10B981">
+          <span class="uc-emoji">🗣️</span>
+          <div class="uc-title">مراكز اللغات والتدريب</div>
+          <div class="uc-desc">بديل احترافي لجروبات الواتساب الفوضوية</div>
+        </div>
+        <div class="uc-card" style="border-color:#F59E0B">
+          <span class="uc-emoji">🚌</span>
+          <div class="uc-title">شركات النقل والخدمات</div>
+          <div class="uc-desc">نظّم المواعيد والإعلانات لعملائك في مكان واحد</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!--  PRICING  -->
+  <section class="section" id="pricing">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-eyebrow">الأسعار</div>
+        <div class="sec-title">باقة تناسب حجم فريقك</div>
+        <p class="sec-sub">كل الباقات تشمل داشبورد كامل + حماية المحتوى + دعم فني</p>
+      </div>
+      <div class="price-toggle">
+        <button class="pt-btn on">شهري</button>
+        <button class="pt-btn">سنوي <span class="pt-save">-20%</span></button>
+      </div>
+      <div class="price-grid">
+        <div class="price-card">
+          <div class="price-name">Starter</div>
+          <div class="price-amt">500</div>
+          <div class="price-per">جنيه / شهر</div>
+          <div class="price-div"></div>
+          <div class="price-f">روم واحدة</div>
+          <div class="price-f">حتى 100 مستخدم</div>
+          <div class="price-f">رفع ملفات PDF وفيديو</div>
+          <div class="price-f">إشعارات Push + Email</div>
+          <div class="price-f">One Device Policy</div>
+          <button class="btn btn-o" style="width:100%;justify-content:center;margin-top:16px" onclick="openAuth('signup')">ابدأ مجاناً</button>
+        </div>
+        <div class="price-card feat">
+          <div class="price-badge">⭐ الأكثر مبيعاً</div>
+          <div class="price-name">Growth</div>
+          <div class="price-amt">1,200</div>
+          <div class="price-per">جنيه / شهر</div>
+          <div class="price-div"></div>
+          <div class="price-f">10 رومات</div>
+          <div class="price-f">حتى 500 مستخدم</div>
+          <div class="price-f">كل مميزات Starter</div>
+          <div class="price-f">Watermark متقدم</div>
+          <div class="price-f">Analytics Dashboard</div>
+          <div class="price-f">امتحانات وكويزات</div>
+          <button class="btn btn-p" style="width:100%;justify-content:center;margin-top:16px" onclick="openAuth('signup')">اشترك الآن</button>
+        </div>
+        <div class="price-card">
+          <div class="price-name">Pro</div>
+          <div class="price-amt">2,500</div>
+          <div class="price-per">جنيه / شهر</div>
+          <div class="price-div"></div>
+          <div class="price-f">رومات غير محدودة</div>
+          <div class="price-f">مستخدمين غير محدودين</div>
+          <div class="price-f">White Label كامل</div>
+          <div class="price-f">بوابة دفع Paymob</div>
+          <div class="price-f">Live Sessions</div>
+          <button class="btn btn-o" style="width:100%;justify-content:center;margin-top:16px" onclick="openAuth('signup')">ابدأ</button>
+        </div>
+        <div class="price-card" style="background:var(--ink);border-color:var(--ink)">
+          <div class="price-name" style="color:#fff">Enterprise</div>
+          <div class="price-amt" style="color:#22D3EE">حسب الاتفاق</div>
+          <div class="price-per" style="color:rgba(255,255,255,.4)">سعر مخصص</div>
+          <div class="price-div" style="background:rgba(255,255,255,.1)"></div>
+          <div class="price-f" style="color:rgba(255,255,255,.7)">كل شيء في Pro</div>
+          <div class="price-f" style="color:rgba(255,255,255,.7)">AI Assistant</div>
+          <div class="price-f" style="color:rgba(255,255,255,.7)">دعم مخصص 24/7</div>
+          <button class="btn" type="button" style="width:100%;justify-content:center;margin-top:16px;background:#06B6D4;color:#fff" onclick="openLeadModal('contact-modal')">تواصل معنا</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!--  TESTIMONIALS  -->
+  <section class="section section-alt">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-eyebrow">قالوا عنا</div>
+        <div class="sec-title">عملاء بيثقوا في All In One (AIO)</div>
+      </div>
+      <div class="test-grid">
+        <div class="test-card">
+          <div class="test-stars">★★★★★</div>
+          <div class="test-quote">"خلصنا من فوضى الواتساب خالص. كل ملف في مكانه ومحدش بقى يقدر يسرب حاجة."</div>
+          <div class="test-author">
+            <div class="test-av" style="background:#4F46E5">أ</div>
+            <div>
+              <div class="test-name">أحمد مصطفى</div>
+              <div class="test-role">مدير TechCorp Egypt</div>
+            </div>
+          </div>
+        </div>
+        <div class="test-card">
+          <div class="test-stars">★★★★★</div>
+          <div class="test-quote">"الطلاب بقوا يثقوا إن المحتوى بتاعهم محمي. خلتنا نقدر نبيع كورسات أونلاين براحتنا."</div>
+          <div class="test-author">
+            <div class="test-av" style="background:#06B6D4">س</div>
+            <div>
+              <div class="test-name">د. سارة كمال</div>
+              <div class="test-role">أكاديمية النخبة</div>
+            </div>
+          </div>
+        </div>
+        <div class="test-card">
+          <div class="test-stars">★★★★★</div>
+          <div class="test-quote">"الإعداد كان سهل جداً، خلال يوم واحد كل الفريق كان شغال على المنصة."</div>
+          <div class="test-author">
+            <div class="test-av" style="background:#10B981">ن</div>
+            <div>
+              <div class="test-name">نور إبراهيم</div>
+              <div class="test-role">HR — Smart Finance</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ABOUT & CONTACT -->
+  <section class="section section-alt" id="about">
+    <div class="wrap about-company-grid">
+      <div class="about-company-copy">
+        <div class="sec-eyebrow">عن AIO</div>
+        <div class="sec-title">كل ما تحتاجه لإدارة مؤسستك ومحتواك في مكان واحد</div>
+        <p class="sec-sub">
+          All In One (AIO) منصة SaaS متعددة المؤسسات للشركات والأكاديميات والجهات التعليمية والأعمال النامية.
+          تمنح كل مؤسسة مساحة عمل مستقلة وآمنة لإدارة المستخدمين والاشتراكات والمحتوى والمواعيد والإشعارات
+          والتقارير، مع صلاحيات وصول واضحة تناسب كل دور.
+        </p>
+        <div class="about-values">
+          <span><i class="ti ti-shield-check"></i> الأمان والخصوصية أولاً</span>
+          <span><i class="ti ti-layout-dashboard"></i> تجربة بسيطة وقابلة للتوسع</span>
+          <span><i class="ti ti-users-group"></i> مناسبة للشركات والأكاديميات</span>
+        </div>
+      </div>
+      <aside class="contact-panel" id="contact">
+        <span class="contact-kicker">تواصل معنا</span>
+        <h2>خلينا نفهم احتياج فريقك</h2>
+        <p>فريق AIO متاح أونلاين داخل مصر وخارجها، وسنساعدك في اختيار المساحة والموديولات المناسبة لطبيعة عملك.</p>
+        <div class="contact-details">
+          <a class="contact-detail" href="tel:+201025849793">
+            <i class="ti ti-phone"></i>
+            <span><small>الهاتف وWhatsApp</small><b dir="ltr">+20 102 584 9793</b></span>
+          </a>
+          <a class="contact-detail" href="mailto:kareem202119883@gmail.com">
+            <i class="ti ti-mail"></i>
+            <span><small>البريد الإلكتروني</small><b dir="ltr">kareem202119883@gmail.com</b></span>
+          </a>
+          <div class="contact-detail">
+            <i class="ti ti-map-pin"></i>
+            <span><small>الموقع</small><b>القاهرة، مصر</b></span>
+          </div>
+          <div class="contact-detail">
+            <i class="ti ti-clock"></i>
+            <span><small>ساعات العمل</small><b>الأحد إلى الخميس، 10 ص - 6 م بتوقيت القاهرة</b></span>
+          </div>
+        </div>
+        <div class="contact-actions">
+          <button class="btn btn-p" type="button" onclick="openLeadModal('demo-modal')"><i class="ti ti-calendar-event"></i> احجز Demo</button>
+          <button class="btn btn-o" type="button" onclick="openWhatsApp()"><i class="ti ti-brand-whatsapp"></i> WhatsApp</button>
+          <button class="btn btn-o" type="button" onclick="openLeadModal('contact-modal')"><i class="ti ti-message-circle"></i> أرسل استفساراً</button>
+        </div>
+        <div class="contact-social" aria-label="Social media">
+          <a href="https://www.facebook.com/share/1ExWvWM2y7/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" aria-label="AIO على Facebook"><i class="ti ti-brand-facebook"></i></a>
+          <a href="https://wa.me/201025849793" target="_blank" rel="noopener noreferrer" aria-label="تواصل مع AIO على WhatsApp"><i class="ti ti-brand-whatsapp"></i></a>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- FOUNDER -->
+  <section class="section" id="founder">
+    <div class="wrap">
+      <div class="founder-card">
+        <div class="founder-avatar" aria-hidden="true">KA</div>
+        <div class="founder-copy">
+          <span class="contact-kicker">المؤسس والتطوير</span>
+          <h2>Kareem Ayman</h2>
+          <p>Founder & AI Developer لمنصة AIO. تم تطوير المنصة بالتعاون مع فريق <b>Tenfold Software Solutions</b>.</p>
+        </div>
+        <div class="founder-links">
+          <a class="btn btn-o" href="https://www.linkedin.com/in/kareem-ayman" target="_blank" rel="noopener noreferrer"><i class="ti ti-brand-linkedin"></i> LinkedIn</a>
+          <a class="btn btn-o" href="https://github.com/Kareem-Ayman-salama" target="_blank" rel="noopener noreferrer"><i class="ti ti-brand-github"></i> GitHub</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!--  CTA BANNER  -->
+  <section class="section">
+    <div class="wrap">
+      <div class="cta-banner">
+        <div class="cta-title">جاهز تحمي بيانات شركتك؟</div>
+        <div class="cta-sub">أول شهر مجاناً — بدون بطاقة ائتمان — إعداد في 5 دقائق</div>
+        <div class="cta-actions">
+          <button class="btn btn-w btn-lg" onclick="openAuth('signup')">
+            <i class="ti ti-rocket"></i> ابدأ الآن مجاناً
+          </button>
+          <button class="btn btn-lg" type="button" onclick="openLeadModal('demo-modal')" style="background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.3)">احجز Demo</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ── FOOTER ── -->
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">
+            <div class="nav-mark"><img src="/images/aio-logo-64.png" alt="" /></div> All In One (AIO)
+          </div>
+          <p class="footer-desc">كل ما تحتاجه لإدارة مؤسستك ومحتواك في مكان واحد، داخل مساحة عمل آمنة ومنظمة.</p>
+          <div class="footer-contact">
+            <a href="tel:+201025849793" dir="ltr">+20 102 584 9793</a>
+            <a href="mailto:kareem202119883@gmail.com">kareem202119883@gmail.com</a>
+            <span>القاهرة، مصر</span>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-title">المنتج</div>
+          <a class="footer-link" onclick="scrollToId('features')">المميزات</a>
+          <a class="footer-link" onclick="scrollToId('pricing')">الأسعار</a>
+          <a class="footer-link" onclick="scrollToId('how')">إزاي بيشتغل</a>
+        </div>
+        <div>
+          <div class="footer-col-title">الشركة</div>
+          <a class="footer-link" onclick="scrollToId('about')">من إحنا</a>
+          <a class="footer-link" onclick="scrollToId('founder')">المؤسس والفريق</a>
+          <a class="footer-link" onclick="scrollToId('contact')">تواصل معنا</a>
+          <a class="footer-link" href="/support">مركز المساعدة</a>
+        </div>
+        <div>
+          <div class="footer-col-title">قانوني</div>
+          <a class="footer-link" href="/privacy">سياسة الخصوصية</a>
+          <a class="footer-link" href="/terms">شروط الاستخدام</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 AIO – All In One. جميع الحقوق محفوظة. تم التطوير بواسطة فريق Tenfold Software Solutions.</span>
+        <div class="footer-social">
+          <a class="fs-icon" href="https://www.facebook.com/share/1ExWvWM2y7/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" aria-label="AIO على Facebook"><i class="ti ti-brand-facebook"></i></a>
+          <a class="fs-icon" href="https://wa.me/201025849793" target="_blank" rel="noopener noreferrer" aria-label="AIO على WhatsApp"><i class="ti ti-brand-whatsapp"></i></a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</div><!-- end #marketing-page -->
+
+<button class="back-top" type="button" onclick="scrollToTop()" aria-label="Back to top">
+  <i class="ti ti-arrow-up"></i>
+</button>
+
+<!-- DEMO REQUEST MODAL -->
+<div class="overlay lead-overlay" id="demo-modal" role="dialog" aria-modal="true" aria-labelledby="demo-modal-title">
+  <div class="modal lead-modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="demo-modal-title">احجز Demo لمنصة AIO</div>
+        <div class="modal-sub">املأ البيانات وسنفتح لك رسالة WhatsApp جاهزة لإرسالها إلى الفريق.</div>
+      </div>
+      <button class="modal-close" type="button" onclick="closeLeadModal('demo-modal')" aria-label="إغلاق"><i class="ti ti-x"></i></button>
+    </div>
+    <form class="modal-body lead-form" onsubmit="submitLeadForm(event, 'demo')">
+      <div class="lead-form-grid">
+        <div class="form-group"><label class="form-label" for="demo-name">الاسم الكامل *</label><input class="form-input" id="demo-name" name="name" required autocomplete="name"></div>
+        <div class="form-group"><label class="form-label" for="demo-email">البريد الإلكتروني *</label><input class="form-input" id="demo-email" name="email" type="email" required autocomplete="email" dir="ltr"></div>
+        <div class="form-group"><label class="form-label" for="demo-phone">الهاتف / WhatsApp *</label><input class="form-input" id="demo-phone" name="phone" type="tel" required autocomplete="tel" dir="ltr"></div>
+        <div class="form-group"><label class="form-label" for="demo-company">الشركة أو المؤسسة *</label><input class="form-input" id="demo-company" name="company" required autocomplete="organization"></div>
+        <div class="form-group"><label class="form-label" for="demo-type">نوع المؤسسة *</label><select class="form-select" id="demo-type" name="organizationType" required><option value="">اختر النوع</option><option>شركة</option><option>أكاديمية أو مركز تدريب</option><option>مؤسسة تعليمية</option><option>عمل ناشئ</option><option>أخرى</option></select></div>
+        <div class="form-group"><label class="form-label" for="demo-users">عدد المستخدمين المتوقع *</label><input class="form-input" id="demo-users" name="expectedUsers" type="number" min="1" required inputmode="numeric"></div>
+        <div class="form-group lead-wide"><label class="form-label" for="demo-features">المميزات المطلوبة *</label><textarea class="form-textarea" id="demo-features" name="features" required placeholder="مثال: الرومات، الكورسات، الحجوزات، الاشتراكات..."></textarea></div>
+        <div class="form-group"><label class="form-label" for="demo-time">وقت التواصل المناسب *</label><input class="form-input" id="demo-time" name="contactTime" required placeholder="مثال: الأحد 2 ظهراً"></div>
+        <div class="form-group"><label class="form-label" for="demo-details">تفاصيل إضافية</label><textarea class="form-textarea" id="demo-details" name="details"></textarea></div>
+      </div>
+      <p class="lead-note"><i class="ti ti-info-circle"></i> لن يتم تخزين البيانات على الموقع حالياً؛ سيتم إرسالها من حسابك عبر WhatsApp.</p>
+      <button class="btn btn-p lead-submit" type="submit"><i class="ti ti-brand-whatsapp"></i> متابعة وإرسال الطلب</button>
+    </form>
+  </div>
+</div>
+
+<!-- CONTACT MODAL -->
+<div class="overlay lead-overlay" id="contact-modal" role="dialog" aria-modal="true" aria-labelledby="contact-modal-title">
+  <div class="modal lead-modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="contact-modal-title">تواصل مع فريق AIO</div>
+        <div class="modal-sub">اكتب استفسارك وسنجهز لك رسالة WhatsApp منظمة.</div>
+      </div>
+      <button class="modal-close" type="button" onclick="closeLeadModal('contact-modal')" aria-label="إغلاق"><i class="ti ti-x"></i></button>
+    </div>
+    <form class="modal-body lead-form" onsubmit="submitLeadForm(event, 'contact')">
+      <div class="lead-form-grid">
+        <div class="form-group"><label class="form-label" for="contact-name">الاسم *</label><input class="form-input" id="contact-name" name="name" required autocomplete="name"></div>
+        <div class="form-group"><label class="form-label" for="contact-email">البريد الإلكتروني *</label><input class="form-input" id="contact-email" name="email" type="email" required autocomplete="email" dir="ltr"></div>
+        <div class="form-group"><label class="form-label" for="contact-phone">الهاتف *</label><input class="form-input" id="contact-phone" name="phone" type="tel" required autocomplete="tel" dir="ltr"></div>
+        <div class="form-group"><label class="form-label" for="contact-company">الشركة أو المؤسسة</label><input class="form-input" id="contact-company" name="company" autocomplete="organization"></div>
+        <div class="form-group lead-wide"><label class="form-label" for="contact-subject">موضوع الرسالة *</label><input class="form-input" id="contact-subject" name="subject" required></div>
+        <div class="form-group lead-wide"><label class="form-label" for="contact-details">التفاصيل *</label><textarea class="form-textarea" id="contact-details" name="details" required></textarea></div>
+      </div>
+      <p class="lead-note"><i class="ti ti-info-circle"></i> لن يتم تخزين البيانات على الموقع حالياً؛ سيتم إرسالها من حسابك عبر WhatsApp.</p>
+      <button class="btn btn-p lead-submit" type="submit"><i class="ti ti-brand-whatsapp"></i> متابعة وإرسال الرسالة</button>
+    </form>
+  </div>
+</div>
+
+
+<!--  AUTH MODAL -->
+<div class="overlay" id="authOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div></div>
+      <button class="modal-close" onclick="closeAuth()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="tab-switch">
+        <button class="tab-btn on" id="tabSignup" onclick="switchTab('signup')">إنشاء حساب شركة</button>
+        <button class="tab-btn" id="tabLogin" onclick="switchTab('login')">تسجيل الدخول</button>
+      </div>
+
+      <!-- SIGNUP TAB -->
+      <div id="signupTab">
+        <div class="modal-title">سجّل شركتك في All In One (AIO)</div>
+        <div class="modal-sub">هتقدر تضيف اللوجو والبايو والتفاصيل في الخطوة الجاية</div>
+        <div class="form-group">
+          <label class="form-label">اسم الشركة / الأكاديمية</label>
+          <input class="form-input" id="su-company" placeholder="مثال: أكاديمية النخبة">
+        </div>
+        <div class="form-group">
+          <label class="form-label">اسمك</label>
+          <input class="form-input" placeholder="الاسم الكامل">
+        </div>
+        <div class="form-group">
+          <label class="form-label">البريد الإلكتروني</label>
+          <input class="form-input" type="email" placeholder="you@company.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">كلمة المرور</label>
+          <input class="form-input" type="password" placeholder="••••••••">
+        </div>
+        <button class="btn btn-p" style="width:100%;justify-content:center;padding:13px;margin-top:6px" onclick="startOnboarding()">
+          متابعة — إعداد الشركة <i class="ti ti-arrow-left"></i>
+        </button>
+        <div style="text-align:center;margin-top:14px;font-size:11px;color:var(--t3)">
+          بالتسجيل إنت موافق على شروط الاستخدام وسياسة الخصوصية
+        </div>
+      </div>
+
+      <!-- LOGIN TAB -->
+      <div id="loginTab" style="display:none">
+        <div class="modal-title">تسجيل الدخول</div>
+        <div class="modal-sub">ادخل بياناتك للمتابعة لداشبورد شركتك</div>
+        <div class="form-group">
+          <label class="form-label">البريد الإلكتروني</label>
+          <input class="form-input" type="email" placeholder="you@company.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">كلمة المرور</label>
+          <input class="form-input" type="password" placeholder="••••••••">
+        </div>
+        <button class="btn btn-p" style="width:100%;justify-content:center;padding:13px;margin-top:6px">دخول</button>
+        <div style="text-align:center;margin-top:14px">
+          <a style="font-size:12px;color:var(--p);cursor:pointer">نسيت كلمة المرور؟</a>
+        </div>
+        <div class="form-hint" style="text-align:center;margin-top:10px">
+          موظف مش عندك حساب؟ تواصل مع مسؤول شركتك للحصول على دعوة.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ONBOARDING FLOW  -->
+<div class="flow-page" id="onboardFlow">
+  <div class="flow-top">
+    <div class="flow-top-inner">
+      <div class="nav-logo"><div class="nav-mark"><img src="/images/aio-logo-64.png" alt="" /></div> All In One (AIO)</div>
+      <button class="btn btn-g" onclick="closeOnboarding()"><i class="ti ti-x"></i> خروج</button>
+    </div>
+  </div>
+
+  <div class="flow-wrap">
+    <div class="flow-steps">
+      <div class="flow-step done" id="fs1"></div>
+      <div class="flow-step" id="fs2"></div>
+      <div class="flow-step" id="fs3"></div>
+      <div class="flow-step" id="fs4"></div>
+    </div>
+
+    <!-- STEP 1: LOGO + BIO + COLOR -->
+    <div class="flow-step-page" id="ob-step-1">
+      <div class="flow-card">
+        <div class="flow-step-label">الخطوة 1 من 4</div>
+        <div class="flow-title">خلّي شركتك تظهر بهويتها 🎨</div>
+        <p class="flow-sub">ارفع اللوجو، اكتب نبذة عن شركتك، واختار اللون اللي يميزكم — موظفينك هيشوفوا هوية شركتك جوه All In One (AIO)</p>
+
+        <label class="form-label">لوجو الشركة</label>
+        <div class="logo-upload-box" onclick="document.getElementById('logoInput').click()">
+          <div id="logoPreviewWrap" style="display:none"></div>
+          <div id="logoUploadPrompt">
+            <i class="ti ti-photo-up"></i>
+            <div style="font-size:13px;color:var(--t2);font-weight:600">اضغط لرفع اللوجو</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:3px">PNG أو SVG — يفضل مربع 400×400</div>
+          </div>
+          <input type="file" id="logoInput" accept="image/*" style="display:none" onchange="previewLogo(event)">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">اسم الشركة المعروض</label>
+          <input class="form-input" id="ob-company-name" value="TechCorp Egypt" oninput="updatePreview()">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">نبذة عن الشركة (Bio)</label>
+          <textarea class="form-textarea" id="ob-bio" maxlength="180" oninput="updateBioCounter()" placeholder="مثال: شركة TechCorp Egypt متخصصة في حلول البرمجيات للشركات الناشئة، تأسست 2019...">شركة TechCorp Egypt متخصصة في حلول البرمجيات للشركات الناشئة في مصر والمنطقة العربية، تأسست عام 2019.</textarea>
+          <div class="bio-counter" id="bioCounter">0/180</div>
+        </div>
+
+        <label class="form-label">لون العلامة التجارية</label>
+        <div class="color-row" id="colorRow">
+          <div class="color-dot on" style="background:#4F46E5" onclick="selectColor(this,'#4F46E5')"></div>
+          <div class="color-dot" style="background:#06B6D4" onclick="selectColor(this,'#06B6D4')"></div>
+          <div class="color-dot" style="background:#10B981" onclick="selectColor(this,'#10B981')"></div>
+          <div class="color-dot" style="background:#F59E0B" onclick="selectColor(this,'#F59E0B')"></div>
+          <div class="color-dot" style="background:#EF4444" onclick="selectColor(this,'#EF4444')"></div>
+          <div class="color-dot" style="background:#EC4899" onclick="selectColor(this,'#EC4899')"></div>
+          <div class="color-dot" style="background:#8B5CF6" onclick="selectColor(this,'#8B5CF6')"></div>
+        </div>
+
+        <div class="tenant-preview">
+          <div class="tenant-preview-logo" id="prevLogo" style="background:#4F46E5">TE</div>
+          <div>
+            <div class="tenant-preview-name" id="prevName">TechCorp Egypt</div>
+            <div class="tenant-preview-bio" id="prevBio">شركة TechCorp Egypt متخصصة في حلول البرمجيات...</div>
+          </div>
+        </div>
+      </div>
+      <div class="flow-nav">
+        <div></div>
+        <button class="btn btn-p btn-lg" onclick="goStep(2)">التالي <i class="ti ti-arrow-left"></i></button>
+      </div>
+    </div>
+
+    <!-- STEP 2: COMPANY TYPE & SIZE -->
+    <div class="flow-step-page" id="ob-step-2" style="display:none">
+      <div class="flow-card">
+        <div class="flow-step-label">الخطوة 2 من 4</div>
+        <div class="flow-title">عرّفنا أكتر على نشاطكم</div>
+        <p class="flow-sub">ده بيساعدنا نظبط الإعدادات المناسبة لنوع نشاطكم</p>
+        <div class="form-group">
+          <label class="form-label">نوع النشاط</label>
+          <select class="form-select">
+            <option>شركة خاصة</option>
+            <option>أكاديمية / مركز تدريب</option>
+            <option>مؤسسة تعليمية</option>
+            <option>مركز لغات</option>
+            <option>أخرى</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">عدد الموظفين / الطلاب المتوقع</label>
+          <select class="form-select">
+            <option>أقل من 50</option>
+            <option selected>50 - 200</option>
+            <option>200 - 500</option>
+            <option>أكتر من 500</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">رقم الواتساب للتواصل</label>
+          <input class="form-input" placeholder="+201XXXXXXXXX">
+        </div>
+        <div class="form-group">
+          <label class="form-label">من فين سمعت عننا؟</label>
+          <select class="form-select">
+            <option>فيسبوك / إنستجرام</option>
+            <option>صديق أو زميل</option>
+            <option>جوجل</option>
+            <option>أخرى</option>
+          </select>
+        </div>
+      </div>
+      <div class="flow-nav">
+        <button class="btn btn-g btn-lg" onclick="goStep(1)"><i class="ti ti-arrow-right"></i> السابق</button>
+        <button class="btn btn-p btn-lg" onclick="goStep(3)">التالي <i class="ti ti-arrow-left"></i></button>
+      </div>
+    </div>
+
+    <!-- STEP 3: PLAN -->
+    <div class="flow-step-page" id="ob-step-3" style="display:none">
+      <div class="flow-card">
+        <div class="flow-step-label">الخطوة 3 من 4</div>
+        <div class="flow-title">اختار باقتك</div>
+        <p class="flow-sub">تقدر تغيّرها في أي وقت بعد كده — أول شهر مجاناً على كل الباقات</p>
+        <div class="plan-row">
+          <div class="plan-opt" onclick="selectPlan(this)">
+            <div>
+              <div class="plan-opt-name">Starter</div>
+              <div class="plan-opt-meta">روم واحدة · 100 مستخدم</div>
+            </div>
+            <div class="plan-opt-price">500 ج/شهر</div>
+          </div>
+          <div class="plan-opt on" onclick="selectPlan(this)">
+            <div>
+              <div class="plan-opt-name">Growth ⭐ الأكثر شيوعاً</div>
+              <div class="plan-opt-meta">10 رومات · 500 مستخدم · Anti-Leak</div>
+            </div>
+            <div class="plan-opt-price">1,200 ج/شهر</div>
+          </div>
+          <div class="plan-opt" onclick="selectPlan(this)">
+            <div>
+              <div class="plan-opt-name">Pro</div>
+              <div class="plan-opt-meta">غير محدود · White Label</div>
+            </div>
+            <div class="plan-opt-price">2,500 ج/شهر</div>
+          </div>
+        </div>
+        <div class="summary-box">
+          <div class="summary-row"><span>أول شهر</span><span>مجاناً 🎉</span></div>
+          <div class="summary-row"><span>بداية من الشهر الثاني</span><span id="planPriceLabel">1,200 جنيه/شهر</span></div>
+        </div>
+      </div>
+      <div class="flow-nav">
+        <button class="btn btn-g btn-lg" onclick="goStep(2)"><i class="ti ti-arrow-right"></i> السابق</button>
+        <button class="btn btn-p btn-lg" onclick="goStep(4)">التالي <i class="ti ti-arrow-left"></i></button>
+      </div>
+    </div>
+
+    <!-- STEP 4: SUCCESS -->
+    <div class="flow-step-page" id="ob-step-4" style="display:none">
+      <div class="flow-card success-box">
+        <div class="success-icon"><i class="ti ti-check"></i></div>
+        <div class="flow-title">تم إنشاء شركتك بنجاح! 🎉</div>
+        <p class="flow-sub">دلوقتي تقدر تعمل أول روم وتدعو فريقك</p>
+        <div class="tenant-preview" style="text-align:right;margin-bottom:24px">
+          <div class="tenant-preview-logo" id="prevLogo2" style="background:#4F46E5">TE</div>
+          <div>
+            <div class="tenant-preview-name" id="prevName2">TechCorp Egypt</div>
+            <div class="tenant-preview-bio">جاهزة دلوقتي على All In One (AIO) ✓</div>
+          </div>
+        </div>
+        <button class="btn btn-p btn-lg" style="width:100%;justify-content:center" onclick="goToDashboard()">
+          <i class="ti ti-layout-dashboard"></i> روح لداشبورد شركتي
+        </button>
+        <button class="btn btn-g" style="width:100%;justify-content:center;margin-top:8px" onclick="alert('هيتم فتح: دعوة موظف')">
+          + ادعُ أول موظف دلوقتي
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div><!-- end #onboardFlow -->
+
+<script src="/landing/script.js"></script>
+</body>
+</html>
