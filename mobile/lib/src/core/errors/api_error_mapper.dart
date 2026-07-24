@@ -33,15 +33,13 @@ class ApiErrorMapper {
 
         return ApiError(
           code: errorJson['code'] as String? ?? 'HTTP_ERROR',
-          message:
-              errorJson['message'] as String? ??
+          message: errorJson['message'] as String? ??
               catalog?.messageEn ??
               'The request failed.',
           messageAr: catalog?.messageAr,
           retryable: catalog?.retryable ?? _isRetryableStatus(error),
           details: _readDetails(errorJson['details']),
-          requestId:
-              errorJson['requestId'] as String? ??
+          requestId: errorJson['requestId'] as String? ??
               error.response?.headers.value('X-Request-ID'),
           category: catalog?.category,
         );
@@ -82,7 +80,8 @@ class ApiErrorMapper {
     return switch (error.type) {
       DioExceptionType.connectionTimeout ||
       DioExceptionType.receiveTimeout ||
-      DioExceptionType.sendTimeout => 'NETWORK_TIMEOUT',
+      DioExceptionType.sendTimeout =>
+        'NETWORK_TIMEOUT',
       DioExceptionType.cancel => 'REQUEST_CANCELLED',
       _ => 'HTTP_ERROR',
     };

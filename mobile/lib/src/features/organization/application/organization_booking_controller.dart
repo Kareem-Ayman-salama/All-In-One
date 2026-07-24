@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final organizationBookingsProvider = FutureProvider.autoDispose
     .family<List<OrganizationBookingSummary>, String>((ref, organizationId) {
-      return ref
-          .watch(organizationBookingRepositoryProvider)
-          .listBookings(organizationId: organizationId);
-    });
+  return ref
+      .watch(organizationBookingRepositoryProvider)
+      .listBookings(organizationId: organizationId);
+});
 
 final organizationBookingActionsProvider = Provider<OrganizationBookingActions>(
   (ref) {
@@ -24,9 +24,7 @@ class OrganizationBookingActions {
     required String bookingId,
     bool markAsPaid = false,
   }) async {
-    await _ref
-        .read(organizationBookingRepositoryProvider)
-        .confirmBooking(
+    await _ref.read(organizationBookingRepositoryProvider).confirmBooking(
           organizationId: organizationId,
           bookingId: bookingId,
           markAsPaid: markAsPaid,

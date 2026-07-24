@@ -337,9 +337,7 @@ class _CreateRoomSheetState extends ConsumerState<_CreateRoomSheet> {
     }
     setState(() => _submitting = true);
     try {
-      await ref
-          .read(organizationRoomActionsProvider)
-          .create(
+      await ref.read(organizationRoomActionsProvider).create(
             organizationId: widget.organizationId,
             command: CreateOrganizationRoomCommand(
               name: _nameController.text,

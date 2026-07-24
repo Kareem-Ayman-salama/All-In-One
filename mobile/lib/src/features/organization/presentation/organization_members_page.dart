@@ -215,9 +215,7 @@ class _MemberCard extends ConsumerWidget {
               trailing: IconButton(
                 tooltip: strings.removeMember,
                 onPressed: () async {
-                  await ref
-                      .read(organizationMemberActionsProvider)
-                      .remove(
+                  await ref.read(organizationMemberActionsProvider).remove(
                         organizationId: organizationId,
                         membershipId: member.id,
                       );
@@ -243,9 +241,7 @@ class _MemberCard extends ConsumerWidget {
                 if (value == null || value == member.role) {
                   return;
                 }
-                await ref
-                    .read(organizationMemberActionsProvider)
-                    .update(
+                await ref.read(organizationMemberActionsProvider).update(
                       organizationId: organizationId,
                       membershipId: member.id,
                       command: UpdateOrganizationMemberCommand(role: value),
@@ -273,9 +269,7 @@ class _MemberCard extends ConsumerWidget {
                 if (value == null || value == member.status) {
                   return;
                 }
-                await ref
-                    .read(organizationMemberActionsProvider)
-                    .update(
+                await ref.read(organizationMemberActionsProvider).update(
                       organizationId: organizationId,
                       membershipId: member.id,
                       command: UpdateOrganizationMemberCommand(status: value),

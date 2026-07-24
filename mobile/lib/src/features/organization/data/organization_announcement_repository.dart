@@ -5,8 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final organizationAnnouncementRepositoryProvider =
     Provider<OrganizationAnnouncementRepository>((ref) {
-      return OrganizationAnnouncementRepository(dio: ref.watch(dioProvider));
-    });
+  return OrganizationAnnouncementRepository(dio: ref.watch(dioProvider));
+});
 
 class OrganizationAnnouncementRepository {
   const OrganizationAnnouncementRepository({required Dio dio}) : _dio = dio;
@@ -23,11 +23,11 @@ class OrganizationAnnouncementRepository {
     );
     final envelope =
         ApiEnvelope<List<OrganizationAnnouncementSummary>>.fromJson(
-          readJsonObject(response.data),
-          (value) => readJsonObjectList(value)
-              .map(OrganizationAnnouncementSummary.fromJson)
-              .toList(growable: false),
-        );
+      readJsonObject(response.data),
+      (value) => readJsonObjectList(value)
+          .map(OrganizationAnnouncementSummary.fromJson)
+          .toList(growable: false),
+    );
 
     return envelope.data;
   }

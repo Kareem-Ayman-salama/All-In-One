@@ -5,8 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final organizationInvitationRepositoryProvider =
     Provider<OrganizationInvitationRepository>((ref) {
-      return OrganizationInvitationRepository(dio: ref.watch(dioProvider));
-    });
+  return OrganizationInvitationRepository(dio: ref.watch(dioProvider));
+});
 
 class OrganizationInvitationRepository {
   const OrganizationInvitationRepository({required Dio dio}) : _dio = dio;

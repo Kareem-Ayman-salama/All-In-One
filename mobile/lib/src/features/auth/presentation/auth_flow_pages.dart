@@ -70,9 +70,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    final result = await ref
-        .read(authControllerProvider.notifier)
-        .register(
+    final result = await ref.read(authControllerProvider.notifier).register(
           name: _nameController.text,
           email: _emailController.text,
           password: _passwordController.text,
@@ -308,14 +306,13 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    final changed = await ref
-        .read(authControllerProvider.notifier)
-        .resetPassword(
-          email: _emailController.text,
-          code: _codeController.text,
-          password: _passwordController.text,
-          passwordConfirmation: _passwordController.text,
-        );
+    final changed =
+        await ref.read(authControllerProvider.notifier).resetPassword(
+              email: _emailController.text,
+              code: _codeController.text,
+              password: _passwordController.text,
+              passwordConfirmation: _passwordController.text,
+            );
     if (mounted && changed) {
       context.go(_loginRoutePath);
     }
@@ -335,9 +332,8 @@ class InvitationPage extends ConsumerWidget {
     final authState = ref.watch(authControllerProvider);
 
     return FutureBuilder(
-      future: ref
-          .read(authControllerProvider.notifier)
-          .previewInvitation(token),
+      future:
+          ref.read(authControllerProvider.notifier).previewInvitation(token),
       builder: (context, snapshot) {
         final preview = snapshot.data;
 
@@ -393,9 +389,8 @@ class InvitationPage extends ConsumerWidget {
       return;
     }
 
-    final result = await ref
-        .read(authControllerProvider.notifier)
-        .acceptInvitation(token);
+    final result =
+        await ref.read(authControllerProvider.notifier).acceptInvitation(token);
     if (context.mounted && result != null) {
       context.go(WorkspaceSelectionPage.routePath);
     }

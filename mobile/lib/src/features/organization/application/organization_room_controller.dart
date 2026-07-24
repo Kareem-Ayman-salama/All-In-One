@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final organizationRoomsProvider = FutureProvider.autoDispose
     .family<List<OrganizationRoomSummary>, String>((ref, organizationId) {
-      return ref
-          .watch(organizationRoomRepositoryProvider)
-          .listRooms(organizationId: organizationId);
-    });
+  return ref
+      .watch(organizationRoomRepositoryProvider)
+      .listRooms(organizationId: organizationId);
+});
 
 final organizationRoomActionsProvider = Provider<OrganizationRoomActions>((
   ref,

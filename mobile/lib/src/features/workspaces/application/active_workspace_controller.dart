@@ -5,8 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final activeWorkspaceControllerProvider =
     AsyncNotifierProvider<ActiveWorkspaceController, ActiveWorkspace?>(
-      ActiveWorkspaceController.new,
-    );
+  ActiveWorkspaceController.new,
+);
 
 class ActiveWorkspaceController extends AsyncNotifier<ActiveWorkspace?> {
   @override
@@ -24,15 +24,13 @@ class ActiveWorkspaceController extends AsyncNotifier<ActiveWorkspace?> {
       ref
           .read(tenantCacheScopeControllerProvider.notifier)
           .activateOrganization(organizationId: workspace.organizationId);
-      await ref
-          .read(telemetryServiceProvider)
-          .track(
-            TelemetryEvent.workspaceSelected,
-            properties: <String, Object?>{
-              'organizationId': workspace.organizationId,
-              'role': workspace.role,
-            },
-          );
+      await ref.read(telemetryServiceProvider).track(
+        TelemetryEvent.workspaceSelected,
+        properties: <String, Object?>{
+          'organizationId': workspace.organizationId,
+          'role': workspace.role,
+        },
+      );
 
       return ActiveWorkspace(
         organizationId: workspace.organizationId,
@@ -70,12 +68,11 @@ class ActiveWorkspaceController extends AsyncNotifier<ActiveWorkspace?> {
     if (current == null) {
       throw StateError('No active workspace is selected.');
     }
-    final updatedOrganization = await ref
-        .read(workspaceRepositoryProvider)
-        .updateOrganization(
-          organizationId: current.organizationId,
-          command: command,
-        );
+    final updatedOrganization =
+        await ref.read(workspaceRepositoryProvider).updateOrganization(
+              organizationId: current.organizationId,
+              command: command,
+            );
     final nextContext = Map<String, Object?>.from(current.context);
     nextContext['organization'] = updatedOrganization;
     final next = current.copyWith(

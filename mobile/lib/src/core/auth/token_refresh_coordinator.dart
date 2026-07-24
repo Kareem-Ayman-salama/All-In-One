@@ -6,8 +6,8 @@ class TokenRefreshCoordinator {
   TokenRefreshCoordinator({
     required Dio dio,
     required SecureTokenStore tokenStore,
-  }) : _dio = dio,
-       _tokenStore = tokenStore;
+  })  : _dio = dio,
+        _tokenStore = tokenStore;
 
   static const skipRefreshExtraKey = 'skipAuthRefresh';
   static const retriedAfterRefreshExtraKey = 'retriedAfterRefresh';

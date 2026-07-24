@@ -142,9 +142,8 @@ class _InvitationsBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = AppStrings.of(context);
-    final pendingCount = invitations
-        .where((invitation) => invitation.isPending)
-        .length;
+    final pendingCount =
+        invitations.where((invitation) => invitation.isPending).length;
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -406,9 +405,7 @@ class _CreateInvitationSheetState
     }
     setState(() => _submitting = true);
     try {
-      await ref
-          .read(organizationInvitationActionsProvider)
-          .create(
+      await ref.read(organizationInvitationActionsProvider).create(
             organizationId: widget.organizationId,
             command: CreateOrganizationInvitationCommand(
               email: _emailController.text,

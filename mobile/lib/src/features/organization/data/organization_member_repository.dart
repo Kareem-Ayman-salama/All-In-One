@@ -5,8 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final organizationMemberRepositoryProvider =
     Provider<OrganizationMemberRepository>((ref) {
-      return OrganizationMemberRepository(dio: ref.watch(dioProvider));
-    });
+  return OrganizationMemberRepository(dio: ref.watch(dioProvider));
+});
 
 class OrganizationMemberRepository {
   const OrganizationMemberRepository({required Dio dio}) : _dio = dio;

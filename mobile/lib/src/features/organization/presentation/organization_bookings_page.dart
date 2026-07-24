@@ -275,9 +275,7 @@ class _OrganizationBookingCard extends ConsumerWidget {
   }
 
   Future<void> _confirm(WidgetRef ref) {
-    return ref
-        .read(organizationBookingActionsProvider)
-        .confirm(
+    return ref.read(organizationBookingActionsProvider).confirm(
           organizationId: organizationId,
           bookingId: booking.id,
           markAsPaid: true,

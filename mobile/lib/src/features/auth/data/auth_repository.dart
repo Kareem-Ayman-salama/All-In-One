@@ -14,8 +14,8 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 
 class AuthRepository {
   const AuthRepository({required Dio dio, required SecureTokenStore tokenStore})
-    : _dio = dio,
-      _tokenStore = tokenStore;
+      : _dio = dio,
+        _tokenStore = tokenStore;
 
   final Dio _dio;
   final SecureTokenStore _tokenStore;

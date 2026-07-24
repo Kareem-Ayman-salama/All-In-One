@@ -6,8 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final contentViewerControllerProvider =
     AsyncNotifierProvider<ContentViewerController, ContentViewerState?>(
-      ContentViewerController.new,
-    );
+  ContentViewerController.new,
+);
 
 class ContentViewerController extends AsyncNotifier<ContentViewerState?> {
   @override
@@ -47,17 +47,15 @@ class ContentViewerController extends AsyncNotifier<ContentViewerState?> {
           ),
         );
       }
-      await ref
-          .read(telemetryServiceProvider)
-          .track(
-            TelemetryEvent.contentOpened,
-            properties: <String, Object?>{
-              'organizationId': organizationId,
-              'contentId': contentId,
-              'mimeType': session.mimeType,
-              'downloadAllowed': session.downloadAllowed,
-            },
-          );
+      await ref.read(telemetryServiceProvider).track(
+        TelemetryEvent.contentOpened,
+        properties: <String, Object?>{
+          'organizationId': organizationId,
+          'contentId': contentId,
+          'mimeType': session.mimeType,
+          'downloadAllowed': session.downloadAllowed,
+        },
+      );
 
       return ContentViewerState(
         organizationId: organizationId,
@@ -155,9 +153,7 @@ class ContentViewerController extends AsyncNotifier<ContentViewerState?> {
     ContentViewerState current,
     ContentViewerAuditEvent event,
   ) {
-    return ref
-        .read(contentRepositoryProvider)
-        .recordViewerAudit(
+    return ref.read(contentRepositoryProvider).recordViewerAudit(
           organizationId: current.organizationId,
           contentId: current.contentId,
           event: event,

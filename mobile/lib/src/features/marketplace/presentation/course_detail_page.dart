@@ -119,19 +119,18 @@ class _CourseDetailPageState extends ConsumerState<CourseDetailPage> {
       _submitting = true;
     });
     try {
-      final result = await ref
-          .read(publicCourseRepositoryProvider)
-          .createBooking(
-            PublicBookingCommand(
-              courseId: course.id,
-              batchId: batchId,
-              studentName: _nameController.text,
-              email: _emailController.text,
-              phone: _phoneController.text,
-              note: _noteController.text,
-              termsAccepted: _acceptedTerms,
-            ),
-          );
+      final result =
+          await ref.read(publicCourseRepositoryProvider).createBooking(
+                PublicBookingCommand(
+                  courseId: course.id,
+                  batchId: batchId,
+                  studentName: _nameController.text,
+                  email: _emailController.text,
+                  phone: _phoneController.text,
+                  note: _noteController.text,
+                  termsAccepted: _acceptedTerms,
+                ),
+              );
       if (!mounted) {
         return;
       }

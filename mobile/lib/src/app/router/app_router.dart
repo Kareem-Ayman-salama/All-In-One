@@ -36,8 +36,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ForgotPasswordPage.routePath,
         ResetPasswordPage.routePath,
       }.contains(state.matchedLocation);
-      final isPublicRoute =
-          state.uri.path == CourseCatalogPage.routePath ||
+      final isPublicRoute = state.uri.path == CourseCatalogPage.routePath ||
           state.uri.path.startsWith('/explore/course/') ||
           state.uri.path.startsWith('/invite/') ||
           state.uri.path == BookingSuccessPage.routePath;

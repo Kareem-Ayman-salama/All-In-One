@@ -16,7 +16,7 @@ final notificationTapRouterProvider = Provider<NotificationTapRouter>((ref) {
 
 class NotificationTapRouter {
   const NotificationTapRouter({required DeepLinkService deepLinkService})
-    : _deepLinkService = deepLinkService;
+      : _deepLinkService = deepLinkService;
 
   final DeepLinkService _deepLinkService;
 
@@ -35,42 +35,40 @@ class NotificationTapRouter {
   String _locationForDeepLink(ResolvedDeepLink link) {
     return switch (link.mobileScreen) {
       'marketplace.courseDetails' => CourseDetailPage.location(
-        link.parameters['courseSlug'] ?? link.query['courseSlug'] ?? '',
-      ),
+          link.parameters['courseSlug'] ?? link.query['courseSlug'] ?? '',
+        ),
       'marketplace.booking' => CourseDetailPage.location(
-        link.parameters['courseId'] ?? link.query['courseId'] ?? '',
-      ),
+          link.parameters['courseId'] ?? link.query['courseId'] ?? '',
+        ),
       'student.bookingStatus' => BookingSuccessPage.location(
-        bookingId: link.query['bookingId'] ?? '',
-        courseTitle: link.query['courseTitle'],
-        batchTitle: link.query['batchTitle'],
-      ),
+          bookingId: link.query['bookingId'] ?? '',
+          courseTitle: link.query['courseTitle'],
+          batchTitle: link.query['batchTitle'],
+        ),
       'notifications.inbox' => _notificationInboxLocation(
-        notificationId: link.query['notificationId'],
-      ),
+          notificationId: link.query['notificationId'],
+        ),
       'content.library' => MyCoursesPage.routePath,
       'student.lessonBookings' => MyCoursesPage.routePath,
-      _ =>
-        link.requiresAuth
-            ? MyCoursesPage.routePath
-            : CourseCatalogPage.routePath,
+      _ => link.requiresAuth
+          ? MyCoursesPage.routePath
+          : CourseCatalogPage.routePath,
     };
   }
 
   String _locationForTarget(AppNotification notification) {
     return switch (notification.targetType) {
-      'course' =>
-        notification.targetId == null
-            ? CourseCatalogPage.routePath
-            : CourseDetailPage.location(notification.targetId!),
+      'course' => notification.targetId == null
+          ? CourseCatalogPage.routePath
+          : CourseDetailPage.location(notification.targetId!),
       'booking' => BookingSuccessPage.location(
-        bookingId: notification.targetId ?? '',
-      ),
+          bookingId: notification.targetId ?? '',
+        ),
       'content_item' => MyCoursesPage.routePath,
       'student_subscription' => MyCoursesPage.routePath,
       'announcement' => _notificationInboxLocation(
-        notificationId: notification.id,
-      ),
+          notificationId: notification.id,
+        ),
       _ => _notificationInboxLocation(notificationId: notification.id),
     };
   }

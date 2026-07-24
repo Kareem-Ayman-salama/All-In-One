@@ -3,13 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final courseContentListProvider = FutureProvider.autoDispose
     .family<List<ContentItemSummary>, CourseContentQuery>((ref, query) {
-      return ref
-          .watch(contentRepositoryProvider)
-          .listContent(
-            organizationId: query.organizationId,
-            roomId: query.roomId,
-          );
-    });
+  return ref.watch(contentRepositoryProvider).listContent(
+        organizationId: query.organizationId,
+        roomId: query.roomId,
+      );
+});
 
 class CourseContentQuery {
   const CourseContentQuery({required this.organizationId, this.roomId});

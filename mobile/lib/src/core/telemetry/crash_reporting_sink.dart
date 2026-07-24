@@ -3,7 +3,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 class CrashReportingSink implements TelemetrySink {
   const CrashReportingSink({required FirebaseCrashlytics crashlytics})
-    : _crashlytics = crashlytics;
+      : _crashlytics = crashlytics;
 
   final FirebaseCrashlytics _crashlytics;
 

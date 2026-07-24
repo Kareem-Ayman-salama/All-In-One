@@ -7,7 +7,7 @@ final secureTokenStoreProvider = Provider<SecureTokenStore>((ref) {
 
 class SecureTokenStore {
   const SecureTokenStore({required FlutterSecureStorage storage})
-    : _storage = storage;
+      : _storage = storage;
 
   static const _accessTokenKey = 'ain.access_token';
   static const _refreshTokenKey = 'ain.refresh_token';

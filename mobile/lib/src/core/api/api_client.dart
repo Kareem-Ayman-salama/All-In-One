@@ -46,16 +46,15 @@ final dioProvider = Provider<Dio>((ref) {
       },
       onError: (error, handler) async {
         if (tokenRefreshCoordinator.shouldAttemptRefresh(error)) {
-          final accessToken = await tokenRefreshCoordinator
-              .refreshAccessToken();
+          final accessToken =
+              await tokenRefreshCoordinator.refreshAccessToken();
           if (accessToken != null && accessToken.isNotEmpty) {
             error.requestOptions.headers['Authorization'] =
                 'Bearer $accessToken';
-            error.requestOptions.headers['X-Request-ID'] = requestIdFactory
-                .create();
-            error.requestOptions.extra[TokenRefreshCoordinator
-                    .retriedAfterRefreshExtraKey] =
-                true;
+            error.requestOptions.headers['X-Request-ID'] =
+                requestIdFactory.create();
+            error.requestOptions.extra[
+                TokenRefreshCoordinator.retriedAfterRefreshExtraKey] = true;
 
             final response = await dio.fetch<Object?>(error.requestOptions);
             handler.resolve(response);

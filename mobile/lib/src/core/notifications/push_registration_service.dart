@@ -16,8 +16,8 @@ class PushRegistrationService {
   const PushRegistrationService({
     required DeviceRepository deviceRepository,
     required Future<String> Function() installationIdReader,
-  }) : _deviceRepository = deviceRepository,
-       _installationIdReader = installationIdReader;
+  })  : _deviceRepository = deviceRepository,
+        _installationIdReader = installationIdReader;
 
   final DeviceRepository _deviceRepository;
   final Future<String> Function() _installationIdReader;

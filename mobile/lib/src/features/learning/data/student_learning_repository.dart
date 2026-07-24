@@ -33,11 +33,11 @@ class StudentLearningRepository {
     );
     final enrollmentEnvelope =
         ApiEnvelope<List<StudentEnrollmentSummary>>.fromJson(
-          readJsonObject(responses[1].data),
-          (value) => readJsonObjectList(
-            value,
-          ).map(StudentEnrollmentSummary.fromJson).toList(growable: false),
-        );
+      readJsonObject(responses[1].data),
+      (value) => readJsonObjectList(
+        value,
+      ).map(StudentEnrollmentSummary.fromJson).toList(growable: false),
+    );
 
     return StudentLearningOverview(
       bookings: bookingEnvelope.data,
@@ -301,8 +301,7 @@ class StudentAcademySummary {
         snakeKey: 'public_name',
         fallback: _readString(json, 'name'),
       ),
-      nameAr:
-          _readNullableString(
+      nameAr: _readNullableString(
             json,
             'publicNameAr',
             snakeKey: 'public_name_ar',

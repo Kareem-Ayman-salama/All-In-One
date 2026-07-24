@@ -5,9 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 final offlineCachePolicyProvider = FutureProvider<OfflineCachePolicy>((
   ref,
 ) async {
-  final manifest = await ref
-      .watch(metadataRepositoryProvider)
-      .getOfflineCachePolicy();
+  final manifest =
+      await ref.watch(metadataRepositoryProvider).getOfflineCachePolicy();
   return OfflineCachePolicy.fromJson(manifest);
 });
 

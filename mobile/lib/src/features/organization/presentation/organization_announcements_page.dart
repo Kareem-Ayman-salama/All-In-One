@@ -357,9 +357,7 @@ class _CreateAnnouncementSheetState
     }
     setState(() => _submitting = true);
     try {
-      await ref
-          .read(organizationAnnouncementActionsProvider)
-          .create(
+      await ref.read(organizationAnnouncementActionsProvider).create(
             organizationId: widget.organizationId,
             command: CreateOrganizationAnnouncementCommand(
               title: _titleController.text,

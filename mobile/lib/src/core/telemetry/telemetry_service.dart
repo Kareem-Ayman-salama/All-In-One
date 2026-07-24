@@ -15,9 +15,9 @@ class TelemetryService {
     required AppEnvironment environment,
     required PrivacyRedactor redactor,
     required List<TelemetrySink> sinks,
-  }) : _environment = environment,
-       _redactor = redactor,
-       _sinks = sinks;
+  })  : _environment = environment,
+        _redactor = redactor,
+        _sinks = sinks;
 
   final AppEnvironment _environment;
   final PrivacyRedactor _redactor;

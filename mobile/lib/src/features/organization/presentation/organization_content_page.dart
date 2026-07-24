@@ -136,9 +136,8 @@ class _ContentBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = AppStrings.of(context);
-    final publishedCount = items
-        .where((item) => item.status == 'published')
-        .length;
+    final publishedCount =
+        items.where((item) => item.status == 'published').length;
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -387,9 +386,7 @@ class _CreateContentLinkSheetState
     }
     setState(() => _submitting = true);
     try {
-      await ref
-          .read(organizationContentActionsProvider)
-          .createLink(
+      await ref.read(organizationContentActionsProvider).createLink(
             organizationId: widget.organizationId,
             command: CreateLinkContentCommand(
               roomId: _roomId!,

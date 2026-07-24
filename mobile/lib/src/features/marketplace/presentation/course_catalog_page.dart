@@ -253,8 +253,7 @@ class _CourseCard extends StatelessWidget {
                 children: [
                   _InfoChip(
                     icon: Icons.business,
-                    label:
-                        course.academy?.localizedName(strings.isArabic) ??
+                    label: course.academy?.localizedName(strings.isArabic) ??
                         strings.academyTeam,
                   ),
                   if (course.deliveryType != null)

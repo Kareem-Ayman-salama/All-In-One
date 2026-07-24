@@ -5,8 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final organizationCourseRepositoryProvider =
     Provider<OrganizationCourseRepository>((ref) {
-      return OrganizationCourseRepository(dio: ref.watch(dioProvider));
-    });
+  return OrganizationCourseRepository(dio: ref.watch(dioProvider));
+});
 
 class OrganizationCourseRepository {
   const OrganizationCourseRepository({required Dio dio}) : _dio = dio;
@@ -29,11 +29,11 @@ class OrganizationCourseRepository {
     ]);
     final courseEnvelope =
         ApiEnvelope<List<OrganizationCourseSummary>>.fromJson(
-          readJsonObject(responses[0].data),
-          (value) => readJsonObjectList(
-            value,
-          ).map(OrganizationCourseSummary.fromJson).toList(growable: false),
-        );
+      readJsonObject(responses[0].data),
+      (value) => readJsonObjectList(
+        value,
+      ).map(OrganizationCourseSummary.fromJson).toList(growable: false),
+    );
     final batchEnvelope = ApiEnvelope<List<OrganizationBatchSummary>>.fromJson(
       readJsonObject(responses[1].data),
       (value) => readJsonObjectList(

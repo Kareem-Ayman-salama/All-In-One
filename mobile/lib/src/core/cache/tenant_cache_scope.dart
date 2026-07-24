@@ -7,8 +7,8 @@ final tenantCacheKeyFactoryProvider = Provider<TenantCacheKeyFactory>((ref) {
 
 final tenantCacheScopeControllerProvider =
     NotifierProvider<TenantCacheScopeController, TenantCacheScope>(
-      TenantCacheScopeController.new,
-    );
+  TenantCacheScopeController.new,
+);
 
 class TenantCacheScopeController extends Notifier<TenantCacheScope> {
   @override
@@ -37,7 +37,9 @@ class TenantCacheScopeController extends Notifier<TenantCacheScope> {
 class TenantCacheScope {
   const TenantCacheScope({this.userId, this.organizationId});
 
-  const TenantCacheScope.empty() : userId = null, organizationId = null;
+  const TenantCacheScope.empty()
+      : userId = null,
+        organizationId = null;
 
   final String? userId;
   final String? organizationId;

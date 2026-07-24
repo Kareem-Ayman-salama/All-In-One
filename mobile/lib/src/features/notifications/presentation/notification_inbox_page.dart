@@ -110,9 +110,8 @@ class NotificationInboxPage extends ConsumerWidget {
       await ref.read(notificationRepositoryProvider).markRead(notification.id);
       ref.invalidate(notificationInboxProvider);
     }
-    final location = await ref
-        .read(notificationTapRouterProvider)
-        .resolve(notification);
+    final location =
+        await ref.read(notificationTapRouterProvider).resolve(notification);
     if (context.mounted) {
       context.go(location);
     }
@@ -136,9 +135,8 @@ class _NotificationTile extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      color: highlighted
-          ? Theme.of(context).colorScheme.primaryContainer
-          : null,
+      color:
+          highlighted ? Theme.of(context).colorScheme.primaryContainer : null,
       child: ListTile(
         leading: Icon(
           notification.read

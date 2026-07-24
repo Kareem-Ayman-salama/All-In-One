@@ -5,8 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final organizationBookingRepositoryProvider =
     Provider<OrganizationBookingRepository>((ref) {
-      return OrganizationBookingRepository(dio: ref.watch(dioProvider));
-    });
+  return OrganizationBookingRepository(dio: ref.watch(dioProvider));
+});
 
 class OrganizationBookingRepository {
   const OrganizationBookingRepository({required Dio dio}) : _dio = dio;

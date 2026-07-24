@@ -273,9 +273,7 @@ class _TaskCard extends ConsumerWidget {
                 if (value == null || value == task.status) {
                   return;
                 }
-                await ref
-                    .read(organizationTaskActionsProvider)
-                    .update(
+                await ref.read(organizationTaskActionsProvider).update(
                       organizationId: organizationId,
                       taskId: task.id,
                       command: UpdateOrganizationTaskCommand(
@@ -283,8 +281,8 @@ class _TaskCard extends ConsumerWidget {
                         progress: value == 'done'
                             ? 100
                             : value == 'in_progress'
-                            ? 25
-                            : 0,
+                                ? 25
+                                : 0,
                       ),
                     );
               },
@@ -431,9 +429,7 @@ class _CreateTaskSheetState extends ConsumerState<_CreateTaskSheet> {
     }
     setState(() => _submitting = true);
     try {
-      await ref
-          .read(organizationTaskActionsProvider)
-          .create(
+      await ref.read(organizationTaskActionsProvider).create(
             organizationId: widget.organizationId,
             command: CreateOrganizationTaskCommand(
               title: _titleController.text,

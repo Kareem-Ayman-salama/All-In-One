@@ -10,7 +10,7 @@ final deepLinkServiceProvider = Provider<DeepLinkService>((ref) {
 
 class DeepLinkService {
   const DeepLinkService({required MetadataRepository metadataRepository})
-    : _metadataRepository = metadataRepository;
+      : _metadataRepository = metadataRepository;
 
   final MetadataRepository _metadataRepository;
 

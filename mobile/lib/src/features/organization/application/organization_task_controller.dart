@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final organizationTasksProvider = FutureProvider.autoDispose
     .family<List<OrganizationTaskSummary>, String>((ref, organizationId) {
-      return ref
-          .watch(organizationTaskRepositoryProvider)
-          .listTasks(organizationId: organizationId);
-    });
+  return ref
+      .watch(organizationTaskRepositoryProvider)
+      .listTasks(organizationId: organizationId);
+});
 
 final organizationTaskActionsProvider = Provider<OrganizationTaskActions>(
   OrganizationTaskActions.new,
@@ -33,13 +33,12 @@ class OrganizationTaskActions {
     required String taskId,
     required UpdateOrganizationTaskCommand command,
   }) async {
-    final result = await _ref
-        .read(organizationTaskRepositoryProvider)
-        .updateTask(
-          organizationId: organizationId,
-          taskId: taskId,
-          command: command,
-        );
+    final result =
+        await _ref.read(organizationTaskRepositoryProvider).updateTask(
+              organizationId: organizationId,
+              taskId: taskId,
+              command: command,
+            );
     _ref.invalidate(organizationTasksProvider(organizationId));
     return result;
   }

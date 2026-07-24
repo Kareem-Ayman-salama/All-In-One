@@ -408,9 +408,7 @@ class _CreateEventSheetState extends ConsumerState<_CreateEventSheet> {
     }
     setState(() => _submitting = true);
     try {
-      await ref
-          .read(organizationEventActionsProvider)
-          .create(
+      await ref.read(organizationEventActionsProvider).create(
             organizationId: widget.organizationId,
             command: CreateOrganizationEventCommand(
               title: _titleController.text,
