@@ -10,7 +10,8 @@ Artisan::command('inspire', function () {
 
 Schedule::command('attendance:send-weekly-guardian-reports')
     ->weeklyOn(1, '08:00')
-    ->withoutOverlapping();
+    ->withoutOverlapping()
+    ->onOneServer();
 
 Schedule::command('aio:dispatch-outbox')
     ->everyMinute()

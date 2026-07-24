@@ -5,7 +5,7 @@
     "buildCommand": "composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader"
   },
   "deploy": {
-    "startCommand": "sh -c 'if [ \"$AIO_DEPLOYMENT_MODE\" = \"staging\" ]; then php artisan aio:production-check || true; else php artisan aio:production-check; fi && php artisan migrate --force && php artisan optimize && php artisan serve --host=0.0.0.0 --port=$PORT'",
+    "startCommand": "sh -c 'if [ \"$AIO_DEPLOYMENT_MODE\" = \"staging\" ]; then php artisan aio:production-check || true; else php artisan aio:production-check; fi && php artisan migrate --force && php artisan optimize && (php artisan schedule:work > /tmp/aio-scheduler.log 2>&1 &) && exec php artisan serve --host=0.0.0.0 --port=$PORT'",
     "healthcheckPath": "/api/v1/health/ready",
     "healthcheckTimeout": 120,
     "restartPolicyType": "ON_FAILURE",
