@@ -9,7 +9,7 @@ class ApiEnvelope<T> {
   final String requestId;
   final Map<String, Object?> meta;
 
-  static ApiEnvelope<T> fromJson<T>(
+  factory ApiEnvelope.fromJson(
     Map<String, Object?> json,
     T Function(Object? value) readData,
   ) {
