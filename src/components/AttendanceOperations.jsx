@@ -2,15 +2,20 @@ import {
   CalendarCheck,
   Check,
   Clock3,
+  Copy,
   Download,
+  History,
   LockKeyhole,
   Plus,
+  QrCode,
   ShieldCheck,
   UserRoundCheck,
   UserRoundX,
   Users
 } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Badge } from "./Badge";
 import { Button } from "./Button";
 import { FormField } from "./FormField";
@@ -59,6 +64,9 @@ export function AttendanceManagementPage() {
   const [loading, setLoading] = useState(true);
   const [lessonBookings, setLessonBookings] = useState([]);
   const [sessionSource, setSessionSource] = useState("batch");
+  const [qrData, setQrData] = useState(null);
+  const [history, setHistory] = useState([]);
+  const [qrOpen, setQrOpen] = useState(false);
   const organizationId = activeOrganization?.id;
 
   const applySheet = (data) => {
@@ -106,8 +114,14 @@ export function AttendanceManagementPage() {
       setSheet(null);
       return;
     }
-    api.getSessionAttendance(organizationId, selectedId)
-      .then(applySheet)
+    Promise.all([
+      api.getSessionAttendance(organizationId, selectedId),
+      api.getAttendanceHistory(organizationId, selectedId)
+    ])
+      .then(([attendance, historyItems]) => {
+        applySheet(attendance);
+        setHistory(historyItems);
+      })
       .catch((error) => showToast(error.message, "error"));
   }, [organizationId, selectedId]);
 
@@ -148,6 +162,17 @@ export function AttendanceManagementPage() {
       showToast("تم قفل سجل الحضور", "success");
       setSheet((current) => ({ ...current, locked: true }));
       await loadSessions();
+    } catch (error) {
+      showToast(error.message, "error");
+    }
+  };
+
+  const generateQr = async () => {
+    try {
+      const data = await api.generateAttendanceQr(organizationId, selectedId, 10);
+      setQrData(data);
+      setQrOpen(true);
+      setHistory(await api.getAttendanceHistory(organizationId, selectedId));
     } catch (error) {
       showToast(error.message, "error");
     }
@@ -222,6 +247,7 @@ export function AttendanceManagementPage() {
                   <p>{dateTime(sheet.session.startsAt)} · {label(sheet.session.instructor)}</p>
                 </div>
                 <div>
+                  {!sheet.locked && <Button variant="ghost" onClick={generateQr}><QrCode size={17} /> QR للحضور</Button>}
                   {!sheet.locked && <Button variant="ghost" onClick={markAllPresent}><Check size={17} /> تحديد الكل حاضر</Button>}
                   <Badge tone={sheet.locked ? "neutral" : "success"}>{sheet.locked ? "مقفول" : "مفتوح للتعديل"}</Badge>
                 </div>
@@ -254,6 +280,19 @@ export function AttendanceManagementPage() {
                 </table>
               </div>
               {!sheet.locked && <footer><Button variant="ghost" onClick={lock}><LockKeyhole size={17} /> حفظ وقفل</Button><Button onClick={save}>حفظ الحضور</Button></footer>}
+              <details className="attendance-history">
+                <summary><History size={17} /> سجل تعديلات الحضور ({history.length})</summary>
+                <div>
+                  {history.map((item) => (
+                    <article key={item.id}>
+                      <strong>{item.actor?.name || "النظام"}</strong>
+                      <span>{item.action}</span>
+                      <small>{dateTime(item.createdAt)}</small>
+                    </article>
+                  ))}
+                  {history.length === 0 && <p>لا توجد تعديلات مسجلة بعد.</p>}
+                </div>
+              </details>
             </>
           )}
         </div>
@@ -289,6 +328,19 @@ export function AttendanceManagementPage() {
           <div className="learning-form-actions"><Button type="submit">إنشاء الحصة</Button></div>
         </form>
       </Modal>
+      <Modal title="QR تسجيل الحضور" open={qrOpen} onClose={() => setQrOpen(false)}>
+        {qrData && (
+          <div className="attendance-qr-panel">
+            <QRCodeSVG value={qrData.checkInUrl} size={240} level="M" />
+            <strong>امسح الكود من موبايل الطالب</strong>
+            <p>صالح حتى {dateTime(qrData.expiresAt)}، وإنشاء كود جديد يلغي القديم.</p>
+            <Button variant="ghost" onClick={async () => {
+              await navigator.clipboard.writeText(qrData.checkInUrl);
+              showToast("تم نسخ رابط الحضور", "success");
+            }}><Copy size={17} /> نسخ الرابط</Button>
+          </div>
+        )}
+      </Modal>
     </>
   );
 }
@@ -317,7 +369,9 @@ export function GuardianManagementPage() {
         guardianEmail: form.get("guardianEmail"),
         studentId: form.get("studentId"),
         relationship: form.get("relationship"),
-        canViewNotes: true
+        canViewNotes: true,
+        weeklyReportEnabled: form.get("weeklyReportEnabled") === "on",
+        absenceAlertThreshold: Number(form.get("absenceAlertThreshold"))
       });
       setOpen(false);
       load();
@@ -331,7 +385,20 @@ export function GuardianManagementPage() {
 
   return (
     <>
-      <div className="stitch-page-head"><div><h1>أولياء الأمور</h1><p>صلاحية قراءة فقط للحضور، بدون كشف محتوى الطالب الخاص.</p></div><Button onClick={() => setOpen(true)}><Plus size={18} /> ربط ولي أمر</Button></div>
+      <div className="stitch-page-head">
+        <div><h1>أولياء الأمور</h1><p>صلاحية قراءة فقط للحضور، بدون كشف محتوى الطالب الخاص.</p></div>
+        <div className="page-actions">
+          <Button variant="ghost" onClick={async () => {
+            try {
+              const result = await api.sendGuardianWeeklyReports(organizationId);
+              showToast(`تم تجهيز ${result.sentCount} تقرير أسبوعي`, "success");
+            } catch (error) {
+              showToast(error.message, "error");
+            }
+          }}>إرسال التقارير الأسبوعية</Button>
+          <Button onClick={() => setOpen(true)}><Plus size={18} /> ربط ولي أمر</Button>
+        </div>
+      </div>
       <section className="guardian-list">
         {links.map((link) => (
           <article key={link.id}>
@@ -339,6 +406,7 @@ export function GuardianManagementPage() {
             <div><strong>{link.guardian?.name}</strong><small>{link.guardian?.email}</small></div>
             <div><small>الطالب</small><strong>{link.student?.name}</strong></div>
             <Badge tone={link.status === "active" ? "success" : "neutral"}>{link.relationship}</Badge>
+            <small>تنبيه كل {link.absenceAlertThreshold || 3} غيابات</small>
             {link.status === "active" && <Button variant="ghost" onClick={async () => { await api.unlinkGuardian(organizationId, link.id); load(); }}>إلغاء الربط</Button>}
           </article>
         ))}
@@ -349,6 +417,8 @@ export function GuardianManagementPage() {
           <FormField label="إيميل ولي الأمر"><input name="guardianEmail" type="email" required /></FormField>
           <FormField label="الطالب"><select name="studentId" required><option value="">اختر الطالب</option>{students.map((student) => <option value={student.userId || student.id} key={student.id}>{student.name}</option>)}</select></FormField>
           <FormField label="صلة القرابة"><select name="relationship"><option value="father">الأب</option><option value="mother">الأم</option><option value="guardian">ولي أمر</option><option value="other">أخرى</option></select></FormField>
+          <FormField label="التنبيه بعد عدد غيابات"><input name="absenceAlertThreshold" type="number" min="1" max="20" defaultValue="3" required /></FormField>
+          <label className="attendance-visibility"><input name="weeklyReportEnabled" type="checkbox" defaultChecked /><span>إرسال تقرير حضور أسبوعي</span></label>
           <div className="learning-form-actions"><Button type="submit">تأكيد الربط</Button></div>
         </form>
       </Modal>
@@ -438,5 +508,47 @@ export function StudentAttendancePage({ guardian = false }) {
         {(data.records || []).length === 0 && <div className="attendance-empty"><CalendarCheck /><strong>لا توجد سجلات حضور</strong><span>ستظهر السجلات هنا بعد أن يسجل المدرس أول حصة.</span></div>}
       </section>
     </>
+  );
+}
+
+export function AttendanceCheckInPage() {
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
+  const [state, setState] = useState("idle");
+  const [message, setMessage] = useState("");
+
+  const checkIn = async () => {
+    setState("loading");
+    try {
+      const record = await api.checkInAttendance(
+        params.get("session"),
+        params.get("token")
+      );
+      setState("success");
+      setMessage(`تم تسجيل حضورك في ${record.session?.title || "الحصة"}`);
+    } catch (error) {
+      setState("error");
+      setMessage(error.message);
+    }
+  };
+
+  return (
+    <main className="attendance-check-in-page">
+      <section>
+        <QrCode size={44} />
+        <h1>تسجيل حضور الحصة</h1>
+        <p>{message || "تأكد أنك داخل حساب الطالب الصحيح ثم سجّل حضورك."}</p>
+        {state !== "success" && (
+          <Button disabled={state === "loading"} onClick={checkIn}>
+            {state === "loading" ? "جاري التسجيل..." : "تسجيل حضوري"}
+          </Button>
+        )}
+        {state === "success" && (
+          <Button onClick={() => navigate("/end-user/attendance")}>
+            عرض سجل الحضور
+          </Button>
+        )}
+      </section>
+    </main>
   );
 }

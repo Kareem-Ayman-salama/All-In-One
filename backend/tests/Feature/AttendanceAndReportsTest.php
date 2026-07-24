@@ -17,6 +17,8 @@ use App\Models\Role;
 use App\Models\Room;
 use App\Models\User;
 use App\Notifications\AttendanceAlertNotification;
+use App\Notifications\GuardianAbsenceThresholdNotification;
+use App\Notifications\GuardianWeeklyAttendanceNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification as NotificationFacade;
 use Laravel\Sanctum\Sanctum;
@@ -59,6 +61,8 @@ class AttendanceAndReportsTest extends TestCase
             'studentId' => $student->id,
             'relationship' => 'mother',
             'canViewNotes' => true,
+            'weeklyReportEnabled' => true,
+            'absenceAlertThreshold' => 1,
         ])->assertCreated();
 
         $session = $this->postJson(
@@ -106,6 +110,11 @@ class AttendanceAndReportsTest extends TestCase
             AttendanceAlertNotification::class,
             1,
         );
+        NotificationFacade::assertSentToTimes(
+            $guardian,
+            GuardianAbsenceThresholdNotification::class,
+            1,
+        );
 
         Sanctum::actingAs($guardian);
         $this->getJson("/api/v1/guardian/students/{$student->id}/attendance")
@@ -123,6 +132,35 @@ class AttendanceAndReportsTest extends TestCase
             "/api/v1/organizations/{$organization->id}/reports/bookings?format=csv",
         )->assertOk()
             ->assertHeader('content-type', 'text/csv; charset=UTF-8');
+
+        $this->postJson(
+            "/api/v1/organizations/{$organization->id}/guardians/weekly-reports/send",
+        )->assertOk()
+            ->assertJsonPath('data.sentCount', 1);
+        NotificationFacade::assertSentToTimes(
+            $guardian,
+            GuardianWeeklyAttendanceNotification::class,
+            1,
+        );
+
+        $qr = $this->postJson(
+            "/api/v1/organizations/{$organization->id}/learning-sessions/{$session['id']}/attendance/qr",
+            ['validForMinutes' => 10],
+        )->assertOk()->json('data');
+
+        Sanctum::actingAs($student);
+        $this->postJson('/api/v1/student/attendance/check-in', [
+            'sessionId' => $session['id'],
+            'token' => $qr['token'],
+        ])->assertOk()
+            ->assertJsonPath('data.status', 'present');
+
+        Sanctum::actingAs($owner);
+        $this->getJson(
+            "/api/v1/organizations/{$organization->id}/learning-sessions/{$session['id']}/attendance/history",
+        )->assertOk()
+            ->assertJsonFragment(['action' => 'attendance.qr_generated'])
+            ->assertJsonFragment(['action' => 'attendance.marked']);
     }
 
     public function test_private_lesson_has_one_attendance_participant(): void

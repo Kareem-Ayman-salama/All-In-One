@@ -10,6 +10,7 @@ use App\Models\LearningSession;
 use App\Models\Notification;
 use App\Models\User;
 use App\Notifications\AttendanceAlertNotification;
+use App\Notifications\GuardianAbsenceThresholdNotification;
 use App\Services\Operations\OperationRecorder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -198,6 +199,66 @@ class AttendanceService
                     report($exception);
                 }
             }
+        }
+
+        if ($record->status === 'absent' && $record->guardian_visible) {
+            $this->notifyAbsenceThreshold($record, $links);
+        }
+    }
+
+    /**
+     * @param  Collection<int, GuardianStudentLink>  $links
+     */
+    private function notifyAbsenceThreshold(
+        AttendanceRecord $record,
+        Collection $links,
+    ): void {
+        $absenceCount = AttendanceRecord::query()
+            ->where('organization_id', $record->organization_id)
+            ->where('student_id', $record->student_id)
+            ->where('status', 'absent')
+            ->where('guardian_visible', true)
+            ->count();
+
+        foreach ($links as $link) {
+            $threshold = max(1, (int) $link->absence_alert_threshold);
+            if (
+                $absenceCount < $threshold
+                || $absenceCount < $link->last_absence_alert_count + $threshold
+            ) {
+                continue;
+            }
+
+            Notification::query()->create([
+                'user_id' => $link->guardian_id,
+                'organization_id' => $record->organization_id,
+                'type' => 'guardian_absence_threshold',
+                'priority' => 'high',
+                'title' => 'Repeated absence alert',
+                'body' => "{$record->student->name}: {$absenceCount} absences",
+                'target_type' => 'guardian_student_link',
+                'target_id' => $link->id,
+                'data' => [
+                    'route' => '/guardian/attendance',
+                    'studentId' => $record->student_id,
+                    'absenceCount' => $absenceCount,
+                    'threshold' => $threshold,
+                ],
+                'status' => 'unread',
+            ]);
+
+            try {
+                $link->guardian?->notify(
+                    new GuardianAbsenceThresholdNotification(
+                        $record->student->name,
+                        $absenceCount,
+                    ),
+                );
+            } catch (Throwable $exception) {
+                report($exception);
+            }
+
+            $link->update(['last_absence_alert_count' => $absenceCount]);
         }
     }
 }

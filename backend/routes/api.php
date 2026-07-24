@@ -99,6 +99,7 @@ Route::prefix('v1')->group(function (): void {
             ->middleware('throttle:20,1');
         Route::post('/student/lesson-bookings/{booking}/cancel', [LessonBookingController::class, 'cancel']);
         Route::get('/student/attendance', [AttendanceController::class, 'mine']);
+        Route::post('/student/attendance/check-in', [AttendanceController::class, 'checkIn']);
         Route::get('/guardian/students', [GuardianController::class, 'students']);
         Route::get('/guardian/students/{student}/attendance', [GuardianController::class, 'attendance']);
         Route::get('/notifications', [NotificationController::class, 'index']);
@@ -241,11 +242,17 @@ Route::prefix('v1')->group(function (): void {
                     ->middleware('permission:attendance.manage');
                 Route::post('/learning-sessions/{session}/attendance/lock', [AttendanceController::class, 'lock'])
                     ->middleware('permission:attendance.manage');
+                Route::post('/learning-sessions/{session}/attendance/qr', [AttendanceController::class, 'generateQr'])
+                    ->middleware('permission:attendance.manage');
+                Route::get('/learning-sessions/{session}/attendance/history', [AttendanceController::class, 'history'])
+                    ->middleware('permission:attendance.view');
                 Route::get('/guardians', [GuardianController::class, 'index'])
                     ->middleware('permission:guardians.view');
                 Route::post('/guardians', [GuardianController::class, 'link'])
                     ->middleware('permission:guardians.manage');
                 Route::delete('/guardians/{link}', [GuardianController::class, 'unlink'])
+                    ->middleware('permission:guardians.manage');
+                Route::post('/guardians/weekly-reports/send', [GuardianController::class, 'sendWeeklyReports'])
                     ->middleware('permission:guardians.manage');
                 Route::get('/reports/attendance', [ReportExportController::class, 'attendance'])
                     ->middleware('permission:reports.export');

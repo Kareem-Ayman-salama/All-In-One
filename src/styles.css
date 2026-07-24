@@ -7398,6 +7398,65 @@ label,
 .attendance-summary .is-late > svg { color: #a16207; background: #fef3c7; }
 .attendance-summary .is-absent > svg { color: #b91c1c; background: #fee2e2; }
 
+.attendance-qr-panel {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.attendance-qr-panel svg {
+  max-width: min(240px, 72vw);
+  height: auto;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.attendance-history {
+  margin: 18px 20px 22px;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+
+.attendance-history summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.attendance-history article {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(160px, 1fr) auto;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.attendance-check-in-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: var(--page-bg);
+}
+
+.attendance-check-in-page section {
+  width: min(460px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  padding: 32px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
 .attendance-source-switch {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

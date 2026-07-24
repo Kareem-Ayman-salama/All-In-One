@@ -12,6 +12,7 @@ use App\Models\OrganizationMembership;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\Operations\OperationRecorder;
+use App\Services\Attendance\GuardianAttendanceReportService;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -87,6 +88,14 @@ class GuardianController extends Controller
                 'relationship' => $request->validated('relationship'),
                 'status' => 'active',
                 'can_view_notes' => $request->boolean('canViewNotes', true),
+                'weekly_report_enabled' => $request->boolean(
+                    'weeklyReportEnabled',
+                    true,
+                ),
+                'absence_alert_threshold' => $request->integer(
+                    'absenceAlertThreshold',
+                    3,
+                ),
             ]);
         });
 
@@ -133,6 +142,29 @@ class GuardianController extends Controller
         );
 
         return ApiResponse::success($request, $model->fresh());
+    }
+
+    public function sendWeeklyReports(
+        Request $request,
+        GuardianAttendanceReportService $service,
+        OperationRecorder $recorder,
+    ): JsonResponse {
+        $organization = $this->organization($request);
+        $sent = $service->sendForOrganization($organization->id);
+        $recorder->record(
+            'guardian.weekly_reports_sent',
+            'organization',
+            $organization->id,
+            $organization->id,
+            $request->user()->id,
+            ['sentCount' => $sent->count()],
+            ['organizationId' => $organization->id],
+            $request,
+        );
+
+        return ApiResponse::success($request, [
+            'sentCount' => $sent->count(),
+        ]);
     }
 
     public function students(Request $request): JsonResponse

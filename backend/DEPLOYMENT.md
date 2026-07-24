@@ -107,6 +107,25 @@ GET /api/v1/health/otp
 
 The OTP endpoint must return `status: ready` before inviting real users.
 
+### Weekly guardian attendance reports
+
+The backend supports both manual report delivery from the organization dashboard
+and scheduled delivery with:
+
+```bash
+php artisan attendance:send-weekly-guardian-reports
+```
+
+Run Laravel's scheduler once per minute in a worker or Railway cron service:
+
+```bash
+php artisan schedule:run
+```
+
+The schedule sends reports every Monday at 08:00 application time. Delivery uses
+the same free SMTP configuration as OTP, so `/api/v1/health/otp` must report
+`ready`. Reports are idempotent for the same weekly period.
+
 Staging mode prints the complete production-readiness report but does not stop
 the API when optional production providers are still missing. Never use
 staging mode for a public production launch.

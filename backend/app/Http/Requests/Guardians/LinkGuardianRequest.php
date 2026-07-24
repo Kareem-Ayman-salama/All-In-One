@@ -35,6 +35,8 @@ class LinkGuardianRequest extends FormRequest
                 Rule::in(['father', 'mother', 'guardian', 'other']),
             ],
             'canViewNotes' => ['nullable', 'boolean'],
+            'weeklyReportEnabled' => ['nullable', 'boolean'],
+            'absenceAlertThreshold' => ['nullable', 'integer', 'min:1', 'max:20'],
         ];
     }
 }

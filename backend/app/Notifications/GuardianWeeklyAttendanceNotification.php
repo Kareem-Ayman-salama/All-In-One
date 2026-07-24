@@ -2,21 +2,24 @@
 
 namespace App\Notifications;
 
-use App\Models\AttendanceRecord;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class AttendanceAlertNotification extends Notification implements ShouldQueue
+class GuardianWeeklyAttendanceNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
     public int $tries = 3;
 
+    /**
+     * @param  array<string, int|float>  $summary
+     */
     public function __construct(
-        private readonly AttendanceRecord $record,
         private readonly string $studentName,
+        private readonly array $summary,
+        private readonly string $periodLabel,
     ) {
         $this->onConnection('sync')->afterCommit();
     }
@@ -31,23 +34,17 @@ class AttendanceAlertNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $status = match ($this->record->status) {
-            'absent' => 'absent',
-            'late' => "late by {$this->record->minutes_late} minutes",
-            'excused' => 'absent with an accepted excuse',
-            default => $this->record->status,
-        };
-
         return (new MailMessage)
-            ->subject('AIO attendance update')
+            ->subject('AIO weekly attendance report')
             ->greeting('Hello '.$notifiable->name.',')
-            ->line("{$this->studentName} was marked {$status}.")
-            ->line(
-                $this->record->instructor_note
-                    ?: 'Open AIO to review the attendance record.',
-            )
+            ->line("Attendance summary for {$this->studentName}: {$this->periodLabel}.")
+            ->line("Present: {$this->summary['present']}")
+            ->line("Absent: {$this->summary['absent']}")
+            ->line("Late: {$this->summary['late']}")
+            ->line("Excused: {$this->summary['excused']}")
+            ->line("Attendance rate: {$this->summary['attendanceRate']}%")
             ->action(
-                'View attendance',
+                'View full report',
                 rtrim((string) config('aio.frontend_url'), '/').'/guardian/attendance',
             );
     }

@@ -24,6 +24,8 @@ class LearningSession extends Model
         'status',
         'notes',
         'attendance_locked_at',
+        'qr_token_hash',
+        'qr_expires_at',
     ];
 
     protected function casts(): array
@@ -32,6 +34,7 @@ class LearningSession extends Model
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
             'attendance_locked_at' => 'datetime',
+            'qr_expires_at' => 'datetime',
         ];
     }
 

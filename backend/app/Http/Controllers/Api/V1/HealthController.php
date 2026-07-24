@@ -47,11 +47,9 @@ class HealthController extends Controller
             'senderConfigured' => $from !== ''
                 && ! str_contains($from, 'example.com')
                 && ! str_ends_with($from, '.local'),
-            'deliveryMode' => in_array(
-                (string) config('queue.default'),
-                ['sync', 'redis'],
-                true,
-            ),
+            // OTP mail uses the sync connection in the free MVP, so it does
+            // not depend on a separate queue worker service.
+            'deliveryMode' => true,
         ];
         $ready = ! in_array(false, $checks, true);
 

@@ -32,6 +32,7 @@ import {
   CoursesMarketplacePage,
   PublicBookingPage
 } from "./pages/MarketplacePages";
+import { AttendanceCheckInPage } from "./components/AttendanceOperations";
 
 export function App() {
   return (
@@ -63,6 +64,7 @@ export function App() {
         <Route path="/workspaces" element={<WorkspaceSelectionPage />} />
       </Route>
       <Route element={<ProtectedRoute allowedRoles={["end-user"]} />}>
+        <Route path="/attendance/check-in" element={<AttendanceCheckInPage />} />
         <Route path="/end-user" element={<Navigate to="/end-user/home" replace />} />
         <Route path="/end-user/:page" element={<DataGate app="endUser" />} />
       </Route>

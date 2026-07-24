@@ -6,6 +6,7 @@ use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Attendance\CreateLearningSessionRequest;
 use App\Http\Requests\Attendance\MarkAttendanceRequest;
+use App\Models\AuditLog;
 use App\Models\AttendanceRecord;
 use App\Models\LearningSession;
 use App\Models\Organization;
@@ -14,6 +15,7 @@ use App\Services\Operations\OperationRecorder;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class AttendanceController extends Controller
 {
@@ -153,6 +155,125 @@ class AttendanceController extends Controller
         );
 
         return ApiResponse::success($request, $model->fresh());
+    }
+
+    public function generateQr(
+        Request $request,
+        string $organization,
+        string $session,
+        OperationRecorder $recorder,
+    ): JsonResponse {
+        $validated = $request->validate([
+            'validForMinutes' => ['nullable', 'integer', 'min:2', 'max:30'],
+        ]);
+        $model = $this->session($request, $session);
+        if ($model->attendance_locked_at) {
+            throw new ApiException(
+                'ATTENDANCE_LOCKED',
+                'Attendance for this session is locked.',
+                409,
+            );
+        }
+
+        $token = Str::random(64);
+        $expiresAt = now()->addMinutes((int) ($validated['validForMinutes'] ?? 10));
+        $model->update([
+            'qr_token_hash' => hash('sha256', $token),
+            'qr_expires_at' => $expiresAt,
+        ]);
+        $recorder->record(
+            'attendance.qr_generated',
+            'learning_session',
+            $model->id,
+            $model->organization_id,
+            $request->user()->id,
+            [
+                'sessionId' => $model->id,
+                'expiresAt' => $expiresAt->toIso8601String(),
+            ],
+            ['sessionId' => $model->id],
+            $request,
+        );
+
+        $query = http_build_query([
+            'session' => $model->id,
+            'token' => $token,
+        ]);
+
+        return ApiResponse::success($request, [
+            'sessionId' => $model->id,
+            'token' => $token,
+            'expiresAt' => $expiresAt,
+            'checkInUrl' => rtrim((string) config('aio.frontend_url'), '/')
+                .'/attendance/check-in?'.$query,
+        ]);
+    }
+
+    public function checkIn(
+        Request $request,
+        AttendanceService $service,
+    ): JsonResponse {
+        $validated = $request->validate([
+            'sessionId' => ['required', 'uuid'],
+            'token' => ['required', 'string', 'size:64'],
+        ]);
+        $session = LearningSession::query()->find($validated['sessionId']);
+        if (
+            ! $session
+            || ! $session->qr_token_hash
+            || ! hash_equals(
+                $session->qr_token_hash,
+                hash('sha256', $validated['token']),
+            )
+            || ! $session->qr_expires_at
+            || $session->qr_expires_at->isPast()
+        ) {
+            throw new ApiException(
+                'ATTENDANCE_QR_INVALID',
+                'This attendance code is invalid or expired.',
+                422,
+            );
+        }
+
+        $record = $service->mark($session, $request->user(), [[
+            'studentId' => $request->user()->id,
+            'status' => 'present',
+            'guardianVisible' => true,
+        ]], $request)->first();
+        if (! $record) {
+            throw new ApiException(
+                'ATTENDANCE_CHECK_IN_FAILED',
+                'Attendance could not be recorded.',
+                422,
+            );
+        }
+
+        return ApiResponse::success($request, $record->load(
+            'session.batch.course',
+            'session.instructor',
+        ));
+    }
+
+    public function history(
+        Request $request,
+        string $organization,
+        string $session,
+    ): JsonResponse {
+        $model = $this->session($request, $session);
+        $items = AuditLog::query()
+            ->with('actor:id,name,email')
+            ->where('organization_id', $model->organization_id)
+            ->whereIn('action', [
+                'attendance.marked',
+                'attendance.locked',
+                'attendance.qr_generated',
+            ])
+            ->where('metadata->sessionId', $model->id)
+            ->latest('created_at')
+            ->limit(100)
+            ->get();
+
+        return ApiResponse::success($request, $items);
     }
 
     public function mine(Request $request): JsonResponse

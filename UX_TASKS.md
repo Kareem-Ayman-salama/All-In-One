@@ -178,3 +178,17 @@ This file tracks the professional UX pass for All In One (AIO). Mark items as do
 - [x] Explain clearly that lead data is not stored until a backend contact service is connected.
 - [x] Remove unconfirmed Instagram, YouTube, TikTok, and X channels.
 - [x] Update the footer copyright and public company information.
+
+## Phase 17 - Attendance, Guardians & Free Operations
+
+- [x] Add course-batch and private-lesson attendance sessions.
+- [x] Allow instructors to record present, absent, late, and excused states.
+- [x] Add instructor notes and guardian visibility controls.
+- [x] Add guardian accounts with student-specific read-only attendance access.
+- [x] Add configurable repeated-absence alerts for guardians.
+- [x] Add weekly guardian attendance summaries with manual and scheduled delivery.
+- [x] Add secure, expiring QR self check-in without a paid QR service.
+- [x] Add attendance change history with actor and timestamp.
+- [x] Export attendance and course/teacher bookings to Excel-compatible and CSV files.
+- [x] Keep email delivery compatible with Brevo's free transactional SMTP plan.
+- [x] Verify the production frontend build and integration contract checks.

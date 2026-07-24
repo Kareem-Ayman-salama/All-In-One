@@ -218,6 +218,18 @@ export const api = {
     `${organizationPath(organizationId, "learning-sessions")}/${sessionId}/attendance/lock`,
     { method: "POST", body: "{}" }
   ).then(camelize),
+  generateAttendanceQr: (organizationId, sessionId, validForMinutes = 10) => httpClient(
+    `${organizationPath(organizationId, "learning-sessions")}/${sessionId}/attendance/qr`,
+    { method: "POST", body: JSON.stringify({ validForMinutes }) }
+  ).then(camelize),
+  checkInAttendance: (sessionId, token) => httpClient(
+    "/student/attendance/check-in",
+    { method: "POST", body: JSON.stringify({ sessionId, token }) }
+  ).then(camelize),
+  getAttendanceHistory: (organizationId, sessionId) => endpoint(
+    `${organizationPath(organizationId, "learning-sessions")}/${sessionId}/attendance/history`,
+    []
+  ).then(camelize),
   getMyAttendance: () => endpoint("/student/attendance?perPage=100", { records: [], summary: {} }).then(camelize),
   getGuardians: (organizationId) => endpoint(
     `${organizationPath(organizationId, "guardians")}?perPage=100`,
@@ -230,6 +242,10 @@ export const api = {
   unlinkGuardian: (organizationId, linkId) => httpClient(
     `${organizationPath(organizationId, "guardians")}/${linkId}`,
     { method: "DELETE" }
+  ).then(camelize),
+  sendGuardianWeeklyReports: (organizationId) => httpClient(
+    organizationPath(organizationId, "guardians/weekly-reports/send"),
+    { method: "POST", body: "{}" }
   ).then(camelize),
   getGuardianStudents: () => endpoint("/guardian/students", []).then(camelize),
   getGuardianAttendance: (studentId) => endpoint(

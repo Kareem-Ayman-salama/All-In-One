@@ -22,7 +22,7 @@ class VerificationCodeNotification extends Notification implements ShouldQueue
         private readonly string $code,
         private readonly string $purpose,
     ) {
-        $this->afterCommit();
+        $this->onConnection('sync')->afterCommit();
     }
 
     /**

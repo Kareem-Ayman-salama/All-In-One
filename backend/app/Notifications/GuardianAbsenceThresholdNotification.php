@@ -2,21 +2,20 @@
 
 namespace App\Notifications;
 
-use App\Models\AttendanceRecord;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class AttendanceAlertNotification extends Notification implements ShouldQueue
+class GuardianAbsenceThresholdNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
     public int $tries = 3;
 
     public function __construct(
-        private readonly AttendanceRecord $record,
         private readonly string $studentName,
+        private readonly int $absenceCount,
     ) {
         $this->onConnection('sync')->afterCommit();
     }
@@ -31,21 +30,13 @@ class AttendanceAlertNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $status = match ($this->record->status) {
-            'absent' => 'absent',
-            'late' => "late by {$this->record->minutes_late} minutes",
-            'excused' => 'absent with an accepted excuse',
-            default => $this->record->status,
-        };
-
         return (new MailMessage)
-            ->subject('AIO attendance update')
+            ->subject('AIO absence alert')
             ->greeting('Hello '.$notifiable->name.',')
-            ->line("{$this->studentName} was marked {$status}.")
             ->line(
-                $this->record->instructor_note
-                    ?: 'Open AIO to review the attendance record.',
+                "{$this->studentName} has reached {$this->absenceCount} recorded absences.",
             )
+            ->line('Please open AIO to review the attendance details.')
             ->action(
                 'View attendance',
                 rtrim((string) config('aio.frontend_url'), '/').'/guardian/attendance',
