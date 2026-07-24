@@ -1,4 +1,5 @@
 import { httpClient, shouldUseMockApi } from "./httpClient";
+import { buildDeviceLoginPayload } from "./devicePolicy";
 
 const storageKey = "aiofront_user";
 const tokenKey = "aiofront_token";
@@ -66,7 +67,7 @@ export const authService = {
           email: normalizedEmail,
           password,
           remember,
-          deviceName: navigator.userAgent.slice(0, 120),
+          ...buildDeviceLoginPayload(),
           ...(mfaCode ? { mfaCode } : {})
         })
       });

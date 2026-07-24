@@ -9,5 +9,6 @@ enum OrganizationRole: string
     case Instructor = 'instructor';
     case Staff = 'staff';
     case Student = 'student';
+    case Guardian = 'guardian';
     case Member = 'member';
 }

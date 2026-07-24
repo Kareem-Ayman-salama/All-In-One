@@ -94,7 +94,7 @@ class InvitationController extends Controller
         return ApiResponse::success($request, [
             'invitation' => $this->present($result['invitation']),
             'token' => $result['token'],
-            'acceptUrl' => config('app.frontend_url', env('FRONTEND_URL'))
+            'acceptUrl' => rtrim((string) config('aio.frontend_url'), '/')
                 .'/invite/'.$result['token'],
         ], status: 201);
     }
@@ -111,7 +111,7 @@ class InvitationController extends Controller
         return ApiResponse::success($request, [
             'invitation' => $this->present($result['invitation']),
             'token' => $result['token'],
-            'acceptUrl' => config('app.frontend_url', env('FRONTEND_URL'))
+            'acceptUrl' => rtrim((string) config('aio.frontend_url'), '/')
                 .'/invite/'.$result['token'],
         ]);
     }

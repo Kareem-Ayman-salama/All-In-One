@@ -30,6 +30,21 @@ class User extends Authenticatable
         return $this->hasMany(UserSession::class);
     }
 
+    public function pushDeviceTokens(): HasMany
+    {
+        return $this->hasMany(PushDeviceToken::class);
+    }
+
+    public function guardianLinks(): HasMany
+    {
+        return $this->hasMany(GuardianStudentLink::class, 'guardian_id');
+    }
+
+    public function attendanceRecords(): HasMany
+    {
+        return $this->hasMany(AttendanceRecord::class, 'student_id');
+    }
+
     public function setEmailAttribute(string $value): void
     {
         $normalized = mb_strtolower(trim($value));

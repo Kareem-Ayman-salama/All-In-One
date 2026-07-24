@@ -27,6 +27,11 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { Navigate, useLocation, useParams } from "react-router-dom";
 import { AccountSettings } from "../components/AccountSettings";
+import {
+  AttendanceManagementPage,
+  GuardianManagementPage,
+  ReportsExportPage
+} from "../components/AttendanceOperations";
 import { Badge } from "../components/Badge";
 import { Button } from "../components/Button";
 import { FormField } from "../components/FormField";
@@ -72,6 +77,9 @@ const nav = [
   { id: "courses", label: "Courses", icon: "courses", path: "/tenant-admin/courses", module: "courses" },
   { id: "batches", label: "Batches", icon: "batches", path: "/tenant-admin/batches", module: "batches" },
   { id: "bookingRequests", label: "Booking requests", icon: "bookingRequests", path: "/tenant-admin/bookingRequests", module: "bookings" },
+  { id: "attendance", label: "Attendance", icon: "attendance", path: "/tenant-admin/attendance", module: "attendance" },
+  { id: "guardians", label: "Guardians", icon: "guardians", path: "/tenant-admin/guardians", module: "attendance" },
+  { id: "reports", label: "Reports & exports", icon: "reports", path: "/tenant-admin/reports", module: "bookings" },
   { id: "academyProfile", label: "Academy profile", icon: "settings", path: "/tenant-admin/academyProfile", module: "courses" },
   { id: "instructors", label: "Instructors", icon: "members", path: "/tenant-admin/instructors", module: "courses" },
   { id: "invitations", label: "Invitations", icon: "members", path: "/tenant-admin/invitations" },
@@ -113,6 +121,9 @@ export function TenantAdminApp({ data, user }) {
       {!moduleLocked && page === "courses" && <CourseWizardPage />}
       {!moduleLocked && page === "batches" && <MarketplaceBatchesPage />}
       {!moduleLocked && page === "bookingRequests" && <MarketplaceBookingsPage />}
+      {!moduleLocked && page === "attendance" && <AttendanceManagementPage />}
+      {!moduleLocked && page === "guardians" && <GuardianManagementPage />}
+      {!moduleLocked && page === "reports" && <ReportsExportPage />}
       {!moduleLocked && page === "academyProfile" && <AcademyProfileSettingsPage />}
       {!moduleLocked && page === "instructors" && <InstructorsManagementPage />}
       {page === "invitations" && <InvitationsManagementPage />}

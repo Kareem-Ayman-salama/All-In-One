@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class LoginRequest extends FormRequest
 {
@@ -28,6 +29,13 @@ class LoginRequest extends FormRequest
             'password' => ['required', 'string', 'max:255'],
             'remember' => ['sometimes', 'boolean'],
             'deviceName' => ['sometimes', 'string', 'max:120'],
+            'installationId' => ['sometimes', 'string', 'min:8', 'max:120'],
+            'platform' => [
+                'sometimes',
+                'string',
+                Rule::in(config('device_policy.allowed_platforms')),
+            ],
+            'appVersion' => ['sometimes', 'string', 'max:60'],
             'mfaCode' => ['sometimes', 'string', 'digits:6'],
         ];
     }

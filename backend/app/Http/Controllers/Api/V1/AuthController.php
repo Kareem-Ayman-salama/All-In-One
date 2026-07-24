@@ -53,6 +53,7 @@ class AuthController extends Controller
             'user' => $this->presenter->present($result['user']),
             'accessToken' => $result['accessToken'],
             'token' => $result['accessToken'],
+            'refreshToken' => $result['refreshToken'],
         ])->withCookie($this->refreshCookie($result['refreshToken']));
     }
 
@@ -77,7 +78,12 @@ class AuthController extends Controller
             $request->string('password')->toString(),
             $request,
             $request->boolean('remember', true),
-            $request->input('deviceName'),
+            [
+                'deviceName' => $request->input('deviceName'),
+                'installationId' => $request->input('installationId'),
+                'platform' => $request->input('platform'),
+                'appVersion' => $request->input('appVersion'),
+            ],
             $request->input('mfaCode'),
         );
 
@@ -98,6 +104,7 @@ class AuthController extends Controller
             'user' => $this->presenter->present($result['user']),
             'accessToken' => $result['accessToken'],
             'token' => $result['accessToken'],
+            'refreshToken' => $result['refreshToken'],
             'mfaRequired' => false,
         ]);
 
@@ -118,6 +125,7 @@ class AuthController extends Controller
             'user' => $this->presenter->present($result['user']),
             'accessToken' => $result['accessToken'],
             'token' => $result['accessToken'],
+            'refreshToken' => $result['refreshToken'],
         ]);
 
         return $response->withCookie($this->refreshCookie($result['refreshToken']));
@@ -125,9 +133,14 @@ class AuthController extends Controller
 
     public function logout(Request $request): JsonResponse
     {
+        $accessTokenId = $request->user()->currentAccessToken()?->getKey();
+        if (! $accessTokenId && str_contains((string) $request->bearerToken(), '|')) {
+            $accessTokenId = explode('|', (string) $request->bearerToken(), 2)[0];
+        }
         $this->auth->logout(
             $request->user(),
             $request->cookie(config('aio.refresh_cookie')),
+            $accessTokenId,
         );
 
         return ApiResponse::success($request, ['loggedOut' => true])

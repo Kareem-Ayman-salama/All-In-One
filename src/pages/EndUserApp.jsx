@@ -16,11 +16,14 @@ import { useWorkspace } from "../contexts/WorkspaceContext";
 import { AppLayout } from "../layouts/AppLayout";
 import { StudentBookingPage } from "./StudentBookingPage";
 import { StudentCourseWorkspace, StudentMarketplaceCourses } from "../components/StudentMarketplaceOperations";
+import { StudentAttendancePage } from "../components/AttendanceOperations";
 
 const nav = [
   { id: "home", label: "Dashboard", icon: "dashboard", path: "/end-user/home" },
   { id: "bookings", label: "Book a teacher", icon: "bookings", path: "/end-user/bookings", roles: ["student"] },
   { id: "courses", label: "My learning", icon: "courses", path: "/end-user/courses", module: "courses" },
+  { id: "attendance", label: "My attendance", icon: "attendance", path: "/end-user/attendance", module: "attendance", roles: ["student"] },
+  { id: "guardianAttendance", label: "Children attendance", icon: "guardians", path: "/end-user/guardianAttendance", roles: ["guardian"] },
   { id: "announcements", label: "Announcements", icon: "announcements", path: "/end-user/announcements", module: "announcements" },
   { id: "meetings", label: "Meetings", icon: "meetings", path: "/end-user/meetings", module: "meetings" },
   { id: "tasks", label: "Tasks", icon: "tasks", path: "/end-user/tasks", module: "tasks" },
@@ -37,7 +40,11 @@ export function EndUserApp({ data, user }) {
   const { isModuleEnabled, activeMembership } = useOrganization();
   const appUser = {
     ...user,
-    roleLabel: activeMembership?.role === "student" ? tx("طالب", "Student") : tx("موظف", "Employee")
+    roleLabel: activeMembership?.role === "student"
+      ? tx("طالب", "Student")
+      : activeMembership?.role === "guardian"
+        ? tx("ولي أمر", "Guardian")
+        : tx("موظف", "Employee")
   };
   const appData = {
     ...data,
@@ -61,6 +68,8 @@ export function EndUserApp({ data, user }) {
       {page === "bookings" && <StudentBookingPage user={user} />}
       {page === "courses" && <StudentMarketplaceCourses user={user} />}
       {page === "course" && <StudentCourseWorkspace user={user} />}
+      {page === "attendance" && <StudentAttendancePage />}
+      {page === "guardianAttendance" && <StudentAttendancePage guardian />}
       {page === "announcements" && <AnnouncementsPage />}
       {page === "meetings" && <MeetingsPage />}
       {page === "tasks" && <TasksPage />}

@@ -5,24 +5,29 @@ use App\Http\Controllers\Api\V1\AdminCategoryController;
 use App\Http\Controllers\Api\V1\AdminModerationController;
 use App\Http\Controllers\Api\V1\AnalyticsController;
 use App\Http\Controllers\Api\V1\AnnouncementController;
+use App\Http\Controllers\Api\V1\AttendanceController;
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BookingController;
 use App\Http\Controllers\Api\V1\ContentController;
 use App\Http\Controllers\Api\V1\CourseBatchController;
 use App\Http\Controllers\Api\V1\CourseController;
+use App\Http\Controllers\Api\V1\DevicePushTokenController;
 use App\Http\Controllers\Api\V1\EventController;
+use App\Http\Controllers\Api\V1\GuardianController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\InstructorController;
 use App\Http\Controllers\Api\V1\InvitationController;
 use App\Http\Controllers\Api\V1\LessonBookingController;
 use App\Http\Controllers\Api\V1\MembershipController;
+use App\Http\Controllers\Api\V1\MetadataController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\NotificationPreferenceController;
 use App\Http\Controllers\Api\V1\OrganizationController;
 use App\Http\Controllers\Api\V1\PrivacyController;
 use App\Http\Controllers\Api\V1\PromotionController;
 use App\Http\Controllers\Api\V1\PublicMarketplaceController;
+use App\Http\Controllers\Api\V1\ReportExportController;
 use App\Http\Controllers\Api\V1\RoomController;
 use App\Http\Controllers\Api\V1\SessionController;
 use App\Http\Controllers\Api\V1\StudentController;
@@ -34,12 +39,20 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function (): void {
     Route::get('/health/live', [HealthController::class, 'live']);
     Route::get('/health/ready', [HealthController::class, 'ready']);
+    Route::get('/health/otp', [HealthController::class, 'otp']);
+    Route::get('/meta/error-catalog', [MetadataController::class, 'errorCatalog']);
+    Route::get('/meta/deep-links', [MetadataController::class, 'deepLinks']);
+    Route::get('/meta/offline-cache-policy', [MetadataController::class, 'offlineCachePolicy']);
+    Route::get('/meta/device-policy', [MetadataController::class, 'devicePolicy']);
     Route::get('/public/courses', [PublicMarketplaceController::class, 'courses']);
     Route::get('/public/courses/{course}', [PublicMarketplaceController::class, 'course']);
     Route::get('/public/academies', [PublicMarketplaceController::class, 'academies']);
     Route::get('/public/academies/{academy}', [PublicMarketplaceController::class, 'academy']);
     Route::get('/public/categories', [PublicMarketplaceController::class, 'categories']);
     Route::get('/public/instructors', [LessonBookingController::class, 'publicInstructors']);
+    Route::get('/content-view/{content}', [ContentController::class, 'viewSigned'])
+        ->middleware(['signed', 'throttle:120,1'])
+        ->name('api.v1.content-view.show');
     Route::get('/public/invitations/{token}', [InvitationController::class, 'preview'])
         ->middleware('throttle:30,1');
     Route::post('/support', [SupportController::class, 'store'])
@@ -85,11 +98,18 @@ Route::prefix('v1')->group(function (): void {
         Route::post('/student/lesson-bookings', [LessonBookingController::class, 'reserve'])
             ->middleware('throttle:20,1');
         Route::post('/student/lesson-bookings/{booking}/cancel', [LessonBookingController::class, 'cancel']);
+        Route::get('/student/attendance', [AttendanceController::class, 'mine']);
+        Route::get('/guardian/students', [GuardianController::class, 'students']);
+        Route::get('/guardian/students/{student}/attendance', [GuardianController::class, 'attendance']);
         Route::get('/notifications', [NotificationController::class, 'index']);
         Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead']);
         Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead']);
         Route::get('/notification-preferences', [NotificationPreferenceController::class, 'show']);
         Route::put('/notification-preferences', [NotificationPreferenceController::class, 'update']);
+        Route::post('/devices/push-tokens', [DevicePushTokenController::class, 'store'])
+            ->middleware('throttle:30,1');
+        Route::delete('/devices/push-tokens', [DevicePushTokenController::class, 'destroy'])
+            ->middleware('throttle:30,1');
         Route::get('/privacy/export', [PrivacyController::class, 'export']);
         Route::post('/privacy/deletion', [PrivacyController::class, 'requestDeletion']);
         Route::delete('/privacy/deletion', [PrivacyController::class, 'cancelDeletion']);
@@ -134,6 +154,10 @@ Route::prefix('v1')->group(function (): void {
                     ->middleware(['module:content', 'permission:content.create']);
                 Route::get('/content/{content}/download', [ContentController::class, 'download'])
                     ->middleware(['module:content', 'permission:content.view']);
+                Route::get('/content/{content}/view-session', [ContentController::class, 'viewSession'])
+                    ->middleware(['module:content', 'permission:content.view']);
+                Route::post('/content/{content}/viewer-audit', [ContentController::class, 'viewerAudit'])
+                    ->middleware(['module:content', 'permission:content.view', 'throttle:120,1']);
                 Route::delete('/content/{content}', [ContentController::class, 'destroy'])
                     ->middleware(['module:content', 'permission:content.delete']);
 
@@ -174,6 +198,8 @@ Route::prefix('v1')->group(function (): void {
                         ->middleware('permission:courses.view');
                     Route::post('/instructor-slots', [LessonBookingController::class, 'createSlot'])
                         ->middleware('permission:courses.update');
+                    Route::get('/lesson-bookings', [LessonBookingController::class, 'organizationIndex'])
+                        ->middleware('permission:bookings.view');
 
                     Route::get('/courses', [CourseController::class, 'index'])
                         ->middleware('permission:courses.view');
@@ -201,7 +227,28 @@ Route::prefix('v1')->group(function (): void {
                         ->middleware('permission:bookings.manage');
                     Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])
                         ->middleware('permission:bookings.cancel');
+                    Route::get('/reports/bookings', [ReportExportController::class, 'bookings'])
+                        ->middleware('permission:reports.export');
                 });
+
+                Route::get('/learning-sessions', [AttendanceController::class, 'sessions'])
+                    ->middleware('permission:attendance.view');
+                Route::post('/learning-sessions', [AttendanceController::class, 'storeSession'])
+                    ->middleware('permission:attendance.manage');
+                Route::get('/learning-sessions/{session}/attendance', [AttendanceController::class, 'attendance'])
+                    ->middleware('permission:attendance.view');
+                Route::put('/learning-sessions/{session}/attendance', [AttendanceController::class, 'mark'])
+                    ->middleware('permission:attendance.manage');
+                Route::post('/learning-sessions/{session}/attendance/lock', [AttendanceController::class, 'lock'])
+                    ->middleware('permission:attendance.manage');
+                Route::get('/guardians', [GuardianController::class, 'index'])
+                    ->middleware('permission:guardians.view');
+                Route::post('/guardians', [GuardianController::class, 'link'])
+                    ->middleware('permission:guardians.manage');
+                Route::delete('/guardians/{link}', [GuardianController::class, 'unlink'])
+                    ->middleware('permission:guardians.manage');
+                Route::get('/reports/attendance', [ReportExportController::class, 'attendance'])
+                    ->middleware('permission:reports.export');
 
                 Route::middleware('module:promotions')->group(function (): void {
                     Route::get('/promotions', [PromotionController::class, 'index'])

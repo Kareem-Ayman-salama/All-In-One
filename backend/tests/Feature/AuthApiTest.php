@@ -33,7 +33,7 @@ class AuthApiTest extends TestCase
             'code' => $code,
         ])->assertOk()
             ->assertJsonPath('data.user.emailVerified', true)
-            ->assertJsonStructure(['data' => ['accessToken']])
+            ->assertJsonStructure(['data' => ['accessToken', 'refreshToken']])
             ->assertCookie(config('aio.refresh_cookie'));
 
         $login = $this->postJson('/api/v1/auth/login', [
@@ -45,7 +45,7 @@ class AuthApiTest extends TestCase
 
         $login->assertOk()
             ->assertJsonStructure([
-                'data' => ['user', 'accessToken', 'token'],
+                'data' => ['user', 'accessToken', 'refreshToken', 'token'],
                 'requestId',
             ])
             ->assertCookie(config('aio.refresh_cookie'));

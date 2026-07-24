@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Content\StoreContentRequest;
+use App\Http\Requests\Content\StoreContentViewerAuditRequest;
 use App\Models\ContentAccessLog;
 use App\Models\ContentItem;
 use App\Models\FileAsset;
@@ -18,6 +19,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -173,6 +175,7 @@ class ContentController extends Controller
         if (! $item || ! $item->fileAsset) {
             throw new ApiException('RESOURCE_NOT_FOUND', 'Content file not found.', 404);
         }
+        $this->assertContentIsAvailable($item);
         $access->ensureCanRead(
             $request->user(),
             $this->membership($request),
@@ -212,6 +215,133 @@ class ContentController extends Controller
             $item->fileAsset->getRawOriginal('path'),
             Str::ascii($item->fileAsset->original_name),
         );
+    }
+
+    public function viewSession(
+        Request $request,
+        string $organization,
+        string $content,
+        RoomAccessService $access,
+    ): JsonResponse {
+        $item = ContentItem::query()
+            ->with('fileAsset')
+            ->where('organization_id', $this->organization($request)->id)
+            ->where('id', $content)
+            ->first();
+
+        if (! $item || ! $item->fileAsset) {
+            throw new ApiException('RESOURCE_NOT_FOUND', 'Content file not found.', 404);
+        }
+        $this->assertContentIsAvailable($item);
+        $access->ensureCanRead(
+            $request->user(),
+            $this->membership($request),
+            $item->room_id,
+        );
+
+        $expiresAt = now()->addMinutes(5);
+        ContentAccessLog::query()->create([
+            'organization_id' => $item->organization_id,
+            'content_item_id' => $item->id,
+            'user_id' => $request->user()->id,
+            'action' => 'view_session',
+            'result' => 'allowed',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'created_at' => now(),
+        ]);
+
+        return ApiResponse::success($request, [
+            'url' => URL::temporarySignedRoute(
+                'api.v1.content-view.show',
+                $expiresAt,
+                ['content' => $item->id],
+            ),
+            'expiresAt' => $expiresAt,
+            'mimeType' => $item->fileAsset->mime_type,
+            'sizeBytes' => $item->fileAsset->size_bytes,
+            'downloadAllowed' => $item->download_allowed,
+            'status' => $item->fileAsset->status,
+            'watermark' => $item->watermark_enabled ? [
+                'enabled' => true,
+                'userId' => $request->user()->id,
+                'userName' => $request->user()->name,
+                'organizationId' => $item->organization_id,
+                'contentId' => $item->id,
+            ] : ['enabled' => false],
+        ]);
+    }
+
+    public function viewSigned(Request $request, string $content): StreamedResponse
+    {
+        $item = ContentItem::query()
+            ->with('fileAsset')
+            ->where('id', $content)
+            ->first();
+
+        if (! $item || ! $item->fileAsset) {
+            throw new ApiException('RESOURCE_NOT_FOUND', 'Content file not found.', 404);
+        }
+        $this->assertContentIsAvailable($item);
+
+        return Storage::disk($item->fileAsset->disk)->response(
+            $item->fileAsset->getRawOriginal('path'),
+            Str::ascii($item->fileAsset->original_name),
+            [
+                'Content-Disposition' => 'inline; filename="'
+                    .Str::ascii($item->fileAsset->original_name)
+                    .'"',
+                'Cache-Control' => 'private, no-store, max-age=0',
+                'X-Content-Type-Options' => 'nosniff',
+            ],
+        );
+    }
+
+    public function viewerAudit(
+        StoreContentViewerAuditRequest $request,
+        string $organization,
+        string $content,
+        RoomAccessService $access,
+    ): JsonResponse {
+        $item = ContentItem::query()
+            ->with('fileAsset')
+            ->where('organization_id', $this->organization($request)->id)
+            ->where('id', $content)
+            ->first();
+
+        if (! $item || ! $item->fileAsset) {
+            throw new ApiException('RESOURCE_NOT_FOUND', 'Content file not found.', 404);
+        }
+        $access->ensureCanRead(
+            $request->user(),
+            $this->membership($request),
+            $item->room_id,
+        );
+
+        $event = $request->string('event')->toString();
+        $log = ContentAccessLog::query()->create([
+            'organization_id' => $item->organization_id,
+            'content_item_id' => $item->id,
+            'user_id' => $request->user()->id,
+            'action' => "viewer_{$event}",
+            'result' => $request->validated('result', $this->defaultViewerResult($event)),
+            'metadata' => [
+                'viewerSessionId' => $request->validated('viewerSessionId'),
+                'page' => $request->validated('page'),
+                'positionSeconds' => $request->validated('positionSeconds'),
+                'message' => $request->validated('message'),
+                'platform' => $request->header('X-AIO-Platform'),
+                'appVersion' => $request->header('X-AIO-App-Version'),
+            ],
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'created_at' => now(),
+        ]);
+
+        return ApiResponse::success($request, [
+            'logged' => true,
+            'id' => $log->id,
+        ], status: 201);
     }
 
     public function destroy(
@@ -278,5 +408,38 @@ class ContentController extends Controller
         return $trimmed === ''
             ? 'download'
             : Str::limit($trimmed, 180, '');
+    }
+
+    private function assertContentIsAvailable(ContentItem $item): void
+    {
+        if ($item->status !== 'published' || $item->fileAsset?->status !== 'ready') {
+            throw new ApiException(
+                'CONTENT_NOT_AVAILABLE',
+                'This content is not available yet.',
+                409,
+            );
+        }
+
+        if (
+            ($item->available_from && $item->available_from->isFuture())
+            || ($item->available_until && $item->available_until->isPast())
+        ) {
+            throw new ApiException(
+                'CONTENT_ACCESS_EXPIRED',
+                'Access to this content is no longer available.',
+                403,
+            );
+        }
+    }
+
+    private function defaultViewerResult(string $event): string
+    {
+        return match ($event) {
+            'failed' => 'failed',
+            'screenshot_warning',
+            'screen_capture_started',
+            'download_blocked' => 'warning',
+            default => 'allowed',
+        };
     }
 }

@@ -1,0 +1,93 @@
+<?php
+
+return [
+    'version' => '2026-07-24',
+    'scheme' => env('MOBILE_DEEP_LINK_SCHEME', 'ain'),
+    'web_host' => parse_url((string) env('FRONTEND_URL', 'http://localhost:5173'), PHP_URL_HOST),
+    'routes' => [
+        'invite.accept' => [
+            'path' => '/invite/{token}',
+            'requiresAuth' => false,
+            'fallbackPath' => '/invite/{token}',
+            'parameters' => ['token'],
+            'mobileScreen' => 'invitations.accept',
+        ],
+        'auth.reset_password' => [
+            'path' => '/reset-password',
+            'requiresAuth' => false,
+            'fallbackPath' => '/reset-password',
+            'query' => ['email', 'code', 'token'],
+            'mobileScreen' => 'auth.resetPassword',
+        ],
+        'marketplace.course' => [
+            'path' => '/courses/{courseSlug}',
+            'requiresAuth' => false,
+            'fallbackPath' => '/courses/{courseSlug}',
+            'parameters' => ['courseSlug'],
+            'mobileScreen' => 'marketplace.courseDetails',
+        ],
+        'marketplace.academy' => [
+            'path' => '/academies/{academySlug}',
+            'requiresAuth' => false,
+            'fallbackPath' => '/academies/{academySlug}',
+            'parameters' => ['academySlug'],
+            'mobileScreen' => 'marketplace.academyProfile',
+        ],
+        'booking.public' => [
+            'path' => '/booking/{courseId}',
+            'requiresAuth' => false,
+            'fallbackPath' => '/booking/{courseId}',
+            'parameters' => ['courseId'],
+            'mobileScreen' => 'marketplace.booking',
+        ],
+        'booking.success' => [
+            'path' => '/booking/success',
+            'requiresAuth' => true,
+            'fallbackPath' => '/booking/success',
+            'query' => ['bookingId', 'courseId'],
+            'mobileScreen' => 'student.bookingStatus',
+        ],
+        'student.notifications' => [
+            'path' => '/end-user/notifications',
+            'requiresAuth' => true,
+            'fallbackPath' => '/login',
+            'query' => ['notificationId'],
+            'mobileScreen' => 'notifications.inbox',
+        ],
+        'student.content' => [
+            'path' => '/end-user/files',
+            'requiresAuth' => true,
+            'fallbackPath' => '/login',
+            'query' => ['contentId', 'roomId'],
+            'mobileScreen' => 'content.library',
+        ],
+        'student.bookings' => [
+            'path' => '/end-user/bookings',
+            'requiresAuth' => true,
+            'fallbackPath' => '/login',
+            'query' => ['bookingId'],
+            'mobileScreen' => 'student.lessonBookings',
+        ],
+        'organization.bookings' => [
+            'path' => '/tenant-admin/bookings',
+            'requiresAuth' => true,
+            'fallbackPath' => '/login',
+            'query' => ['bookingId'],
+            'mobileScreen' => 'organization.bookings',
+        ],
+        'organization.content' => [
+            'path' => '/tenant-admin/files',
+            'requiresAuth' => true,
+            'fallbackPath' => '/login',
+            'query' => ['contentId', 'roomId'],
+            'mobileScreen' => 'organization.content',
+        ],
+        'platform.course_approvals' => [
+            'path' => '/super-admin/courseApprovals',
+            'requiresAuth' => true,
+            'fallbackPath' => '/login',
+            'query' => ['courseId'],
+            'mobileScreen' => 'platform.courseApprovals',
+        ],
+    ],
+];

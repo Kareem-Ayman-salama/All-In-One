@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Jobs\SendPushNotification;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
@@ -31,5 +32,12 @@ class Notification extends Model
             'read_at' => 'datetime',
             'resolved_at' => 'datetime',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::created(function (Notification $notification): void {
+            SendPushNotification::dispatch($notification->id)->afterCommit();
+        });
     }
 }

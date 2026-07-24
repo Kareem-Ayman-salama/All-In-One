@@ -38,6 +38,31 @@ class HealthController extends Controller
         );
     }
 
+    public function otp(Request $request): JsonResponse
+    {
+        $mailer = (string) config('mail.default');
+        $from = (string) config('mail.from.address');
+        $checks = [
+            'transactionalMail' => ! in_array($mailer, ['log', 'array'], true),
+            'senderConfigured' => $from !== ''
+                && ! str_contains($from, 'example.com')
+                && ! str_ends_with($from, '.local'),
+            'deliveryMode' => in_array(
+                (string) config('queue.default'),
+                ['sync', 'redis'],
+                true,
+            ),
+        ];
+        $ready = ! in_array(false, $checks, true);
+
+        return ApiResponse::success($request, [
+            'status' => $ready ? 'ready' : 'not_ready',
+            'checks' => $checks,
+            'mailer' => $mailer,
+            'queue' => (string) config('queue.default'),
+        ], status: $ready ? 200 : 503);
+    }
+
     private function databaseCheck(): bool
     {
         try {

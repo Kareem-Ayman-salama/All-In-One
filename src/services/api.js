@@ -1,5 +1,5 @@
 import { analytics, files, members, notifications, roles, rooms, tenants } from "../data/mockData";
-import { httpClient, shouldUseMockApi } from "./httpClient";
+import { downloadFile, httpClient, shouldUseMockApi } from "./httpClient";
 
 const delay = (value) => new Promise((resolve) => {
   window.setTimeout(() => resolve(value), 120);
@@ -26,6 +26,10 @@ function organizationPath(organizationId, resource) {
 }
 
 export const api = {
+  getErrorCatalog: () => endpoint("/meta/error-catalog", { version: "local", errors: {} }),
+  getDeepLinks: () => endpoint("/meta/deep-links", { version: "local", routes: {} }),
+  getOfflineCachePolicy: () => endpoint("/meta/offline-cache-policy", { version: "local", datasets: {}, writeOperations: {} }),
+  getDevicePolicy: () => endpoint("/meta/device-policy", { version: "local" }),
   getRoles: () => shouldUseMockApi() ? delay(roles) : Promise.resolve([]),
   getRooms: (organizationId) => organizationId
     ? endpoint(`${organizationPath(organizationId, "rooms")}?perPage=100`, rooms).then((items) => items.map((room) => ({
@@ -122,11 +126,26 @@ export const api = {
     body.set("status", "published");
     return httpClient(organizationPath(organizationId, "content"), { method: "POST", body }).then(camelize);
   },
+  getContentViewSession: (organizationId, contentId) => httpClient(
+    `${organizationPath(organizationId, "content")}/${contentId}/view-session`
+  ).then(camelize),
+  recordContentViewerAudit: (organizationId, contentId, payload) => httpClient(
+    `${organizationPath(organizationId, "content")}/${contentId}/viewer-audit`,
+    { method: "POST", body: JSON.stringify(payload) }
+  ).then(camelize),
   deleteRoom: (organizationId, roomId) => httpClient(`${organizationPath(organizationId, "rooms")}/${roomId}`, { method: "DELETE" }),
   deleteContent: (organizationId, contentId) => httpClient(`${organizationPath(organizationId, "content")}/${contentId}`, { method: "DELETE" }),
   removeMember: (organizationId, membershipId) => httpClient(`${organizationPath(organizationId, "members")}/${membershipId}`, { method: "DELETE" }),
   markNotificationRead: (notificationId) => httpClient(`/notifications/${notificationId}/read`, { method: "POST", body: "{}" }),
   markAllNotificationsRead: () => httpClient("/notifications/read-all", { method: "POST", body: "{}" }),
+  registerPushDeviceToken: (payload) => httpClient("/devices/push-tokens", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  }).then(camelize),
+  revokePushDeviceToken: (payload) => httpClient("/devices/push-tokens", {
+    method: "DELETE",
+    body: JSON.stringify(payload)
+  }).then(camelize),
   getInstructorSlots: (organizationId) => endpoint(
     organizationPath(organizationId, "instructor-slots?perPage=100"),
     []
@@ -175,5 +194,60 @@ export const api = {
     method: "POST",
     body: JSON.stringify(payload)
   }).then(camelize),
-  cancelLesson: (bookingId) => httpClient(`/student/lesson-bookings/${bookingId}/cancel`, { method: "POST", body: "{}" }).then(camelize)
+  cancelLesson: (bookingId) => httpClient(`/student/lesson-bookings/${bookingId}/cancel`, { method: "POST", body: "{}" }).then(camelize),
+  getOrganizationLessonBookings: (organizationId) => endpoint(
+    `${organizationPath(organizationId, "lesson-bookings")}?perPage=100`,
+    []
+  ).then(camelize),
+  getLearningSessions: (organizationId, filters = {}) => {
+    const query = new URLSearchParams({ perPage: "100", ...filters });
+    return endpoint(`${organizationPath(organizationId, "learning-sessions")}?${query}`, []).then(camelize);
+  },
+  createLearningSession: (organizationId, payload) => httpClient(
+    organizationPath(organizationId, "learning-sessions"),
+    { method: "POST", body: JSON.stringify(payload) }
+  ).then(camelize),
+  getSessionAttendance: (organizationId, sessionId) => httpClient(
+    `${organizationPath(organizationId, "learning-sessions")}/${sessionId}/attendance`
+  ).then(camelize),
+  markSessionAttendance: (organizationId, sessionId, records) => httpClient(
+    `${organizationPath(organizationId, "learning-sessions")}/${sessionId}/attendance`,
+    { method: "PUT", body: JSON.stringify({ records }) }
+  ).then(camelize),
+  lockSessionAttendance: (organizationId, sessionId) => httpClient(
+    `${organizationPath(organizationId, "learning-sessions")}/${sessionId}/attendance/lock`,
+    { method: "POST", body: "{}" }
+  ).then(camelize),
+  getMyAttendance: () => endpoint("/student/attendance?perPage=100", { records: [], summary: {} }).then(camelize),
+  getGuardians: (organizationId) => endpoint(
+    `${organizationPath(organizationId, "guardians")}?perPage=100`,
+    []
+  ).then(camelize),
+  linkGuardian: (organizationId, payload) => httpClient(
+    organizationPath(organizationId, "guardians"),
+    { method: "POST", body: JSON.stringify(payload) }
+  ).then(camelize),
+  unlinkGuardian: (organizationId, linkId) => httpClient(
+    `${organizationPath(organizationId, "guardians")}/${linkId}`,
+    { method: "DELETE" }
+  ).then(camelize),
+  getGuardianStudents: () => endpoint("/guardian/students", []).then(camelize),
+  getGuardianAttendance: (studentId) => endpoint(
+    `/guardian/students/${studentId}/attendance?perPage=100`,
+    { student: null, records: [], summary: {} }
+  ).then(camelize),
+  exportBookings: (organizationId, filters = {}) => {
+    const query = new URLSearchParams({ format: "xlsx", kind: "all", ...filters });
+    return downloadFile(
+      `${organizationPath(organizationId, "reports/bookings")}?${query}`,
+      "aio-bookings.xls"
+    );
+  },
+  exportAttendance: (organizationId, filters = {}) => {
+    const query = new URLSearchParams({ format: "xlsx", ...filters });
+    return downloadFile(
+      `${organizationPath(organizationId, "reports/attendance")}?${query}`,
+      "aio-attendance.xls"
+    );
+  }
 };

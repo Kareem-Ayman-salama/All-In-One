@@ -60,7 +60,10 @@ const icons = {
   settings: Settings,
   locked: Shield,
   invites: UserPlus,
-  activity: History
+  activity: History,
+  attendance: CalendarCheck2,
+  guardians: Users,
+  reports: BarChart3
 };
 
 export function AppLayout({ appTitle, user, nav, children }) {

@@ -1,3 +1,5 @@
+import { getApiErrorMessage } from "./apiErrors";
+
 const codeToKey = {
   INVALID_CREDENTIALS: "invalidCredentials",
   ACCOUNT_EXISTS: "accountExists",
@@ -10,5 +12,7 @@ const codeToKey = {
 
 export function getAuthErrorMessage(error, translations) {
   const key = codeToKey[error?.code];
-  return (key && translations.auth[key]) || error?.message || translations.auth.loginError;
+  return (key && translations.auth[key])
+    || getApiErrorMessage(error, document.documentElement.lang)
+    || translations.auth.loginError;
 }

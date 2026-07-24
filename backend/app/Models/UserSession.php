@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Sanctum\PersonalAccessToken;
 
 class UserSession extends Model
@@ -15,6 +16,9 @@ class UserSession extends Model
         'user_id',
         'access_token_id',
         'name',
+        'installation_id',
+        'platform',
+        'app_version',
         'refresh_token_hash',
         'ip_address',
         'user_agent',
@@ -42,5 +46,10 @@ class UserSession extends Model
     public function accessToken(): BelongsTo
     {
         return $this->belongsTo(PersonalAccessToken::class, 'access_token_id');
+    }
+
+    public function pushDeviceTokens(): HasMany
+    {
+        return $this->hasMany(PushDeviceToken::class);
     }
 }

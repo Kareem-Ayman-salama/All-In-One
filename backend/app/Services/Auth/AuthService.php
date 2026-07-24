@@ -3,6 +3,7 @@
 namespace App\Services\Auth;
 
 use App\Exceptions\ApiException;
+use App\Models\PushDeviceToken;
 use App\Models\User;
 use App\Models\UserSession;
 use App\Notifications\VerificationCodeNotification;
@@ -64,7 +65,7 @@ class AuthService
             $user,
             $request,
             true,
-            'Verified browser',
+            ['deviceName' => 'Verified browser'],
         );
     }
 
@@ -95,7 +96,7 @@ class AuthService
         string $password,
         Request $request,
         bool $remember,
-        ?string $deviceName,
+        ?array $device = null,
         ?string $mfaCode = null,
     ): array {
         $user = User::query()
@@ -135,7 +136,7 @@ class AuthService
         $user->forceFill(['last_login_at' => now()])->save();
 
         return [
-            ...$this->createSession($user, $request, $remember, $deviceName),
+            ...$this->createSession($user, $request, $remember, $device),
             'mfaRequired' => false,
         ];
     }
@@ -161,6 +162,10 @@ class AuthService
                     ->where('user_id', $session->user_id)
                     ->whereNull('revoked_at')
                     ->update(['revoked_at' => now()]);
+                PushDeviceToken::query()
+                    ->where('user_id', $session->user_id)
+                    ->whereNull('revoked_at')
+                    ->update(['revoked_at' => now()]);
                 $session->user?->tokens()->delete();
 
                 return ['error' => 'SESSION_REUSE_DETECTED'];
@@ -182,6 +187,10 @@ class AuthService
                         ->where('user_id', $user->id)
                         ->whereNull('revoked_at')
                         ->update(['revoked_at' => now()]);
+                    PushDeviceToken::query()
+                        ->where('user_id', $user->id)
+                        ->whereNull('revoked_at')
+                        ->update(['revoked_at' => now()]);
                 }
 
                 return ['error' => 'ACCOUNT_DISABLED'];
@@ -194,7 +203,12 @@ class AuthService
                 $user,
                 $request,
                 true,
-                $session->name,
+                [
+                    'deviceName' => $session->name,
+                    'installationId' => $session->installation_id,
+                    'platform' => $session->platform,
+                    'appVersion' => $session->app_version,
+                ],
             );
         });
 
@@ -221,17 +235,37 @@ class AuthService
         return $result;
     }
 
-    public function logout(User $user, ?string $rawRefreshToken): void
-    {
-        $user->currentAccessToken()?->delete();
+    public function logout(
+        User $user,
+        ?string $rawRefreshToken,
+        int|string|null $authenticatedAccessTokenId = null,
+    ): void {
+        $accessTokenId = $authenticatedAccessTokenId
+            ?? $user->currentAccessToken()?->getKey();
 
         if ($rawRefreshToken) {
-            UserSession::query()
+            $session = UserSession::query()
                 ->where('user_id', $user->id)
                 ->where('refresh_token_hash', hash('sha256', $rawRefreshToken))
                 ->whereNull('revoked_at')
+                ->first();
+        } elseif ($accessTokenId) {
+            $session = UserSession::query()
+                ->where('user_id', $user->id)
+                ->where('access_token_id', $accessTokenId)
+                ->whereNull('revoked_at')
+                ->first();
+        }
+
+        if (isset($session) && $session) {
+            $session->forceFill(['revoked_at' => now()])->save();
+            PushDeviceToken::query()
+                ->where('user_session_id', $session->id)
+                ->whereNull('revoked_at')
                 ->update(['revoked_at' => now()]);
         }
+
+        $user->currentAccessToken()?->delete();
     }
 
     public function requestPasswordReset(string $email): ?string
@@ -259,6 +293,10 @@ class AuthService
                 ->where('user_id', $user->id)
                 ->whereNull('revoked_at')
                 ->update(['revoked_at' => now()]);
+            PushDeviceToken::query()
+                ->where('user_id', $user->id)
+                ->whereNull('revoked_at')
+                ->update(['revoked_at' => now()]);
         });
     }
 
@@ -267,6 +305,10 @@ class AuthService
         DB::transaction(function () use ($user, $password): void {
             $user->forceFill(['password' => $password])->save();
             UserSession::query()
+                ->where('user_id', $user->id)
+                ->whereNull('revoked_at')
+                ->update(['revoked_at' => now()]);
+            PushDeviceToken::query()
                 ->where('user_id', $user->id)
                 ->whereNull('revoked_at')
                 ->update(['revoked_at' => now()]);
@@ -281,8 +323,11 @@ class AuthService
         User $user,
         Request $request,
         bool $remember,
-        ?string $deviceName,
+        ?array $device = null,
     ): array {
+        $installationId = $device['installationId'] ?? null;
+        $this->enforceDeviceLimit($user, $installationId);
+
         $accessExpiresAt = now()->addMinutes(config('aio.access_token_minutes'));
         $accessToken = $user->createToken('web', ['*'], $accessExpiresAt);
         $rawRefreshToken = bin2hex(random_bytes(48));
@@ -291,7 +336,11 @@ class AuthService
         UserSession::query()->create([
             'user_id' => $user->id,
             'access_token_id' => $accessToken->accessToken->getKey(),
-            'name' => $deviceName ?: Str::limit((string) $request->userAgent(), 120),
+            'name' => ($device['deviceName'] ?? null)
+                ?: Str::limit((string) $request->userAgent(), 120),
+            'installation_id' => $installationId,
+            'platform' => $device['platform'] ?? null,
+            'app_version' => $device['appVersion'] ?? null,
             'refresh_token_hash' => hash('sha256', $rawRefreshToken),
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
@@ -304,6 +353,33 @@ class AuthService
             'accessToken' => $accessToken->plainTextToken,
             'refreshToken' => $rawRefreshToken,
         ];
+    }
+
+    private function enforceDeviceLimit(User $user, ?string $installationId): void
+    {
+        if (
+            $installationId
+            && (bool) config('device_policy.allow_same_installation_replacement')
+        ) {
+            UserSession::query()
+                ->where('user_id', $user->id)
+                ->where('installation_id', $installationId)
+                ->whereNull('revoked_at')
+                ->update(['revoked_at' => now()]);
+        }
+
+        $activeSessions = UserSession::query()
+            ->where('user_id', $user->id)
+            ->whereNull('revoked_at')
+            ->count();
+
+        if ($activeSessions >= (int) config('device_policy.max_active_sessions_per_user')) {
+            throw new ApiException(
+                'DEVICE_LIMIT_REACHED',
+                'Too many active devices. Revoke a device session and try again.',
+                403,
+            );
+        }
     }
 
     private function ensureAccountIsActive(User $user): void

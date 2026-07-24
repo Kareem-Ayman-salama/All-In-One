@@ -121,17 +121,29 @@ Required states:
 
 Frontend needs:
 
-- Signed stream URL.
+- Short-lived signed stream URL.
 - File metadata.
-- Watermark payload: user name, email, phone/id, timestamp.
+- Watermark payload: user name, user id, organization id, and content id.
 - Blocked actions policy: download, print, copy, screen recording hints.
 - Audit event endpoint for every open/view attempt.
 
-Suggested endpoints:
+Implemented endpoints:
 
-- `POST /files/:id/view-session`
-- `POST /files/:id/audit`
-- `GET /rooms/:id/files`
+- `GET /organizations/:organizationId/content`
+- `GET /organizations/:organizationId/content/:contentId/view-session`
+- `GET /organizations/:organizationId/content/:contentId/download`
+- `POST /organizations/:organizationId/content/:contentId/viewer-audit`
+
+The view-session response includes `url`, `expiresAt`, `mimeType`,
+`sizeBytes`, `downloadAllowed`, `status`, and `watermark`. The signed URL is
+short-lived and should be treated as sensitive by mobile logs and analytics.
+The viewer-audit endpoint accepts `opened`, `closed`, `failed`,
+`screenshot_warning`, `screen_capture_started`, `screen_capture_stopped`,
+`download_blocked`, and `watermark_rendered` events.
+
+The Flutter-facing OpenAPI seed lives at `docs/mobile-openapi.json` and should
+be used for typed client generation until a complete backend-generated contract
+is available from Scramble.
 
 ## Notification / Action Inbox API
 

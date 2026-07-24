@@ -12,6 +12,13 @@ Recent integrations:
 - Organization tasks are connected to workspace task endpoints.
 - Billing uses the real plan, interval, limits, and period end from
   `/workspaces`; the UI does not render placeholder invoices.
+- Mobile push registration is available through device-token endpoints for
+  Firebase Cloud Messaging integration.
+- Backend notifications queue preference-aware push delivery jobs; production
+  Firebase delivery can be enabled by binding a real push provider.
+- Protected content supports short-lived mobile view sessions instead of
+  exposing private object storage URLs.
+- Mobile clients can load stable error and deep-link manifests from `/meta`.
 
 | Frontend area | Backend domain | Primary endpoints |
 |---|---|---|
@@ -21,7 +28,7 @@ Recent integrations:
 | Organization onboarding | Organizations / Plans | `/organizations`, `/organizations/:id/subscription` |
 | Members and invitations | Memberships / Invitations | `/organizations/:id/members`, `/organizations/:id/invitations` |
 | Rooms | Rooms | `/organizations/:id/rooms` |
-| Files | Content / Files | `/organizations/:id/rooms/:roomId/content`, `/files/:id/view-session` |
+| Files | Content / Files | `/organizations/:id/content`, `/organizations/:id/content/:contentId/view-session`, `/organizations/:id/content/:contentId/viewer-audit`, `/organizations/:id/content/:contentId/download` |
 | Announcements | Announcements | `/organizations/:id/announcements` |
 | Calendar and meetings | Events | `/organizations/:id/events` |
 | Public course marketplace | Courses | `/public/courses`, `/public/courses/:slug` |
@@ -34,6 +41,8 @@ Recent integrations:
 | Promotions | Promotions | `/organizations/:id/promotions`, `/admin/promotions` |
 | Platform moderation | Platform admin | `/admin/academies`, `/admin/courses`, `/admin/categories` |
 | Notifications | Notifications | `/notifications`, `/notifications/:id/read`, `/notifications/read-all` |
+| Mobile push tokens | Devices / Notifications | `/devices/push-tokens` |
+| Mobile metadata | API metadata | `/meta/error-catalog`, `/meta/deep-links`, `/meta/offline-cache-policy`, `/meta/device-policy` |
 | Audit screen | Audit logs | `/organizations/:id/audit-logs`, `/admin/audit-logs` |
 | Dashboard cards | Analytics | `/organizations/:id/analytics/overview`, `/admin/analytics/overview` |
 

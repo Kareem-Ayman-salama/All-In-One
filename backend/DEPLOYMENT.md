@@ -21,7 +21,7 @@ Health check: `/api/v1/health/ready`
 Override the start command:
 
 ```text
-php artisan queue:work redis --queue=outbox,default --sleep=2 --tries=5 --timeout=120 --max-time=3600
+php artisan queue:work redis --queue=notifications,outbox,default --sleep=2 --tries=5 --timeout=120 --max-time=3600
 ```
 
 ### Scheduler
@@ -45,6 +45,7 @@ FRONTEND_URL=https://YOUR-FRONTEND.up.railway.app
 CORS_ALLOWED_ORIGINS=https://YOUR-FRONTEND.up.railway.app
 COOKIE_SECURE=true
 COOKIE_SAME_SITE=lax
+MAX_ACTIVE_SESSIONS_PER_USER=8
 LOG_CHANNEL=stderr
 LOG_LEVEL=info
 DB_CONNECTION=pgsql
@@ -59,6 +60,8 @@ REDIS_HOST=${{Redis.REDISHOST}}
 REDIS_PORT=${{Redis.REDISPORT}}
 REDIS_PASSWORD=${{Redis.REDISPASSWORD}}
 QUEUE_CONNECTION=redis
+PUSH_PROVIDER=disabled
+PUSH_QUEUE=notifications
 CACHE_STORE=redis
 SESSION_DRIVER=redis
 FILESYSTEM_DISK=s3
@@ -70,11 +73,39 @@ For a temporary staging deployment, set:
 AIO_DEPLOYMENT_MODE=staging
 SESSION_DRIVER=database
 CACHE_STORE=database
-QUEUE_CONNECTION=database
+QUEUE_CONNECTION=sync
 FILESYSTEM_DISK=local
-MAIL_MAILER=log
 REDIS_REQUIRED=false
 ```
+
+### Free OTP email for the MVP
+
+Create a free Brevo account, verify the sender address or domain, then copy the
+SMTP credentials into Railway Variables:
+
+```text
+MAIL_MAILER=smtp
+MAIL_SCHEME=tls
+MAIL_HOST=smtp-relay.brevo.com
+MAIL_PORT=587
+MAIL_USERNAME=YOUR_BREVO_SMTP_LOGIN
+MAIL_PASSWORD=YOUR_BREVO_SMTP_KEY
+MAIL_FROM_ADDRESS=YOUR_VERIFIED_SENDER
+MAIL_FROM_NAME=AIO - All In One
+QUEUE_CONNECTION=sync
+```
+
+`QUEUE_CONNECTION=sync` avoids paying for a separate worker during the MVP.
+Move to Redis plus a dedicated worker before high-volume production use.
+
+After deployment, verify both endpoints:
+
+```text
+GET /api/v1/health/ready
+GET /api/v1/health/otp
+```
+
+The OTP endpoint must return `status: ready` before inviting real users.
 
 Staging mode prints the complete production-readiness report but does not stop
 the API when optional production providers are still missing. Never use

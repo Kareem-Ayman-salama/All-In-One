@@ -51,6 +51,10 @@ class AuthorizationSeeder extends Seeder
                 'batches.manage',
                 'bookings.view',
                 'enrollments.view',
+                'attendance.view',
+                'attendance.manage',
+                'guardians.view',
+                'reports.export',
             ]),
             OrganizationRole::Staff->value => $this->permissions([
                 'organization.view',
@@ -69,6 +73,11 @@ class AuthorizationSeeder extends Seeder
                 'bookings.manage',
                 'subscriptions.view',
                 'analytics.view',
+                'attendance.view',
+                'attendance.manage',
+                'guardians.view',
+                'guardians.manage',
+                'reports.export',
             ]),
             OrganizationRole::Student->value => $this->permissions([
                 'organization.view',
@@ -80,6 +89,14 @@ class AuthorizationSeeder extends Seeder
                 'batches.view',
                 'enrollments.view',
                 'subscriptions.view',
+                'attendance.view',
+            ]),
+            OrganizationRole::Guardian->value => $this->permissions([
+                'organization.view',
+                'courses.view',
+                'events.view',
+                'attendance.view',
+                'guardians.view',
             ]),
             OrganizationRole::Member->value => $this->permissions([
                 'organization.view',

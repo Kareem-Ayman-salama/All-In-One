@@ -30,4 +30,9 @@ class LessonBooking extends Model
     {
         return $this->belongsTo(InstructorAvailabilitySlot::class, 'slot_id');
     }
+
+    public function student(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'student_id');
+    }
 }

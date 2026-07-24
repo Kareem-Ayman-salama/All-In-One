@@ -38,10 +38,26 @@ Error:
     "code": "VALIDATION_ERROR",
     "message": "The request is invalid.",
     "details": {},
+    "catalog": {
+      "category": "request",
+      "retryable": false,
+      "messageEn": "Check the highlighted fields and try again.",
+      "messageAr": "راجع الحقول المطلوبة وحاول مرة أخرى."
+    },
     "requestId": "uuid"
   }
 }
 ```
+
+Mobile clients can also load `GET /api/v1/meta/error-catalog` to cache the full
+localized error catalog.
+
+Mobile metadata endpoints:
+
+- `GET /api/v1/meta/error-catalog`
+- `GET /api/v1/meta/deep-links`
+- `GET /api/v1/meta/offline-cache-policy`
+- `GET /api/v1/meta/device-policy`
 
 ## Required Error Codes
 
@@ -62,6 +78,9 @@ Error:
 - `DUPLICATE_BOOKING`
 - `SUBSCRIPTION_EXPIRED`
 - `FILE_NOT_AVAILABLE`
+- `CONTENT_NOT_AVAILABLE`
+- `CONTENT_ACCESS_EXPIRED`
+- `DOWNLOAD_DISABLED`
 - `RATE_LIMITED`
 - `INTERNAL_SERVER_ERROR`
 
@@ -75,4 +94,3 @@ Error:
   subscription.
 - Production startup fails when required secrets are absent.
 - Mock data is never a production fallback.
-

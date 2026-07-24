@@ -33,11 +33,19 @@ class ApiResponse
         int $status,
         array $details = [],
     ): JsonResponse {
+        $catalogEntry = config("api_errors.{$code}");
+
         return response()->json([
             'error' => [
                 'code' => $code,
                 'message' => $message,
                 'details' => (object) $details,
+                'catalog' => $catalogEntry ? [
+                    'category' => $catalogEntry['category'],
+                    'retryable' => $catalogEntry['retryable'],
+                    'messageEn' => $catalogEntry['messageEn'],
+                    'messageAr' => $catalogEntry['messageAr'],
+                ] : null,
                 'requestId' => self::requestId($request),
             ],
         ], $status);

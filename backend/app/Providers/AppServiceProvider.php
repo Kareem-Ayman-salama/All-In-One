@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Contracts\Notifications\PushNotificationProvider;
 use App\Contracts\Payments\PaymentProvider;
+use App\Services\Notifications\DisabledPushNotificationProvider;
 use App\Services\Payments\DisabledPaymentProvider;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -19,6 +21,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             PaymentProvider::class,
             DisabledPaymentProvider::class,
+        );
+        $this->app->bind(
+            PushNotificationProvider::class,
+            DisabledPushNotificationProvider::class,
         );
     }
 

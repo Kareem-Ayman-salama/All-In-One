@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
+use App\Models\PushDeviceToken;
 use App\Models\UserSession;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -22,6 +23,9 @@ class SessionController extends Controller
             ->map(fn (UserSession $session): array => [
                 'id' => $session->id,
                 'name' => $session->name,
+                'installationId' => $session->installation_id,
+                'platform' => $session->platform,
+                'appVersion' => $session->app_version,
                 'ipAddress' => $session->ip_address,
                 'userAgent' => $session->user_agent,
                 'lastUsedAt' => $session->last_used_at,
@@ -46,6 +50,10 @@ class SessionController extends Controller
             }
 
             $userSession->forceFill(['revoked_at' => now()])->save();
+            PushDeviceToken::query()
+                ->where('user_session_id', $userSession->id)
+                ->whereNull('revoked_at')
+                ->update(['revoked_at' => now()]);
             $userSession->accessToken?->delete();
 
             return 1;
@@ -63,7 +71,7 @@ class SessionController extends Controller
         $currentTokenId = $request->user()->currentAccessToken()?->id;
 
         DB::transaction(function () use ($request, $currentTokenId): void {
-            UserSession::query()
+            $sessionIds = UserSession::query()
                 ->where('user_id', $request->user()->id)
                 ->whereNull('revoked_at')
                 ->when(
@@ -78,6 +86,15 @@ class SessionController extends Controller
                             ->orWhereNull('access_token_id'),
                     ),
                 )
+                ->pluck('id');
+
+            UserSession::query()
+                ->whereIn('id', $sessionIds)
+                ->update(['revoked_at' => now()]);
+
+            PushDeviceToken::query()
+                ->whereIn('user_session_id', $sessionIds)
+                ->whereNull('revoked_at')
                 ->update(['revoked_at' => now()]);
 
             $request->user()->tokens()

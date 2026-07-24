@@ -51,6 +51,11 @@ class CourseEnrollment extends Model
         return $this->belongsTo(CourseBatch::class, 'batch_id');
     }
 
+    public function student(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'student_id');
+    }
+
     public function roomMembership(): BelongsTo
     {
         return $this->belongsTo(RoomMembership::class);

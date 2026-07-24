@@ -44,8 +44,9 @@ class VerificationCodeNotification extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject($title)
             ->greeting('Hello '.$notifiable->name.',')
-            ->line('Your six-digit AIO verification code is:')
+            ->line('Your AIO verification code is / رمز التحقق الخاص بك في AIO:')
             ->line($this->code)
-            ->line('This code expires in 15 minutes. Do not share it with anyone.');
+            ->line('This code expires in 15 minutes. Do not share it with anyone.')
+            ->line('ينتهي هذا الرمز خلال 15 دقيقة. لا تشاركه مع أي شخص.');
     }
 }

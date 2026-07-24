@@ -41,6 +41,7 @@ class PlanSeeder extends Seeder
                     'courses' => 20,
                     'batches' => null,
                     'bookings' => 1000,
+                    'attendance' => null,
                     'analytics' => null,
                     'promotions' => null,
                 ],

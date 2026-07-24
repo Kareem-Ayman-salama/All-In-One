@@ -12,6 +12,7 @@ export const ORGANIZATION_ROLES = {
   instructor: "Instructor",
   staff: "Staff",
   student: "Student",
+  guardian: "Guardian",
   member: "Member"
 };
 
@@ -42,7 +43,12 @@ export const PERMISSIONS = {
   batchesManage: "batches.manage",
   bookingsView: "bookings.view",
   bookingsManage: "bookings.manage",
-  analyticsView: "analytics.view"
+  analyticsView: "analytics.view",
+  attendanceView: "attendance.view",
+  attendanceManage: "attendance.manage",
+  guardiansView: "guardians.view",
+  guardiansManage: "guardians.manage",
+  reportsExport: "reports.export"
 };
 
 const allPermissions = Object.values(PERMISSIONS);
@@ -55,13 +61,18 @@ export const ROLE_PERMISSIONS = {
     PERMISSIONS.contentView, PERMISSIONS.contentCreate, PERMISSIONS.contentUpdate,
     PERMISSIONS.announcementsCreate, PERMISSIONS.eventsManage, PERMISSIONS.coursesView,
     PERMISSIONS.coursesCreate, PERMISSIONS.coursesUpdate, PERMISSIONS.batchesManage,
-    PERMISSIONS.bookingsView, PERMISSIONS.analyticsView
+    PERMISSIONS.bookingsView, PERMISSIONS.analyticsView,
+    PERMISSIONS.attendanceView, PERMISSIONS.attendanceManage,
+    PERMISSIONS.guardiansView, PERMISSIONS.reportsExport
   ],
   staff: [
     PERMISSIONS.organizationView, PERMISSIONS.membersView, PERMISSIONS.roomsView,
-    PERMISSIONS.contentView, PERMISSIONS.contentCreate, PERMISSIONS.eventsManage
+    PERMISSIONS.contentView, PERMISSIONS.contentCreate, PERMISSIONS.eventsManage,
+    PERMISSIONS.attendanceView, PERMISSIONS.attendanceManage,
+    PERMISSIONS.guardiansView, PERMISSIONS.guardiansManage, PERMISSIONS.reportsExport
   ],
-  student: [PERMISSIONS.organizationView, PERMISSIONS.roomsView, PERMISSIONS.contentView, PERMISSIONS.coursesView],
+  student: [PERMISSIONS.organizationView, PERMISSIONS.roomsView, PERMISSIONS.contentView, PERMISSIONS.coursesView, PERMISSIONS.attendanceView],
+  guardian: [PERMISSIONS.organizationView, PERMISSIONS.coursesView, PERMISSIONS.attendanceView, PERMISSIONS.guardiansView],
   member: [PERMISSIONS.organizationView, PERMISSIONS.roomsView, PERMISSIONS.contentView]
 };
 

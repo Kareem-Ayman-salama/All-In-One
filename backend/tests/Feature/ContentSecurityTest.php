@@ -47,6 +47,124 @@ class ContentSecurityTest extends TestCase
         Storage::disk('local')->assertExists($assetPath);
     }
 
+    public function test_mobile_view_session_returns_short_lived_signed_url(): void
+    {
+        Storage::fake('local');
+        [$organization, $owner, $room] = $this->workspace();
+        Sanctum::actingAs($owner);
+
+        $upload = $this->post(
+            "/api/v1/organizations/{$organization->id}/content",
+            [
+                'roomId' => $room->id,
+                'title' => 'Mobile PDF',
+                'type' => 'pdf',
+                'file' => UploadedFile::fake()->createWithContent(
+                    'mobile.pdf',
+                    "%PDF-1.4\n1 0 obj\n<<>>\nendobj\n%%EOF",
+                ),
+            ],
+            ['Accept' => 'application/json'],
+        );
+        $contentId = $upload->json('data.id');
+
+        $session = $this->getJson(
+            "/api/v1/organizations/{$organization->id}/content/{$contentId}/view-session",
+        );
+
+        $session->assertOk()
+            ->assertJsonPath('data.mimeType', 'application/pdf')
+            ->assertJsonPath('data.downloadAllowed', false)
+            ->assertJsonPath('data.watermark.enabled', true)
+            ->assertJsonStructure([
+                'data' => ['url', 'expiresAt', 'sizeBytes', 'status'],
+            ]);
+
+        $this->get($session->json('data.url'))
+            ->assertOk()
+            ->assertHeader('X-Content-Type-Options', 'nosniff');
+
+        $this->assertDatabaseHas('content_access_logs', [
+            'organization_id' => $organization->id,
+            'content_item_id' => $contentId,
+            'user_id' => $owner->id,
+            'action' => 'view_session',
+            'result' => 'allowed',
+        ]);
+    }
+
+    public function test_mobile_view_session_rejects_unavailable_content(): void
+    {
+        Storage::fake('local');
+        [$organization, $owner, $room] = $this->workspace();
+        Sanctum::actingAs($owner);
+
+        $upload = $this->post(
+            "/api/v1/organizations/{$organization->id}/content",
+            [
+                'roomId' => $room->id,
+                'title' => 'Future PDF',
+                'type' => 'pdf',
+                'availableFrom' => now()->addDay()->toIso8601String(),
+                'availableUntil' => now()->addDays(2)->toIso8601String(),
+                'file' => UploadedFile::fake()->createWithContent(
+                    'future.pdf',
+                    "%PDF-1.4\n1 0 obj\n<<>>\nendobj\n%%EOF",
+                ),
+            ],
+            ['Accept' => 'application/json'],
+        );
+        $contentId = $upload->json('data.id');
+
+        $this->getJson(
+            "/api/v1/organizations/{$organization->id}/content/{$contentId}/view-session",
+        )
+            ->assertForbidden()
+            ->assertJsonPath('error.code', 'CONTENT_ACCESS_EXPIRED');
+    }
+
+    public function test_mobile_viewer_audit_event_is_logged(): void
+    {
+        Storage::fake('local');
+        [$organization, $owner, $room] = $this->workspace();
+        Sanctum::actingAs($owner);
+
+        $upload = $this->post(
+            "/api/v1/organizations/{$organization->id}/content",
+            [
+                'roomId' => $room->id,
+                'title' => 'Audited PDF',
+                'type' => 'pdf',
+                'file' => UploadedFile::fake()->createWithContent(
+                    'audited.pdf',
+                    "%PDF-1.4\n1 0 obj\n<<>>\nendobj\n%%EOF",
+                ),
+            ],
+            ['Accept' => 'application/json'],
+        );
+        $contentId = $upload->json('data.id');
+
+        $this->postJson(
+            "/api/v1/organizations/{$organization->id}/content/{$contentId}/viewer-audit",
+            [
+                'event' => 'download_blocked',
+                'viewerSessionId' => 'viewer-session-1',
+                'page' => 3,
+                'message' => 'Download button disabled by policy.',
+            ],
+        )
+            ->assertCreated()
+            ->assertJsonPath('data.logged', true);
+
+        $this->assertDatabaseHas('content_access_logs', [
+            'organization_id' => $organization->id,
+            'content_item_id' => $contentId,
+            'user_id' => $owner->id,
+            'action' => 'viewer_download_blocked',
+            'result' => 'warning',
+        ]);
+    }
+
     public function test_html_disguised_as_pdf_is_rejected(): void
     {
         [$organization, $owner, $room] = $this->workspace();

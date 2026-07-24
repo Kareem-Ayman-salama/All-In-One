@@ -102,6 +102,24 @@ class LessonBookingController extends Controller
         return ApiResponse::success($request, $items->items(), ['total' => $items->total()]);
     }
 
+    public function organizationIndex(Request $request): JsonResponse
+    {
+        $items = LessonBooking::query()
+            ->with([
+                'student:id,name,email',
+                'instructor:id,name,name_ar',
+                'slot',
+            ])
+            ->where('organization_id', $this->organization($request)->id)
+            ->whereIn('status', ['confirmed', 'completed'])
+            ->latest()
+            ->paginate(min($request->integer('perPage', 100), 100));
+
+        return ApiResponse::success($request, $items->items(), [
+            'total' => $items->total(),
+        ]);
+    }
+
     public function cancel(Request $request, string $booking): JsonResponse
     {
         $model = LessonBooking::query()

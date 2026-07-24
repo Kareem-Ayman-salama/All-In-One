@@ -54,4 +54,9 @@ enum PermissionName: string
     case PromotionsManage = 'promotions.manage';
     case AnalyticsView = 'analytics.view';
     case AuditView = 'audit.view';
+    case AttendanceView = 'attendance.view';
+    case AttendanceManage = 'attendance.manage';
+    case GuardiansView = 'guardians.view';
+    case GuardiansManage = 'guardians.manage';
+    case ReportsExport = 'reports.export';
 }
