@@ -1,7 +1,7 @@
 providers = ["php"]
 
 [phases.setup]
-nixPkgs = ["php83", "php83Extensions.pdo_pgsql", "php83Extensions.redis", "php83Packages.composer"]
+nixPkgs = ["php83", "php83Extensions.pdo_pgsql", "php83Extensions.redis", "php83Packages.composer", "nodejs_22"]
 
 [phases.build]
 cmds = [
