@@ -155,13 +155,20 @@ return new class extends Migration
 
         Schema::create('categories', function (Blueprint $table): void {
             $table->uuid('id')->primary();
-            $table->foreignUuid('parent_id')->nullable()->constrained('categories')->nullOnDelete();
+            $table->uuid('parent_id')->nullable();
             $table->string('name');
             $table->string('name_ar');
             $table->string('slug')->unique();
             $table->boolean('active')->default(true)->index();
             $table->unsignedInteger('sort_order')->default(0);
             $table->timestamps();
+        });
+
+        Schema::table('categories', function (Blueprint $table): void {
+            $table->foreign('parent_id')
+                ->references('id')
+                ->on('categories')
+                ->nullOnDelete();
         });
 
         Schema::create('courses', function (Blueprint $table): void {
