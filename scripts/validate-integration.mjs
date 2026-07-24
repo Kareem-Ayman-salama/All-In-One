@@ -638,7 +638,7 @@ assert.ok(
     && mobileCiWorkflow.includes("dart format --set-exit-if-changed lib test")
     && mobileCiWorkflow.includes("flutter analyze")
     && mobileCiWorkflow.includes("flutter test")
-    && mobileCiWorkflow.includes("flutter build apk")
+    && !mobileCiWorkflow.includes("flutter build apk")
     && !mobileCiWorkflow.includes("flutter build appbundle --flavor production")
     && !mobileCiWorkflow.includes("flutter build ipa --flavor production"),
   "Mobile CI workflow must validate mobile changes without performing production release builds"
