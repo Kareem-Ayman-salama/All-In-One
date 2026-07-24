@@ -1,0 +1,94 @@
+name: AIO CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install frontend dependencies
+        run: npm install
+
+      - name: Validate frontend and integration contracts
+        run: npm test
+
+      - name: Build frontend
+        env:
+          VITE_API_BASE_URL: https://api.example.com/api/v1
+          VITE_USE_MOCK_API: "false"
+          VITE_SHOW_DEMO_ACCOUNTS: "false"
+        run: npm run build
+
+  backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: aio_test
+          POSTGRES_USER: aio
+          POSTGRES_PASSWORD: aio_test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U aio -d aio_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, pdo_pgsql, redis
+          coverage: none
+
+      - name: Validate Composer files
+        run: composer validate --strict
+
+      - name: Install locked dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Check formatting
+        run: vendor/bin/pint --test
+
+      - name: Run backend tests
+        run: php artisan test
+
+      - name: Validate PostgreSQL migrations
+        env:
+          APP_ENV: testing
+          APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: aio_test
+          DB_USERNAME: aio
+          DB_PASSWORD: aio_test_password
+        run: php artisan migrate:fresh --force
+
+      - name: Audit production dependencies
+        run: composer audit --locked --no-dev

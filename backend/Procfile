@@ -1,0 +1,3 @@
+web: sh -c 'if [ "$AIO_DEPLOYMENT_MODE" = "staging" ]; then php artisan aio:production-check || true; else php artisan aio:production-check; fi && php artisan migrate --force && php artisan optimize && php artisan serve --host=0.0.0.0 --port=$PORT'
+worker: php artisan queue:work redis --queue=outbox,default --sleep=2 --tries=5 --timeout=120 --max-time=3600
+scheduler: php artisan schedule:work

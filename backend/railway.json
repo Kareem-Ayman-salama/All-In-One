@@ -1,0 +1,14 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader"
+  },
+  "deploy": {
+    "startCommand": "sh -c 'if [ \"$AIO_DEPLOYMENT_MODE\" = \"staging\" ]; then php artisan aio:production-check || true; else php artisan aio:production-check; fi && php artisan migrate --force && php artisan optimize && php artisan serve --host=0.0.0.0 --port=$PORT'",
+    "healthcheckPath": "/api/v1/health/ready",
+    "healthcheckTimeout": 120,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  }
+}

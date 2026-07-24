@@ -1,6 +1,10 @@
-# AIOFRONT React
+# All In One (AIO)
 
-React implementation for the AIOFRONT prototype, prepared for backend integration.
+This repository contains the connected AIO platform:
+
+- The React frontend is in the repository root.
+- The Laravel API is in [`backend/`](backend/).
+- Railway should create two services from the same repository.
 
 ## Run locally
 
@@ -16,6 +20,17 @@ npm install
 npm run build
 npm start
 ```
+
+For the API:
+
+```bash
+cd backend
+composer install
+php artisan test
+php artisan serve
+```
+
+See [`RAILWAY_DEPLOYMENT.md`](RAILWAY_DEPLOYMENT.md) for the two-service setup.
 
 The current data source is mocked in `src/data/mockData.js`. Replace the functions in `src/services/api.js` with backend endpoints when APIs are ready.
 

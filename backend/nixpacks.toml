@@ -1,0 +1,10 @@
+providers = ["php"]
+
+[phases.setup]
+nixPkgs = ["php83", "php83Extensions.pdo_pgsql", "php83Extensions.redis", "php83Packages.composer"]
+
+[phases.build]
+cmds = [
+  "mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs",
+  "chmod -R 775 storage bootstrap/cache"
+]
