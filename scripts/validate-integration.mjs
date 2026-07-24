@@ -635,7 +635,7 @@ assert.ok(
     && mobileCiWorkflow.includes("channel: stable")
     && mobileCiWorkflow.includes("flutter pub get")
     && mobileCiWorkflow.includes("dart run build_runner build --delete-conflicting-outputs")
-    && mobileCiWorkflow.includes("dart format --set-exit-if-changed lib")
+    && mobileCiWorkflow.includes("dart format --set-exit-if-changed lib test")
     && mobileCiWorkflow.includes("flutter analyze")
     && mobileCiWorkflow.includes("flutter test")
     && mobileCiWorkflow.includes("flutter build apk")
