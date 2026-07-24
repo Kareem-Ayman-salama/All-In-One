@@ -86,10 +86,7 @@ class OrganizationRoomsPage extends ConsumerWidget {
     );
   }
 
-  Future<void> _showCreateSheet(
-    BuildContext context,
-    String organizationId,
-  ) {
+  Future<void> _showCreateSheet(BuildContext context, String organizationId) {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -160,7 +157,10 @@ class _RoomsBody extends StatelessWidget {
                 icon: Icons.groups,
                 label: strings.roomMembers,
                 value: rooms
-                    .fold<int>(0, (total, room) => total + room.membershipsCount)
+                    .fold<int>(
+                      0,
+                      (total, room) => total + room.membershipsCount,
+                    )
                     .toString(),
               ),
             ),
@@ -337,7 +337,9 @@ class _CreateRoomSheetState extends ConsumerState<_CreateRoomSheet> {
     }
     setState(() => _submitting = true);
     try {
-      await ref.read(organizationRoomActionsProvider).create(
+      await ref
+          .read(organizationRoomActionsProvider)
+          .create(
             organizationId: widget.organizationId,
             command: CreateOrganizationRoomCommand(
               name: _nameController.text,

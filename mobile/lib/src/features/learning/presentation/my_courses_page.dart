@@ -56,9 +56,7 @@ class MyCoursesPage extends ConsumerWidget {
 }
 
 class _MyCoursesBody extends StatelessWidget {
-  const _MyCoursesBody({
-    required this.overview,
-  });
+  const _MyCoursesBody({required this.overview});
 
   final StudentLearningOverview overview;
 
@@ -103,9 +101,7 @@ class _MyCoursesBody extends StatelessWidget {
 }
 
 class _LearningStats extends StatelessWidget {
-  const _LearningStats({
-    required this.overview,
-  });
+  const _LearningStats({required this.overview});
 
   final StudentLearningOverview overview;
 
@@ -158,10 +154,7 @@ class _StatCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(label),
             const SizedBox(height: 4),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
+            Text(value, style: Theme.of(context).textTheme.headlineSmall),
           ],
         ),
       ),
@@ -170,9 +163,7 @@ class _StatCard extends StatelessWidget {
 }
 
 class _EnrollmentCard extends StatelessWidget {
-  const _EnrollmentCard({
-    required this.enrollment,
-  });
+  const _EnrollmentCard({required this.enrollment});
 
   final StudentEnrollmentSummary enrollment;
 
@@ -187,9 +178,7 @@ class _EnrollmentCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
         leading: const Icon(Icons.play_circle_outline),
-        title: Text(
-          course?.localizedTitle(strings.isArabic) ?? strings.course,
-        ),
+        title: Text(course?.localizedTitle(strings.isArabic) ?? strings.course),
         subtitle: Text(
           [
             course?.academy?.localizedName(strings.isArabic),
@@ -210,9 +199,7 @@ class _EnrollmentCard extends StatelessWidget {
 }
 
 class _BookingCard extends StatelessWidget {
-  const _BookingCard({
-    required this.booking,
-  });
+  const _BookingCard({required this.booking});
 
   final StudentBookingSummary booking;
 
@@ -228,9 +215,7 @@ class _BookingCard extends StatelessWidget {
         leading: Icon(
           booking.isPending ? Icons.pending_actions : Icons.task_alt,
         ),
-        title: Text(
-          course?.localizedTitle(strings.isArabic) ?? strings.course,
-        ),
+        title: Text(course?.localizedTitle(strings.isArabic) ?? strings.course),
         subtitle: Text(
           [
             batch?.localizedTitle(strings.isArabic),
@@ -244,18 +229,13 @@ class _BookingCard extends StatelessWidget {
 }
 
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({
-    required this.title,
-  });
+  const _SectionTitle({required this.title});
 
   final String title;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: Theme.of(context).textTheme.titleLarge,
-    );
+    return Text(title, style: Theme.of(context).textTheme.titleLarge);
   }
 }
 
@@ -276,10 +256,7 @@ class _EmptyLearningState extends StatelessWidget {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
-            Text(
-              strings.noLearningYetHint,
-              textAlign: TextAlign.center,
-            ),
+            Text(strings.noLearningYetHint, textAlign: TextAlign.center),
             const SizedBox(height: 16),
             FilledButton.icon(
               onPressed: () => context.go(CourseCatalogPage.routePath),

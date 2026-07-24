@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final organizationMembersProvider = FutureProvider.autoDispose
     .family<List<OrganizationMemberSummary>, String>((ref, organizationId) {
-  return ref
-      .watch(organizationMemberRepositoryProvider)
-      .listMembers(organizationId: organizationId);
-});
+      return ref
+          .watch(organizationMemberRepositoryProvider)
+          .listMembers(organizationId: organizationId);
+    });
 
 final organizationMemberActionsProvider = Provider<OrganizationMemberActions>(
   OrganizationMemberActions.new,
@@ -37,7 +37,9 @@ class OrganizationMemberActions {
     required String organizationId,
     required String membershipId,
   }) async {
-    await _ref.read(organizationMemberRepositoryProvider).removeMember(
+    await _ref
+        .read(organizationMemberRepositoryProvider)
+        .removeMember(
           organizationId: organizationId,
           membershipId: membershipId,
         );

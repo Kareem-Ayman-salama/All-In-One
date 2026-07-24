@@ -78,7 +78,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   const SizedBox(height: 12),
                   Text(
                     authState.errorMessage!,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                   ),
                 ],
                 Align(
@@ -123,7 +125,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       return;
     }
 
-    await ref.read(authControllerProvider.notifier).signIn(
+    await ref
+        .read(authControllerProvider.notifier)
+        .signIn(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );

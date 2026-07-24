@@ -5,13 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final organizationAnnouncementRepositoryProvider =
     Provider<OrganizationAnnouncementRepository>((ref) {
-  return OrganizationAnnouncementRepository(dio: ref.watch(dioProvider));
-});
+      return OrganizationAnnouncementRepository(dio: ref.watch(dioProvider));
+    });
 
 class OrganizationAnnouncementRepository {
-  const OrganizationAnnouncementRepository({
-    required Dio dio,
-  }) : _dio = dio;
+  const OrganizationAnnouncementRepository({required Dio dio}) : _dio = dio;
 
   final Dio _dio;
 
@@ -25,11 +23,11 @@ class OrganizationAnnouncementRepository {
     );
     final envelope =
         ApiEnvelope<List<OrganizationAnnouncementSummary>>.fromJson(
-      readJsonObject(response.data),
-      (value) => readJsonObjectList(value)
-          .map(OrganizationAnnouncementSummary.fromJson)
-          .toList(growable: false),
-    );
+          readJsonObject(response.data),
+          (value) => readJsonObjectList(value)
+              .map(OrganizationAnnouncementSummary.fromJson)
+              .toList(growable: false),
+        );
 
     return envelope.data;
   }
@@ -44,9 +42,8 @@ class OrganizationAnnouncementRepository {
     );
     final envelope = ApiEnvelope<OrganizationAnnouncementSummary>.fromJson(
       readJsonObject(response.data),
-      (value) => OrganizationAnnouncementSummary.fromJson(
-        readJsonObject(value),
-      ),
+      (value) =>
+          OrganizationAnnouncementSummary.fromJson(readJsonObject(value)),
     );
 
     return envelope.data;
@@ -102,9 +99,7 @@ class OrganizationAnnouncementSummary {
     this.createdAt,
   });
 
-  factory OrganizationAnnouncementSummary.fromJson(
-    Map<String, Object?> json,
-  ) {
+  factory OrganizationAnnouncementSummary.fromJson(Map<String, Object?> json) {
     return OrganizationAnnouncementSummary(
       id: _readString(json, 'id'),
       title: _readString(json, 'title'),

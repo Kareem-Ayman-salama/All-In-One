@@ -30,9 +30,7 @@ class PrivacyRedactor {
       return redact(value);
     }
     if (value is Map) {
-      return redact(
-        value.map((key, entry) => MapEntry(key.toString(), entry)),
-      );
+      return redact(value.map((key, entry) => MapEntry(key.toString(), entry)));
     }
     if (value is List) {
       return value.map(_redactValue).toList(growable: false);
@@ -63,4 +61,3 @@ class PrivacyRedactor {
         value.length > 512;
   }
 }
-

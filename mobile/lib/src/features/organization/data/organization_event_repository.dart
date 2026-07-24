@@ -5,13 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final organizationEventRepositoryProvider =
     Provider<OrganizationEventRepository>((ref) {
-  return OrganizationEventRepository(dio: ref.watch(dioProvider));
-});
+      return OrganizationEventRepository(dio: ref.watch(dioProvider));
+    });
 
 class OrganizationEventRepository {
-  const OrganizationEventRepository({
-    required Dio dio,
-  }) : _dio = dio;
+  const OrganizationEventRepository({required Dio dio}) : _dio = dio;
 
   final Dio _dio;
 
@@ -33,9 +31,9 @@ class OrganizationEventRepository {
     );
     final envelope = ApiEnvelope<List<OrganizationEventSummary>>.fromJson(
       readJsonObject(response.data),
-      (value) => readJsonObjectList(value)
-          .map(OrganizationEventSummary.fromJson)
-          .toList(growable: false),
+      (value) => readJsonObjectList(
+        value,
+      ).map(OrganizationEventSummary.fromJson).toList(growable: false),
     );
 
     return envelope.data;
@@ -61,7 +59,9 @@ class OrganizationEventRepository {
     required String organizationId,
     required String eventId,
   }) async {
-    await _dio.delete<Object?>('/organizations/$organizationId/events/$eventId');
+    await _dio.delete<Object?>(
+      '/organizations/$organizationId/events/$eventId',
+    );
   }
 }
 

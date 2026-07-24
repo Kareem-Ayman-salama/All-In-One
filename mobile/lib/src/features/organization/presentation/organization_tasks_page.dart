@@ -89,10 +89,7 @@ class OrganizationTasksPage extends ConsumerWidget {
     );
   }
 
-  Future<void> _showCreateSheet(
-    BuildContext context,
-    String organizationId,
-  ) {
+  Future<void> _showCreateSheet(BuildContext context, String organizationId) {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -129,10 +126,7 @@ class _NoWorkspace extends StatelessWidget {
 }
 
 class _TasksBody extends StatelessWidget {
-  const _TasksBody({
-    required this.tasks,
-    required this.organizationId,
-  });
+  const _TasksBody({required this.tasks, required this.organizationId});
 
   final List<OrganizationTaskSummary> tasks;
   final String organizationId;
@@ -213,10 +207,7 @@ class _StatTile extends StatelessWidget {
 }
 
 class _TaskCard extends ConsumerWidget {
-  const _TaskCard({
-    required this.task,
-    required this.organizationId,
-  });
+  const _TaskCard({required this.task, required this.organizationId});
 
   final OrganizationTaskSummary task;
   final String organizationId;
@@ -247,10 +238,9 @@ class _TaskCard extends ConsumerWidget {
               trailing: IconButton(
                 tooltip: strings.deleteTask,
                 onPressed: () async {
-                  await ref.read(organizationTaskActionsProvider).delete(
-                        organizationId: organizationId,
-                        taskId: task.id,
-                      );
+                  await ref
+                      .read(organizationTaskActionsProvider)
+                      .delete(organizationId: organizationId, taskId: task.id);
                 },
                 icon: const Icon(Icons.delete_outline),
               ),
@@ -283,7 +273,9 @@ class _TaskCard extends ConsumerWidget {
                 if (value == null || value == task.status) {
                   return;
                 }
-                await ref.read(organizationTaskActionsProvider).update(
+                await ref
+                    .read(organizationTaskActionsProvider)
+                    .update(
                       organizationId: organizationId,
                       taskId: task.id,
                       command: UpdateOrganizationTaskCommand(
@@ -291,8 +283,8 @@ class _TaskCard extends ConsumerWidget {
                         progress: value == 'done'
                             ? 100
                             : value == 'in_progress'
-                                ? 25
-                                : 0,
+                            ? 25
+                            : 0,
                       ),
                     );
               },
@@ -439,7 +431,9 @@ class _CreateTaskSheetState extends ConsumerState<_CreateTaskSheet> {
     }
     setState(() => _submitting = true);
     try {
-      await ref.read(organizationTaskActionsProvider).create(
+      await ref
+          .read(organizationTaskActionsProvider)
+          .create(
             organizationId: widget.organizationId,
             command: CreateOrganizationTaskCommand(
               title: _titleController.text,

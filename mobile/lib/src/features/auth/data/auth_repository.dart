@@ -13,11 +13,9 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 });
 
 class AuthRepository {
-  const AuthRepository({
-    required Dio dio,
-    required SecureTokenStore tokenStore,
-  })  : _dio = dio,
-        _tokenStore = tokenStore;
+  const AuthRepository({required Dio dio, required SecureTokenStore tokenStore})
+    : _dio = dio,
+      _tokenStore = tokenStore;
 
   final Dio _dio;
   final SecureTokenStore _tokenStore;
@@ -133,9 +131,7 @@ class AuthRepository {
 
     final response = await _dio.post<Object?>(
       '/auth/refresh',
-      data: <String, Object?>{
-        'refreshToken': refreshToken,
-      },
+      data: <String, Object?>{'refreshToken': refreshToken},
       options: Options(
         extra: const <String, Object?>{
           TokenRefreshCoordinator.skipRefreshExtraKey: true,
@@ -226,10 +222,7 @@ class RegisterCommand {
 }
 
 class EmailCodeCommand {
-  const EmailCodeCommand({
-    required this.email,
-    required this.code,
-  });
+  const EmailCodeCommand({required this.email, required this.code});
 
   final String email;
   final String code;
@@ -383,9 +376,9 @@ class InvitationAcceptance {
       membershipId: json['membershipId']?.toString() ?? '',
       organization: readJsonObject(json['organization']),
       role: json['role'] as String? ?? '',
-      permissions: _readJsonArray(json['permissions'])
-          .map((value) => value.toString())
-          .toList(growable: false),
+      permissions: _readJsonArray(
+        json['permissions'],
+      ).map((value) => value.toString()).toList(growable: false),
       next: json['next'] as String? ?? '',
     );
   }

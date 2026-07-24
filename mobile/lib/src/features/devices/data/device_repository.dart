@@ -8,9 +8,7 @@ final deviceRepositoryProvider = Provider<DeviceRepository>((ref) {
 });
 
 class DeviceRepository {
-  const DeviceRepository({
-    required Dio dio,
-  }) : _dio = dio;
+  const DeviceRepository({required Dio dio}) : _dio = dio;
 
   final Dio _dio;
 
@@ -29,10 +27,7 @@ class DeviceRepository {
     return envelope.data;
   }
 
-  Future<void> revokePushToken({
-    String? token,
-    String? installationId,
-  }) async {
+  Future<void> revokePushToken({String? token, String? installationId}) async {
     await _dio.delete<Object?>(
       '/devices/push-tokens',
       data: <String, Object?>{
@@ -103,4 +98,3 @@ class PushDeviceToken {
   final String? appVersion;
   final String? lastRegisteredAt;
 }
-

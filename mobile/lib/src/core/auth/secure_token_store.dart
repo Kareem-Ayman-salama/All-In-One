@@ -2,15 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 final secureTokenStoreProvider = Provider<SecureTokenStore>((ref) {
-  return SecureTokenStore(
-    storage: const FlutterSecureStorage(),
-  );
+  return SecureTokenStore(storage: const FlutterSecureStorage());
 });
 
 class SecureTokenStore {
-  const SecureTokenStore({
-    required FlutterSecureStorage storage,
-  }) : _storage = storage;
+  const SecureTokenStore({required FlutterSecureStorage storage})
+    : _storage = storage;
 
   static const _accessTokenKey = 'ain.access_token';
   static const _refreshTokenKey = 'ain.refresh_token';
@@ -22,9 +19,8 @@ class SecureTokenStore {
 
   Future<String?> readRefreshToken() => _storage.read(key: _refreshTokenKey);
 
-  Future<String?> readInstallationId() => _storage.read(
-        key: _installationIdKey,
-      );
+  Future<String?> readInstallationId() =>
+      _storage.read(key: _installationIdKey);
 
   Future<void> writeTokens({
     required String accessToken,
@@ -45,4 +41,3 @@ class SecureTokenStore {
 
   Future<void> clearAll() => _storage.deleteAll();
 }
-

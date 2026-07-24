@@ -50,9 +50,7 @@ class OrganizationMembersPage extends ConsumerWidget {
                     FilledButton.icon(
                       onPressed: () {
                         ref.invalidate(
-                          organizationMembersProvider(
-                            workspace.organizationId,
-                          ),
+                          organizationMembersProvider(workspace.organizationId),
                         );
                       },
                       icon: const Icon(Icons.refresh),
@@ -110,10 +108,7 @@ class _NoWorkspace extends StatelessWidget {
 }
 
 class _MembersBody extends StatelessWidget {
-  const _MembersBody({
-    required this.members,
-    required this.organizationId,
-  });
+  const _MembersBody({required this.members, required this.organizationId});
 
   final List<OrganizationMemberSummary> members;
   final String organizationId;
@@ -194,10 +189,7 @@ class _StatTile extends StatelessWidget {
 }
 
 class _MemberCard extends ConsumerWidget {
-  const _MemberCard({
-    required this.member,
-    required this.organizationId,
-  });
+  const _MemberCard({required this.member, required this.organizationId});
 
   final OrganizationMemberSummary member;
   final String organizationId;
@@ -223,7 +215,9 @@ class _MemberCard extends ConsumerWidget {
               trailing: IconButton(
                 tooltip: strings.removeMember,
                 onPressed: () async {
-                  await ref.read(organizationMemberActionsProvider).remove(
+                  await ref
+                      .read(organizationMemberActionsProvider)
+                      .remove(
                         organizationId: organizationId,
                         membershipId: member.id,
                       );
@@ -249,7 +243,9 @@ class _MemberCard extends ConsumerWidget {
                 if (value == null || value == member.role) {
                   return;
                 }
-                await ref.read(organizationMemberActionsProvider).update(
+                await ref
+                    .read(organizationMemberActionsProvider)
+                    .update(
                       organizationId: organizationId,
                       membershipId: member.id,
                       command: UpdateOrganizationMemberCommand(role: value),
@@ -277,7 +273,9 @@ class _MemberCard extends ConsumerWidget {
                 if (value == null || value == member.status) {
                   return;
                 }
-                await ref.read(organizationMemberActionsProvider).update(
+                await ref
+                    .read(organizationMemberActionsProvider)
+                    .update(
                       organizationId: organizationId,
                       membershipId: member.id,
                       command: UpdateOrganizationMemberCommand(status: value),

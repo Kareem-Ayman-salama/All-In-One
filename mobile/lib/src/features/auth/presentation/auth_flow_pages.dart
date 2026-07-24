@@ -45,9 +45,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             _AuthTextField(
               controller: _nameController,
               label: strings.fullName,
-              validator: (value) => _hasText(value)
-                  ? null
-                  : strings.fullNameRequired,
+              validator: (value) =>
+                  _hasText(value) ? null : strings.fullNameRequired,
             ),
             const SizedBox(height: 12),
             _EmailField(controller: _emailController),
@@ -71,7 +70,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    final result = await ref.read(authControllerProvider.notifier).register(
+    final result = await ref
+        .read(authControllerProvider.notifier)
+        .register(
           name: _nameController.text,
           email: _emailController.text,
           password: _passwordController.text,
@@ -158,10 +159,9 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    await ref.read(authControllerProvider.notifier).verifyEmail(
-          email: _emailController.text,
-          code: _codeController.text,
-        );
+    await ref
+        .read(authControllerProvider.notifier)
+        .verifyEmail(email: _emailController.text, code: _codeController.text);
     if (mounted && ref.read(authControllerProvider).isAuthenticated) {
       context.go(WorkspaceSelectionPage.routePath);
     }
@@ -308,7 +308,9 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    final changed = await ref.read(authControllerProvider.notifier).resetPassword(
+    final changed = await ref
+        .read(authControllerProvider.notifier)
+        .resetPassword(
           email: _emailController.text,
           code: _codeController.text,
           password: _passwordController.text,
@@ -333,7 +335,9 @@ class InvitationPage extends ConsumerWidget {
     final authState = ref.watch(authControllerProvider);
 
     return FutureBuilder(
-      future: ref.read(authControllerProvider.notifier).previewInvitation(token),
+      future: ref
+          .read(authControllerProvider.notifier)
+          .previewInvitation(token),
       builder: (context, snapshot) {
         final preview = snapshot.data;
 
@@ -399,10 +403,7 @@ class InvitationPage extends ConsumerWidget {
 }
 
 class _AuthScaffold extends StatelessWidget {
-  const _AuthScaffold({
-    required this.title,
-    required this.child,
-  });
+  const _AuthScaffold({required this.title, required this.child});
 
   final String title;
   final Widget child;
@@ -412,10 +413,7 @@ class _AuthScaffold extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(title)),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: child,
-        ),
+        child: Padding(padding: const EdgeInsets.all(24), child: child),
       ),
     );
   }

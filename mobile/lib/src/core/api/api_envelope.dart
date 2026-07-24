@@ -25,9 +25,7 @@ class ApiEnvelope<T> {
       return value;
     }
     if (value is Map) {
-      return value.map(
-        (key, entry) => MapEntry(key.toString(), entry),
-      );
+      return value.map((key, entry) => MapEntry(key.toString(), entry));
     }
     return const <String, Object?>{};
   }
@@ -38,9 +36,7 @@ Map<String, Object?> readJsonObject(Object? value) {
     return value;
   }
   if (value is Map) {
-    return value.map(
-      (key, entry) => MapEntry(key.toString(), entry),
-    );
+    return value.map((key, entry) => MapEntry(key.toString(), entry));
   }
   throw const FormatException('Expected JSON object.');
 }
@@ -52,4 +48,3 @@ List<Map<String, Object?>> readJsonObjectList(Object? value) {
 
   return value.map(readJsonObject).toList(growable: false);
 }
-

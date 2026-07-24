@@ -5,13 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final organizationBookingRepositoryProvider =
     Provider<OrganizationBookingRepository>((ref) {
-  return OrganizationBookingRepository(dio: ref.watch(dioProvider));
-});
+      return OrganizationBookingRepository(dio: ref.watch(dioProvider));
+    });
 
 class OrganizationBookingRepository {
-  const OrganizationBookingRepository({
-    required Dio dio,
-  }) : _dio = dio;
+  const OrganizationBookingRepository({required Dio dio}) : _dio = dio;
 
   final Dio _dio;
 
@@ -27,12 +25,11 @@ class OrganizationBookingRepository {
         if (_hasText(status)) 'status': status,
       },
     );
-    final envelope =
-        ApiEnvelope<List<OrganizationBookingSummary>>.fromJson(
+    final envelope = ApiEnvelope<List<OrganizationBookingSummary>>.fromJson(
       readJsonObject(response.data),
-      (value) => readJsonObjectList(value)
-          .map(OrganizationBookingSummary.fromJson)
-          .toList(growable: false),
+      (value) => readJsonObjectList(
+        value,
+      ).map(OrganizationBookingSummary.fromJson).toList(growable: false),
     );
 
     return envelope.data;
@@ -166,10 +163,7 @@ class OrganizationBookingSummary {
 }
 
 class OrganizationBookingCourse {
-  const OrganizationBookingCourse({
-    required this.id,
-    required this.title,
-  });
+  const OrganizationBookingCourse({required this.id, required this.title});
 
   factory OrganizationBookingCourse.fromJson(Map<String, Object?> json) {
     final titleAr = _readString(json, 'titleAr', snakeKey: 'title_ar');
@@ -243,11 +237,7 @@ String? _readNullableString(
   return value?.toString();
 }
 
-int _readInt(
-  Map<String, Object?> json,
-  String key, {
-  String? snakeKey,
-}) {
+int _readInt(Map<String, Object?> json, String key, {String? snakeKey}) {
   final value = json[key] ?? (snakeKey == null ? null : json[snakeKey]);
   if (value is int) {
     return value;

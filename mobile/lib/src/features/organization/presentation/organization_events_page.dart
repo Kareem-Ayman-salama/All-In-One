@@ -89,10 +89,7 @@ class OrganizationEventsPage extends ConsumerWidget {
     );
   }
 
-  Future<void> _showCreateSheet(
-    BuildContext context,
-    String organizationId,
-  ) {
+  Future<void> _showCreateSheet(BuildContext context, String organizationId) {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -129,10 +126,7 @@ class _NoWorkspace extends StatelessWidget {
 }
 
 class _EventsBody extends StatelessWidget {
-  const _EventsBody({
-    required this.events,
-    required this.organizationId,
-  });
+  const _EventsBody({required this.events, required this.organizationId});
 
   final List<OrganizationEventSummary> events;
   final String organizationId;
@@ -213,10 +207,7 @@ class _StatTile extends StatelessWidget {
 }
 
 class _EventCard extends ConsumerWidget {
-  const _EventCard({
-    required this.event,
-    required this.organizationId,
-  });
+  const _EventCard({required this.event, required this.organizationId});
 
   final OrganizationEventSummary event;
   final String organizationId;
@@ -240,10 +231,9 @@ class _EventCard extends ConsumerWidget {
         trailing: IconButton(
           tooltip: strings.deleteEvent,
           onPressed: () async {
-            await ref.read(organizationEventActionsProvider).delete(
-                  organizationId: organizationId,
-                  eventId: event.id,
-                );
+            await ref
+                .read(organizationEventActionsProvider)
+                .delete(organizationId: organizationId, eventId: event.id);
           },
           icon: const Icon(Icons.delete_outline),
         ),
@@ -418,7 +408,9 @@ class _CreateEventSheetState extends ConsumerState<_CreateEventSheet> {
     }
     setState(() => _submitting = true);
     try {
-      await ref.read(organizationEventActionsProvider).create(
+      await ref
+          .read(organizationEventActionsProvider)
+          .create(
             organizationId: widget.organizationId,
             command: CreateOrganizationEventCommand(
               title: _titleController.text,

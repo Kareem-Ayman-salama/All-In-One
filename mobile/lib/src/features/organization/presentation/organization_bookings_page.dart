@@ -26,8 +26,9 @@ class OrganizationBookingsPage extends ConsumerWidget {
               return _NoWorkspace(strings: strings);
             }
 
-            final bookings =
-                ref.watch(organizationBookingsProvider(workspace.organizationId));
+            final bookings = ref.watch(
+              organizationBookingsProvider(workspace.organizationId),
+            );
             return RefreshIndicator(
               onRefresh: () {
                 return ref.refresh(
@@ -49,7 +50,9 @@ class OrganizationBookingsPage extends ConsumerWidget {
                     FilledButton.icon(
                       onPressed: () {
                         ref.invalidate(
-                          organizationBookingsProvider(workspace.organizationId),
+                          organizationBookingsProvider(
+                            workspace.organizationId,
+                          ),
                         );
                       },
                       icon: const Icon(Icons.refresh),
@@ -107,10 +110,7 @@ class _NoWorkspace extends StatelessWidget {
 }
 
 class _BookingsList extends StatelessWidget {
-  const _BookingsList({
-    required this.organizationId,
-    required this.bookings,
-  });
+  const _BookingsList({required this.organizationId, required this.bookings});
 
   final String organizationId;
   final List<OrganizationBookingSummary> bookings;
@@ -275,7 +275,9 @@ class _OrganizationBookingCard extends ConsumerWidget {
   }
 
   Future<void> _confirm(WidgetRef ref) {
-    return ref.read(organizationBookingActionsProvider).confirm(
+    return ref
+        .read(organizationBookingActionsProvider)
+        .confirm(
           organizationId: organizationId,
           bookingId: booking.id,
           markAsPaid: true,
@@ -283,16 +285,14 @@ class _OrganizationBookingCard extends ConsumerWidget {
   }
 
   Future<void> _reject(WidgetRef ref) {
-    return ref.read(organizationBookingActionsProvider).reject(
-          organizationId: organizationId,
-          bookingId: booking.id,
-        );
+    return ref
+        .read(organizationBookingActionsProvider)
+        .reject(organizationId: organizationId, bookingId: booking.id);
   }
 
   Future<void> _cancel(WidgetRef ref) {
-    return ref.read(organizationBookingActionsProvider).cancel(
-          organizationId: organizationId,
-          bookingId: booking.id,
-        );
+    return ref
+        .read(organizationBookingActionsProvider)
+        .cancel(organizationId: organizationId, bookingId: booking.id);
   }
 }

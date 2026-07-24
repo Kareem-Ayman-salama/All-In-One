@@ -93,16 +93,12 @@ class OrganizationInvitationsPage extends ConsumerWidget {
     );
   }
 
-  Future<void> _showCreateSheet(
-    BuildContext context,
-    String organizationId,
-  ) {
+  Future<void> _showCreateSheet(BuildContext context, String organizationId) {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      builder: (context) => _CreateInvitationSheet(
-        organizationId: organizationId,
-      ),
+      builder: (context) =>
+          _CreateInvitationSheet(organizationId: organizationId),
     );
   }
 }
@@ -146,8 +142,9 @@ class _InvitationsBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = AppStrings.of(context);
-    final pendingCount =
-        invitations.where((invitation) => invitation.isPending).length;
+    final pendingCount = invitations
+        .where((invitation) => invitation.isPending)
+        .length;
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -288,17 +285,15 @@ class _InvitationCard extends ConsumerWidget {
   }
 
   Future<void> _resend(WidgetRef ref) {
-    return ref.read(organizationInvitationActionsProvider).resend(
-          organizationId: organizationId,
-          invitationId: invitation.id,
-        );
+    return ref
+        .read(organizationInvitationActionsProvider)
+        .resend(organizationId: organizationId, invitationId: invitation.id);
   }
 
   Future<void> _cancel(WidgetRef ref) {
-    return ref.read(organizationInvitationActionsProvider).cancel(
-          organizationId: organizationId,
-          invitationId: invitation.id,
-        );
+    return ref
+        .read(organizationInvitationActionsProvider)
+        .cancel(organizationId: organizationId, invitationId: invitation.id);
   }
 }
 
@@ -367,7 +362,10 @@ class _CreateInvitationSheetState
               items: const [
                 DropdownMenuItem(value: 'member', child: Text('Member')),
                 DropdownMenuItem(value: 'staff', child: Text('Staff')),
-                DropdownMenuItem(value: 'instructor', child: Text('Instructor')),
+                DropdownMenuItem(
+                  value: 'instructor',
+                  child: Text('Instructor'),
+                ),
                 DropdownMenuItem(value: 'student', child: Text('Student')),
               ],
               onChanged: (value) {
@@ -408,7 +406,9 @@ class _CreateInvitationSheetState
     }
     setState(() => _submitting = true);
     try {
-      await ref.read(organizationInvitationActionsProvider).create(
+      await ref
+          .read(organizationInvitationActionsProvider)
+          .create(
             organizationId: widget.organizationId,
             command: CreateOrganizationInvitationCommand(
               email: _emailController.text,

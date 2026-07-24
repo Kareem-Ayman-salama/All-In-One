@@ -3,21 +3,18 @@ import 'package:ain_mobile/src/core/api/api_envelope.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final studentLearningRepositoryProvider =
-    Provider<StudentLearningRepository>((ref) {
+final studentLearningRepositoryProvider = Provider<StudentLearningRepository>((
+  ref,
+) {
   return StudentLearningRepository(dio: ref.watch(dioProvider));
 });
 
 class StudentLearningRepository {
-  const StudentLearningRepository({
-    required Dio dio,
-  }) : _dio = dio;
+  const StudentLearningRepository({required Dio dio}) : _dio = dio;
 
   final Dio _dio;
 
-  Future<StudentLearningOverview> getOverview({
-    int perPage = 100,
-  }) async {
+  Future<StudentLearningOverview> getOverview({int perPage = 100}) async {
     final responses = await Future.wait([
       _dio.get<Object?>(
         '/student/bookings',
@@ -30,17 +27,17 @@ class StudentLearningRepository {
     ]);
     final bookingEnvelope = ApiEnvelope<List<StudentBookingSummary>>.fromJson(
       readJsonObject(responses[0].data),
-      (value) => readJsonObjectList(value)
-          .map(StudentBookingSummary.fromJson)
-          .toList(growable: false),
+      (value) => readJsonObjectList(
+        value,
+      ).map(StudentBookingSummary.fromJson).toList(growable: false),
     );
     final enrollmentEnvelope =
         ApiEnvelope<List<StudentEnrollmentSummary>>.fromJson(
-      readJsonObject(responses[1].data),
-      (value) => readJsonObjectList(value)
-          .map(StudentEnrollmentSummary.fromJson)
-          .toList(growable: false),
-    );
+          readJsonObject(responses[1].data),
+          (value) => readJsonObjectList(
+            value,
+          ).map(StudentEnrollmentSummary.fromJson).toList(growable: false),
+        );
 
     return StudentLearningOverview(
       bookings: bookingEnvelope.data,
@@ -169,12 +166,19 @@ class StudentEnrollmentSummary {
       status: _readString(json, 'status', fallback: 'active'),
       course: StudentCourseSummary.fromNullableJson(json['course']),
       batch: StudentBatchSummary.fromNullableJson(json['batch']),
-      subscription:
-          StudentSubscriptionSummary.fromNullableJson(json['subscription']),
-      accessStartsAt:
-          _readNullableString(json, 'accessStartsAt', snakeKey: 'access_starts_at'),
-      accessEndsAt:
-          _readNullableString(json, 'accessEndsAt', snakeKey: 'access_ends_at'),
+      subscription: StudentSubscriptionSummary.fromNullableJson(
+        json['subscription'],
+      ),
+      accessStartsAt: _readNullableString(
+        json,
+        'accessStartsAt',
+        snakeKey: 'access_starts_at',
+      ),
+      accessEndsAt: _readNullableString(
+        json,
+        'accessEndsAt',
+        snakeKey: 'access_ends_at',
+      ),
     );
   }
 
@@ -211,9 +215,7 @@ class StudentEnrollmentDetail {
       enrollment: StudentEnrollmentSummary.fromJson(
         readJsonObject(json['enrollment']),
       ),
-      access: StudentEnrollmentAccess.fromJson(
-        readJsonObject(json['access']),
-      ),
+      access: StudentEnrollmentAccess.fromJson(readJsonObject(json['access'])),
     );
   }
 
@@ -299,11 +301,13 @@ class StudentAcademySummary {
         snakeKey: 'public_name',
         fallback: _readString(json, 'name'),
       ),
-      nameAr: _readNullableString(
-        json,
-        'publicNameAr',
-        snakeKey: 'public_name_ar',
-      ) ?? _readNullableString(json, 'nameAr', snakeKey: 'name_ar'),
+      nameAr:
+          _readNullableString(
+            json,
+            'publicNameAr',
+            snakeKey: 'public_name_ar',
+          ) ??
+          _readNullableString(json, 'nameAr', snakeKey: 'name_ar'),
     );
   }
 
@@ -395,10 +399,7 @@ class StudentBatchSummary {
 }
 
 class StudentRoomSummary {
-  const StudentRoomSummary({
-    required this.id,
-    required this.name,
-  });
+  const StudentRoomSummary({required this.id, required this.name});
 
   factory StudentRoomSummary.fromJson(Map<String, Object?> json) {
     return StudentRoomSummary(
@@ -451,7 +452,8 @@ String _readString(
   String? snakeKey,
   String fallback = '',
 }) {
-  return (json[key] ?? (snakeKey == null ? null : json[snakeKey]))?.toString() ??
+  return (json[key] ?? (snakeKey == null ? null : json[snakeKey]))
+          ?.toString() ??
       fallback;
 }
 

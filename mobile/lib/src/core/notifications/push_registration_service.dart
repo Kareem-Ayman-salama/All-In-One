@@ -3,7 +3,9 @@ import 'package:ain_mobile/src/features/devices/data/device_repository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final pushRegistrationServiceProvider = Provider<PushRegistrationService>((ref) {
+final pushRegistrationServiceProvider = Provider<PushRegistrationService>((
+  ref,
+) {
   return PushRegistrationService(
     deviceRepository: ref.watch(deviceRepositoryProvider),
     installationIdReader: () => ref.read(installationIdProvider.future),
@@ -14,8 +16,8 @@ class PushRegistrationService {
   const PushRegistrationService({
     required DeviceRepository deviceRepository,
     required Future<String> Function() installationIdReader,
-  })  : _deviceRepository = deviceRepository,
-        _installationIdReader = installationIdReader;
+  }) : _deviceRepository = deviceRepository,
+       _installationIdReader = installationIdReader;
 
   final DeviceRepository _deviceRepository;
   final Future<String> Function() _installationIdReader;
@@ -50,4 +52,3 @@ class PushRegistrationService {
     };
   }
 }
-

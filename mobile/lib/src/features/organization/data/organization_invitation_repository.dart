@@ -5,13 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final organizationInvitationRepositoryProvider =
     Provider<OrganizationInvitationRepository>((ref) {
-  return OrganizationInvitationRepository(dio: ref.watch(dioProvider));
-});
+      return OrganizationInvitationRepository(dio: ref.watch(dioProvider));
+    });
 
 class OrganizationInvitationRepository {
-  const OrganizationInvitationRepository({
-    required Dio dio,
-  }) : _dio = dio;
+  const OrganizationInvitationRepository({required Dio dio}) : _dio = dio;
 
   final Dio _dio;
 
@@ -27,12 +25,11 @@ class OrganizationInvitationRepository {
         if (_hasText(status)) 'status': status,
       },
     );
-    final envelope =
-        ApiEnvelope<List<OrganizationInvitationSummary>>.fromJson(
+    final envelope = ApiEnvelope<List<OrganizationInvitationSummary>>.fromJson(
       readJsonObject(response.data),
-      (value) => readJsonObjectList(value)
-          .map(OrganizationInvitationSummary.fromJson)
-          .toList(growable: false),
+      (value) => readJsonObjectList(
+        value,
+      ).map(OrganizationInvitationSummary.fromJson).toList(growable: false),
     );
 
     return envelope.data;
@@ -48,9 +45,8 @@ class OrganizationInvitationRepository {
     );
     final envelope = ApiEnvelope<OrganizationInvitationCommandResult>.fromJson(
       readJsonObject(response.data),
-      (value) => OrganizationInvitationCommandResult.fromJson(
-        readJsonObject(value),
-      ),
+      (value) =>
+          OrganizationInvitationCommandResult.fromJson(readJsonObject(value)),
     );
 
     return envelope.data;
@@ -66,9 +62,8 @@ class OrganizationInvitationRepository {
     );
     final envelope = ApiEnvelope<OrganizationInvitationCommandResult>.fromJson(
       readJsonObject(response.data),
-      (value) => OrganizationInvitationCommandResult.fromJson(
-        readJsonObject(value),
-      ),
+      (value) =>
+          OrganizationInvitationCommandResult.fromJson(readJsonObject(value)),
     );
 
     return envelope.data;

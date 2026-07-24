@@ -5,13 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final organizationMemberRepositoryProvider =
     Provider<OrganizationMemberRepository>((ref) {
-  return OrganizationMemberRepository(dio: ref.watch(dioProvider));
-});
+      return OrganizationMemberRepository(dio: ref.watch(dioProvider));
+    });
 
 class OrganizationMemberRepository {
-  const OrganizationMemberRepository({
-    required Dio dio,
-  }) : _dio = dio;
+  const OrganizationMemberRepository({required Dio dio}) : _dio = dio;
 
   final Dio _dio;
 
@@ -31,9 +29,9 @@ class OrganizationMemberRepository {
     );
     final envelope = ApiEnvelope<List<OrganizationMemberSummary>>.fromJson(
       readJsonObject(response.data),
-      (value) => readJsonObjectList(value)
-          .map(OrganizationMemberSummary.fromJson)
-          .toList(growable: false),
+      (value) => readJsonObjectList(
+        value,
+      ).map(OrganizationMemberSummary.fromJson).toList(growable: false),
     );
 
     return envelope.data;
@@ -67,10 +65,7 @@ class OrganizationMemberRepository {
 }
 
 class UpdateOrganizationMemberCommand {
-  const UpdateOrganizationMemberCommand({
-    this.role,
-    this.status,
-  });
+  const UpdateOrganizationMemberCommand({this.role, this.status});
 
   final String? role;
   final String? status;

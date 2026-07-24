@@ -8,9 +8,7 @@ final workspaceRepositoryProvider = Provider<WorkspaceRepository>((ref) {
 });
 
 class WorkspaceRepository {
-  const WorkspaceRepository({
-    required Dio dio,
-  }) : _dio = dio;
+  const WorkspaceRepository({required Dio dio}) : _dio = dio;
 
   final Dio _dio;
 
@@ -18,9 +16,9 @@ class WorkspaceRepository {
     final response = await _dio.get<Object?>('/workspaces');
     final envelope = ApiEnvelope<List<WorkspaceSummary>>.fromJson(
       readJsonObject(response.data),
-      (value) => readJsonObjectList(value)
-          .map(WorkspaceSummary.fromJson)
-          .toList(growable: false),
+      (value) => readJsonObjectList(
+        value,
+      ).map(WorkspaceSummary.fromJson).toList(growable: false),
     );
 
     return envelope.data;

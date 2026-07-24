@@ -9,11 +9,8 @@ Future<void> bootstrap(AppEnvironment environment) async {
 
   runApp(
     ProviderScope(
-      overrides: [
-        appEnvironmentProvider.overrideWithValue(environment),
-      ],
+      overrides: [appEnvironmentProvider.overrideWithValue(environment)],
       child: const AinMobileApp(),
     ),
   );
 }
-

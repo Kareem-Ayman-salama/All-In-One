@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final studentLearningOverviewProvider =
     FutureProvider.autoDispose<StudentLearningOverview>((ref) {
-  return ref.watch(studentLearningRepositoryProvider).getOverview();
-});
+      return ref.watch(studentLearningRepositoryProvider).getOverview();
+    });
 
 final studentEnrollmentDetailProvider = FutureProvider.autoDispose
     .family<StudentEnrollmentDetail, String>((ref, enrollmentId) {
-  return ref.watch(studentLearningRepositoryProvider).getEnrollment(enrollmentId);
-});
+      return ref
+          .watch(studentLearningRepositoryProvider)
+          .getEnrollment(enrollmentId);
+    });

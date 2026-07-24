@@ -36,7 +36,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ForgotPasswordPage.routePath,
         ResetPasswordPage.routePath,
       }.contains(state.matchedLocation);
-      final isPublicRoute = state.uri.path == CourseCatalogPage.routePath ||
+      final isPublicRoute =
+          state.uri.path == CourseCatalogPage.routePath ||
           state.uri.path.startsWith('/explore/course/') ||
           state.uri.path.startsWith('/invite/') ||
           state.uri.path == BookingSuccessPage.routePath;
@@ -88,9 +89,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: InvitationPage.routePath,
-        builder: (context, state) => InvitationPage(
-          token: state.pathParameters['token'] ?? '',
-        ),
+        builder: (context, state) =>
+            InvitationPage(token: state.pathParameters['token'] ?? ''),
       ),
       GoRoute(
         path: WorkspaceSelectionPage.routePath,
@@ -176,15 +176,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/schedule',
-        builder: (context, state) => const PlaceholderPage(
-          titleKey: PlaceholderTitleKey.schedule,
-        ),
+        builder: (context, state) =>
+            const PlaceholderPage(titleKey: PlaceholderTitleKey.schedule),
       ),
       GoRoute(
         path: '/profile',
-        builder: (context, state) => const PlaceholderPage(
-          titleKey: PlaceholderTitleKey.profile,
-        ),
+        builder: (context, state) =>
+            const PlaceholderPage(titleKey: PlaceholderTitleKey.profile),
       ),
     ],
   );

@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final organizationContentProvider = FutureProvider.autoDispose
     .family<List<ContentItemSummary>, String>((ref, organizationId) {
-  return ref
-      .watch(contentRepositoryProvider)
-      .listContent(organizationId: organizationId);
-});
+      return ref
+          .watch(contentRepositoryProvider)
+          .listContent(organizationId: organizationId);
+    });
 
 final organizationContentActionsProvider = Provider<OrganizationContentActions>(
   OrganizationContentActions.new,
@@ -21,10 +21,9 @@ class OrganizationContentActions {
     required String organizationId,
     required CreateLinkContentCommand command,
   }) async {
-    final result = await _ref.read(contentRepositoryProvider).createLinkContent(
-          organizationId: organizationId,
-          command: command,
-        );
+    final result = await _ref
+        .read(contentRepositoryProvider)
+        .createLinkContent(organizationId: organizationId, command: command);
     _ref.invalidate(organizationContentProvider(organizationId));
     return result;
   }
@@ -33,10 +32,9 @@ class OrganizationContentActions {
     required String organizationId,
     required String contentId,
   }) async {
-    await _ref.read(contentRepositoryProvider).deleteContent(
-          organizationId: organizationId,
-          contentId: contentId,
-        );
+    await _ref
+        .read(contentRepositoryProvider)
+        .deleteContent(organizationId: organizationId, contentId: contentId);
     _ref.invalidate(organizationContentProvider(organizationId));
   }
 }

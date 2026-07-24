@@ -2,8 +2,12 @@ import 'package:ain_mobile/src/core/api/api_envelope.dart';
 import 'package:ain_mobile/src/features/metadata/data/metadata_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final offlineCachePolicyProvider = FutureProvider<OfflineCachePolicy>((ref) async {
-  final manifest = await ref.watch(metadataRepositoryProvider).getOfflineCachePolicy();
+final offlineCachePolicyProvider = FutureProvider<OfflineCachePolicy>((
+  ref,
+) async {
+  final manifest = await ref
+      .watch(metadataRepositoryProvider)
+      .getOfflineCachePolicy();
   return OfflineCachePolicy.fromJson(manifest);
 });
 
@@ -18,16 +22,12 @@ class OfflineCachePolicy {
 
   factory OfflineCachePolicy.fromJson(Map<String, Object?> json) {
     final datasets = readJsonObject(json['datasets']).map(
-      (key, value) => MapEntry(
-        key,
-        OfflineDatasetPolicy.fromJson(readJsonObject(value)),
-      ),
+      (key, value) =>
+          MapEntry(key, OfflineDatasetPolicy.fromJson(readJsonObject(value))),
     );
     final writeOperations = readJsonObject(json['writeOperations']).map(
-      (key, value) => MapEntry(
-        key,
-        OfflineWritePolicy.fromJson(readJsonObject(value)),
-      ),
+      (key, value) =>
+          MapEntry(key, OfflineWritePolicy.fromJson(readJsonObject(value))),
     );
 
     return OfflineCachePolicy(
@@ -51,9 +51,9 @@ class OfflineCachePolicy {
       return false;
     }
 
-    return dataset.offlineReadable
-        && dataset.storage != 'memory_only'
-        && !dataset.neverPersist;
+    return dataset.offlineReadable &&
+        dataset.storage != 'memory_only' &&
+        !dataset.neverPersist;
   }
 
   bool requiresServerConfirmation(String operationKey) {
@@ -131,4 +131,3 @@ List<String> _readStringList(Object? value) {
 
   return value.map((entry) => entry.toString()).toList(growable: false);
 }
-

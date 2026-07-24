@@ -55,10 +55,7 @@ class BookingSuccessPage extends StatelessWidget {
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
-            Text(
-              strings.bookingSubmittedHint,
-              textAlign: TextAlign.center,
-            ),
+            Text(strings.bookingSubmittedHint, textAlign: TextAlign.center),
             const SizedBox(height: 24),
             Card(
               child: Padding(
@@ -66,10 +63,7 @@ class BookingSuccessPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _SummaryRow(
-                      label: strings.requestNumber,
-                      value: shortId,
-                    ),
+                    _SummaryRow(label: strings.requestNumber, value: shortId),
                     if (_hasText(courseTitle))
                       _SummaryRow(
                         label: strings.course,
@@ -102,10 +96,7 @@ class BookingSuccessPage extends StatelessWidget {
 }
 
 class _SummaryRow extends StatelessWidget {
-  const _SummaryRow({
-    required this.label,
-    required this.value,
-  });
+  const _SummaryRow({required this.label, required this.value});
 
   final String label;
   final String value;
@@ -118,10 +109,7 @@ class _SummaryRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.labelLarge,
-            ),
+            child: Text(label, style: Theme.of(context).textTheme.labelLarge),
           ),
           const SizedBox(width: 12),
           Expanded(

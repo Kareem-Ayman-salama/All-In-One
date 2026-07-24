@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final organizationTasksProvider = FutureProvider.autoDispose
     .family<List<OrganizationTaskSummary>, String>((ref, organizationId) {
-  return ref
-      .watch(organizationTaskRepositoryProvider)
-      .listTasks(organizationId: organizationId);
-});
+      return ref
+          .watch(organizationTaskRepositoryProvider)
+          .listTasks(organizationId: organizationId);
+    });
 
 final organizationTaskActionsProvider = Provider<OrganizationTaskActions>(
   OrganizationTaskActions.new,
@@ -21,10 +21,9 @@ class OrganizationTaskActions {
     required String organizationId,
     required CreateOrganizationTaskCommand command,
   }) async {
-    final result = await _ref.read(organizationTaskRepositoryProvider).createTask(
-          organizationId: organizationId,
-          command: command,
-        );
+    final result = await _ref
+        .read(organizationTaskRepositoryProvider)
+        .createTask(organizationId: organizationId, command: command);
     _ref.invalidate(organizationTasksProvider(organizationId));
     return result;
   }
@@ -34,7 +33,9 @@ class OrganizationTaskActions {
     required String taskId,
     required UpdateOrganizationTaskCommand command,
   }) async {
-    final result = await _ref.read(organizationTaskRepositoryProvider).updateTask(
+    final result = await _ref
+        .read(organizationTaskRepositoryProvider)
+        .updateTask(
           organizationId: organizationId,
           taskId: taskId,
           command: command,
@@ -47,10 +48,9 @@ class OrganizationTaskActions {
     required String organizationId,
     required String taskId,
   }) async {
-    await _ref.read(organizationTaskRepositoryProvider).deleteTask(
-          organizationId: organizationId,
-          taskId: taskId,
-        );
+    await _ref
+        .read(organizationTaskRepositoryProvider)
+        .deleteTask(organizationId: organizationId, taskId: taskId);
     _ref.invalidate(organizationTasksProvider(organizationId));
   }
 }

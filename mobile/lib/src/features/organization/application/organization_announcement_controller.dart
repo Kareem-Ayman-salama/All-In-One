@@ -2,18 +2,19 @@ import 'package:ain_mobile/src/features/organization/data/organization_announcem
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final organizationAnnouncementsProvider = FutureProvider.autoDispose
-    .family<List<OrganizationAnnouncementSummary>, String>(
-  (ref, organizationId) {
-    return ref
-        .watch(organizationAnnouncementRepositoryProvider)
-        .listAnnouncements(organizationId: organizationId);
-  },
-);
+    .family<List<OrganizationAnnouncementSummary>, String>((
+      ref,
+      organizationId,
+    ) {
+      return ref
+          .watch(organizationAnnouncementRepositoryProvider)
+          .listAnnouncements(organizationId: organizationId);
+    });
 
 final organizationAnnouncementActionsProvider =
     Provider<OrganizationAnnouncementActions>((ref) {
-  return OrganizationAnnouncementActions(ref);
-});
+      return OrganizationAnnouncementActions(ref);
+    });
 
 class OrganizationAnnouncementActions {
   const OrganizationAnnouncementActions(this._ref);
@@ -26,10 +27,7 @@ class OrganizationAnnouncementActions {
   }) async {
     final result = await _ref
         .read(organizationAnnouncementRepositoryProvider)
-        .createAnnouncement(
-          organizationId: organizationId,
-          command: command,
-        );
+        .createAnnouncement(organizationId: organizationId, command: command);
     _ref.invalidate(organizationAnnouncementsProvider(organizationId));
     return result;
   }

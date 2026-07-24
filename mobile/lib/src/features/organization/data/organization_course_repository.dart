@@ -5,13 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final organizationCourseRepositoryProvider =
     Provider<OrganizationCourseRepository>((ref) {
-  return OrganizationCourseRepository(dio: ref.watch(dioProvider));
-});
+      return OrganizationCourseRepository(dio: ref.watch(dioProvider));
+    });
 
 class OrganizationCourseRepository {
-  const OrganizationCourseRepository({
-    required Dio dio,
-  }) : _dio = dio;
+  const OrganizationCourseRepository({required Dio dio}) : _dio = dio;
 
   final Dio _dio;
 
@@ -31,17 +29,16 @@ class OrganizationCourseRepository {
     ]);
     final courseEnvelope =
         ApiEnvelope<List<OrganizationCourseSummary>>.fromJson(
-      readJsonObject(responses[0].data),
-      (value) => readJsonObjectList(value)
-          .map(OrganizationCourseSummary.fromJson)
-          .toList(growable: false),
-    );
-    final batchEnvelope =
-        ApiEnvelope<List<OrganizationBatchSummary>>.fromJson(
+          readJsonObject(responses[0].data),
+          (value) => readJsonObjectList(
+            value,
+          ).map(OrganizationCourseSummary.fromJson).toList(growable: false),
+        );
+    final batchEnvelope = ApiEnvelope<List<OrganizationBatchSummary>>.fromJson(
       readJsonObject(responses[1].data),
-      (value) => readJsonObjectList(value)
-          .map(OrganizationBatchSummary.fromJson)
-          .toList(growable: false),
+      (value) => readJsonObjectList(
+        value,
+      ).map(OrganizationBatchSummary.fromJson).toList(growable: false),
     );
 
     return OrganizationCoursesOverview(
@@ -172,7 +169,11 @@ class OrganizationBatchSummary {
         fallback: 'offline',
       ),
       capacity: _readInt(json, 'capacity'),
-      reservedSeats: _readInt(json, 'reservedSeats', snakeKey: 'reserved_seats'),
+      reservedSeats: _readInt(
+        json,
+        'reservedSeats',
+        snakeKey: 'reserved_seats',
+      ),
       confirmedSeats: _readInt(
         json,
         'confirmedSeats',
@@ -233,11 +234,7 @@ String? _readNullableString(
   return value?.toString();
 }
 
-int _readInt(
-  Map<String, Object?> json,
-  String key, {
-  String? snakeKey,
-}) {
+int _readInt(Map<String, Object?> json, String key, {String? snakeKey}) {
   final value = json[key] ?? (snakeKey == null ? null : json[snakeKey]);
   if (value is int) {
     return value;

@@ -1,9 +1,7 @@
 import 'dart:math';
 
 class RequestIdFactory {
-  RequestIdFactory({
-    Random? random,
-  }) : _random = random ?? Random.secure();
+  RequestIdFactory({Random? random}) : _random = random ?? Random.secure();
 
   final Random _random;
 
@@ -17,4 +15,3 @@ class RequestIdFactory {
     return bytes.map((value) => value.toRadixString(16).padLeft(2, '0')).join();
   }
 }
-

@@ -10,10 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 class CourseWorkspacePage extends ConsumerWidget {
-  const CourseWorkspacePage({
-    required this.enrollmentId,
-    super.key,
-  });
+  const CourseWorkspacePage({required this.enrollmentId, super.key});
 
   static const routePath = '/my-courses/enrollments/:enrollmentId';
 
@@ -69,9 +66,7 @@ class CourseWorkspacePage extends ConsumerWidget {
 }
 
 class _CourseWorkspaceBody extends StatelessWidget {
-  const _CourseWorkspaceBody({
-    required this.detail,
-  });
+  const _CourseWorkspaceBody({required this.detail});
 
   final StudentEnrollmentDetail detail;
 
@@ -131,7 +126,9 @@ class _CourseWorkspaceBody extends StatelessWidget {
                     if (enrollment.accessEndsAt != null)
                       Chip(
                         avatar: const Icon(Icons.schedule, size: 16),
-                        label: Text(strings.accessUntil(enrollment.accessEndsAt!)),
+                        label: Text(
+                          strings.accessUntil(enrollment.accessEndsAt!),
+                        ),
                       ),
                   ],
                 ),
@@ -160,10 +157,7 @@ class _CourseWorkspaceBody extends StatelessWidget {
 }
 
 class _CourseContentSection extends ConsumerWidget {
-  const _CourseContentSection({
-    required this.organizationId,
-    this.roomId,
-  });
+  const _CourseContentSection({required this.organizationId, this.roomId});
 
   final String organizationId;
   final String? roomId;
@@ -232,9 +226,8 @@ class _CourseContentSection extends ConsumerWidget {
                   Text(error.toString()),
                   const SizedBox(height: 8),
                   TextButton.icon(
-                    onPressed: () => ref.invalidate(
-                      courseContentListProvider(query),
-                    ),
+                    onPressed: () =>
+                        ref.invalidate(courseContentListProvider(query)),
                     icon: const Icon(Icons.refresh),
                     label: Text(strings.retry),
                   ),
@@ -274,16 +267,15 @@ class _CourseContentSection extends ConsumerWidget {
   }) async {
     final strings = AppStrings.of(context);
     if (item.fileAsset == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(strings.contentFileUnavailable)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(strings.contentFileUnavailable)));
       return;
     }
 
-    await ref.read(contentViewerControllerProvider.notifier).open(
-          organizationId: organizationId,
-          contentId: item.id,
-        );
+    await ref
+        .read(contentViewerControllerProvider.notifier)
+        .open(organizationId: organizationId, contentId: item.id);
   }
 }
 
@@ -326,9 +318,7 @@ class _ContentTile extends StatelessWidget {
 }
 
 class _SecureViewerState extends ConsumerWidget {
-  const _SecureViewerState({
-    required this.state,
-  });
+  const _SecureViewerState({required this.state});
 
   final ContentViewerState state;
 
@@ -384,9 +374,7 @@ class _SecureViewerState extends ConsumerWidget {
 }
 
 class _LockedCourseState extends StatelessWidget {
-  const _LockedCourseState({
-    required this.detail,
-  });
+  const _LockedCourseState({required this.detail});
 
   final StudentEnrollmentDetail detail;
 

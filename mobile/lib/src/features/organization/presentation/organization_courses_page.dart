@@ -191,10 +191,7 @@ class _StatTile extends StatelessWidget {
 }
 
 class _CourseCard extends StatelessWidget {
-  const _CourseCard({
-    required this.course,
-    required this.batches,
-  });
+  const _CourseCard({required this.course, required this.batches});
 
   final OrganizationCourseSummary course;
   final List<OrganizationBatchSummary> batches;
@@ -210,10 +207,7 @@ class _CourseCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              course.title,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text(course.title, style: Theme.of(context).textTheme.titleMedium),
             if (course.shortDescription != null) ...[
               const SizedBox(height: 4),
               Text(course.shortDescription!),

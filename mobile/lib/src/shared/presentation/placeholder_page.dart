@@ -1,18 +1,10 @@
 import 'package:ain_mobile/src/app/localization/app_strings.dart';
 import 'package:flutter/material.dart';
 
-enum PlaceholderTitleKey {
-  explore,
-  myCourses,
-  schedule,
-  profile,
-}
+enum PlaceholderTitleKey { explore, myCourses, schedule, profile }
 
 class PlaceholderPage extends StatelessWidget {
-  const PlaceholderPage({
-    required this.titleKey,
-    super.key,
-  });
+  const PlaceholderPage({required this.titleKey, super.key});
 
   final PlaceholderTitleKey titleKey;
 
@@ -28,9 +20,7 @@ class PlaceholderPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(title)),
-      body: Center(
-        child: Text(strings.repositoryWiringPending(title)),
-      ),
+      body: Center(child: Text(strings.repositoryWiringPending(title))),
     );
   }
 }

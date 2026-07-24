@@ -1,10 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum AppFlavor {
-  development,
-  staging,
-  production,
-}
+enum AppFlavor { development, staging, production }
 
 final appEnvironmentProvider = Provider<AppEnvironment>(
   (ref) => throw UnimplementedError('AppEnvironment must be overridden.'),
@@ -61,4 +57,3 @@ class AppEnvironment {
     }
   }
 }
-

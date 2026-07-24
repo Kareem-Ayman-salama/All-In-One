@@ -3,15 +3,14 @@ import 'package:ain_mobile/src/core/api/api_envelope.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final organizationRoomRepositoryProvider =
-    Provider<OrganizationRoomRepository>((ref) {
-  return OrganizationRoomRepository(dio: ref.watch(dioProvider));
-});
+final organizationRoomRepositoryProvider = Provider<OrganizationRoomRepository>(
+  (ref) {
+    return OrganizationRoomRepository(dio: ref.watch(dioProvider));
+  },
+);
 
 class OrganizationRoomRepository {
-  const OrganizationRoomRepository({
-    required Dio dio,
-  }) : _dio = dio;
+  const OrganizationRoomRepository({required Dio dio}) : _dio = dio;
 
   final Dio _dio;
 
@@ -25,9 +24,9 @@ class OrganizationRoomRepository {
     );
     final envelope = ApiEnvelope<List<OrganizationRoomSummary>>.fromJson(
       readJsonObject(response.data),
-      (value) => readJsonObjectList(value)
-          .map(OrganizationRoomSummary.fromJson)
-          .toList(growable: false),
+      (value) => readJsonObjectList(
+        value,
+      ).map(OrganizationRoomSummary.fromJson).toList(growable: false),
     );
 
     return envelope.data;
@@ -142,11 +141,7 @@ String? _readNullableString(
   return value?.toString();
 }
 
-int _readInt(
-  Map<String, Object?> json,
-  String key, {
-  String? snakeKey,
-}) {
+int _readInt(Map<String, Object?> json, String key, {String? snakeKey}) {
   final value = json[key] ?? (snakeKey == null ? null : json[snakeKey]);
   if (value is int) {
     return value;

@@ -5,8 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final activeWorkspaceControllerProvider =
     AsyncNotifierProvider<ActiveWorkspaceController, ActiveWorkspace?>(
-  ActiveWorkspaceController.new,
-);
+      ActiveWorkspaceController.new,
+    );
 
 class ActiveWorkspaceController extends AsyncNotifier<ActiveWorkspace?> {
   @override
@@ -21,10 +21,12 @@ class ActiveWorkspaceController extends AsyncNotifier<ActiveWorkspace?> {
           .read(workspaceRepositoryProvider)
           .getContext(workspace.organizationId);
 
-      ref.read(tenantCacheScopeControllerProvider.notifier).activateOrganization(
-            organizationId: workspace.organizationId,
-          );
-      await ref.read(telemetryServiceProvider).track(
+      ref
+          .read(tenantCacheScopeControllerProvider.notifier)
+          .activateOrganization(organizationId: workspace.organizationId);
+      await ref
+          .read(telemetryServiceProvider)
+          .track(
             TelemetryEvent.workspaceSelected,
             properties: <String, Object?>{
               'organizationId': workspace.organizationId,
@@ -104,10 +106,7 @@ class ActiveWorkspace {
   final String role;
   final Map<String, Object?> context;
 
-  ActiveWorkspace copyWith({
-    String? name,
-    Map<String, Object?>? context,
-  }) {
+  ActiveWorkspace copyWith({String? name, Map<String, Object?>? context}) {
     return ActiveWorkspace(
       organizationId: organizationId,
       name: name ?? this.name,

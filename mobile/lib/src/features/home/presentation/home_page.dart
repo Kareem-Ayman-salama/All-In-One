@@ -37,9 +37,7 @@ class HomePage extends StatelessWidget {
             Card(
               child: ListTile(
                 title: Text(strings.mobileFoundationReady),
-                subtitle: Text(
-                  strings.repositoryWiringNext,
-                ),
+                subtitle: Text(strings.repositoryWiringNext),
               ),
             ),
             Card(
@@ -75,9 +73,8 @@ class HomePage extends StatelessWidget {
                 title: Text(strings.organizationAnnouncements),
                 subtitle: Text(strings.organizationAnnouncementsHint),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.go(
-                  OrganizationAnnouncementsPage.routePath,
-                ),
+                onTap: () =>
+                    context.go(OrganizationAnnouncementsPage.routePath),
               ),
             ),
             Card(

@@ -7,10 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 class NotificationInboxPage extends ConsumerWidget {
-  const NotificationInboxPage({
-    this.highlightNotificationId,
-    super.key,
-  });
+  const NotificationInboxPage({this.highlightNotificationId, super.key});
 
   static const routePath = '/notifications';
 

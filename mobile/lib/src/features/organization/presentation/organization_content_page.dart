@@ -61,9 +61,7 @@ class OrganizationContentPage extends ConsumerWidget {
                     FilledButton.icon(
                       onPressed: () {
                         ref.invalidate(
-                          organizationContentProvider(
-                            workspace.organizationId,
-                          ),
+                          organizationContentProvider(workspace.organizationId),
                         );
                       },
                       icon: const Icon(Icons.refresh),
@@ -92,16 +90,12 @@ class OrganizationContentPage extends ConsumerWidget {
     );
   }
 
-  Future<void> _showCreateSheet(
-    BuildContext context,
-    String organizationId,
-  ) {
+  Future<void> _showCreateSheet(BuildContext context, String organizationId) {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      builder: (context) => _CreateContentLinkSheet(
-        organizationId: organizationId,
-      ),
+      builder: (context) =>
+          _CreateContentLinkSheet(organizationId: organizationId),
     );
   }
 }
@@ -134,10 +128,7 @@ class _NoWorkspace extends StatelessWidget {
 }
 
 class _ContentBody extends StatelessWidget {
-  const _ContentBody({
-    required this.items,
-    required this.organizationId,
-  });
+  const _ContentBody({required this.items, required this.organizationId});
 
   final List<ContentItemSummary> items;
   final String organizationId;
@@ -145,7 +136,9 @@ class _ContentBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = AppStrings.of(context);
-    final publishedCount = items.where((item) => item.status == 'published').length;
+    final publishedCount = items
+        .where((item) => item.status == 'published')
+        .length;
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -218,10 +211,7 @@ class _StatTile extends StatelessWidget {
 }
 
 class _ContentCard extends ConsumerWidget {
-  const _ContentCard({
-    required this.item,
-    required this.organizationId,
-  });
+  const _ContentCard({required this.item, required this.organizationId});
 
   final ContentItemSummary item;
   final String organizationId;
@@ -245,10 +235,9 @@ class _ContentCard extends ConsumerWidget {
         trailing: IconButton(
           tooltip: strings.deleteContent,
           onPressed: () async {
-            await ref.read(organizationContentActionsProvider).delete(
-                  organizationId: organizationId,
-                  contentId: item.id,
-                );
+            await ref
+                .read(organizationContentActionsProvider)
+                .delete(organizationId: organizationId, contentId: item.id);
           },
           icon: const Icon(Icons.delete_outline),
         ),
@@ -398,7 +387,9 @@ class _CreateContentLinkSheetState
     }
     setState(() => _submitting = true);
     try {
-      await ref.read(organizationContentActionsProvider).createLink(
+      await ref
+          .read(organizationContentActionsProvider)
+          .createLink(
             organizationId: widget.organizationId,
             command: CreateLinkContentCommand(
               roomId: _roomId!,

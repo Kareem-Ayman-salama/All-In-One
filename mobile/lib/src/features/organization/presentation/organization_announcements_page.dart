@@ -90,16 +90,12 @@ class OrganizationAnnouncementsPage extends ConsumerWidget {
     );
   }
 
-  Future<void> _showCreateSheet(
-    BuildContext context,
-    String organizationId,
-  ) {
+  Future<void> _showCreateSheet(BuildContext context, String organizationId) {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      builder: (context) => _CreateAnnouncementSheet(
-        organizationId: organizationId,
-      ),
+      builder: (context) =>
+          _CreateAnnouncementSheet(organizationId: organizationId),
     );
   }
 }
@@ -361,7 +357,9 @@ class _CreateAnnouncementSheetState
     }
     setState(() => _submitting = true);
     try {
-      await ref.read(organizationAnnouncementActionsProvider).create(
+      await ref
+          .read(organizationAnnouncementActionsProvider)
+          .create(
             organizationId: widget.organizationId,
             command: CreateOrganizationAnnouncementCommand(
               title: _titleController.text,

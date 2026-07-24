@@ -8,9 +8,7 @@ final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
 });
 
 class NotificationRepository {
-  const NotificationRepository({
-    required Dio dio,
-  }) : _dio = dio;
+  const NotificationRepository({required Dio dio}) : _dio = dio;
 
   final Dio _dio;
 
@@ -21,9 +19,9 @@ class NotificationRepository {
     );
     final envelope = ApiEnvelope<List<AppNotification>>.fromJson(
       readJsonObject(response.data),
-      (value) => readJsonObjectList(value)
-          .map(AppNotification.fromJson)
-          .toList(growable: false),
+      (value) => readJsonObjectList(
+        value,
+      ).map(AppNotification.fromJson).toList(growable: false),
     );
 
     return envelope.data;
@@ -61,7 +59,11 @@ class AppNotification {
       body: _readString(json, 'body'),
       read: (json['read'] as bool?) ?? status == 'read' || readAt != null,
       type: _readNullableString(json, 'type'),
-      targetType: _readNullableString(json, 'targetType', snakeKey: 'target_type'),
+      targetType: _readNullableString(
+        json,
+        'targetType',
+        snakeKey: 'target_type',
+      ),
       targetId: _readNullableString(json, 'targetId', snakeKey: 'target_id'),
       data: _readJsonObjectOrEmpty(json['data']),
       createdAt: _readNullableString(json, 'createdAt', snakeKey: 'created_at'),
@@ -96,7 +98,8 @@ String _readString(
   String? snakeKey,
   String fallback = '',
 }) {
-  return (json[key] ?? (snakeKey == null ? null : json[snakeKey]))?.toString() ??
+  return (json[key] ?? (snakeKey == null ? null : json[snakeKey]))
+          ?.toString() ??
       fallback;
 }
 

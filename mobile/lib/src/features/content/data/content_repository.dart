@@ -8,9 +8,7 @@ final contentRepositoryProvider = Provider<ContentRepository>((ref) {
 });
 
 class ContentRepository {
-  const ContentRepository({
-    required Dio dio,
-  }) : _dio = dio;
+  const ContentRepository({required Dio dio}) : _dio = dio;
 
   final Dio _dio;
 
@@ -28,9 +26,9 @@ class ContentRepository {
     );
     final envelope = ApiEnvelope<List<ContentItemSummary>>.fromJson(
       readJsonObject(response.data),
-      (value) => readJsonObjectList(value)
-          .map(ContentItemSummary.fromJson)
-          .toList(growable: false),
+      (value) => readJsonObjectList(
+        value,
+      ).map(ContentItemSummary.fromJson).toList(growable: false),
     );
 
     return envelope.data;
@@ -161,10 +159,16 @@ class ContentItemSummary {
       ),
       type: _readString(json, 'type'),
       status: _readString(json, 'status', fallback: 'published'),
-      downloadAllowed:
-          _readBool(json, 'downloadAllowed', snakeKey: 'download_allowed'),
-      watermarkEnabled:
-          _readBool(json, 'watermarkEnabled', snakeKey: 'watermark_enabled'),
+      downloadAllowed: _readBool(
+        json,
+        'downloadAllowed',
+        snakeKey: 'download_allowed',
+      ),
+      watermarkEnabled: _readBool(
+        json,
+        'watermarkEnabled',
+        snakeKey: 'watermark_enabled',
+      ),
       fileAsset: ContentFileAssetSummary.fromNullableJson(
         json['fileAsset'] ?? json['file_asset'],
       ),
@@ -342,7 +346,8 @@ String _readString(
   String? snakeKey,
   String fallback = '',
 }) {
-  return (json[key] ?? (snakeKey == null ? null : json[snakeKey]))?.toString() ??
+  return (json[key] ?? (snakeKey == null ? null : json[snakeKey]))
+          ?.toString() ??
       fallback;
 }
 

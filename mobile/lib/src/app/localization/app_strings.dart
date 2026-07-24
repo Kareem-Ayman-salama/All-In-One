@@ -15,16 +15,14 @@ class AppStrings {
   String get verifyEmail => isArabic ? 'Verify email' : 'Verify email';
   String get verificationCode =>
       isArabic ? 'Verification code' : 'Verification code';
-  String get invalidVerificationCode => isArabic
-      ? 'Enter the 6-digit code.'
-      : 'Enter the 6-digit code.';
+  String get invalidVerificationCode =>
+      isArabic ? 'Enter the 6-digit code.' : 'Enter the 6-digit code.';
   String get resendVerification =>
       isArabic ? 'Resend verification code' : 'Resend verification code';
   String get forgotPassword =>
       isArabic ? 'Forgot password?' : 'Forgot password?';
   String get resetPassword => isArabic ? 'Reset password' : 'Reset password';
-  String get sendResetCode =>
-      isArabic ? 'Send reset code' : 'Send reset code';
+  String get sendResetCode => isArabic ? 'Send reset code' : 'Send reset code';
   String get invitation => isArabic ? 'Invitation' : 'Invitation';
   String get invitationUnavailable =>
       isArabic ? 'Invitation is unavailable.' : 'Invitation is unavailable.';
@@ -38,8 +36,7 @@ class AppStrings {
   String get organizationBookingsHint => isArabic
       ? 'Review student booking requests and confirm, reject, or cancel through the backend.'
       : 'Review student booking requests and confirm, reject, or cancel through the backend.';
-  String get confirmBooking =>
-      isArabic ? 'Confirm booking' : 'Confirm booking';
+  String get confirmBooking => isArabic ? 'Confirm booking' : 'Confirm booking';
   String get rejectBooking => isArabic ? 'Reject booking' : 'Reject booking';
   String get cancelBooking => isArabic ? 'Cancel booking' : 'Cancel booking';
   String get organizationContent =>
@@ -49,8 +46,7 @@ class AppStrings {
       : 'Review protected room content and add published learning links.';
   String get addContentLink =>
       isArabic ? 'Add content link' : 'Add content link';
-  String get deleteContent =>
-      isArabic ? 'Delete content' : 'Delete content';
+  String get deleteContent => isArabic ? 'Delete content' : 'Delete content';
   String get contentItems => isArabic ? 'Content items' : 'Content items';
   String get publishedContent =>
       isArabic ? 'Published content' : 'Published content';
@@ -59,8 +55,9 @@ class AppStrings {
   String get contentTitleRequired =>
       isArabic ? 'Enter a content title.' : 'Enter a content title.';
   String get externalUrl => isArabic ? 'External URL' : 'External URL';
-  String get validUrlRequired =>
-      isArabic ? 'Enter a valid HTTP or HTTPS URL.' : 'Enter a valid HTTP or HTTPS URL.';
+  String get validUrlRequired => isArabic
+      ? 'Enter a valid HTTP or HTTPS URL.'
+      : 'Enter a valid HTTP or HTTPS URL.';
   String get roomRequired => isArabic ? 'Choose a room.' : 'Choose a room.';
   String contentTypeLabel(String type) {
     return switch (type) {
@@ -71,6 +68,7 @@ class AppStrings {
       _ => isArabic ? 'File' : 'File',
     };
   }
+
   String get organizationAnnouncements =>
       isArabic ? 'Organization announcements' : 'Organization announcements';
   String get organizationAnnouncementsHint => isArabic
@@ -85,8 +83,9 @@ class AppStrings {
       isArabic ? 'No announcements yet.' : 'No announcements yet.';
   String get announcementTitle =>
       isArabic ? 'Announcement title' : 'Announcement title';
-  String get announcementTitleRequired =>
-      isArabic ? 'Enter an announcement title.' : 'Enter an announcement title.';
+  String get announcementTitleRequired => isArabic
+      ? 'Enter an announcement title.'
+      : 'Enter an announcement title.';
   String get announcementBody =>
       isArabic ? 'Announcement body' : 'Announcement body';
   String get announcementBodyRequired =>
@@ -100,6 +99,7 @@ class AppStrings {
       _ => isArabic ? 'Organization' : 'Organization',
     };
   }
+
   String get organizationCourses =>
       isArabic ? 'Organization courses' : 'Organization courses';
   String get organizationCoursesHint => isArabic
@@ -108,8 +108,9 @@ class AppStrings {
   String get publishedCourses =>
       isArabic ? 'Published courses' : 'Published courses';
   String get openBatches => isArabic ? 'Open batches' : 'Open batches';
-  String get noOrganizationCourses =>
-      isArabic ? 'No organization courses yet.' : 'No organization courses yet.';
+  String get noOrganizationCourses => isArabic
+      ? 'No organization courses yet.'
+      : 'No organization courses yet.';
   String get noBatchesYet => isArabic ? 'No batches yet.' : 'No batches yet.';
   String get organizationEvents =>
       isArabic ? 'Organization events' : 'Organization events';
@@ -148,6 +149,7 @@ class AppStrings {
       _ => isArabic ? 'Scheduled' : 'Scheduled',
     };
   }
+
   String get organizationTasks =>
       isArabic ? 'Organization tasks' : 'Organization tasks';
   String get organizationTasksHint => isArabic
@@ -181,6 +183,7 @@ class AppStrings {
       _ => isArabic ? 'To do' : 'To do',
     };
   }
+
   String get organizationMembers =>
       isArabic ? 'Organization members' : 'Organization members';
   String get organizationMembersHint => isArabic
@@ -208,14 +211,14 @@ class AppStrings {
       _ => isArabic ? 'Member' : 'Member',
     };
   }
+
   String get organizationInvitations =>
       isArabic ? 'Organization invitations' : 'Organization invitations';
   String get organizationInvitationsHint => isArabic
       ? 'Invite members and manage pending workspace invitation links.'
       : 'Invite members and manage pending workspace invitation links.';
   String get inviteMember => isArabic ? 'Invite member' : 'Invite member';
-  String get sendInvitation =>
-      isArabic ? 'Send invitation' : 'Send invitation';
+  String get sendInvitation => isArabic ? 'Send invitation' : 'Send invitation';
   String get invitations => isArabic ? 'Invitations' : 'Invitations';
   String get pendingInvitations =>
       isArabic ? 'Pending invitations' : 'Pending invitations';
@@ -246,8 +249,9 @@ class AppStrings {
   String get resetRequested => isArabic
       ? 'Check your email for the reset code.'
       : 'Check your email for the reset code.';
-  String get passwordChanged =>
-      isArabic ? 'Password changed. Sign in again.' : 'Password changed. Sign in again.';
+  String get passwordChanged => isArabic
+      ? 'Password changed. Sign in again.'
+      : 'Password changed. Sign in again.';
 
   String get organizationProfile =>
       isArabic ? 'Organization profile' : 'Organization profile';
@@ -295,17 +299,13 @@ class AppStrings {
   String get myCourses => isArabic ? 'دوراتي' : 'My Courses';
   String get schedule => isArabic ? 'الجدول' : 'Schedule';
   String get profile => isArabic ? 'الملف الشخصي' : 'Profile';
-  String get notifications =>
-      isArabic ? 'الإشعارات' : 'Notifications';
+  String get notifications => isArabic ? 'الإشعارات' : 'Notifications';
   String get notificationsHint => isArabic
       ? 'تابع تنبيهات الحجوزات والكورسات وافتح الوجهة المناسبة.'
       : 'Review booking and course alerts and open the right destination.';
-  String get loading =>
-      isArabic ? 'جاري التحميل' : 'Loading';
-  String get openWorkspace =>
-      isArabic ? 'فتح مساحة العمل' : 'Open workspace';
-  String get exploreCourses =>
-      isArabic ? 'استكشف الكورسات' : 'Explore courses';
+  String get loading => isArabic ? 'جاري التحميل' : 'Loading';
+  String get openWorkspace => isArabic ? 'فتح مساحة العمل' : 'Open workspace';
+  String get exploreCourses => isArabic ? 'استكشف الكورسات' : 'Explore courses';
   String get findCourses => isArabic
       ? 'اختار الكورس المناسب واحجز مكانك'
       : 'Find the right course and reserve your seat';
@@ -331,19 +331,18 @@ class AppStrings {
       : 'Course details and booking are the next implementation step.';
   String get retry => isArabic ? 'إعادة المحاولة' : 'Retry';
   String get back => isArabic ? 'رجوع' : 'Back';
-  String get courseDetails =>
-      isArabic ? 'تفاصيل الكورس' : 'Course details';
+  String get courseDetails => isArabic ? 'تفاصيل الكورس' : 'Course details';
   String get availableBatches =>
       isArabic ? 'الدفعات المتاحة' : 'Available batches';
-  String get noAvailableBatches =>
-      isArabic ? 'لا توجد دفعات متاحة للحجز حاليا.' : 'No batches are currently available.';
+  String get noAvailableBatches => isArabic
+      ? 'لا توجد دفعات متاحة للحجز حاليا.'
+      : 'No batches are currently available.';
   String get whatYouWillLearn =>
       isArabic ? 'ماذا ستتعلم؟' : 'What you will learn';
   String get learningOutcomesPending => isArabic
       ? 'ستضيف الأكاديمية مخرجات التعلم التفصيلية قريبا.'
       : 'Detailed learning outcomes will be added by the academy soon.';
-  String get completeBooking =>
-      isArabic ? 'إتمام الحجز' : 'Complete booking';
+  String get completeBooking => isArabic ? 'إتمام الحجز' : 'Complete booking';
   String get noPaymentNow => isArabic
       ? 'لن تدفع الآن. ستتواصل الأكاديمية معك لتأكيد المقعد.'
       : 'No payment now. The academy will contact you to confirm your seat.';
@@ -353,8 +352,7 @@ class AppStrings {
   String get phone => isArabic ? 'رقم الهاتف' : 'Phone';
   String get phoneRequired =>
       isArabic ? 'اكتب رقم هاتف صحيح.' : 'Enter a valid phone number.';
-  String get optionalNote =>
-      isArabic ? 'ملاحظة اختيارية' : 'Optional note';
+  String get optionalNote => isArabic ? 'ملاحظة اختيارية' : 'Optional note';
   String get bookingTerms => isArabic
       ? 'أوافق على شروط الحجز وسياسة الإلغاء الخاصة بالأكاديمية.'
       : 'I accept the academy booking and cancellation policy.';
@@ -380,15 +378,11 @@ class AppStrings {
   String get myLearningSubtitle => isArabic
       ? 'تابع طلبات الحجز وافتح مساحات الكورسات التي تم تأكيدها.'
       : 'Track booking requests and open confirmed course spaces.';
-  String get pendingBookings =>
-      isArabic ? 'قيد التأكيد' : 'Pending bookings';
-  String get activeCourses =>
-      isArabic ? 'الكورسات النشطة' : 'Active courses';
-  String get noActiveCourses => isArabic
-      ? 'لا توجد كورسات نشطة بعد.'
-      : 'No active courses yet.';
-  String get bookingRequests =>
-      isArabic ? 'طلبات الحجز' : 'Booking requests';
+  String get pendingBookings => isArabic ? 'قيد التأكيد' : 'Pending bookings';
+  String get activeCourses => isArabic ? 'الكورسات النشطة' : 'Active courses';
+  String get noActiveCourses =>
+      isArabic ? 'لا توجد كورسات نشطة بعد.' : 'No active courses yet.';
+  String get bookingRequests => isArabic ? 'طلبات الحجز' : 'Booking requests';
   String get noBookingRequests =>
       isArabic ? 'لا توجد طلبات حجز بعد.' : 'No booking requests yet.';
   String get openCourseSpace =>
@@ -407,8 +401,9 @@ class AppStrings {
   String get courseContentPending => isArabic
       ? 'ستظهر ملفات وفيديوهات الكورس هنا بعد إضافتها من الأكاديمية.'
       : 'Course files and videos will appear here after the academy adds them.';
-  String get contentFileUnavailable =>
-      isArabic ? 'ملف المحتوى غير متاح حاليا.' : 'Content file is not available.';
+  String get contentFileUnavailable => isArabic
+      ? 'ملف المحتوى غير متاح حاليا.'
+      : 'Content file is not available.';
   String get watermarkProtected =>
       isArabic ? 'محمي بعلامة مائية' : 'Watermark protected';
   String get downloadDisabled =>
@@ -419,10 +414,8 @@ class AppStrings {
       isArabic ? 'المشاهد الآمن مفتوح' : 'Secure viewer open';
   String get reportDownloadBlocked =>
       isArabic ? 'تسجيل منع التحميل' : 'Report blocked download';
-  String get closeViewer =>
-      isArabic ? 'إغلاق المشاهد' : 'Close viewer';
-  String get markAllRead =>
-      isArabic ? 'تحديد الكل كمقروء' : 'Mark all read';
+  String get closeViewer => isArabic ? 'إغلاق المشاهد' : 'Close viewer';
+  String get markAllRead => isArabic ? 'تحديد الكل كمقروء' : 'Mark all read';
   String get noNotifications =>
       isArabic ? 'لا توجد إشعارات حاليا.' : 'No notifications yet.';
   String get read => isArabic ? 'مقروء' : 'Read';

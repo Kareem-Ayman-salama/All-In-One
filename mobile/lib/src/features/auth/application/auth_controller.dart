@@ -24,15 +24,14 @@ class AuthController extends Notifier<AuthState> {
         : const AuthState.authenticated();
   }
 
-  Future<void> signIn({
-    required String email,
-    required String password,
-  }) async {
+  Future<void> signIn({required String email, required String password}) async {
     state = const AuthState.submitting();
 
     try {
       final installationId = await ref.read(installationIdProvider.future);
-      await ref.read(authRepositoryProvider).login(
+      await ref
+          .read(authRepositoryProvider)
+          .login(
             LoginCommand(
               email: email,
               password: password,
@@ -45,12 +44,12 @@ class AuthController extends Notifier<AuthState> {
               ),
             ),
           );
-      await ref.read(telemetryServiceProvider).track(
-        TelemetryEvent.loginSuccess,
-        properties: <String, Object?>{
-          'platform': _mobilePlatformName(),
-        },
-      );
+      await ref
+          .read(telemetryServiceProvider)
+          .track(
+            TelemetryEvent.loginSuccess,
+            properties: <String, Object?>{'platform': _mobilePlatformName()},
+          );
       state = const AuthState.authenticated();
     } on Object catch (error) {
       final apiError = ref.read(apiErrorMapperProvider).map(error);
@@ -67,7 +66,9 @@ class AuthController extends Notifier<AuthState> {
     state = const AuthState.submitting();
 
     try {
-      final result = await ref.read(authRepositoryProvider).register(
+      final result = await ref
+          .read(authRepositoryProvider)
+          .register(
             RegisterCommand(
               name: name,
               email: email,
@@ -93,16 +94,18 @@ class AuthController extends Notifier<AuthState> {
     state = const AuthState.submitting();
 
     try {
-      await ref.read(authRepositoryProvider).verifyEmail(
-            EmailCodeCommand(email: email, code: code),
+      await ref
+          .read(authRepositoryProvider)
+          .verifyEmail(EmailCodeCommand(email: email, code: code));
+      await ref
+          .read(telemetryServiceProvider)
+          .track(
+            TelemetryEvent.loginSuccess,
+            properties: <String, Object?>{
+              'method': 'email_verification',
+              'platform': _mobilePlatformName(),
+            },
           );
-      await ref.read(telemetryServiceProvider).track(
-        TelemetryEvent.loginSuccess,
-        properties: <String, Object?>{
-          'method': 'email_verification',
-          'platform': _mobilePlatformName(),
-        },
-      );
       state = const AuthState.authenticated();
     } on Object catch (error) {
       final apiError = ref.read(apiErrorMapperProvider).map(error);
@@ -145,7 +148,9 @@ class AuthController extends Notifier<AuthState> {
     state = const AuthState.submitting();
 
     try {
-      final result = await ref.read(authRepositoryProvider).resetPassword(
+      final result = await ref
+          .read(authRepositoryProvider)
+          .resetPassword(
             ResetPasswordCommand(
               email: email,
               code: code,
@@ -174,16 +179,18 @@ class AuthController extends Notifier<AuthState> {
 
   Future<InvitationAcceptance?> acceptInvitation(String token) async {
     try {
-      final result = await ref.read(authRepositoryProvider).acceptInvitation(
-            token,
+      final result = await ref
+          .read(authRepositoryProvider)
+          .acceptInvitation(token);
+      await ref
+          .read(telemetryServiceProvider)
+          .track(
+            TelemetryEvent.workspaceSelected,
+            properties: <String, Object?>{
+              'source': 'invitation',
+              'organizationId': result.organization['id'],
+            },
           );
-      await ref.read(telemetryServiceProvider).track(
-        TelemetryEvent.workspaceSelected,
-        properties: <String, Object?>{
-          'source': 'invitation',
-          'organizationId': result.organization['id'],
-        },
-      );
       return result;
     } on Object catch (error) {
       final apiError = ref.read(apiErrorMapperProvider).map(error);
@@ -211,7 +218,6 @@ class AuthController extends Notifier<AuthState> {
   void markUnauthenticated() {
     state = const AuthState.unauthenticated();
   }
-
 }
 
 class AuthState {
@@ -224,48 +230,32 @@ class AuthState {
   });
 
   const AuthState.restoring()
-      : this._(
-          isRestoring: true,
-          isAuthenticated: false,
-          isSubmitting: false,
-        );
+    : this._(isRestoring: true, isAuthenticated: false, isSubmitting: false);
 
   const AuthState.unauthenticated()
-      : this._(
-          isRestoring: false,
-          isAuthenticated: false,
-          isSubmitting: false,
-        );
+    : this._(isRestoring: false, isAuthenticated: false, isSubmitting: false);
 
   const AuthState.submitting()
-      : this._(
-          isRestoring: false,
-          isAuthenticated: false,
-          isSubmitting: true,
-        );
+    : this._(isRestoring: false, isAuthenticated: false, isSubmitting: true);
 
   const AuthState.unauthenticatedWithError(String errorMessage)
-      : this._(
-          isRestoring: false,
-          isAuthenticated: false,
-          isSubmitting: false,
-          errorMessage: errorMessage,
-        );
+    : this._(
+        isRestoring: false,
+        isAuthenticated: false,
+        isSubmitting: false,
+        errorMessage: errorMessage,
+      );
 
   const AuthState.unauthenticatedWithMessage(String successMessage)
-      : this._(
-          isRestoring: false,
-          isAuthenticated: false,
-          isSubmitting: false,
-          successMessage: successMessage,
-        );
+    : this._(
+        isRestoring: false,
+        isAuthenticated: false,
+        isSubmitting: false,
+        successMessage: successMessage,
+      );
 
   const AuthState.authenticated()
-      : this._(
-          isRestoring: false,
-          isAuthenticated: true,
-          isSubmitting: false,
-        );
+    : this._(isRestoring: false, isAuthenticated: true, isSubmitting: false);
 
   final bool isRestoring;
   final bool isAuthenticated;

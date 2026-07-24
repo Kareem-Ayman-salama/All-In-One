@@ -8,9 +8,7 @@ final metadataRepositoryProvider = Provider<MetadataRepository>((ref) {
 });
 
 class MetadataRepository {
-  const MetadataRepository({
-    required Dio dio,
-  }) : _dio = dio;
+  const MetadataRepository({required Dio dio}) : _dio = dio;
 
   final Dio _dio;
 
@@ -40,4 +38,3 @@ class MetadataRepository {
     return envelope.data;
   }
 }
-

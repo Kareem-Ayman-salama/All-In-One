@@ -56,10 +56,7 @@ class _CourseCatalogPageState extends ConsumerState<CourseCatalogPage> {
                 onClear: _clearSearch,
               ),
               const SizedBox(height: 12),
-              _SortSelector(
-                value: _query.sort,
-                onChanged: _setSort,
-              ),
+              _SortSelector(value: _query.sort, onChanged: _setSort),
               const SizedBox(height: 16),
               coursePage.when(
                 data: (page) => _CourseList(page: page),
@@ -88,20 +85,14 @@ class _CourseCatalogPageState extends ConsumerState<CourseCatalogPage> {
 
   void _submitSearch() {
     setState(() {
-      _query = _query.copyWith(
-        search: _searchController.text,
-        page: 1,
-      );
+      _query = _query.copyWith(search: _searchController.text, page: 1);
     });
   }
 
   void _clearSearch() {
     _searchController.clear();
     setState(() {
-      _query = _query.copyWith(
-        search: '',
-        page: 1,
-      );
+      _query = _query.copyWith(search: '', page: 1);
     });
   }
 
@@ -144,10 +135,7 @@ class _CourseSearchBar extends StatelessWidget {
 }
 
 class _SortSelector extends StatelessWidget {
-  const _SortSelector({
-    required this.value,
-    required this.onChanged,
-  });
+  const _SortSelector({required this.value, required this.onChanged});
 
   final PublicCourseSort value;
   final ValueChanged<PublicCourseSort> onChanged;
@@ -181,9 +169,7 @@ class _SortSelector extends StatelessWidget {
 }
 
 class _CourseList extends StatelessWidget {
-  const _CourseList({
-    required this.page,
-  });
+  const _CourseList({required this.page});
 
   final PublicCoursePage page;
 
@@ -210,9 +196,7 @@ class _CourseList extends StatelessWidget {
 }
 
 class _CourseCard extends StatelessWidget {
-  const _CourseCard({
-    required this.course,
-  });
+  const _CourseCard({required this.course});
 
   final PublicCourseSummary course;
 
@@ -269,7 +253,8 @@ class _CourseCard extends StatelessWidget {
                 children: [
                   _InfoChip(
                     icon: Icons.business,
-                    label: course.academy?.localizedName(strings.isArabic) ??
+                    label:
+                        course.academy?.localizedName(strings.isArabic) ??
                         strings.academyTeam,
                   ),
                   if (course.deliveryType != null)
@@ -319,10 +304,7 @@ class _CourseCard extends StatelessWidget {
 }
 
 class _InfoChip extends StatelessWidget {
-  const _InfoChip({
-    required this.icon,
-    required this.label,
-  });
+  const _InfoChip({required this.icon, required this.label});
 
   final IconData icon;
   final String label;
@@ -338,10 +320,7 @@ class _InfoChip extends StatelessWidget {
 }
 
 class _CatalogError extends StatelessWidget {
-  const _CatalogError({
-    required this.message,
-    required this.onRetry,
-  });
+  const _CatalogError({required this.message, required this.onRetry});
 
   final String message;
   final VoidCallback onRetry;
@@ -372,9 +351,7 @@ class _CatalogError extends StatelessWidget {
 }
 
 class _EmptyCatalog extends StatelessWidget {
-  const _EmptyCatalog({
-    required this.message,
-  });
+  const _EmptyCatalog({required this.message});
 
   final String message;
 

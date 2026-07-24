@@ -9,9 +9,7 @@ final publicCourseRepositoryProvider = Provider<PublicCourseRepository>((ref) {
 });
 
 class PublicCourseRepository {
-  const PublicCourseRepository({
-    required Dio dio,
-  }) : _dio = dio;
+  const PublicCourseRepository({required Dio dio}) : _dio = dio;
 
   final Dio _dio;
 
@@ -24,9 +22,9 @@ class PublicCourseRepository {
     );
     final envelope = ApiEnvelope<List<PublicCourseSummary>>.fromJson(
       readJsonObject(response.data),
-      (value) => readJsonObjectList(value)
-          .map(PublicCourseSummary.fromJson)
-          .toList(growable: false),
+      (value) => readJsonObjectList(
+        value,
+      ).map(PublicCourseSummary.fromJson).toList(growable: false),
     );
 
     return PublicCoursePage(
@@ -119,14 +117,8 @@ class PublicCourseQuery {
   }
 
   @override
-  int get hashCode => Object.hash(
-        search,
-        categorySlug,
-        deliveryType,
-        sort,
-        page,
-        perPage,
-      );
+  int get hashCode =>
+      Object.hash(search, categorySlug, deliveryType, sort, page, perPage);
 }
 
 enum PublicCourseSort {
@@ -141,10 +133,7 @@ enum PublicCourseSort {
 }
 
 class PublicCoursePage {
-  const PublicCoursePage({
-    required this.courses,
-    required this.pagination,
-  });
+  const PublicCoursePage({required this.courses, required this.pagination});
 
   final List<PublicCourseSummary> courses;
   final PublicCoursePagination pagination;
@@ -232,9 +221,9 @@ class PublicCourseSummary {
       academy: PublicCourseAcademy.fromNullableJson(json['academy']),
       instructor: PublicCourseInstructor.fromNullableJson(json['instructor']),
       category: PublicCourseCategory.fromNullableJson(json['category']),
-      batches: _readObjectList(json['batches'])
-          .map(PublicCourseBatch.fromJson)
-          .toList(growable: false),
+      batches: _readObjectList(
+        json['batches'],
+      ).map(PublicCourseBatch.fromJson).toList(growable: false),
       description: json['description'] as String?,
       descriptionAr: json['descriptionAr'] as String?,
       learningOutcomes: _readStringList(json['learningOutcomes']),
@@ -335,10 +324,7 @@ class PublicBookingCommand {
 }
 
 class PublicBookingResult {
-  const PublicBookingResult({
-    required this.bookingId,
-    required this.nextPath,
-  });
+  const PublicBookingResult({required this.bookingId, required this.nextPath});
 
   factory PublicBookingResult.fromJson(Map<String, Object?> json) {
     final booking = readJsonObject(json['booking']);

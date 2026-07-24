@@ -7,10 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 class CourseDetailPage extends ConsumerStatefulWidget {
-  const CourseDetailPage({
-    required this.courseSlug,
-    super.key,
-  });
+  const CourseDetailPage({required this.courseSlug, super.key});
 
   static const routePath = '/explore/course/:courseSlug';
 
@@ -122,7 +119,9 @@ class _CourseDetailPageState extends ConsumerState<CourseDetailPage> {
       _submitting = true;
     });
     try {
-      final result = await ref.read(publicCourseRepositoryProvider).createBooking(
+      final result = await ref
+          .read(publicCourseRepositoryProvider)
+          .createBooking(
             PublicBookingCommand(
               courseId: course.id,
               batchId: batchId,
@@ -159,9 +158,9 @@ class _CourseDetailPageState extends ConsumerState<CourseDetailPage> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 }
 
@@ -321,7 +320,9 @@ class _CourseDetailBody extends StatelessWidget {
                   TextFormField(
                     controller: noteController,
                     maxLines: 2,
-                    decoration: InputDecoration(labelText: strings.optionalNote),
+                    decoration: InputDecoration(
+                      labelText: strings.optionalNote,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   CheckboxListTile(
@@ -386,26 +387,18 @@ PublicCourseBatch? _findBatchById(
 }
 
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({
-    required this.title,
-  });
+  const _SectionTitle({required this.title});
 
   final String title;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: Theme.of(context).textTheme.titleLarge,
-    );
+    return Text(title, style: Theme.of(context).textTheme.titleLarge);
   }
 }
 
 class _DetailError extends StatelessWidget {
-  const _DetailError({
-    required this.message,
-    required this.onRetry,
-  });
+  const _DetailError({required this.message, required this.onRetry});
 
   final String message;
   final VoidCallback onRetry;

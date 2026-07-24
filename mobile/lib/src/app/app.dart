@@ -18,10 +18,7 @@ class AinMobileApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       title: 'AIN',
       locale: locale,
-      supportedLocales: const [
-        Locale('ar'),
-        Locale('en'),
-      ],
+      supportedLocales: const [Locale('ar'), Locale('en')],
       localizationsDelegates: const [
         AppStringsDelegate(),
         GlobalMaterialLocalizations.delegate,

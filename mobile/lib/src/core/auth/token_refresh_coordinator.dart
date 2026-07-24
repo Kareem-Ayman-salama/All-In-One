@@ -6,8 +6,8 @@ class TokenRefreshCoordinator {
   TokenRefreshCoordinator({
     required Dio dio,
     required SecureTokenStore tokenStore,
-  })  : _dio = dio,
-        _tokenStore = tokenStore;
+  }) : _dio = dio,
+       _tokenStore = tokenStore;
 
   static const skipRefreshExtraKey = 'skipAuthRefresh';
   static const retriedAfterRefreshExtraKey = 'retriedAfterRefresh';
@@ -41,13 +41,9 @@ class TokenRefreshCoordinator {
     try {
       final response = await _dio.post<Object?>(
         '/auth/refresh',
-        data: <String, Object?>{
-          'refreshToken': refreshToken,
-        },
+        data: <String, Object?>{'refreshToken': refreshToken},
         options: Options(
-          extra: const <String, Object?>{
-            skipRefreshExtraKey: true,
-          },
+          extra: const <String, Object?>{skipRefreshExtraKey: true},
         ),
       );
       final envelope = ApiEnvelope<Map<String, Object?>>.fromJson(
@@ -55,7 +51,8 @@ class TokenRefreshCoordinator {
         readJsonObject,
       );
       final accessToken = envelope.data['accessToken'] as String? ?? '';
-      final rotatedRefreshToken = envelope.data['refreshToken'] as String? ?? '';
+      final rotatedRefreshToken =
+          envelope.data['refreshToken'] as String? ?? '';
 
       if (accessToken.isEmpty || rotatedRefreshToken.isEmpty) {
         await _tokenStore.clearSession();
@@ -84,4 +81,3 @@ class TokenRefreshCoordinator {
         options.extra[retriedAfterRefreshExtraKey] != true;
   }
 }
-

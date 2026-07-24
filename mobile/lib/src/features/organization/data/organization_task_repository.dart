@@ -3,15 +3,14 @@ import 'package:ain_mobile/src/core/api/api_envelope.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final organizationTaskRepositoryProvider =
-    Provider<OrganizationTaskRepository>((ref) {
-  return OrganizationTaskRepository(dio: ref.watch(dioProvider));
-});
+final organizationTaskRepositoryProvider = Provider<OrganizationTaskRepository>(
+  (ref) {
+    return OrganizationTaskRepository(dio: ref.watch(dioProvider));
+  },
+);
 
 class OrganizationTaskRepository {
-  const OrganizationTaskRepository({
-    required Dio dio,
-  }) : _dio = dio;
+  const OrganizationTaskRepository({required Dio dio}) : _dio = dio;
 
   final Dio _dio;
 
@@ -31,9 +30,9 @@ class OrganizationTaskRepository {
     );
     final envelope = ApiEnvelope<List<OrganizationTaskSummary>>.fromJson(
       readJsonObject(response.data),
-      (value) => readJsonObjectList(value)
-          .map(OrganizationTaskSummary.fromJson)
-          .toList(growable: false),
+      (value) => readJsonObjectList(
+        value,
+      ).map(OrganizationTaskSummary.fromJson).toList(growable: false),
     );
 
     return envelope.data;
@@ -183,7 +182,11 @@ class OrganizationTaskSummary {
       titleAr: _readNullableString(json, 'titleAr', snakeKey: 'title_ar'),
       description: _readNullableString(json, 'description'),
       roomId: _readNullableString(json, 'roomId', snakeKey: 'room_id'),
-      assignedTo: _readNullableString(json, 'assignedTo', snakeKey: 'assigned_to'),
+      assignedTo: _readNullableString(
+        json,
+        'assignedTo',
+        snakeKey: 'assigned_to',
+      ),
       dueAt: _readNullableString(json, 'dueAt', snakeKey: 'due_at'),
       priority: _readString(json, 'priority', fallback: 'medium'),
       status: _readString(json, 'status', fallback: 'todo'),

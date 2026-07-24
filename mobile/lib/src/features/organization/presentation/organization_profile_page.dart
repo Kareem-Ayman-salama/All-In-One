@@ -96,7 +96,8 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
       text: organization['bio']?.toString() ?? '',
     );
     _brandColorController = TextEditingController(
-      text: (organization['brandColor'] ?? organization['brand_color'])
+      text:
+          (organization['brandColor'] ?? organization['brand_color'])
               ?.toString() ??
           '',
     );

@@ -7,8 +7,8 @@ final tenantCacheKeyFactoryProvider = Provider<TenantCacheKeyFactory>((ref) {
 
 final tenantCacheScopeControllerProvider =
     NotifierProvider<TenantCacheScopeController, TenantCacheScope>(
-  TenantCacheScopeController.new,
-);
+      TenantCacheScopeController.new,
+    );
 
 class TenantCacheScopeController extends Notifier<TenantCacheScope> {
   @override
@@ -16,15 +16,11 @@ class TenantCacheScopeController extends Notifier<TenantCacheScope> {
     return const TenantCacheScope.empty();
   }
 
-  void activateUser({
-    required String userId,
-  }) {
+  void activateUser({required String userId}) {
     state = state.copyWith(userId: userId);
   }
 
-  void activateOrganization({
-    required String organizationId,
-  }) {
+  void activateOrganization({required String organizationId}) {
     state = state.copyWith(organizationId: organizationId);
     ref.invalidate(offlineCachePolicyProvider);
   }
@@ -39,22 +35,14 @@ class TenantCacheScopeController extends Notifier<TenantCacheScope> {
 }
 
 class TenantCacheScope {
-  const TenantCacheScope({
-    this.userId,
-    this.organizationId,
-  });
+  const TenantCacheScope({this.userId, this.organizationId});
 
-  const TenantCacheScope.empty()
-      : userId = null,
-        organizationId = null;
+  const TenantCacheScope.empty() : userId = null, organizationId = null;
 
   final String? userId;
   final String? organizationId;
 
-  TenantCacheScope copyWith({
-    String? userId,
-    String? organizationId,
-  }) {
+  TenantCacheScope copyWith({String? userId, String? organizationId}) {
     return TenantCacheScope(
       userId: userId ?? this.userId,
       organizationId: organizationId ?? this.organizationId,
@@ -97,4 +85,3 @@ class TenantCacheKeyFactory {
     return value;
   }
 }
-
