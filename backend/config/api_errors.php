@@ -55,4 +55,6 @@ return [
     'STUDENT_ACCOUNT_REQUIRED' => ['status' => 403, 'category' => 'booking', 'retryable' => false, 'messageEn' => 'Use a student account to complete this action.', 'messageAr' => 'استخدم حساب طالب لإكمال هذا الإجراء.'],
     'TENANT_ACCESS_DENIED' => ['status' => 403, 'category' => 'workspace', 'retryable' => false, 'messageEn' => 'You do not have access to this organization.', 'messageAr' => 'ليست لديك صلاحية الوصول إلى هذه المؤسسة.'],
     'VALIDATION_ERROR' => ['status' => 422, 'category' => 'request', 'retryable' => false, 'messageEn' => 'Check the highlighted fields and try again.', 'messageAr' => 'راجع الحقول المطلوبة وحاول مرة أخرى.'],
+    'OTP_DELIVERY_FAILED' => ['status' => 502, 'category' => 'auth', 'retryable' => true, 'messageEn' => 'The verification email could not be delivered.', 'messageAr' => 'تعذر إرسال رسالة رمز التحقق.'],
+    'OTP_DELIVERY_NOT_CONFIGURED' => ['status' => 503, 'category' => 'auth', 'retryable' => false, 'messageEn' => 'Email verification delivery is not configured.', 'messageAr' => 'إرسال رموز التحقق عبر البريد غير معد بعد.'],
 ];

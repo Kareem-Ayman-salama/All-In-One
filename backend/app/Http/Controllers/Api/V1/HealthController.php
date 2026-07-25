@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Services\Auth\OtpReadinessService;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -38,27 +39,19 @@ class HealthController extends Controller
         );
     }
 
-    public function otp(Request $request): JsonResponse
+    public function otp(
+        Request $request,
+        OtpReadinessService $readiness,
+    ): JsonResponse
     {
-        $mailer = (string) config('mail.default');
-        $from = (string) config('mail.from.address');
-        $checks = [
-            'transactionalMail' => ! in_array($mailer, ['log', 'array'], true),
-            'senderConfigured' => $from !== ''
-                && ! str_contains($from, 'example.com')
-                && ! str_ends_with($from, '.local'),
-            // OTP mail uses the sync connection in the free MVP, so it does
-            // not depend on a separate queue worker service.
-            'deliveryMode' => true,
-        ];
-        $ready = ! in_array(false, $checks, true);
+        $report = $readiness->report();
 
         return ApiResponse::success($request, [
-            'status' => $ready ? 'ready' : 'not_ready',
-            'checks' => $checks,
-            'mailer' => $mailer,
-            'queue' => (string) config('queue.default'),
-        ], status: $ready ? 200 : 503);
+            'status' => $report['status'],
+            'checks' => $report['checks'],
+            'mailer' => $report['mailer'],
+            'queue' => $report['queue'],
+        ], status: $report['status'] === 'ready' ? 200 : 503);
     }
 
     private function databaseCheck(): bool

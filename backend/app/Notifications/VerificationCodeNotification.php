@@ -38,12 +38,13 @@ class VerificationCodeNotification extends Notification implements ShouldQueue
         $title = match ($this->purpose) {
             'password_reset' => 'AIO password reset code',
             'mfa_login' => 'AIO administrator sign-in code',
+            'delivery_test' => 'AIO OTP delivery test',
             default => 'Verify your AIO email',
         };
 
         return (new MailMessage)
             ->subject($title)
-            ->greeting('Hello '.$notifiable->name.',')
+            ->greeting('Hello '.$notifiable->name.'.')
             ->line('Your AIO verification code is / رمز التحقق الخاص بك في AIO:')
             ->line($this->code)
             ->line('This code expires in 15 minutes. Do not share it with anyone.')

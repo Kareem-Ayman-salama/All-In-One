@@ -107,6 +107,29 @@ GET /api/v1/health/otp
 
 The OTP endpoint must return `status: ready` before inviting real users.
 
+After signing in as the platform Super Admin, open:
+
+```text
+/super-admin/settings
+```
+
+The OTP operations panel checks the transactional mail provider, verified
+sender, SMTP credentials, and direct delivery mode. Use **Send test OTP** to
+deliver a real code to the signed-in Super Admin email. The test endpoint never
+accepts an arbitrary recipient and is limited to three attempts per ten
+minutes.
+
+Protected operational endpoints:
+
+```text
+GET  /api/v1/admin/otp/status
+POST /api/v1/admin/otp/test
+```
+
+Only the `super_admin` platform role can access these endpoints. A successful
+test is recorded in the platform audit log without storing or returning the
+plain OTP.
+
 ### Weekly guardian attendance reports
 
 The backend supports both manual report delivery from the organization dashboard

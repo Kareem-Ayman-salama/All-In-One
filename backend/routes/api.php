@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\V1\MembershipController;
 use App\Http\Controllers\Api\V1\MetadataController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\NotificationPreferenceController;
+use App\Http\Controllers\Api\V1\OtpOperationsController;
 use App\Http\Controllers\Api\V1\OrganizationController;
 use App\Http\Controllers\Api\V1\PrivacyController;
 use App\Http\Controllers\Api\V1\PromotionController;
@@ -290,6 +291,11 @@ Route::prefix('v1')->group(function (): void {
                 Route::get('/audit-logs', [AuditLogController::class, 'platform']);
                 Route::get('/analytics/overview', [AnalyticsController::class, 'platform']);
                 Route::get('/support', [SupportController::class, 'index']);
+                Route::middleware('platform.role:super_admin')->group(function (): void {
+                    Route::get('/otp/status', [OtpOperationsController::class, 'status']);
+                    Route::post('/otp/test', [OtpOperationsController::class, 'sendTest'])
+                        ->middleware('throttle:otp-operations');
+                });
             });
     });
 });

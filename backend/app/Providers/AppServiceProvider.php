@@ -41,5 +41,7 @@ class AppServiceProvider extends ServiceProvider
             ->by($request->ip()));
         RateLimiter::for('support', fn (Request $request): Limit => Limit::perHour(5)
             ->by($request->user()?->id ?: $request->ip()));
+        RateLimiter::for('otp-operations', fn (Request $request): Limit => Limit::perMinutes(10, 3)
+            ->by($request->user()?->id ?: $request->ip()));
     }
 }

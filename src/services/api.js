@@ -26,6 +26,21 @@ function organizationPath(organizationId, resource) {
 }
 
 export const api = {
+  getOtpOperationsStatus: () => endpoint("/admin/otp/status", {
+    status: "ready",
+    checks: {
+      transactionalMail: true,
+      senderConfigured: true,
+      transportConfigured: true,
+      deliveryMode: true
+    },
+    mailer: "smtp",
+    queue: "sync",
+    sender: "ad***@aio.test"
+  }),
+  sendOtpDeliveryTest: () => shouldUseMockApi()
+    ? delay({ deliveredTo: "ad***@aio.test", expiresInMinutes: 15 })
+    : httpClient("/admin/otp/test", { method: "POST", body: "{}" }).then(camelize),
   getErrorCatalog: () => endpoint("/meta/error-catalog", { version: "local", errors: {} }),
   getDeepLinks: () => endpoint("/meta/deep-links", { version: "local", routes: {} }),
   getOfflineCachePolicy: () => endpoint("/meta/offline-cache-policy", { version: "local", datasets: {}, writeOperations: {} }),

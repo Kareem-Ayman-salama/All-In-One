@@ -2,6 +2,7 @@ import { AlertTriangle, Building2, CreditCard, Download, MoreVertical, Plus, Shi
 import { useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { AccountSettings } from "../components/AccountSettings";
+import { OtpOperationsPanel } from "../components/OtpOperationsPanel";
 import { Badge } from "../components/Badge";
 import { Button } from "../components/Button";
 import { FormField } from "../components/FormField";
@@ -55,7 +56,12 @@ export function SuperAdminApp({ data, user }) {
       {page === "pricing" && <Pricing />}
       {page === "activity" && <ActivityAuditPage />}
       {page === "notifications" && <NotificationCenterPage user={user} />}
-      {page === "settings" && <AccountSettings user={user} workspaceLabel="Super Admin workspace" />}
+      {page === "settings" && (
+        <div className="super-admin-settings-stack">
+          <OtpOperationsPanel user={user} />
+          <AccountSettings user={user} workspaceLabel="Super Admin workspace" />
+        </div>
+      )}
     </AppLayout>
   );
 }

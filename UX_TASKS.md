@@ -192,3 +192,15 @@ This file tracks the professional UX pass for All In One (AIO). Mark items as do
 - [x] Export attendance and course/teacher bookings to Excel-compatible and CSV files.
 - [x] Keep email delivery compatible with Brevo's free transactional SMTP plan.
 - [x] Verify the production frontend build and integration contract checks.
+
+## Phase 18 - OTP Operational Readiness
+
+- [x] Centralize OTP mail readiness checks without exposing SMTP credentials.
+- [x] Require a real transactional mailer, verified sender, and SMTP credentials.
+- [x] Add a Super Admin-only OTP status endpoint.
+- [x] Add a rate-limited OTP delivery test to the signed-in administrator email only.
+- [x] Record successful OTP delivery tests in the audit log without storing plain codes.
+- [x] Add a responsive OTP operations panel to Super Admin settings.
+- [x] Add loading, not-ready, delivery-error, and success states.
+- [x] Add authorization, readiness, and delivery feature tests.
+- [x] Verify the frontend production build and integration checks.
