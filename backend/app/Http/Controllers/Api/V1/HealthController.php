@@ -42,8 +42,7 @@ class HealthController extends Controller
     public function otp(
         Request $request,
         OtpReadinessService $readiness,
-    ): JsonResponse
-    {
+    ): JsonResponse {
         $report = $readiness->report();
 
         return ApiResponse::success($request, [
