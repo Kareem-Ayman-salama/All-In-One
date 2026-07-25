@@ -56,6 +56,7 @@ class OtpDeliveryTest extends TestCase
         $this->getJson('/api/v1/health/otp')
             ->assertOk()
             ->assertJsonPath('data.status', 'ready')
+            ->assertJsonPath('data.checks.applicationKeyConfigured', true)
             ->assertJsonPath('data.checks.transactionalMail', true)
             ->assertJsonPath('data.checks.transportConfigured', true)
             ->assertJsonPath('data.checks.deliveryMode', true);
@@ -105,6 +106,16 @@ class OtpDeliveryTest extends TestCase
         $this->postJson('/api/v1/admin/otp/test')
             ->assertForbidden()
             ->assertJsonPath('error.code', 'PLATFORM_ACCESS_DENIED');
+    }
+
+    public function test_unauthenticated_otp_operations_return_a_structured_401(): void
+    {
+        $this->getJson('/api/v1/admin/otp/status')
+            ->assertUnauthorized()
+            ->assertJsonPath('error.code', 'AUTHENTICATION_REQUIRED');
+        $this->postJson('/api/v1/admin/otp/test')
+            ->assertUnauthorized()
+            ->assertJsonPath('error.code', 'AUTHENTICATION_REQUIRED');
     }
 
     public function test_delivery_test_is_blocked_until_smtp_is_configured(): void

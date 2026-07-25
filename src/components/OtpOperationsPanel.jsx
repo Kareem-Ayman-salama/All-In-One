@@ -6,6 +6,7 @@ import { api } from "../services/api";
 import { Button } from "./Button";
 
 const checkLabels = {
+  applicationKeyConfigured: ["مفتاح تشفير التطبيق", "Application encryption key"],
   transactionalMail: ["مزود بريد فعلي", "Transactional mail provider"],
   senderConfigured: ["عنوان مرسل موثق", "Verified sender address"],
   transportConfigured: ["بيانات اتصال SMTP", "SMTP connection settings"],
@@ -82,7 +83,7 @@ export function OtpOperationsPanel({ user }) {
       {error && <div className="otp-operations-error" role="alert">{error}</div>}
 
       <div className="otp-check-grid" aria-busy={loading}>
-        {loading && Array.from({ length: 4 }).map((_, index) => <span className="otp-check-skeleton" key={index} />)}
+        {loading && Array.from({ length: 5 }).map((_, index) => <span className="otp-check-skeleton" key={index} />)}
         {!loading && Object.entries(status?.checks || {}).map(([key, passed]) => (
           <div className={`otp-check-item ${passed ? "passed" : "failed"}`} key={key}>
             {passed ? <CheckCircle2 size={18} /> : <XCircle size={18} />}
@@ -90,6 +91,16 @@ export function OtpOperationsPanel({ user }) {
           </div>
         ))}
       </div>
+
+      {!loading && !ready && (
+        <div className="otp-setup-hint">
+          <strong>{tx("الإعداد المطلوب على Railway", "Required Railway configuration")}</strong>
+          <p>{tx(
+            "أضف APP_KEY وإعدادات Brevo المجانية: MAIL_MAILER وMAIL_HOST وMAIL_PORT وMAIL_USERNAME وMAIL_PASSWORD وMAIL_FROM_ADDRESS، ثم أعد النشر واضغط تحديث الحالة.",
+            "Add APP_KEY and the free Brevo settings: MAIL_MAILER, MAIL_HOST, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD, and MAIL_FROM_ADDRESS. Redeploy, then refresh the status."
+          )}</p>
+        </div>
+      )}
 
       <footer>
         <div className="otp-delivery-meta">

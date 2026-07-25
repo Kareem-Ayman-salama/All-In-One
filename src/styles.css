@@ -4038,6 +4038,9 @@ tr:last-child td { border-bottom: 0; }
 .otp-delivery-meta { min-width: 0; display: flex; flex-wrap: wrap; gap: 8px 18px; color: var(--stitch-muted, var(--muted)); font-size: 11px; }
 .otp-delivery-meta strong { color: var(--stitch-text, var(--text)); }
 .otp-operations-error { margin-top: 14px; padding: 10px 12px; border: 1px solid rgba(220, 38, 38, .25); border-radius: 7px; color: #b91c1c; background: rgba(254, 226, 226, .55); font-size: 12px; }
+.otp-setup-hint { margin: -7px 0 18px; padding: 12px 14px; border-inline-start: 3px solid #d97706; border-radius: 6px; background: rgba(245, 158, 11, .08); color: var(--stitch-text, var(--text)); }
+.otp-setup-hint strong { display: block; margin-bottom: 4px; font-size: 12px; }
+.otp-setup-hint p { margin: 0; color: var(--stitch-muted, var(--muted)); font-size: 11px; line-height: 1.7; overflow-wrap: anywhere; }
 @keyframes otp-spin { to { transform: rotate(360deg); } }
 @media (max-width: 900px) {
   .otp-check-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

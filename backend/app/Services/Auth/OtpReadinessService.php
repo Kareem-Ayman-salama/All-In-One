@@ -20,6 +20,7 @@ class OtpReadinessService
         $mailer = (string) config('mail.default');
         $sender = (string) config('mail.from.address');
         $checks = [
+            'applicationKeyConfigured' => $this->applicationKeyIsConfigured(),
             'transactionalMail' => ! in_array($mailer, ['log', 'array'], true),
             'senderConfigured' => $this->senderIsConfigured($sender),
             'transportConfigured' => $this->transportIsConfigured($mailer),
@@ -34,6 +35,13 @@ class OtpReadinessService
             'queue' => (string) config('queue.default'),
             'sender' => $this->maskEmail($sender),
         ];
+    }
+
+    private function applicationKeyIsConfigured(): bool
+    {
+        $key = trim((string) config('app.key'));
+
+        return $key !== '' && $key !== 'base64:...';
     }
 
     private function senderIsConfigured(string $sender): bool

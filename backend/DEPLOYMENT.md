@@ -113,11 +113,11 @@ After signing in as the platform Super Admin, open:
 /super-admin/settings
 ```
 
-The OTP operations panel checks the transactional mail provider, verified
-sender, SMTP credentials, and direct delivery mode. Use **Send test OTP** to
-deliver a real code to the signed-in Super Admin email. The test endpoint never
-accepts an arbitrary recipient and is limited to three attempts per ten
-minutes.
+The OTP operations panel checks the Laravel application key, transactional mail
+provider, verified sender, SMTP credentials, and direct delivery mode. Use
+**Send test OTP** to deliver a real code to the signed-in Super Admin email.
+The test endpoint never accepts an arbitrary recipient and is limited to three
+attempts per ten minutes.
 
 Protected operational endpoints:
 
