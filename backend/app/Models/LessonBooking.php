@@ -12,8 +12,8 @@ class LessonBooking extends Model
 
     protected $fillable = [
         'organization_id', 'instructor_id', 'slot_id', 'student_id', 'subject',
-        'student_note', 'status', 'payment_status', 'amount_minor', 'currency',
-        'cancelled_at',
+        'student_phone', 'student_note', 'status', 'payment_status',
+        'amount_minor', 'currency', 'cancelled_at',
     ];
 
     protected function casts(): array

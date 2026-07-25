@@ -10,9 +10,20 @@ use Illuminate\Support\Facades\DB;
 
 class LessonBookingService
 {
-    public function reserve(User $student, string $slotId, string $subject, ?string $note): LessonBooking
-    {
-        return DB::transaction(function () use ($student, $slotId, $subject, $note): LessonBooking {
+    public function reserve(
+        User $student,
+        string $slotId,
+        string $subject,
+        string $studentPhone,
+        ?string $note,
+    ): LessonBooking {
+        return DB::transaction(function () use (
+            $student,
+            $slotId,
+            $subject,
+            $studentPhone,
+            $note,
+        ): LessonBooking {
             $slot = InstructorAvailabilitySlot::query()
                 ->whereKey($slotId)
                 ->lockForUpdate()
@@ -28,6 +39,7 @@ class LessonBookingService
                 'instructor_id' => $slot->instructor_id,
                 'slot_id' => $slot->id,
                 'student_id' => $student->id,
+                'student_phone' => $studentPhone,
                 'subject' => $subject,
                 'student_note' => $note,
                 'status' => 'confirmed',

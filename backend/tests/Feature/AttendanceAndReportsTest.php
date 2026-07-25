@@ -124,14 +124,25 @@ class AttendanceAndReportsTest extends TestCase
             ->assertJsonPath('data.summary.absent', 1);
 
         Sanctum::actingAs($owner);
-        $this->get(
+        $attendanceExport = $this->get(
             "/api/v1/organizations/{$organization->id}/reports/attendance?format=xlsx",
-        )->assertOk()
+        );
+        $attendanceExport->assertOk()
             ->assertHeader('content-type', 'application/vnd.ms-excel; charset=UTF-8');
-        $this->get(
+        $this->assertStringContainsString(
+            'Please review chapter four.',
+            $attendanceExport->streamedContent(),
+        );
+
+        $bookingExport = $this->get(
             "/api/v1/organizations/{$organization->id}/reports/bookings?format=csv",
-        )->assertOk()
+        );
+        $bookingExport->assertOk()
             ->assertHeader('content-type', 'text/csv; charset=UTF-8');
+        $bookingContent = $bookingExport->streamedContent();
+        $this->assertStringContainsString('AIO Student', $bookingContent);
+        $this->assertStringContainsString('Physics Grade 12', $bookingContent);
+        $this->assertStringContainsString('+201000000000', $bookingContent);
 
         $this->postJson(
             "/api/v1/organizations/{$organization->id}/guardians/weekly-reports/send",
@@ -188,7 +199,8 @@ class AttendanceAndReportsTest extends TestCase
         Sanctum::actingAs($student);
         $lesson = $this->postJson('/api/v1/student/lesson-bookings', [
             'slotId' => $slot['id'],
-            'subject' => 'English',
+            'subject' => '=English',
+            'studentPhone' => '+201000000003',
         ])->assertCreated()->json('data');
 
         Sanctum::actingAs($owner);
@@ -209,6 +221,17 @@ class AttendanceAndReportsTest extends TestCase
             "/api/v1/organizations/{$organization->id}/learning-sessions/{$session['id']}/attendance",
         )->assertOk()
             ->assertJsonPath('data.participants.0.student.id', $student->id);
+
+        $lessonExport = $this->get(
+            "/api/v1/organizations/{$organization->id}/reports/bookings?format=csv&kind=lessons",
+        );
+        $lessonExport->assertOk()
+            ->assertHeader('content-type', 'text/csv; charset=UTF-8');
+        $lessonContent = $lessonExport->streamedContent();
+        $this->assertStringContainsString($student->name, $lessonContent);
+        $this->assertStringContainsString('Sarah Hassan', $lessonContent);
+        $this->assertStringContainsString('+201000000003', $lessonContent);
+        $this->assertStringContainsString("'=English", $lessonContent);
     }
 
     /**

@@ -64,6 +64,7 @@ class ReportExportController extends Controller
             $rows = $query->latest()->get()->map(fn (LessonBooking $booking): array => [
                 $booking->student?->name,
                 $booking->student?->email,
+                $booking->student_phone,
                 $booking->instructor?->name_ar ?: $booking->instructor?->name,
                 $booking->subject,
                 $booking->slot?->starts_at,
@@ -76,7 +77,7 @@ class ReportExportController extends Controller
             ])->all();
             $sheets['Teacher Bookings'] = [
                 'headers' => [
-                    'Student', 'Email', 'Instructor', 'Subject',
+                    'Student', 'Email', 'Phone', 'Instructor', 'Subject',
                     'Starts At', 'Ends At', 'Status', 'Payment',
                     'Amount', 'Currency', 'Booked At',
                 ],

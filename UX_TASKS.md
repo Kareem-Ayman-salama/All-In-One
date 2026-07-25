@@ -204,3 +204,12 @@ This file tracks the professional UX pass for All In One (AIO). Mark items as do
 - [x] Add loading, not-ready, delivery-error, and success states.
 - [x] Add authorization, readiness, and delivery feature tests.
 - [x] Verify the frontend production build and integration checks.
+
+## Phase 19 - Booking Export Data Quality
+
+- [x] Require a student contact phone when booking a private lesson.
+- [x] Persist the contact phone on the lesson booking for academy follow-up.
+- [x] Include student name, email, phone, teacher, subject, schedule, and payment state in exports.
+- [x] Verify course bookings, teacher bookings, and attendance content inside generated files.
+- [x] Protect CSV exports from spreadsheet formula injection.
+- [x] Keep Excel and CSV generation local to the backend without a paid export service.

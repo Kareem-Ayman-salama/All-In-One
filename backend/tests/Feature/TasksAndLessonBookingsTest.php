@@ -67,6 +67,13 @@ class TasksAndLessonBookingsTest extends TestCase
         $this->postJson('/api/v1/student/lesson-bookings', [
             'slotId' => $slot['id'],
             'subject' => 'English',
+        ])->assertUnprocessable()
+            ->assertJsonPath('error.code', 'VALIDATION_ERROR');
+
+        $this->postJson('/api/v1/student/lesson-bookings', [
+            'slotId' => $slot['id'],
+            'subject' => 'English',
+            'studentPhone' => '+201000000001',
         ])->assertCreated()->assertJsonPath('data.status', 'confirmed');
 
         $secondStudent = User::factory()->create();
@@ -74,6 +81,7 @@ class TasksAndLessonBookingsTest extends TestCase
         $this->postJson('/api/v1/student/lesson-bookings', [
             'slotId' => $slot['id'],
             'subject' => 'English',
+            'studentPhone' => '+201000000002',
         ])->assertConflict()->assertJsonPath('error.code', 'SLOT_UNAVAILABLE');
 
         $this->assertDatabaseCount('lesson_bookings', 1);

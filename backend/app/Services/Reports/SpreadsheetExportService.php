@@ -33,7 +33,7 @@ class SpreadsheetExportService
                 }
                 fputcsv($stream, $sheet['headers']);
                 foreach ($sheet['rows'] as $row) {
-                    fputcsv($stream, array_map($this->scalar(...), $row));
+                    fputcsv($stream, array_map($this->csvScalar(...), $row));
                 }
                 if (count($sheets) > 1) {
                     fputcsv($stream, []);
@@ -100,6 +100,17 @@ class SpreadsheetExportService
         }
 
         return $value === null ? '' : (string) $value;
+    }
+
+    private function csvScalar(mixed $value): string
+    {
+        $text = $this->scalar($value);
+
+        if (preg_match('/^(?:\s*[=+\-@]|\t|\r|\n)/u', $text) === 1) {
+            return "'".$text;
+        }
+
+        return $text;
     }
 
     private function xml(string $value): string

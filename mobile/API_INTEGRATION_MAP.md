@@ -51,7 +51,7 @@ Initial repository/controller files:
 | Student bookings | `/api/v1/student/bookings` | Show booking status and next action. |
 | Enrollments | `/api/v1/student/enrollments` | Entry point to course workspace. |
 | Enrollment detail | `/api/v1/student/enrollments/:enrollment` | Validate access state before opening course workspace. |
-| Lesson bookings | `/api/v1/student/lesson-bookings` | Reserve/cancel through backend endpoints. |
+| Lesson bookings | `/api/v1/student/lesson-bookings` | Reserve with `slotId`, `subject`, required `studentPhone`, and optional `note`; cancel through backend endpoints. |
 
 Initial repository and screen files:
 

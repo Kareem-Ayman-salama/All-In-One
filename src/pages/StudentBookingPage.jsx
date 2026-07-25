@@ -29,7 +29,12 @@ export function StudentBookingPage({ user }) {
   const [level, setLevel] = useState("all");
   const [format, setFormat] = useState("all");
   const [selectedTeacher, setSelectedTeacher] = useState(null);
-  const [bookingForm, setBookingForm] = useState({ subjectId: "", slotId: "", format: "online" });
+  const [bookingForm, setBookingForm] = useState({
+    subjectId: "",
+    slotId: "",
+    format: "online",
+    studentPhone: ""
+  });
   const subjects = useMemo(() => [...new Set(teachers.flatMap((teacher) => teacher.subjects))].map((id) => ({
     id,
     name: id.replaceAll("-", " "),
@@ -61,7 +66,8 @@ export function StudentBookingPage({ user }) {
     setBookingForm({
       subjectId: teacher.subjects[0],
       slotId: "",
-      format: teacher.formats[0]
+      format: teacher.formats[0],
+      studentPhone: ""
     });
   };
 
@@ -83,6 +89,7 @@ export function StudentBookingPage({ user }) {
       await api.reserveLesson({
         slotId: slot.id,
         subject: selectedSubject.name,
+        studentPhone: bookingForm.studentPhone,
         note: null
       });
       setBookings(await api.getLessonBookings());
@@ -177,11 +184,12 @@ export function StudentBookingPage({ user }) {
         open={Boolean(selectedTeacher)}
         onClose={() => setSelectedTeacher(null)}
         title={tx("اختيار موعد الحصة", "Choose a lesson time")}
-        footer={<><Button variant="ghost" onClick={() => setSelectedTeacher(null)}>{tx("إلغاء", "Cancel")}</Button><Button onClick={confirmBooking} disabled={!bookingForm.slotId}><CalendarCheck2 size={17} /> {tx("تأكيد الحجز", "Confirm booking")}</Button></>}
+        footer={<><Button variant="ghost" onClick={() => setSelectedTeacher(null)}>{tx("إلغاء", "Cancel")}</Button><Button onClick={confirmBooking} disabled={!bookingForm.slotId || bookingForm.studentPhone.trim().length < 7}><CalendarCheck2 size={17} /> {tx("تأكيد الحجز", "Confirm booking")}</Button></>}
       >
         {selectedTeacher && <div className="booking-modal-content">
           <div className="booking-teacher-summary"><span className="teacher-avatar" style={{ backgroundColor: selectedTeacher.color }}>{initials(selectedTeacher.name)}</span><div><strong>{tx(selectedTeacher.nameAr, selectedTeacher.name)}</strong><span>{tx(selectedTeacher.titleAr, selectedTeacher.title)}</span></div>{selectedTeacher.rating && <span><Star size={15} fill="currentColor" /> {selectedTeacher.rating}</span>}</div>
           <div className="booking-field"><label htmlFor="booking-subject">{tx("المادة", "Subject")}</label><select id="booking-subject" value={bookingForm.subjectId} onChange={(event) => setBookingForm((current) => ({ ...current, subjectId: event.target.value }))}>{selectedTeacher.subjects.map((id) => { const item = getSubject(subjects, id); return <option value={id} key={id}>{tx(item.nameAr, item.name)}</option>; })}</select></div>
+          <div className="booking-field"><label htmlFor="booking-phone">{tx("رقم الهاتف للتواصل", "Contact phone")}</label><input id="booking-phone" type="tel" inputMode="tel" dir="ltr" minLength="7" maxLength="40" required value={bookingForm.studentPhone} onChange={(event) => setBookingForm((current) => ({ ...current, studentPhone: event.target.value }))} placeholder="01xxxxxxxxx" /></div>
           <fieldset className="booking-field"><legend>{tx("نوع الحصة", "Lesson type")}</legend><div className="booking-format-toggle">{selectedTeacher.formats.map((item) => <button className={bookingForm.format === item ? "active" : ""} onClick={() => setBookingForm((current) => ({ ...current, format: item }))} type="button" aria-pressed={bookingForm.format === item} key={item}>{item === "online" ? <Video size={18} /> : <MapPin size={18} />}{item === "online" ? tx("أونلاين", "Online") : tx("حضوري", "On-site")}</button>)}</div></fieldset>
           <fieldset className="booking-field"><legend>{tx("اختر الموعد", "Select a time")}</legend><div className="booking-slot-grid">{selectedTeacher.slots.map((slot) => { const unavailable = isBooked(selectedTeacher.id, slot); return <button className={bookingForm.slotId === slot.id ? "active" : ""} disabled={unavailable} onClick={() => setBookingForm((current) => ({ ...current, slotId: slot.id }))} type="button" aria-pressed={bookingForm.slotId === slot.id} key={slot.id}><CalendarDays size={17} /><span>{new Intl.DateTimeFormat(document.documentElement.lang || "en", { weekday: "short", month: "short", day: "numeric" }).format(new Date(`${slot.date}T12:00:00`))}<small>{unavailable ? tx("محجوز", "Booked") : slot.time}</small></span></button>; })}</div></fieldset>
           <div className="booking-summary"><div><BookOpen size={19} /><span>{tx("مدة الحصة", "Lesson duration")}</span><strong>{selectedTeacher.duration} {tx("دقيقة", "min")}</strong></div><div><span>{tx("الإجمالي", "Total")}</span><strong>{selectedTeacher.price} {tx("جنيه", "EGP")}</strong></div></div>

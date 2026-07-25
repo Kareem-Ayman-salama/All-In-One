@@ -85,10 +85,17 @@ class LessonBookingController extends Controller
         $data = $request->validate([
             'slotId' => ['required', 'uuid'],
             'subject' => ['required', 'string', 'max:120'],
+            'studentPhone' => ['required', 'string', 'min:7', 'max:40'],
             'note' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        return ApiResponse::success($request, $service->reserve($request->user(), $data['slotId'], $data['subject'], $data['note'] ?? null), status: 201);
+        return ApiResponse::success($request, $service->reserve(
+            $request->user(),
+            $data['slotId'],
+            $data['subject'],
+            $data['studentPhone'],
+            $data['note'] ?? null,
+        ), status: 201);
     }
 
     public function mine(Request $request): JsonResponse
