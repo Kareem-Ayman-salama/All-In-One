@@ -8,4 +8,18 @@ return [
     'cookie_same_site' => env('COOKIE_SAME_SITE', 'lax'),
     'frontend_url' => env('FRONTEND_URL', 'http://localhost:5173'),
     'redis_required' => (bool) env('REDIS_REQUIRED', false),
+    'demo_access' => [
+        'enabled' => filter_var(
+            env('AIO_DEMO_ACCESS_ENABLED', false),
+            FILTER_VALIDATE_BOOL,
+        ),
+        'super_admin_email' => mb_strtolower(trim((string) env(
+            'AIO_DEMO_SUPER_ADMIN_EMAIL',
+            '',
+        ))),
+        'super_admin_mfa_code' => (string) env(
+            'AIO_DEMO_SUPER_ADMIN_MFA_CODE',
+            '',
+        ),
+    ],
 ];

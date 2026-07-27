@@ -46,4 +46,63 @@ class SuperAdminMfaTest extends TestCase
             ->assertJsonPath('data.mfaRequired', false)
             ->assertJsonStructure(['data' => ['accessToken', 'user']]);
     }
+
+    public function test_enabled_demo_super_admin_uses_scoped_fixed_mfa_code(): void
+    {
+        config()->set('aio.demo_access.enabled', true);
+        config()->set('aio.demo_access.super_admin_email', 'super@ain.test');
+        config()->set('aio.demo_access.super_admin_mfa_code', '123456');
+
+        $admin = User::factory()->create([
+            'email' => 'super@ain.test',
+            'password' => 'StrongPassword123!',
+        ]);
+        $admin->forceFill(['platform_role' => 'super_admin'])->save();
+
+        $this->postJson('/api/v1/auth/login', [
+            'email' => 'super@ain.test',
+            'password' => 'StrongPassword123!',
+        ])
+            ->assertStatus(202)
+            ->assertJsonPath('data.mfaRequired', true)
+            ->assertJsonMissingPath('data.debugCode');
+
+        $this->postJson('/api/v1/auth/login', [
+            'email' => 'super@ain.test',
+            'password' => 'StrongPassword123!',
+            'mfaCode' => '654321',
+        ])
+            ->assertUnprocessable()
+            ->assertJsonPath('error.code', 'INVALID_CODE');
+
+        $this->postJson('/api/v1/auth/login', [
+            'email' => 'super@ain.test',
+            'password' => 'StrongPassword123!',
+            'mfaCode' => '123456',
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.mfaRequired', false)
+            ->assertJsonPath('data.user.role', 'super-admin');
+    }
+
+    public function test_demo_mfa_code_never_applies_to_a_different_admin(): void
+    {
+        config()->set('aio.demo_access.enabled', true);
+        config()->set('aio.demo_access.super_admin_email', 'super@ain.test');
+        config()->set('aio.demo_access.super_admin_mfa_code', '123456');
+
+        $admin = User::factory()->create([
+            'email' => 'other-admin@ain.test',
+            'password' => 'StrongPassword123!',
+        ]);
+        $admin->forceFill(['platform_role' => 'super_admin'])->save();
+
+        $this->postJson('/api/v1/auth/login', [
+            'email' => 'other-admin@ain.test',
+            'password' => 'StrongPassword123!',
+        ])
+            ->assertStatus(202)
+            ->assertJsonPath('data.mfaRequired', true)
+            ->assertJsonStructure(['data' => ['debugCode']]);
+    }
 }

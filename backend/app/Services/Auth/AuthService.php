@@ -114,7 +114,23 @@ class AuthService
         }
 
         if ($user->platform_role === 'super_admin') {
-            if (! $mfaCode) {
+            $demoMfaCode = $this->demoSuperAdminMfaCode($user);
+            if ($demoMfaCode !== null) {
+                if (! $mfaCode) {
+                    return [
+                        'user' => $user,
+                        'mfaRequired' => true,
+                        'debugCode' => null,
+                    ];
+                }
+                if (! hash_equals($demoMfaCode, $mfaCode)) {
+                    throw new ApiException(
+                        'INVALID_CODE',
+                        'The verification code is invalid or expired.',
+                        422,
+                    );
+                }
+            } elseif (! $mfaCode) {
                 $code = $this->verificationCodes->issue($user, 'mfa_login');
                 $user->notify(new VerificationCodeNotification($code, 'mfa_login'));
 
@@ -125,12 +141,13 @@ class AuthService
                         ? $code
                         : null,
                 ];
+            } else {
+                $this->verificationCodes->consume(
+                    $user->normalized_email,
+                    'mfa_login',
+                    $mfaCode,
+                );
             }
-            $this->verificationCodes->consume(
-                $user->normalized_email,
-                'mfa_login',
-                $mfaCode,
-            );
         }
 
         $user->forceFill(['last_login_at' => now()])->save();
@@ -139,6 +156,25 @@ class AuthService
             ...$this->createSession($user, $request, $remember, $device),
             'mfaRequired' => false,
         ];
+    }
+
+    private function demoSuperAdminMfaCode(User $user): ?string
+    {
+        if (! config('aio.demo_access.enabled')) {
+            return null;
+        }
+
+        $email = (string) config('aio.demo_access.super_admin_email');
+        $code = (string) config('aio.demo_access.super_admin_mfa_code');
+        if (
+            $email === ''
+            || $user->normalized_email !== $email
+            || preg_match('/^\d{6}$/', $code) !== 1
+        ) {
+            return null;
+        }
+
+        return $code;
     }
 
     /**
