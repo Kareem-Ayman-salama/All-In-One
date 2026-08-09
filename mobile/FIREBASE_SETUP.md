@@ -11,22 +11,29 @@ project credentials.
 - FCM permission request after successful sign in/email verification.
 - FCM token registration to the Laravel endpoint:
   `/api/v1/devices/push-tokens`.
-- Android Gradle applies `google-services` and Crashlytics only when
-  `android/app/google-services.json` exists.
+- Android Gradle applies `google-services` and Crashlytics when a root or
+  flavor-specific `google-services.json` exists.
+
+## Current Firebase project
+
+- Project name: `AIN All In One`
+- Project ID: `ain-all-in-one`
+- Project number: `837892248017`
+- Android apps:
+  - Development: `com.ain.ain_mobile.dev`
+  - Staging: `com.ain.ain_mobile.staging`
+  - Production: `com.ain.ain_mobile`
 
 ## Required Firebase Console steps
 
-1. Create or open a Firebase project.
-2. Add Android apps for the package IDs:
-   - `com.ain.ain_mobile.dev`
-   - `com.ain.ain_mobile.staging`
-   - `com.ain.ain_mobile`
-3. Download the matching `google-services.json`.
-4. Put it here:
-   `mobile/android/app/google-services.json`
-5. Enable Cloud Messaging and Crashlytics in Firebase Console.
-6. Create a Firebase service account key for the backend sender.
-7. Add these values to the backend `.env`:
+1. Keep the Android Firebase apps above registered in the project.
+2. Keep the downloaded config files in the matching flavor folders:
+   - `android/app/src/development/google-services.json`
+   - `android/app/src/staging/google-services.json`
+   - `android/app/src/production/google-services.json`
+3. Enable Cloud Messaging and Crashlytics in Firebase Console.
+4. Create a Firebase service account key for the backend sender.
+5. Add these values to the backend `.env`:
 
 ```bash
 PUSH_PROVIDER=fcm
@@ -51,6 +58,17 @@ computer LAN IP:
 
 ```bash
 make build-local-device-firebase-apk LOCAL_DEVICE_API_URL=http://192.168.1.10:8000/api/v1
+```
+
+Direct verified Firebase build:
+
+```bash
+flutter build apk --flavor development \
+  --dart-define=AIN_FLAVOR=development \
+  --dart-define=AIN_API_BASE_URL=http://10.0.2.2:8000/api/v1 \
+  --dart-define=AIN_ENABLE_FIREBASE=true \
+  --dart-define=AIN_ENABLE_CRASH_REPORTING=false \
+  --dart-define=AIN_ALLOW_MOCK_DATA=false
 ```
 
 ## Backend note

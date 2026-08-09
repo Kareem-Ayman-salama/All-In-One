@@ -46,5 +46,6 @@ app.*.map.json
 
 # Firebase project files are environment-specific.
 /android/app/google-services.json
+/android/app/src/*/google-services.json
 /ios/Runner/GoogleService-Info.plist
 firebase-service-account*.json
