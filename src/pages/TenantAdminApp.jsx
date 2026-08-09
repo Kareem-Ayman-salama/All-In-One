@@ -4,6 +4,7 @@ import {
   Bell,
   BookOpen,
   Building2,
+  CalendarDays,
   CheckCircle2,
   Cloud,
   CloudUpload,
