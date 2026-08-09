@@ -13,6 +13,7 @@ import {
 import { NotificationCenterPage, WorkspaceCalendarPage } from "../components/WorkspaceOperations";
 import { useBilingualText } from "../contexts/LanguageContext";
 import { useOrganization } from "../contexts/OrganizationContext";
+import { useToast } from "../contexts/ToastContext";
 import { useWorkspace } from "../contexts/WorkspaceContext";
 import { AppLayout } from "../layouts/AppLayout";
 import { StudentBookingPage } from "./StudentBookingPage";
@@ -133,6 +134,7 @@ function ProtectedFiles({ data, user }) {
 
 function ProtectedFilesSecure({ data, user }) {
   const tx = useBilingualText();
+  const { showToast } = useToast();
   const { activeOrganization } = useOrganization();
   const [selectedFileId, setSelectedFileId] = useState(data.files[0]?.id);
   const [session, setSession] = useState(null);
@@ -207,6 +209,8 @@ function ProtectedFilesSecure({ data, user }) {
   }, [session?.watermark?.enabled, session?.watermark?.moveEverySeconds, watermarkPositions.length]);
 
   const auditBlockedAction = (event, message) => {
+    showToast(tx("تم منع الإجراء لحماية المحتوى.", "Action blocked to protect the content."), "warning");
+
     if (!activeOrganization?.id || !selectedFile?.id) {
       return;
     }

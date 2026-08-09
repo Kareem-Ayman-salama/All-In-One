@@ -118,7 +118,7 @@ Legend:
   - `user-select: none`
   - `-webkit-user-drag: none`
   - protected overlay layer
-- [ ] Add warning toast when blocked action is attempted.
+- [x] Add warning toast when blocked action is attempted.
 - [x] Log blocked right-click attempts.
 - [x] Log blocked shortcut attempts.
 - [ ] Prevent direct backend content download when disabled.
