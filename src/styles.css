@@ -4433,6 +4433,13 @@ tr:last-child td { border-bottom: 0; }
   outline: 0;
 }
 
+body.content-protection-active,
+body.content-protection-active * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -webkit-user-drag: none !important;
+}
+
 .protected-viewer-shell .stitch-document-stage {
   min-height: 520px;
   overflow: hidden;
@@ -4449,13 +4456,54 @@ tr:last-child td { border-bottom: 0; }
   height: 100%;
   border: 0;
   background: #050505;
+  pointer-events: none;
 }
 
 .protected-viewer-blocker {
   position: absolute;
   inset: 0;
   z-index: 3;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: not-allowed;
+}
+
+.protected-capture-shield {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  padding: 24px;
+  text-align: center;
+  background: rgba(2, 6, 23, .88);
+  color: #fff;
+}
+
+.protected-capture-shield svg {
+  color: #a5b4fc;
+}
+
+.protected-capture-shield strong,
+.protected-capture-shield span {
+  max-width: 420px;
+}
+
+@media print {
+  body.content-protection-active .protected-viewer-shell,
+  body.content-protection-active .stitch-document-stage {
+    display: none !important;
+  }
+
+  body.content-protection-active::before {
+    content: "Protected content cannot be printed.";
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
+    color: #111827;
+    font: 700 24px/1.4 system-ui, sans-serif;
+  }
 }
 
 .stitch-document-stage .watermark.moving {

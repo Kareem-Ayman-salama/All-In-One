@@ -141,6 +141,7 @@ function ProtectedFilesSecure({ data, user }) {
   const [viewerError, setViewerError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [watermarkIndex, setWatermarkIndex] = useState(0);
+  const [protectionFlash, setProtectionFlash] = useState(false);
   const selectedFile = data.files.find((file) => file.id === selectedFileId) || data.files[0];
   const watermarkPositions = ["top-left", "top-right", "center", "bottom-left", "bottom-right"];
   const watermarkText = session?.watermark?.text || `${user.email} / AIO`;
@@ -226,8 +227,14 @@ function ProtectedFilesSecure({ data, user }) {
     ).catch(() => {});
   };
 
+  const flashProtectionOverlay = () => {
+    setProtectionFlash(true);
+    window.setTimeout(() => setProtectionFlash(false), 1400);
+  };
+
   const handleContextMenu = (event) => {
     event.preventDefault();
+    flashProtectionOverlay();
     auditBlockedAction(
       CONTENT_VIEWER_EVENTS.rightClickBlocked,
       "Right click blocked in web content viewer."
@@ -245,11 +252,63 @@ function ProtectedFilesSecure({ data, user }) {
     }
 
     event.preventDefault();
+    flashProtectionOverlay();
     auditBlockedAction(
       CONTENT_VIEWER_EVENTS.shortcutBlocked,
       `Blocked shortcut: ${event.key}`
     );
   };
+
+  useEffect(() => {
+    if (!selectedFile?.id) {
+      return undefined;
+    }
+
+    const blockDomAction = (event) => {
+      event.preventDefault();
+      flashProtectionOverlay();
+      auditBlockedAction(
+        event.type === "contextmenu" ? CONTENT_VIEWER_EVENTS.rightClickBlocked : CONTENT_VIEWER_EVENTS.downloadBlocked,
+        `Blocked browser action: ${event.type}`
+      );
+    };
+    const blockShortcut = (event) => {
+      const key = event.key.toLowerCase();
+      const blocked = event.key === "F12"
+        || event.key === "PrintScreen"
+        || ((event.ctrlKey || event.metaKey) && ["a", "c", "p", "s", "u"].includes(key))
+        || ((event.ctrlKey || event.metaKey) && event.shiftKey && ["c", "i", "j", "s"].includes(key));
+
+      if (!blocked) {
+        return;
+      }
+
+      event.preventDefault();
+      flashProtectionOverlay();
+      auditBlockedAction(
+        event.key === "PrintScreen" || key === "p" ? CONTENT_VIEWER_EVENTS.screenshotWarning : CONTENT_VIEWER_EVENTS.shortcutBlocked,
+        `Blocked protected-content shortcut: ${event.key}`
+      );
+    };
+    const blockPrint = (event) => {
+      event.preventDefault?.();
+      flashProtectionOverlay();
+      auditBlockedAction(CONTENT_VIEWER_EVENTS.screenshotWarning, "Print/export blocked in protected viewer.");
+    };
+    const blockedEvents = ["contextmenu", "copy", "cut", "dragstart", "selectstart"];
+
+    document.body.classList.add("content-protection-active");
+    blockedEvents.forEach((eventName) => document.addEventListener(eventName, blockDomAction, true));
+    window.addEventListener("keydown", blockShortcut, true);
+    window.addEventListener("beforeprint", blockPrint, true);
+
+    return () => {
+      document.body.classList.remove("content-protection-active");
+      blockedEvents.forEach((eventName) => document.removeEventListener(eventName, blockDomAction, true));
+      window.removeEventListener("keydown", blockShortcut, true);
+      window.removeEventListener("beforeprint", blockPrint, true);
+    };
+  }, [activeOrganization?.id, selectedFile?.id, session?.viewerSessionId]);
 
   const renderViewer = () => {
     if (!selectedFile) {
@@ -325,7 +384,8 @@ function ProtectedFilesSecure({ data, user }) {
               {watermarkText}
             </div>
           )}
-          <div className="protected-viewer-blocker" aria-hidden="true" />
+          <div className="protected-viewer-blocker" aria-hidden="true" onContextMenu={handleContextMenu} />
+          {protectionFlash && <div className="protected-capture-shield"><Shield size={34} /><strong>{tx("المحتوى محمي", "Protected content")}</strong><span>{tx("تم منع النسخ أو الالتقاط داخل العارض.", "Copying, downloading, and capture shortcuts are blocked in this viewer.")}</span></div>}
         </div>
         <aside className="stitch-viewer-side">
           <h2>{tx("ملفات الغرفة الآمنة", "Secure room files")}</h2>
