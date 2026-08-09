@@ -89,48 +89,64 @@
           <p class="muted">AIN مش نفس الشاشة لكل الناس. الشركة لها إدارة موظفين وغرف وملفات، والأكاديمية لها كورسات وطلاب ومدرسين وحجوزات، والطالب أو الموظف يدخلوا على المساحة المسموح لهم بها.</p>
         </div>
         <div class="audience-grid">
-          <article class="company">
-            <i class="ti ti-building"></i>
-            <h3>شركة أو فريق عمل</h3>
-            <p>للموظفين والأقسام: غرف عمل، رسائل، ملفات محمية، مواعيد، وصلاحيات أعضاء.</p>
-            <ul>
-              <li>إضافة موظفين وأدمن</li>
-              <li>Rooms لكل فريق أو قسم</li>
-              <li>ملفات بلا تحميل وWatermark</li>
-            </ul>
-            <a class="primary-button" href="/register-company?type=company">ابدأ كشركة</a>
+          <article class="audience-card featured company">
+            <div class="path-badge">SaaS للشركات</div>
+            <div class="audience-card-head">
+              <i class="ti ti-building"></i>
+              <div>
+                <h3>شركة أو فريق عمل</h3>
+                <p>مساحة للموظفين والأقسام والملفات الداخلية.</p>
+              </div>
+            </div>
+            <div class="feature-pills">
+              <span>موظفين وأدمن</span>
+              <span>Rooms للأقسام</span>
+              <span>رسائل ومواعيد</span>
+              <span>ملفات محمية</span>
+            </div>
+            <footer>
+              <small>يفتح أدوات الشركة فقط، بدون كورسات أو دفعات.</small>
+              <a class="primary-button" href="/register-company?type=company">ابدأ كشركة</a>
+            </footer>
           </article>
-          <article class="academy">
-            <i class="ti ti-school"></i>
-            <h3>أكاديمية أو مدرس</h3>
-            <p>للتعليم والدروس: كورسات، دفعات، طلاب، مدرسين، حجوزات، حضور ومحتوى محمي.</p>
-            <ul>
-              <li>إنشاء كورسات ودفعات</li>
-              <li>إضافة طلاب ومدرسين</li>
-              <li>حجوزات وحضور وتقارير</li>
-            </ul>
-            <a class="primary-button" href="/register-company?type=academy">ابدأ كأكاديمية</a>
+          <article class="audience-card featured academy">
+            <div class="path-badge">تعليم وأكاديميات</div>
+            <div class="audience-card-head">
+              <i class="ti ti-school"></i>
+              <div>
+                <h3>أكاديمية أو مدرس</h3>
+                <p>مساحة للكورسات والطلاب والمدرسين والحجوزات.</p>
+              </div>
+            </div>
+            <div class="feature-pills">
+              <span>كورسات ودفعات</span>
+              <span>طلاب ومدرسين</span>
+              <span>حجوزات وحضور</span>
+              <span>محتوى محمي</span>
+            </div>
+            <footer>
+              <small>يفتح أدوات التعليم: كورسات، دفعات، حضور وتقارير.</small>
+              <a class="primary-button" href="/register-company?type=academy">ابدأ كأكاديمية</a>
+            </footer>
           </article>
-          <article class="student">
-            <i class="ti ti-user-check"></i>
-            <h3>طالب أو متعلم</h3>
-            <p>تدخل تشوف كورساتك أو تحجز كورس/مدرس، وبعد التأكيد يظهر لك الروم والمحتوى.</p>
-            <ul>
-              <li>استكشاف الكورسات</li>
-              <li>حجز دفعة أو مدرس</li>
-              <li>مشاهدة المحتوى المسموح</li>
-            </ul>
+          <article class="audience-card compact student">
+            <div class="audience-card-head">
+              <i class="ti ti-user-check"></i>
+              <div>
+                <h3>طالب أو متعلم</h3>
+                <p>استكشف كورساتك واحجز ثم ادخل الروم بعد التأكيد.</p>
+              </div>
+            </div>
             <a class="secondary-light-button" href="/create-account?type=student">إنشاء حساب طالب</a>
           </article>
-          <article class="member">
-            <i class="ti ti-users"></i>
-            <h3>موظف أو عضو مدعو</h3>
-            <p>لو شركتك أو أكاديميتك بعتت لك دعوة، تدخل بالكود وتظهر لك الغرف الخاصة بك فقط.</p>
-            <ul>
-              <li>قبول دعوة مؤسسة</li>
-              <li>الوصول للغرف المسموحة</li>
-              <li>رسائل وملفات ومواعيد</li>
-            </ul>
+          <article class="audience-card compact member">
+            <div class="audience-card-head">
+              <i class="ti ti-users"></i>
+              <div>
+                <h3>موظف أو عضو مدعو</h3>
+                <p>ادخل بكود الدعوة وشوف الغرف المسموحة لك فقط.</p>
+              </div>
+            </div>
             <a class="secondary-light-button" href="/join">عندي كود دعوة</a>
           </article>
         </div>

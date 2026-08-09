@@ -334,68 +334,161 @@ h2 {
 }
 
 .audience-section {
-  background: #fbfcff;
+  background:
+    linear-gradient(180deg, #fbfcff 0%, #ffffff 100%);
 }
 
 .audience-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.audience-card {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  padding: 24px;
+  display: grid;
+  gap: 18px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 18px 42px rgba(18, 35, 70, 0.09);
+}
+
+.audience-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  background: var(--blue);
+}
+
+.audience-card.company::before { background: #0e7490; }
+.audience-card.academy::before { background: #7c3aed; }
+.audience-card.student::before { background: var(--green); }
+.audience-card.member::before { background: var(--amber); }
+
+.audience-card.featured {
+  min-height: 360px;
+}
+
+.audience-card.compact {
+  min-height: 170px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.audience-card.compact .audience-card-head {
+  min-width: 0;
+}
+
+.audience-card-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
   gap: 14px;
 }
 
-.audience-grid article {
-  min-width: 0;
-  min-height: 360px;
-  padding: 22px;
-  display: grid;
-  align-content: start;
-  gap: 12px;
-  background: var(--white);
-  border: 1px solid var(--line);
-  border-top: 4px solid var(--blue);
-  border-radius: 8px;
-  box-shadow: 0 12px 30px rgba(18, 35, 70, 0.08);
-}
-
-.audience-grid article.company { border-top-color: #0e7490; }
-.audience-grid article.academy { border-top-color: #7c3aed; }
-.audience-grid article.student { border-top-color: var(--green); }
-.audience-grid article.member { border-top-color: var(--amber); }
-
-.audience-grid i {
-  width: 44px;
-  height: 44px;
+.audience-card-head i {
+  width: 56px;
+  height: 56px;
   display: grid;
   place-items: center;
   color: var(--blue);
   background: #eef4ff;
   border-radius: 8px;
-  font-size: 24px;
+  font-size: 28px;
 }
 
-.audience-grid h3,
-.audience-grid p {
+.audience-card.company .audience-card-head i {
+  color: #0e7490;
+  background: rgba(14, 116, 144, .1);
+}
+
+.audience-card.academy .audience-card-head i {
+  color: #7c3aed;
+  background: rgba(124, 58, 237, .1);
+}
+
+.audience-card.student .audience-card-head i {
+  color: var(--green);
+  background: rgba(23, 163, 107, .1);
+}
+
+.audience-card.member .audience-card-head i {
+  color: var(--amber);
+  background: rgba(245, 158, 11, .13);
+}
+
+.audience-card h3,
+.audience-card p {
   margin: 0;
 }
 
-.audience-grid h3 {
-  font-size: 20px;
+.audience-card h3 {
+  font-size: 22px;
+  line-height: 1.25;
 }
 
-.audience-grid p,
-.audience-grid li {
+.audience-card p,
+.audience-card footer small {
   color: var(--muted);
   line-height: 1.75;
   font-size: 14px;
 }
 
-.audience-grid ul {
-  margin: 0;
-  padding-inline-start: 18px;
+.path-badge {
+  width: max-content;
+  max-width: 100%;
+  padding: 7px 10px;
+  color: var(--blue);
+  background: #eef4ff;
+  border: 1px solid #d6e4fb;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
 }
 
-.audience-grid a {
-  align-self: end;
+.audience-card.company .path-badge {
+  color: #0e7490;
+  background: rgba(14, 116, 144, .1);
+  border-color: rgba(14, 116, 144, .18);
+}
+
+.audience-card.academy .path-badge {
+  color: #7c3aed;
+  background: rgba(124, 58, 237, .1);
+  border-color: rgba(124, 58, 237, .18);
+}
+
+.feature-pills {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.feature-pills span {
+  min-height: 40px;
+  padding: 0 11px;
+  display: flex;
+  align-items: center;
+  color: var(--ink);
+  background: var(--soft);
+  border: 1px solid #e5ebf5;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.audience-card footer {
+  margin-top: auto;
+  display: grid;
+  gap: 12px;
+}
+
+.audience-card a {
   width: 100%;
 }
 
