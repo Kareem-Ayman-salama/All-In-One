@@ -14,6 +14,7 @@ use App\Models\OrganizationMembership;
 use App\Services\Content\YouTubeUrlParser;
 use App\Services\Operations\OperationRecorder;
 use App\Services\Plans\EntitlementService;
+use App\Services\Security\SecurityEventLogger;
 use App\Services\Workspace\RoomAccessService;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -348,6 +349,7 @@ class ContentController extends Controller
         string $organization,
         string $content,
         RoomAccessService $access,
+        SecurityEventLogger $securityEvents,
     ): JsonResponse {
         $item = ContentItem::query()
             ->where('organization_id', $this->organization($request)->id)
@@ -364,13 +366,13 @@ class ContentController extends Controller
         );
 
         $event = $request->string('event')->toString();
-        $log = ContentAccessLog::query()->create([
-            'organization_id' => $item->organization_id,
-            'content_item_id' => $item->id,
-            'user_id' => $request->user()->id,
-            'action' => "viewer_{$event}",
-            'result' => $request->validated('result', $this->defaultViewerResult($event)),
-            'metadata' => [
+        $log = $securityEvents->recordContent(
+            "viewer_{$event}",
+            $request->validated('result', $this->defaultViewerResult($event)),
+            $item->organization_id,
+            $item->id,
+            $request->user()->id,
+            [
                 'viewerSessionId' => $request->validated('viewerSessionId'),
                 'page' => $request->validated('page'),
                 'positionSeconds' => $request->validated('positionSeconds'),
@@ -378,10 +380,8 @@ class ContentController extends Controller
                 'platform' => $request->header('X-AIO-Platform'),
                 'appVersion' => $request->header('X-AIO-App-Version'),
             ],
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'created_at' => now(),
-        ]);
+            $request,
+        );
 
         return ApiResponse::success($request, [
             'logged' => true,

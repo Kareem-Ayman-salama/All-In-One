@@ -172,8 +172,8 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 
 ### 2.7 Security Logs
 
-- [~] Content access logs table exists.
-- [ ] Normalize security event names:
+- [x] Content access logs table exists.
+- [x] Normalize security event names:
   - `login_success`
   - `login_failed`
   - `new_device_detected`
@@ -190,13 +190,13 @@ Important note: browser protections are deterrents, not guaranteed protection. W
   - `shortcut_blocked`
   - `session_revoked`
   - `suspicious_ip_change`
-- [ ] Add backend logger service.
+- [x] Add backend logger service.
 - [ ] Log auth events.
-- [ ] Log device events.
-- [ ] Log playback events.
-- [ ] Log download block events.
-- [ ] Add admin security logs page.
-- [ ] Add filters by member, event type, date, IP, content.
+- [x] Log device events.
+- [x] Log playback events.
+- [x] Log download block events.
+- [x] Add admin security logs page.
+- [~] Add filters by member, event type, date, IP, content.
 - [ ] Add CSV export after pilot, if needed.
 
 ### 2.8 Trial Plans and Limits
@@ -363,7 +363,7 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 - [x] Add member devices endpoint.
 - [x] Add admin member sessions endpoint.
 - [x] Add revoke all member sessions endpoint.
-- [ ] Add security logs endpoint.
+- [x] Add security logs endpoint.
 - [ ] Add security logs export endpoint later.
 - [x] Add plan limits enforcement middleware/service.
 - [ ] Add manual subscription approval endpoints.

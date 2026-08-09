@@ -597,7 +597,7 @@ function SecurityPageLive() {
     }
 
     setLoading(true);
-    api.getContentAccessLogs(activeOrganization.id, filter === "all" ? {} : { result: filter })
+    api.getSecurityEvents(activeOrganization.id, filter === "all" ? {} : { result: filter })
       .then(setLogs)
       .catch((error) => showToast(error.message, "danger"))
       .finally(() => setLoading(false));
@@ -717,7 +717,7 @@ function SecurityPageLive() {
         {!loading && logs.length === 0 && <div className="audit-row"><span>{tx("لا توجد أحداث بعد", "No events yet")}</span><span /><span /><span /><span /></div>}
         {!loading && logs.map((item) => (
           <div className="audit-row" key={item.id}>
-            <span className={`audit-event ${resultTone(item.result)}`}><i />{item.action}</span>
+            <span className={`audit-event ${resultTone(item.result)}`}><i />{item.event || item.action}</span>
             <strong>{item.user?.name || item.user?.email || "—"}</strong>
             <span>{item.contentItem?.title || item.contentItemId || "—"}</span>
             <span>{item.ipAddress || "—"}</span>

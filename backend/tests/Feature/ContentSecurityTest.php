@@ -409,6 +409,43 @@ class ContentSecurityTest extends TestCase
             ->assertJsonPath('data.0.user.email', $owner->email);
     }
 
+    public function test_organization_admin_can_list_normalized_security_events(): void
+    {
+        Storage::fake('local');
+        [$organization, $owner, $room] = $this->workspace();
+        Sanctum::actingAs($owner);
+
+        $upload = $this->post(
+            "/api/v1/organizations/{$organization->id}/content",
+            [
+                'roomId' => $room->id,
+                'title' => 'Security Feed PDF',
+                'type' => 'pdf',
+                'file' => UploadedFile::fake()->createWithContent(
+                    'feed.pdf',
+                    "%PDF-1.4\n1 0 obj\n<<>>\nendobj\n%%EOF",
+                ),
+            ],
+            ['Accept' => 'application/json'],
+        );
+
+        $this->postJson(
+            "/api/v1/organizations/{$organization->id}/content/{$upload->json('data.id')}/viewer-audit",
+            [
+                'event' => 'right_click_blocked',
+                'viewerSessionId' => 'feed-session',
+                'message' => 'Right click blocked.',
+            ],
+        )->assertCreated();
+
+        $this->getJson("/api/v1/organizations/{$organization->id}/security-events?event=right_click_blocked")
+            ->assertOk()
+            ->assertJsonPath('data.0.event', 'right_click_blocked')
+            ->assertJsonPath('data.0.rawAction', 'viewer_right_click_blocked')
+            ->assertJsonPath('data.0.contentItem.title', 'Security Feed PDF')
+            ->assertJsonPath('data.0.user.email', $owner->email);
+    }
+
     public function test_html_disguised_as_pdf_is_rejected(): void
     {
         [$organization, $owner, $room] = $this->workspace();

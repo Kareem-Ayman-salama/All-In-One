@@ -135,6 +135,12 @@ class DevicePolicyTest extends TestCase
             ->where('user_id', $student->id)
             ->where('status', 'pending')
             ->firstOrFail();
+        $this->assertDatabaseHas('audit_logs', [
+            'organization_id' => $organization->id,
+            'actor_id' => $student->id,
+            'action' => 'new_device_detected',
+            'entity_id' => $pending->id,
+        ]);
         $adminToken = $admin->createToken('admin')->plainTextToken;
 
         $this->withToken($adminToken)
@@ -162,6 +168,11 @@ class DevicePolicyTest extends TestCase
             'action' => 'device.approved',
             'entity_id' => $pending->id,
         ]);
+        $this->withToken($adminToken)
+            ->getJson("/api/v1/organizations/{$organization->id}/security-events?event=new_device_detected")
+            ->assertOk()
+            ->assertJsonPath('data.0.event', 'new_device_detected')
+            ->assertJsonPath('data.0.user.email', $student->email);
     }
 
     public function test_blocking_member_device_revokes_linked_sessions(): void

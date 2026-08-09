@@ -6,11 +6,16 @@ use App\Exceptions\ApiException;
 use App\Models\OrganizationMembership;
 use App\Models\User;
 use App\Models\UserDevice;
+use App\Services\Security\SecurityEventLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
 class DeviceRegistry
 {
+    public function __construct(
+        private readonly SecurityEventLogger $securityEvents,
+    ) {}
+
     /**
      * @param  array<string, mixed>|null  $device
      * @return Collection<int, UserDevice>
@@ -64,6 +69,16 @@ class DeviceRegistry
             ->first();
 
         if ($existing?->status === 'blocked' || $existing?->revoked_at) {
+            $this->securityEvents->record(
+                'device_blocked',
+                $organizationId,
+                $user->id,
+                'user_device',
+                $existing->id,
+                ['deviceName' => $existing->device_name],
+                $request,
+            );
+
             throw new ApiException(
                 'DEVICE_BLOCKED',
                 'This device is blocked for this workspace.',
@@ -82,6 +97,20 @@ class DeviceRegistry
                 $existing,
                 'pending',
                 null,
+            );
+            $pending = UserDevice::query()
+                ->where('organization_id', $organizationId)
+                ->where('user_id', $user->id)
+                ->where('device_hash', $deviceHash)
+                ->first();
+            $this->securityEvents->record(
+                'new_device_detected',
+                $organizationId,
+                $user->id,
+                'user_device',
+                $pending?->id,
+                ['deviceName' => $device['deviceName'] ?? null],
+                $request,
             );
 
             throw new ApiException(

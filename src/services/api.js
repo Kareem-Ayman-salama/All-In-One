@@ -173,6 +173,14 @@ export const api = {
     const suffix = query.toString() ? `?${query}` : "";
     return endpoint(`${organizationPath(organizationId, "content-access-logs")}${suffix}`, []).then(camelize);
   },
+  getSecurityEvents: (organizationId, filters = {}) => {
+    const query = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) query.set(key, value);
+    });
+    const suffix = query.toString() ? `?${query}` : "";
+    return endpoint(`${organizationPath(organizationId, "security-events")}${suffix}`, []).then(camelize);
+  },
   getMemberSessions: (organizationId) => endpoint(
     organizationPath(organizationId, "member-sessions"),
     []

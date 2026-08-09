@@ -288,6 +288,8 @@ Route::prefix('v1')->group(function (): void {
                     ->middleware('permission:audit.view');
                 Route::get('/content-access-logs', [AuditLogController::class, 'contentAccess'])
                     ->middleware('permission:audit.view');
+                Route::get('/security-events', [AuditLogController::class, 'securityEvents'])
+                    ->middleware('permission:audit.view');
                 Route::get('/member-sessions', [SessionController::class, 'organizationSessions'])
                     ->middleware('permission:audit.view');
                 Route::delete('/members/{member}/sessions', [SessionController::class, 'destroyMemberSessions'])
