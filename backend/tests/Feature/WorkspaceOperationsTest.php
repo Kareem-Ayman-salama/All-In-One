@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Domain\Tenancy\Enums\OrganizationRole;
 use App\Models\Announcement;
 use App\Models\ContentItem;
+use App\Models\Course;
+use App\Models\CourseBatch;
 use App\Models\Event;
 use App\Models\Organization;
 use App\Models\OrganizationMembership;
@@ -112,6 +114,208 @@ class WorkspaceOperationsTest extends TestCase
         )
             ->assertForbidden()
             ->assertJsonPath('error.code', 'FORBIDDEN');
+    }
+
+    public function test_owner_can_update_and_delete_announcements(): void
+    {
+        $this->seed();
+        [$organization, $owner] = $this->organizationWithMember(
+            OrganizationRole::Owner,
+        );
+        Sanctum::actingAs($owner);
+
+        $announcement = Announcement::query()->create([
+            'organization_id' => $organization->id,
+            'created_by' => $owner->id,
+            'title' => 'Original title',
+            'body' => 'Original body',
+            'audience' => 'organization',
+            'published_at' => now(),
+        ]);
+
+        $this->patchJson(
+            "/api/v1/organizations/{$organization->id}/announcements/{$announcement->id}",
+            [
+                'title' => 'Updated title',
+                'body' => 'Updated body',
+                'pinned' => true,
+            ],
+        )
+            ->assertOk()
+            ->assertJsonPath('data.title', 'Updated title')
+            ->assertJsonPath('data.pinned', true);
+        $this->assertDatabaseHas('audit_logs', [
+            'organization_id' => $organization->id,
+            'action' => 'announcement.updated',
+        ]);
+
+        $student = User::factory()->create();
+        $studentRole = Role::query()
+            ->whereNull('organization_id')
+            ->where('name', OrganizationRole::Student->value)
+            ->firstOrFail();
+        OrganizationMembership::query()->create([
+            'organization_id' => $organization->id,
+            'user_id' => $student->id,
+            'role_id' => $studentRole->id,
+            'status' => 'active',
+            'joined_at' => now(),
+        ]);
+        Sanctum::actingAs($student);
+        $this->patchJson(
+            "/api/v1/organizations/{$organization->id}/announcements/{$announcement->id}",
+            ['title' => 'Forbidden'],
+        )
+            ->assertForbidden()
+            ->assertJsonPath('error.code', 'FORBIDDEN');
+
+        Sanctum::actingAs($owner);
+        $this->deleteJson(
+            "/api/v1/organizations/{$organization->id}/announcements/{$announcement->id}",
+        )
+            ->assertOk()
+            ->assertJsonPath('data.deleted', true);
+        $this->assertSoftDeleted('announcements', ['id' => $announcement->id]);
+        $this->assertDatabaseHas('audit_logs', [
+            'organization_id' => $organization->id,
+            'action' => 'announcement.deleted',
+        ]);
+    }
+
+    public function test_owner_can_update_course_batches(): void
+    {
+        $this->seed();
+        [$organization, $owner] = $this->organizationWithMember(
+            OrganizationRole::Owner,
+        );
+        $room = $this->createRoom($organization, $owner, 'Batch Room');
+        $course = Course::query()->create([
+            'organization_id' => $organization->id,
+            'academy_profile_id' => null,
+            'created_by' => $owner->id,
+            'slug' => 'physics',
+            'title' => 'Physics',
+            'delivery_type' => 'offline',
+            'price_minor' => 10000,
+            'currency' => 'EGP',
+            'status' => 'draft',
+        ]);
+        $batch = CourseBatch::query()->create([
+            'organization_id' => $organization->id,
+            'course_id' => $course->id,
+            'room_id' => $room->id,
+            'title' => 'Original Batch',
+            'start_date' => now()->toDateString(),
+            'end_date' => now()->addMonth()->toDateString(),
+            'schedule' => [[
+                'day' => 'Sunday',
+                'startTime' => '10:00',
+                'endTime' => '11:00',
+            ]],
+            'delivery_type' => 'offline',
+            'capacity' => 20,
+            'reserved_seats' => 0,
+            'confirmed_seats' => 0,
+            'status' => 'open',
+        ]);
+        Sanctum::actingAs($owner);
+
+        $this->patchJson(
+            "/api/v1/organizations/{$organization->id}/batches/{$batch->id}",
+            [
+                'courseId' => $course->id,
+                'roomId' => $room->id,
+                'title' => 'Updated Batch',
+                'startDate' => now()->addWeek()->toDateString(),
+                'endDate' => now()->addWeeks(6)->toDateString(),
+                'schedule' => [[
+                    'day' => 'Monday',
+                    'startTime' => '12:00',
+                    'endTime' => '13:00',
+                ]],
+                'deliveryType' => 'online',
+                'capacity' => 30,
+                'status' => 'in_progress',
+            ],
+        )
+            ->assertOk()
+            ->assertJsonPath('data.title', 'Updated Batch')
+            ->assertJsonPath('data.capacity', 30)
+            ->assertJsonPath('data.status', 'in_progress');
+        $this->assertDatabaseHas('audit_logs', [
+            'organization_id' => $organization->id,
+            'action' => 'batch.updated',
+        ]);
+    }
+
+    public function test_owner_can_manage_room_members(): void
+    {
+        $this->seed();
+        [$organization, $owner] = $this->organizationWithMember(
+            OrganizationRole::Owner,
+        );
+        $room = $this->createRoom($organization, $owner, 'Managed Room');
+        $student = User::factory()->create();
+        $studentRole = Role::query()
+            ->whereNull('organization_id')
+            ->where('name', OrganizationRole::Student->value)
+            ->firstOrFail();
+        OrganizationMembership::query()->create([
+            'organization_id' => $organization->id,
+            'user_id' => $student->id,
+            'role_id' => $studentRole->id,
+            'status' => 'active',
+            'joined_at' => now(),
+        ]);
+        Sanctum::actingAs($owner);
+
+        $response = $this->postJson(
+            "/api/v1/organizations/{$organization->id}/rooms/{$room->id}/members",
+            [
+                'userId' => $student->id,
+                'role' => 'assistant',
+            ],
+        )
+            ->assertCreated()
+            ->assertJsonPath('data.user_id', $student->id)
+            ->assertJsonPath('data.role', 'assistant')
+            ->assertJsonPath('data.status', 'active');
+        $roomMembershipId = $response->json('data.id');
+
+        $this->getJson(
+            "/api/v1/organizations/{$organization->id}/rooms/{$room->id}/members",
+        )
+            ->assertOk()
+            ->assertJsonPath('data.0.id', $roomMembershipId);
+
+        $this->patchJson(
+            "/api/v1/organizations/{$organization->id}/rooms/{$room->id}/members/{$roomMembershipId}",
+            [
+                'role' => 'member',
+                'status' => 'suspended',
+            ],
+        )
+            ->assertOk()
+            ->assertJsonPath('data.role', 'member')
+            ->assertJsonPath('data.status', 'suspended');
+
+        $this->deleteJson(
+            "/api/v1/organizations/{$organization->id}/rooms/{$room->id}/members/{$roomMembershipId}",
+        )
+            ->assertOk()
+            ->assertJsonPath('data.deleted', true);
+        $this->assertDatabaseHas('audit_logs', [
+            'organization_id' => $organization->id,
+            'action' => 'room_member.added',
+        ]);
+        $this->assertDatabaseHas('audit_logs', [
+            'organization_id' => $organization->id,
+            'action' => 'room_member.updated',
+        ]);
+        $this->assertDatabaseHas('audit_logs', [
+            'organization_id' => $organization->id,
+            'action' => 'room_member.removed',
+        ]);
     }
 
     public function test_invitation_acceptance_is_email_bound_and_idempotently_links_rooms(): void
@@ -326,7 +530,7 @@ class WorkspaceOperationsTest extends TestCase
             'status' => 'active',
             'joined_at' => now(),
         ]);
-        $plan = Plan::query()->where('code', 'starter')->firstOrFail();
+        $plan = Plan::query()->where('code', 'growth')->firstOrFail();
         OrganizationSubscription::query()->create([
             'organization_id' => $organization->id,
             'plan_id' => $plan->id,

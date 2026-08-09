@@ -260,7 +260,7 @@ class DemoWorkspaceSeeder extends Seeder
     }
 
     /**
-     * @param array<string, mixed> $attributes
+     * @param  array<string, mixed>  $attributes
      */
     private function course(
         Organization $academy,

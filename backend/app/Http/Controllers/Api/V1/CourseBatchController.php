@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Batches\StoreBatchRequest;
+use App\Http\Requests\Batches\UpdateBatchRequest;
 use App\Models\CourseBatch;
 use App\Models\Organization;
 use App\Services\Operations\OperationRecorder;
@@ -44,24 +46,10 @@ class CourseBatchController extends Controller
         OperationRecorder $recorder,
     ): JsonResponse {
         $organization = $this->organization($request);
-        $batch = CourseBatch::query()->create([
+        $batch = CourseBatch::query()->create($this->attributes($request) + [
             'organization_id' => $organization->id,
-            'course_id' => $request->validated('courseId'),
-            'room_id' => $request->validated('roomId'),
-            'title' => $request->validated('title'),
-            'title_ar' => $request->validated('titleAr'),
-            'start_date' => $request->validated('startDate'),
-            'end_date' => $request->validated('endDate'),
-            'schedule' => $request->validated('schedule'),
-            'delivery_type' => $request->validated('deliveryType'),
-            'capacity' => $request->validated('capacity'),
             'reserved_seats' => 0,
             'confirmed_seats' => 0,
-            'location' => $request->validated('location'),
-            'meeting_reference' => $request->validated('meetingReference'),
-            'enrollment_starts_at' => $request->validated('enrollmentStartsAt'),
-            'enrollment_ends_at' => $request->validated('enrollmentEndsAt'),
-            'status' => $request->validated('status', 'draft'),
         ]);
         $recorder->record(
             'batch.created',
@@ -81,8 +69,84 @@ class CourseBatchController extends Controller
         );
     }
 
+    public function update(
+        UpdateBatchRequest $request,
+        string $organization,
+        string $batch,
+        OperationRecorder $recorder,
+    ): JsonResponse {
+        $model = $this->batch($request, $batch);
+        $model->fill($this->attributes($request, partial: true))->save();
+        $recorder->record(
+            'batch.updated',
+            'course_batch',
+            $model->id,
+            $model->organization_id,
+            $request->user()->id,
+            ['changed' => array_keys($request->validated())],
+            ['batchId' => $model->id],
+            $request,
+        );
+
+        return ApiResponse::success(
+            $request,
+            $model->fresh()->load('course', 'room'),
+        );
+    }
+
     private function organization(Request $request): Organization
     {
         return $request->attributes->get('active_organization');
+    }
+
+    private function batch(Request $request, string $identifier): CourseBatch
+    {
+        return CourseBatch::query()
+            ->with('course:id,title,title_ar,slug', 'room:id,name,slug')
+            ->where('organization_id', $this->organization($request)->id)
+            ->where('id', $identifier)
+            ->first() ?? throw new ApiException(
+                'RESOURCE_NOT_FOUND',
+                'Batch not found.',
+                404,
+            );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function attributes(
+        StoreBatchRequest|UpdateBatchRequest $request,
+        bool $partial = false,
+    ): array {
+        $validated = $request->validated();
+        $map = [
+            'courseId' => 'course_id',
+            'roomId' => 'room_id',
+            'title' => 'title',
+            'titleAr' => 'title_ar',
+            'startDate' => 'start_date',
+            'endDate' => 'end_date',
+            'schedule' => 'schedule',
+            'deliveryType' => 'delivery_type',
+            'capacity' => 'capacity',
+            'location' => 'location',
+            'meetingReference' => 'meeting_reference',
+            'enrollmentStartsAt' => 'enrollment_starts_at',
+            'enrollmentEndsAt' => 'enrollment_ends_at',
+            'status' => 'status',
+        ];
+
+        $attributes = [];
+        foreach ($map as $input => $column) {
+            if (! $partial || array_key_exists($input, $validated)) {
+                $attributes[$column] = $validated[$input] ?? null;
+            }
+        }
+        if (! $partial && ! array_key_exists('status', $validated)) {
+            $attributes['status'] = 'draft';
+        }
+
+        return $attributes;
     }
 }

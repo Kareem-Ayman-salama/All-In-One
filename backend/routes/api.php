@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\V1\PromotionController;
 use App\Http\Controllers\Api\V1\PublicMarketplaceController;
 use App\Http\Controllers\Api\V1\ReportExportController;
 use App\Http\Controllers\Api\V1\RoomController;
+use App\Http\Controllers\Api\V1\RoomMembershipController;
 use App\Http\Controllers\Api\V1\SessionController;
 use App\Http\Controllers\Api\V1\StudentController;
 use App\Http\Controllers\Api\V1\SupportController;
@@ -133,6 +134,14 @@ Route::prefix('v1')->group(function (): void {
                     ->middleware(['module:rooms', 'permission:rooms.update']);
                 Route::delete('/rooms/{room}', [RoomController::class, 'destroy'])
                     ->middleware(['module:rooms', 'permission:rooms.delete']);
+                Route::get('/rooms/{room}/members', [RoomMembershipController::class, 'index'])
+                    ->middleware(['module:rooms', 'permission:rooms.view']);
+                Route::post('/rooms/{room}/members', [RoomMembershipController::class, 'store'])
+                    ->middleware(['module:rooms', 'permission:rooms.update']);
+                Route::patch('/rooms/{room}/members/{roomMembership}', [RoomMembershipController::class, 'update'])
+                    ->middleware(['module:rooms', 'permission:rooms.update']);
+                Route::delete('/rooms/{room}/members/{roomMembership}', [RoomMembershipController::class, 'destroy'])
+                    ->middleware(['module:rooms', 'permission:rooms.update']);
 
                 Route::get('/invitations', [InvitationController::class, 'index'])
                     ->middleware(['module:members', 'permission:members.view']);
@@ -168,6 +177,10 @@ Route::prefix('v1')->group(function (): void {
                 Route::get('/announcements', [AnnouncementController::class, 'index'])
                     ->middleware(['module:announcements', 'permission:announcements.view']);
                 Route::post('/announcements', [AnnouncementController::class, 'store'])
+                    ->middleware(['module:announcements', 'permission:announcements.create']);
+                Route::patch('/announcements/{announcement}', [AnnouncementController::class, 'update'])
+                    ->middleware(['module:announcements', 'permission:announcements.create']);
+                Route::delete('/announcements/{announcement}', [AnnouncementController::class, 'destroy'])
                     ->middleware(['module:announcements', 'permission:announcements.create']);
 
                 Route::get('/events', [EventController::class, 'index'])
@@ -219,6 +232,8 @@ Route::prefix('v1')->group(function (): void {
                     Route::get('/batches', [CourseBatchController::class, 'index'])
                         ->middleware('permission:batches.view');
                     Route::post('/batches', [CourseBatchController::class, 'store'])
+                        ->middleware('permission:batches.manage');
+                    Route::patch('/batches/{batch}', [CourseBatchController::class, 'update'])
                         ->middleware('permission:batches.manage');
                 });
 

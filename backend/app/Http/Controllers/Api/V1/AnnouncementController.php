@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Announcements\StoreAnnouncementRequest;
+use App\Http\Requests\Announcements\UpdateAnnouncementRequest;
 use App\Models\Announcement;
 use App\Models\Notification;
 use App\Models\NotificationPreference;
@@ -140,6 +142,74 @@ class AnnouncementController extends Controller
         return ApiResponse::success($request, $announcement, status: 201);
     }
 
+    public function update(
+        UpdateAnnouncementRequest $request,
+        string $organization,
+        string $announcement,
+        OperationRecorder $recorder,
+    ): JsonResponse {
+        $model = $this->announcement($request, $announcement);
+        $validated = $request->validated();
+        $model->fill([
+            'room_id' => array_key_exists('roomId', $validated)
+                ? $validated['roomId']
+                : $model->room_id,
+            'title' => $validated['title'] ?? $model->title,
+            'title_ar' => array_key_exists('titleAr', $validated)
+                ? $validated['titleAr']
+                : $model->title_ar,
+            'body' => $validated['body'] ?? $model->body,
+            'body_ar' => array_key_exists('bodyAr', $validated)
+                ? $validated['bodyAr']
+                : $model->body_ar,
+            'audience' => $validated['audience'] ?? (
+                array_key_exists('roomId', $validated) && $validated['roomId']
+                    ? 'room'
+                    : $model->audience
+            ),
+            'pinned' => array_key_exists('pinned', $validated)
+                ? $request->boolean('pinned')
+                : $model->pinned,
+            'published_at' => array_key_exists('publishedAt', $validated)
+                ? $validated['publishedAt']
+                : $model->published_at,
+        ])->save();
+        $recorder->record(
+            'announcement.updated',
+            'announcement',
+            $model->id,
+            $model->organization_id,
+            $request->user()->id,
+            ['changed' => array_keys($validated)],
+            ['announcementId' => $model->id],
+            $request,
+        );
+
+        return ApiResponse::success($request, $model->fresh());
+    }
+
+    public function destroy(
+        Request $request,
+        string $organization,
+        string $announcement,
+        OperationRecorder $recorder,
+    ): JsonResponse {
+        $model = $this->announcement($request, $announcement);
+        $model->delete();
+        $recorder->record(
+            'announcement.deleted',
+            'announcement',
+            $model->id,
+            $model->organization_id,
+            $request->user()->id,
+            ['title' => $model->title],
+            ['announcementId' => $model->id],
+            $request,
+        );
+
+        return ApiResponse::success($request, ['deleted' => true]);
+    }
+
     private function organization(Request $request): Organization
     {
         return $request->attributes->get('active_organization');
@@ -148,5 +218,25 @@ class AnnouncementController extends Controller
     private function membership(Request $request): OrganizationMembership
     {
         return $request->attributes->get('organization_membership');
+    }
+
+    private function announcement(
+        Request $request,
+        string $identifier,
+    ): Announcement {
+        $announcement = Announcement::query()
+            ->where('organization_id', $this->organization($request)->id)
+            ->where('id', $identifier)
+            ->first();
+
+        if (! $announcement) {
+            throw new ApiException(
+                'RESOURCE_NOT_FOUND',
+                'Announcement not found.',
+                404,
+            );
+        }
+
+        return $announcement;
     }
 }

@@ -4,9 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\Organization;
 use App\Models\OrganizationMembership;
+use App\Models\Role;
 use App\Models\User;
 use App\Models\UserSession;
-use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
