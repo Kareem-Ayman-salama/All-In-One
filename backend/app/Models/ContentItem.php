@@ -20,11 +20,20 @@ class ContentItem extends Model
         'description',
         'type',
         'external_url',
+        'video_provider',
+        'external_video_id',
+        'external_url_encrypted',
         'download_allowed',
         'watermark_enabled',
+        'allow_fullscreen',
+        'display_order',
         'available_from',
         'available_until',
         'status',
+    ];
+
+    protected $hidden = [
+        'external_url_encrypted',
     ];
 
     protected function casts(): array
@@ -32,6 +41,9 @@ class ContentItem extends Model
         return [
             'download_allowed' => 'boolean',
             'watermark_enabled' => 'boolean',
+            'allow_fullscreen' => 'boolean',
+            'display_order' => 'integer',
+            'external_url_encrypted' => 'encrypted:string',
             'available_from' => 'datetime',
             'available_until' => 'datetime',
         ];

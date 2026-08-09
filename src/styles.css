@@ -4128,6 +4128,8 @@ tr:last-child td { border-bottom: 0; }
 .settings-toggle-icon svg { width: 18px; }
 .settings-toggle-row > div { display: grid; gap: 4px; }
 .settings-toggle-row small { color: var(--stitch-muted, var(--muted)); line-height: 1.5; }
+.settings-toggle { min-height: 42px; display: inline-flex; align-items: center; gap: 10px; color: var(--stitch-text, var(--text)); font-size: 13px; font-weight: 750; }
+.settings-toggle input { width: 18px; height: 18px; accent-color: var(--stitch-primary, var(--primary)); }
 .pro-toggle { width: 42px; height: 24px; padding: 3px; border: 0; border-radius: 999px; background: #b3b8c2; cursor: pointer; }
 .pro-toggle span { display: block; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .2s ease; }
 .pro-toggle.on { background: var(--stitch-primary-container, var(--primary)); }

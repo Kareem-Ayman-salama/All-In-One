@@ -131,6 +131,23 @@ export const api = {
     body: JSON.stringify(payload)
   }).then(camelize),
   uploadContent: (organizationId, payload) => {
+    if (payload.type === "youtube") {
+      return httpClient(organizationPath(organizationId, "content"), {
+        method: "POST",
+        body: JSON.stringify({
+          roomId: payload.roomId,
+          title: payload.title,
+          type: "youtube",
+          externalUrl: payload.externalUrl,
+          downloadAllowed: false,
+          watermarkEnabled: payload.watermarkEnabled !== false,
+          allowFullscreen: payload.allowFullscreen !== false,
+          displayOrder: payload.displayOrder || 0,
+          status: "published"
+        })
+      }).then(camelize);
+    }
+
     const body = new FormData();
     body.set("roomId", payload.roomId);
     body.set("title", payload.file.name);

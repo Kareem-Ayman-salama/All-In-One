@@ -93,6 +93,77 @@ class ContentSecurityTest extends TestCase
         ]);
     }
 
+    public function test_youtube_content_stores_video_id_and_returns_playback_config(): void
+    {
+        [$organization, $owner, $room] = $this->workspace();
+        Sanctum::actingAs($owner);
+
+        $response = $this->postJson(
+            "/api/v1/organizations/{$organization->id}/content",
+            [
+                'roomId' => $room->id,
+                'title' => 'YouTube lesson',
+                'type' => 'youtube',
+                'externalUrl' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                'allowFullscreen' => false,
+            ],
+        );
+
+        $contentId = $response
+            ->assertCreated()
+            ->assertJsonPath('data.type', 'youtube')
+            ->assertJsonPath('data.video_provider', 'youtube')
+            ->assertJsonPath('data.external_video_id', 'dQw4w9WgXcQ')
+            ->assertJsonMissingPath('data.external_url_encrypted')
+            ->json('data.id');
+
+        $this->assertDatabaseHas('content_items', [
+            'id' => $contentId,
+            'external_url' => null,
+            'video_provider' => 'youtube',
+            'external_video_id' => 'dQw4w9WgXcQ',
+            'allow_fullscreen' => false,
+        ]);
+
+        $session = $this->getJson(
+            "/api/v1/organizations/{$organization->id}/content/{$contentId}/view-session",
+        );
+
+        $session->assertOk()
+            ->assertJsonPath('data.playbackType', 'youtube')
+            ->assertJsonPath('data.provider', 'youtube')
+            ->assertJsonPath('data.videoId', 'dQw4w9WgXcQ')
+            ->assertJsonPath('data.allowFullscreen', false)
+            ->assertJsonPath('data.downloadAllowed', false)
+            ->assertJsonPath('data.watermark.enabled', true)
+            ->assertJsonStructure([
+                'data' => [
+                    'embedUrl',
+                    'expiresAt',
+                    'viewerSessionId',
+                    'watermark' => ['maskedEmail', 'moveEverySeconds'],
+                ],
+            ]);
+    }
+
+    public function test_youtube_content_rejects_non_youtube_urls(): void
+    {
+        [$organization, $owner, $room] = $this->workspace();
+        Sanctum::actingAs($owner);
+
+        $this->postJson(
+            "/api/v1/organizations/{$organization->id}/content",
+            [
+                'roomId' => $room->id,
+                'title' => 'Bad video',
+                'type' => 'youtube',
+                'externalUrl' => 'https://example.com/watch?v=dQw4w9WgXcQ',
+            ],
+        )
+            ->assertStatus(422)
+            ->assertJsonPath('error.code', 'INVALID_YOUTUBE_URL');
+    }
+
     public function test_mobile_view_session_rejects_unavailable_content(): void
     {
         Storage::fake('local');

@@ -48,29 +48,29 @@ Legend:
 
 ### 2.1 YouTube Video Content
 
-- [ ] Add backend fields for YouTube video content if missing:
+- [x] Add backend fields for YouTube video content if missing:
   - `content_type`
   - `video_provider`
   - `external_video_id`
   - `external_url_encrypted`
   - `allow_fullscreen`
   - `display_order`
-- [ ] Add YouTube URL parser service.
-- [ ] Validate supported YouTube URL formats.
-- [ ] Store only the provider and video ID, not raw public links.
-- [ ] Add backend endpoint to create YouTube video content.
+- [x] Add YouTube URL parser service.
+- [x] Validate supported YouTube URL formats.
+- [x] Store only the provider and video ID, not raw public links.
+- [x] Add backend endpoint to create YouTube video content.
 - [ ] Add backend endpoint to update video settings.
-- [ ] Add admin UI to paste YouTube link.
-- [ ] Add admin UI to select room/course.
+- [x] Add admin UI to paste YouTube link.
+- [x] Add admin UI to select room/course.
 - [ ] Add admin UI to set availability date.
-- [ ] Add admin UI to enable/disable fullscreen.
-- [ ] Add admin UI to enable/disable watermark.
+- [x] Add admin UI to enable/disable fullscreen.
+- [x] Add admin UI to enable/disable watermark.
 - [ ] Add admin UI to order videos inside a room/course.
 - [ ] Add mobile admin support for adding video links, if needed for pilot.
 
 ### 2.2 Secure Playback
 
-- [ ] Add playback endpoint for content:
+- [~] Add playback endpoint for content:
   - validates auth
   - validates organization membership
   - validates room/course access
@@ -79,7 +79,7 @@ Legend:
   - validates session policy
   - returns short-lived playback configuration
 - [ ] Do not allow playback by only knowing `content_id`.
-- [ ] Add short-lived viewer session expiration.
+- [x] Add short-lived viewer session expiration.
 - [ ] Add frontend secure video viewer.
 - [ ] Add mobile secure video viewer.
 - [ ] Render YouTube embedded player without showing a raw YouTube link in UI.
@@ -89,19 +89,19 @@ Legend:
 
 ### 2.3 Dynamic Watermark
 
-- [ ] Add backend watermark config in playback response.
-- [ ] Include student name.
-- [ ] Include masked email or masked phone.
-- [ ] Include user ID or short user reference.
-- [ ] Include date/time.
-- [ ] Include short session ID.
+- [x] Add backend watermark config in playback response.
+- [x] Include student name.
+- [x] Include masked email or masked phone.
+- [x] Include user ID or short user reference.
+- [x] Include date/time.
+- [x] Include short session ID.
 - [ ] Move watermark position every few seconds.
 - [ ] Keep watermark above video player.
 - [ ] Keep watermark visible during playback.
 - [ ] Make watermark hard to crop by changing position.
 - [ ] Add web implementation.
 - [ ] Complete mobile implementation.
-- [ ] Add tests for watermark payload.
+- [x] Add tests for watermark payload.
 
 ### 2.4 Anti-Leakage Controls
 
@@ -318,7 +318,7 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 
 ## 7. Web Frontend Tasks
 
-- [ ] Add YouTube video creation form.
+- [x] Add YouTube video creation form.
 - [ ] Add video security settings form.
 - [ ] Add secure video player page.
 - [ ] Add moving watermark overlay.
@@ -352,8 +352,8 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 
 ## 9. Backend API Tasks
 
-- [ ] Add YouTube video content endpoint.
-- [ ] Add playback config endpoint.
+- [x] Add YouTube video content endpoint.
+- [~] Add playback config endpoint.
 - [ ] Add video event endpoints:
   - start
   - progress

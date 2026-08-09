@@ -720,21 +720,47 @@ function InviteMemberModal({ open, onClose }) {
 }
 
 function UploadFileModal({ open, onClose }) {
+  const [mode, setMode] = useState("file");
   const [file, setFile] = useState(null);
   const [room, setRoom] = useState("HR & Policies");
+  const [title, setTitle] = useState("");
+  const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [allowFullscreen, setAllowFullscreen] = useState(true);
+  const [watermarkEnabled, setWatermarkEnabled] = useState(true);
   const { uploadFile, rooms } = useWorkspace();
   const { activeOrganization } = useOrganization();
   const { showToast } = useToast();
   const tx = useBilingualText();
   const submit = async (event) => {
     event.preventDefault();
-    if (!file) return;
-    const extension = file.name.split(".").pop()?.toUpperCase() || "File";
     const selectedRoom = rooms.find((item) => item.name === room) || rooms[0];
     if (!selectedRoom) {
       showToast(tx("أنشئ غرفة أولاً قبل رفع المحتوى", "Create a room before uploading content"), "danger");
       return;
     }
+    if (mode === "youtube") {
+      if (!title.trim() || !youtubeUrl.trim()) return;
+      await api.uploadContent(activeOrganization.id, {
+        roomId: selectedRoom.id,
+        title: title.trim(),
+        type: "youtube",
+        externalUrl: youtubeUrl.trim(),
+        downloadAllowed: false,
+        watermarkEnabled,
+        allowFullscreen
+      });
+      uploadFile({ name: title.trim(), room: selectedRoom.name, type: "Video", size: "YouTube", protected: true });
+      showToast(tx("تمت إضافة فيديو YouTube إلى المكتبة", "YouTube video added to the library"));
+      setTitle("");
+      setYoutubeUrl("");
+      setAllowFullscreen(true);
+      setWatermarkEnabled(true);
+      onClose();
+      return;
+    }
+
+    if (!file) return;
+    const extension = file.name.split(".").pop()?.toUpperCase() || "File";
     const contentType = file.type === "application/pdf"
       ? "pdf"
       : file.type.startsWith("image/")
@@ -756,10 +782,29 @@ function UploadFileModal({ open, onClose }) {
   };
 
   return (
-    <Modal title={tx("رفع محتوى جديد", "Upload content")} open={open} onClose={onClose} footer={<Button form="upload-file-form">{tx("بدء الرفع", "Start upload")}</Button>}>
+    <Modal title={tx("إضافة محتوى جديد", "Add content")} open={open} onClose={onClose} footer={<Button form="upload-file-form">{mode === "youtube" ? tx("إضافة الفيديو", "Add video") : tx("بدء الرفع", "Start upload")}</Button>}>
       <form id="upload-file-form" className="form-grid" onSubmit={submit}>
-        <FormField label={tx("الملف", "File")}><input type="file" required onChange={(event) => setFile(event.target.files?.[0] || null)} /></FormField>
-        <FormField label={tx("الغرفة", "Room")}><input value={room} onChange={(event) => setRoom(event.target.value)} required /></FormField>
+        <FormField label={tx("نوع المحتوى", "Content type")}>
+          <div className="stitch-period-toggle">
+            <button className={mode === "file" ? "active" : ""} type="button" onClick={() => setMode("file")}>{tx("ملف", "File")}</button>
+            <button className={mode === "youtube" ? "active" : ""} type="button" onClick={() => setMode("youtube")}>{tx("YouTube", "YouTube")}</button>
+          </div>
+        </FormField>
+        <FormField label={tx("الغرفة", "Room")}>
+          <select value={room} onChange={(event) => setRoom(event.target.value)} required>
+            {rooms.map((item) => <option value={item.name} key={item.id}>{item.name}</option>)}
+          </select>
+        </FormField>
+        {mode === "file" ? (
+          <FormField label={tx("الملف", "File")}><input type="file" required onChange={(event) => setFile(event.target.files?.[0] || null)} /></FormField>
+        ) : (
+          <>
+            <FormField label={tx("عنوان الفيديو", "Video title")}><input value={title} onChange={(event) => setTitle(event.target.value)} required /></FormField>
+            <FormField label={tx("رابط YouTube", "YouTube link")}><input dir="ltr" type="url" placeholder="https://www.youtube.com/watch?v=..." value={youtubeUrl} onChange={(event) => setYoutubeUrl(event.target.value)} required /></FormField>
+            <label className="settings-toggle"><input checked={allowFullscreen} onChange={(event) => setAllowFullscreen(event.target.checked)} type="checkbox" /> <span>{tx("السماح بملء الشاشة", "Allow fullscreen")}</span></label>
+            <label className="settings-toggle"><input checked={watermarkEnabled} onChange={(event) => setWatermarkEnabled(event.target.checked)} type="checkbox" /> <span>{tx("تشغيل العلامة المائية", "Enable watermark")}</span></label>
+          </>
+        )}
       </form>
     </Modal>
   );
