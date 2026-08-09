@@ -1,8 +1,8 @@
-# AIN MVP To Do Checklist
+# AIN Product Launch Checklist
 
 Last updated: 2026-08-09
 
-Use this file as the working checklist before launching the first market pilot.
+Use this file as the working checklist before launching the first public product trial.
 
 Legend:
 - `[x]` Done
@@ -29,7 +29,7 @@ Legend:
 - [~] Watermark display in mobile content viewer.
 - [~] User sessions and session revoke.
 
-## 2. Phase 1 - MVP Pilot Must-Haves
+## 2. Phase 1 - Product Trial Must-Haves
 
 ### 2.0 Landing Page and Market Message
 
@@ -127,7 +127,7 @@ Legend:
 - [ ] Add suspicious IP/device change detection.
 - [ ] Add admin alert flag for repeated blocked actions.
 
-Important note: browser protections are deterrents, not guaranteed protection. Watermark, device policy, sessions, and logs are the real MVP protection layers.
+Important note: browser protections are deterrents, not guaranteed protection. Watermark, device policy, sessions, and logs are the real protection layers.
 
 ### 2.5 Device Policy
 
@@ -148,7 +148,7 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 - [ ] Generate stable device fingerprint on web.
 - [ ] Generate stable installation ID on mobile.
 - [ ] Register first device automatically or as pending, based on organization settings.
-- [ ] Enforce one approved device per student for MVP.
+- [ ] Enforce one approved device per student for the first public trial.
 - [ ] Block or require approval for new device.
 - [ ] Add admin device list for each member.
 - [ ] Add approve device action.
@@ -162,7 +162,7 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 - [~] List active sessions.
 - [~] Revoke sessions.
 - [ ] Enforce max active sessions per student.
-- [ ] Default MVP policy: one active session.
+- [ ] Default product-trial policy: one active session.
 - [ ] Link sessions to approved device.
 - [ ] Block concurrent student login when policy requires it.
 - [ ] Add admin revoke all member sessions.
@@ -203,7 +203,7 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 
 - [~] Plans and subscriptions exist.
 - [ ] Add explicit trial plan.
-- [x] Set default MVP trial duration to one month.
+- [x] Set default trial duration to one month.
 - [x] Show one-month free trial in plan/subscription UI.
 - [ ] Add editable plan limits:
   - max rooms
@@ -231,7 +231,7 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 - [ ] Add reject subscription action with reason.
 - [ ] Add workspace suspension/activation controls.
 - [ ] Add audit log for subscription changes.
-- [ ] Keep payment gateway out of MVP.
+- [ ] Keep payment gateway out of the first public trial.
 
 ## 3. Phase 2 - After First Pilot Feedback
 
@@ -268,7 +268,7 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 - [ ] Add automated backups.
 - [ ] Add production incident runbook.
 
-## 5. Free / Almost Free MVP Infrastructure
+## 5. Free / Almost Free Infrastructure
 
 ### Recommended Pilot Stack
 
@@ -278,7 +278,7 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 - [ ] Video hosting: YouTube Unlisted.
 - [ ] Email / OTP: Brevo free plan.
 - [ ] Push notifications: Firebase Cloud Messaging free.
-- [ ] File storage: avoid in MVP where possible.
+- [ ] File storage: avoid in the first public trial where possible.
 - [ ] Payment: manual transfer outside the app for pilot.
 
 ### Deployment Tasks
@@ -288,7 +288,7 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 - [ ] Add CORS config for deployed frontend domain.
 - [ ] Add backend health check endpoint to hosting config.
 - [ ] Add Laravel queue strategy for free hosting.
-- [ ] Use sync queue for MVP emails if no worker is available.
+- [ ] Use sync queue for transactional emails if no worker is available.
 - [ ] Run migrations on hosted database.
 - [ ] Seed initial super admin.
 - [ ] Deploy frontend.
@@ -375,7 +375,7 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 
 ## 10. Anti-Leakage Definition
 
-AIN MVP should not promise perfect content protection. The promise should be:
+AIN should not promise perfect content protection. The promise should be:
 
 - [ ] Make casual sharing harder.
 - [ ] Make account sharing harder.
@@ -406,7 +406,7 @@ AIN MVP should not promise perfect content protection. The promise should be:
 - [ ] Android APK works against hosted API.
 - [ ] First pilot academy/school can use the system without developer intervention.
 
-## 12. Not In MVP
+## 12. Not In First Public Trial
 
 - [ ] Private video storage.
 - [ ] Guaranteed screenshot prevention.
