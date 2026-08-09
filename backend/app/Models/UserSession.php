@@ -15,6 +15,7 @@ class UserSession extends Model
     protected $fillable = [
         'user_id',
         'access_token_id',
+        'user_device_id',
         'name',
         'installation_id',
         'platform',
@@ -46,6 +47,11 @@ class UserSession extends Model
     public function accessToken(): BelongsTo
     {
         return $this->belongsTo(PersonalAccessToken::class, 'access_token_id');
+    }
+
+    public function userDevice(): BelongsTo
+    {
+        return $this->belongsTo(UserDevice::class);
     }
 
     public function pushDeviceTokens(): HasMany

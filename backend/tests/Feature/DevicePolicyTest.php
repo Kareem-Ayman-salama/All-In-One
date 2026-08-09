@@ -2,7 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\Organization;
+use App\Models\OrganizationMembership;
+use App\Models\Role;
 use App\Models\User;
+use App\Models\UserDevice;
 use App\Models\UserSession;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -95,5 +99,140 @@ class DevicePolicyTest extends TestCase
             'app_version' => '1.2.3',
             'revoked_at' => null,
         ]);
+    }
+
+    public function test_organization_device_approval_flow_blocks_new_devices(): void
+    {
+        $this->seed();
+        [$organization, $admin, $student] = $this->organizationWithStudent();
+
+        $this->postJson('/api/v1/auth/login', [
+            'email' => $student->email,
+            'password' => 'password',
+            'deviceName' => 'Primary laptop',
+            'installationId' => 'primary-installation',
+            'platform' => 'web',
+        ])
+            ->assertOk();
+
+        $this->assertDatabaseHas('user_devices', [
+            'organization_id' => $organization->id,
+            'user_id' => $student->id,
+            'status' => 'approved',
+        ]);
+
+        $this->postJson('/api/v1/auth/login', [
+            'email' => $student->email,
+            'password' => 'password',
+            'deviceName' => 'Second phone',
+            'installationId' => 'second-installation',
+            'platform' => 'android',
+        ])
+            ->assertForbidden()
+            ->assertJsonPath('error.code', 'DEVICE_APPROVAL_REQUIRED');
+
+        $pending = UserDevice::query()
+            ->where('user_id', $student->id)
+            ->where('status', 'pending')
+            ->firstOrFail();
+        $adminToken = $admin->createToken('admin')->plainTextToken;
+
+        $this->withToken($adminToken)
+            ->getJson("/api/v1/organizations/{$organization->id}/member-devices?memberId={$student->id}")
+            ->assertOk()
+            ->assertJsonCount(2, 'data');
+
+        $this->withToken($adminToken)
+            ->postJson("/api/v1/organizations/{$organization->id}/members/{$student->id}/devices/{$pending->id}/approve")
+            ->assertOk()
+            ->assertJsonPath('data.status', 'approved');
+
+        $this->postJson('/api/v1/auth/login', [
+            'email' => $student->email,
+            'password' => 'password',
+            'deviceName' => 'Second phone',
+            'installationId' => 'second-installation',
+            'platform' => 'android',
+        ])
+            ->assertOk();
+
+        $this->assertDatabaseHas('audit_logs', [
+            'organization_id' => $organization->id,
+            'actor_id' => $admin->id,
+            'action' => 'device.approved',
+            'entity_id' => $pending->id,
+        ]);
+    }
+
+    public function test_blocking_member_device_revokes_linked_sessions(): void
+    {
+        $this->seed();
+        [$organization, $admin, $student] = $this->organizationWithStudent();
+        $response = $this->postJson('/api/v1/auth/login', [
+            'email' => $student->email,
+            'password' => 'password',
+            'deviceName' => 'Primary laptop',
+            'installationId' => 'primary-installation',
+            'platform' => 'web',
+        ])->assertOk();
+
+        $device = UserDevice::query()->where('user_id', $student->id)->firstOrFail();
+        $session = UserSession::query()->where('user_id', $student->id)->firstOrFail();
+        $adminToken = $admin->createToken('admin')->plainTextToken;
+
+        $this->withToken($adminToken)
+            ->postJson("/api/v1/organizations/{$organization->id}/members/{$student->id}/devices/{$device->id}/block")
+            ->assertOk()
+            ->assertJsonPath('data.status', 'blocked');
+
+        $this->assertNotNull($session->fresh()->revoked_at);
+        $this->assertDatabaseMissing('personal_access_tokens', [
+            'token' => hash('sha256', explode('|', $response->json('data.accessToken'))[1]),
+        ]);
+        $this->assertDatabaseHas('audit_logs', [
+            'organization_id' => $organization->id,
+            'actor_id' => $admin->id,
+            'action' => 'device.blocked',
+            'entity_id' => $device->id,
+        ]);
+    }
+
+    /**
+     * @return array{Organization, User, User}
+     */
+    private function organizationWithStudent(): array
+    {
+        $admin = User::factory()->create();
+        $student = User::factory()->create();
+        $organization = Organization::query()->create([
+            'name' => 'Device Academy',
+            'slug' => fake()->unique()->slug(),
+            'type' => 'academy',
+        ]);
+        $ownerRole = Role::query()
+            ->whereNull('organization_id')
+            ->where('name', 'organization_owner')
+            ->firstOrFail();
+        $studentRole = Role::query()
+            ->whereNull('organization_id')
+            ->where('name', 'student')
+            ->firstOrFail();
+
+        OrganizationMembership::query()->create([
+            'organization_id' => $organization->id,
+            'user_id' => $admin->id,
+            'role_id' => $ownerRole->id,
+            'status' => 'active',
+            'joined_at' => now(),
+        ]);
+        OrganizationMembership::query()->create([
+            'organization_id' => $organization->id,
+            'user_id' => $student->id,
+            'role_id' => $studentRole->id,
+            'status' => 'active',
+            'joined_at' => now(),
+        ]);
+
+        return [$organization, $admin, $student];
     }
 }

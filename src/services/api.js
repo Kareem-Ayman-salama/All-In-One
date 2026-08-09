@@ -177,6 +177,26 @@ export const api = {
     organizationPath(organizationId, "member-sessions"),
     []
   ).then(camelize),
+  getMemberDevices: (organizationId, filters = {}) => {
+    const query = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) query.set(key, value);
+    });
+    const suffix = query.toString() ? `?${query}` : "";
+    return endpoint(`${organizationPath(organizationId, "member-devices")}${suffix}`, []).then(camelize);
+  },
+  approveMemberDevice: (organizationId, memberId, deviceId) => httpClient(
+    `${organizationPath(organizationId, "members")}/${memberId}/devices/${deviceId}/approve`,
+    { method: "POST", body: "{}" }
+  ).then(camelize),
+  blockMemberDevice: (organizationId, memberId, deviceId) => httpClient(
+    `${organizationPath(organizationId, "members")}/${memberId}/devices/${deviceId}/block`,
+    { method: "POST", body: "{}" }
+  ).then(camelize),
+  revokeMemberDevice: (organizationId, memberId, deviceId) => httpClient(
+    `${organizationPath(organizationId, "members")}/${memberId}/devices/${deviceId}/revoke`,
+    { method: "POST", body: "{}" }
+  ).then(camelize),
   revokeMemberSessions: (organizationId, memberId) => httpClient(
     `${organizationPath(organizationId, "members")}/${memberId}/sessions`,
     { method: "DELETE" }

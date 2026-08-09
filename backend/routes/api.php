@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\InstructorController;
 use App\Http\Controllers\Api\V1\InvitationController;
 use App\Http\Controllers\Api\V1\LessonBookingController;
+use App\Http\Controllers\Api\V1\MemberDeviceController;
 use App\Http\Controllers\Api\V1\MembershipController;
 use App\Http\Controllers\Api\V1\MetadataController;
 use App\Http\Controllers\Api\V1\NotificationController;
@@ -289,6 +290,16 @@ Route::prefix('v1')->group(function (): void {
                 Route::get('/member-sessions', [SessionController::class, 'organizationSessions'])
                     ->middleware('permission:audit.view');
                 Route::delete('/members/{member}/sessions', [SessionController::class, 'destroyMemberSessions'])
+                    ->middleware('permission:audit.view');
+                Route::get('/member-devices', [MemberDeviceController::class, 'index'])
+                    ->middleware('permission:audit.view');
+                Route::get('/members/{member}/devices', [MemberDeviceController::class, 'member'])
+                    ->middleware('permission:audit.view');
+                Route::post('/members/{member}/devices/{device}/approve', [MemberDeviceController::class, 'approve'])
+                    ->middleware('permission:audit.view');
+                Route::post('/members/{member}/devices/{device}/block', [MemberDeviceController::class, 'block'])
+                    ->middleware('permission:audit.view');
+                Route::post('/members/{member}/devices/{device}/revoke', [MemberDeviceController::class, 'revoke'])
                     ->middleware('permission:audit.view');
                 Route::get('/analytics/overview', [AnalyticsController::class, 'organization'])
                     ->middleware(['module:analytics', 'permission:analytics.view']);

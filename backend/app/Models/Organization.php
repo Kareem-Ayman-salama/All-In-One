@@ -45,6 +45,11 @@ class Organization extends Model
         return $this->hasMany(Course::class);
     }
 
+    public function userDevices(): HasMany
+    {
+        return $this->hasMany(UserDevice::class);
+    }
+
     public function academyProfile(): HasOne
     {
         return $this->hasOne(AcademyProfile::class);

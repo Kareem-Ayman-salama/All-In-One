@@ -131,8 +131,8 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 
 ### 2.5 Device Policy
 
-- [ ] Add `user_devices` table if current session table is not enough.
-- [ ] Store:
+- [x] Add `user_devices` table if current session table is not enough.
+- [x] Store:
   - `user_id`
   - `organization_id`
   - `device_hash`
@@ -147,13 +147,13 @@ Important note: browser protections are deterrents, not guaranteed protection. W
   - `revoked_at`
 - [ ] Generate stable device fingerprint on web.
 - [ ] Generate stable installation ID on mobile.
-- [ ] Register first device automatically or as pending, based on organization settings.
-- [ ] Enforce one approved device per student for the first public trial.
-- [ ] Block or require approval for new device.
-- [ ] Add admin device list for each member.
-- [ ] Add approve device action.
-- [ ] Add block device action.
-- [ ] Add revoke device action.
+- [x] Register first device automatically or as pending, based on organization settings.
+- [x] Enforce one approved device per student for the first public trial.
+- [x] Block or require approval for new device.
+- [x] Add admin device list for each member.
+- [x] Add approve device action.
+- [x] Add block device action.
+- [x] Add revoke device action.
 - [ ] Add student page showing current registered device.
 - [ ] Add request device change flow.
 
@@ -161,9 +161,9 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 
 - [x] List active sessions.
 - [x] Revoke sessions.
-- [ ] Enforce max active sessions per student.
+- [x] Enforce max active sessions per student.
 - [ ] Default product-trial policy: one active session.
-- [ ] Link sessions to approved device.
+- [x] Link sessions to approved device.
 - [ ] Block concurrent student login when policy requires it.
 - [x] Add admin revoke all member sessions.
 - [x] Add logout all endpoint.
@@ -324,7 +324,7 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 - [x] Add moving watermark overlay.
 - [x] Add right-click blocking on playback page.
 - [x] Add shortcut blocking on playback page.
-- [ ] Add member devices page.
+- [x] Add member devices page.
 - [x] Add active sessions page for admins.
 - [x] Add security logs page.
 - [ ] Add plan usage page.
@@ -358,9 +358,9 @@ Important note: browser protections are deterrents, not guaranteed protection. W
   - start
   - progress
   - complete
-- [ ] Add device register endpoint.
-- [ ] Add device approve/block/revoke endpoints.
-- [ ] Add member devices endpoint.
+- [x] Add device register endpoint.
+- [x] Add device approve/block/revoke endpoints.
+- [x] Add member devices endpoint.
 - [x] Add admin member sessions endpoint.
 - [x] Add revoke all member sessions endpoint.
 - [ ] Add security logs endpoint.

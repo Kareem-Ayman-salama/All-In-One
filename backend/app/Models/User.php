@@ -30,6 +30,11 @@ class User extends Authenticatable
         return $this->hasMany(UserSession::class);
     }
 
+    public function devices(): HasMany
+    {
+        return $this->hasMany(UserDevice::class);
+    }
+
     public function pushDeviceTokens(): HasMany
     {
         return $this->hasMany(PushDeviceToken::class);

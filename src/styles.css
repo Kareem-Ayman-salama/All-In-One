@@ -6389,6 +6389,8 @@ button.stitch-search {
 .audit-event i { width: 8px; height: 8px; border-radius: 50%; background: var(--stitch-primary-container); }
 .audit-event.success i { background: #059669; }
 .audit-event.danger i { background: #dc2626; }
+.inline-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.inline-actions .btn { min-height: 34px; padding: 7px 10px; }
 :root[data-theme="dark"] .audit-summary { border-color: #14532d; background: #052e16; color: #bbf7d0; }
 
 .billing-hero { min-height: 210px; margin-bottom: 22px; border: 1px solid var(--stitch-border); border-radius: 12px; background: var(--stitch-surface); padding: 28px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }

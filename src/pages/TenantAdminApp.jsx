@@ -585,9 +585,11 @@ function SecurityPageLive() {
   const { showToast } = useToast();
   const [logs, setLogs] = useState([]);
   const [sessions, setSessions] = useState([]);
+  const [devices, setDevices] = useState([]);
   const [filter, setFilter] = useState("all");
   const [loading, setLoading] = useState(false);
   const [sessionLoading, setSessionLoading] = useState(false);
+  const [deviceLoading, setDeviceLoading] = useState(false);
 
   useEffect(() => {
     if (!activeOrganization?.id) {
@@ -613,6 +615,18 @@ function SecurityPageLive() {
       .finally(() => setSessionLoading(false));
   }, [activeOrganization?.id, showToast]);
 
+  useEffect(() => {
+    if (!activeOrganization?.id) {
+      return;
+    }
+
+    setDeviceLoading(true);
+    api.getMemberDevices(activeOrganization.id)
+      .then(setDevices)
+      .catch((error) => showToast(error.message, "danger"))
+      .finally(() => setDeviceLoading(false));
+  }, [activeOrganization?.id, showToast]);
+
   const blocked = logs.filter((item) => ["denied", "warning", "failed"].includes(item.result)).length;
   const denied = logs.filter((item) => item.result === "denied").length;
   const allowed = logs.filter((item) => item.result === "allowed").length;
@@ -636,6 +650,28 @@ function SecurityPageLive() {
       if (result.revokedSessions === 0) {
         showToast(tx("لا توجد جلسات نشطة لهذا العضو.", "No active sessions were found for this member."), "info");
       }
+    } catch (error) {
+      showToast(error.message, "danger");
+    }
+  };
+  const updateDevice = async (memberId, deviceId, action) => {
+    if (!activeOrganization?.id || !memberId || !deviceId) {
+      return;
+    }
+
+    const methods = {
+      approve: api.approveMemberDevice,
+      block: api.blockMemberDevice,
+      revoke: api.revokeMemberDevice
+    };
+
+    try {
+      const updated = await methods[action](activeOrganization.id, memberId, deviceId);
+      setDevices((current) => current.map((item) => item.id === deviceId ? updated : item));
+      if (action === "block" || action === "revoke") {
+        setSessions((current) => current.filter((item) => item.user?.id !== memberId));
+      }
+      showToast(tx("Device policy updated.", "Device policy updated."), "success");
     } catch (error) {
       showToast(error.message, "danger");
     }
@@ -695,6 +731,64 @@ function SecurityPageLive() {
         formatTime={formatTime}
         revokeMember={revokeMember}
       />
+      <MemberDevicesBlock
+        devices={devices}
+        deviceLoading={deviceLoading}
+        formatTime={formatTime}
+        updateDevice={updateDevice}
+      />
+    </>
+  );
+}
+
+function MemberDevicesBlock({ devices, deviceLoading, formatTime, updateDevice }) {
+  const tx = useBilingualText();
+  const pending = devices.filter((device) => device.status === "pending").length;
+  const tone = (status) => {
+    if (status === "approved") return "success";
+    if (status === "blocked" || status === "revoked") return "danger";
+    return "warning";
+  };
+
+  return (
+    <>
+      <div className="stitch-page-head compact">
+        <div>
+          <h2>{tx("Member devices", "Member devices")}</h2>
+          <p>{tx("Approve the first trusted device, block suspicious devices, and revoke access when account sharing appears.", "Approve the first trusted device, block suspicious devices, and revoke access when account sharing appears.")}</p>
+        </div>
+        <Badge tone={pending ? "warning" : "success"}>{pending} {tx("pending", "pending")}</Badge>
+      </div>
+      <div className="audit-table">
+        <div className="audit-head">
+          <span>{tx("Member", "Member")}</span>
+          <span>{tx("Device", "Device")}</span>
+          <span>{tx("Status", "Status")}</span>
+          <span>{tx("Last seen", "Last seen")}</span>
+          <span>{tx("Action", "Action")}</span>
+        </div>
+        {deviceLoading && <div className="audit-row"><span>{tx("Loading...", "Loading...")}</span><span /><span /><span /><span /></div>}
+        {!deviceLoading && devices.length === 0 && <div className="audit-row"><span>{tx("No registered devices yet", "No registered devices yet")}</span><span /><span /><span /><span /></div>}
+        {!deviceLoading && devices.map((device) => (
+          <div className="audit-row" key={device.id}>
+            <strong>{device.user?.name || device.user?.email || "-"}</strong>
+            <span>{device.deviceName || device.platform || device.browser || "-"}</span>
+            <span><Badge tone={tone(device.status)}>{device.status}</Badge></span>
+            <small>{formatTime(device.lastSeenAt)}</small>
+            <span className="inline-actions">
+              {device.status !== "approved" && (
+                <Button variant="ghost" onClick={() => updateDevice(device.userId, device.id, "approve")}><CheckCircle2 size={15} /> {tx("Approve", "Approve")}</Button>
+              )}
+              {device.status !== "blocked" && (
+                <Button variant="ghost" onClick={() => updateDevice(device.userId, device.id, "block")}><Lock size={15} /> {tx("Block", "Block")}</Button>
+              )}
+              {device.status !== "revoked" && (
+                <Button variant="ghost" onClick={() => updateDevice(device.userId, device.id, "revoke")}><Trash2 size={15} /> {tx("Revoke", "Revoke")}</Button>
+              )}
+            </span>
+          </div>
+        ))}
+      </div>
     </>
   );
 }

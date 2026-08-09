@@ -3,6 +3,7 @@
 return [
     'version' => '2026-07-24',
     'max_active_sessions_per_user' => (int) env('MAX_ACTIVE_SESSIONS_PER_USER', 8),
+    'max_approved_devices_per_member' => (int) env('MAX_APPROVED_DEVICES_PER_MEMBER', 1),
     'allow_same_installation_replacement' => true,
     'installation_id' => [
         'source' => 'application_generated',

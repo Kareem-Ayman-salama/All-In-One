@@ -7,6 +7,7 @@ use App\Models\PushDeviceToken;
 use App\Models\User;
 use App\Models\UserSession;
 use App\Notifications\VerificationCodeNotification;
+use App\Services\Devices\DeviceRegistry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -16,6 +17,7 @@ class AuthService
 {
     public function __construct(
         private readonly VerificationCodeService $verificationCodes,
+        private readonly DeviceRegistry $devices,
     ) {}
 
     /**
@@ -363,6 +365,11 @@ class AuthService
     ): array {
         $installationId = $device['installationId'] ?? null;
         $this->enforceDeviceLimit($user, $installationId);
+        $registeredDevices = $this->devices->registerForActiveMemberships(
+            $user,
+            $request,
+            $device,
+        );
 
         $accessExpiresAt = now()->addMinutes(config('aio.access_token_minutes'));
         $accessToken = $user->createToken('web', ['*'], $accessExpiresAt);
@@ -372,6 +379,7 @@ class AuthService
         UserSession::query()->create([
             'user_id' => $user->id,
             'access_token_id' => $accessToken->accessToken->getKey(),
+            'user_device_id' => $registeredDevices->first()?->id,
             'name' => ($device['deviceName'] ?? null)
                 ?: Str::limit((string) $request->userAgent(), 120),
             'installation_id' => $installationId,
