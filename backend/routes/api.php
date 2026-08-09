@@ -56,6 +56,8 @@ Route::prefix('v1')->group(function (): void {
         ->name('api.v1.content-view.show');
     Route::get('/public/invitations/{token}', [InvitationController::class, 'preview'])
         ->middleware('throttle:30,1');
+    Route::post('/public/trial-leads', [SupportController::class, 'trialLead'])
+        ->middleware('throttle:support');
     Route::post('/support', [SupportController::class, 'store'])
         ->middleware('throttle:support');
 

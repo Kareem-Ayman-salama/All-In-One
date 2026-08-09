@@ -1,5 +1,6 @@
 const AIN_CONTACT = {
   whatsapp: "201025849793",
+  apiBaseUrl: window.AIN_API_BASE_URL || "/api/v1",
 };
 
 function scrollToId(id) {
@@ -33,10 +34,27 @@ function openWhatsApp(message) {
   window.open(url, "_blank", "noopener,noreferrer");
 }
 
-function submitTrialForm(event) {
+async function captureTrialLead(data) {
+  const payload = Object.fromEntries(data.entries());
+  const response = await fetch(`${AIN_CONTACT.apiBaseUrl}/public/trial-leads`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error("Trial lead capture failed.");
+  }
+}
+
+async function submitTrialForm(event) {
   event.preventDefault();
   const form = event.currentTarget;
   if (!form.reportValidity()) return;
+  const submit = form.querySelector("[type='submit']");
 
   const data = new FormData(form);
   const message = [
@@ -51,6 +69,15 @@ function submitTrialForm(event) {
     `المحتوى المطلوب حمايته: ${value(data, "content")}`,
   ].join("\n");
 
+  submit?.setAttribute("disabled", "disabled");
+  try {
+    await captureTrialLead(data);
+    form.reset();
+  } catch (error) {
+    console.warn(error);
+  } finally {
+    submit?.removeAttribute("disabled");
+  }
   closeLeadModal("trial-modal");
   openWhatsApp(message);
 }

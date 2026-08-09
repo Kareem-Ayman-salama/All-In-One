@@ -40,7 +40,7 @@ Legend:
 - [x] Add simple explanation of workspace, courses, rooms, students, and protected content.
 - [x] Add anti-leakage section explaining realistic protection.
 - [x] Add trial lead form that opens WhatsApp with structured details.
-- [ ] Add real lead capture backend endpoint instead of WhatsApp-only handoff.
+- [x] Add real lead capture backend endpoint instead of WhatsApp-only handoff.
 - [ ] Add screenshots from the actual dashboard to the landing page.
 - [ ] Add short demo video when the product flow is stable.
 - [ ] Run landing page user test with 3 academy/teacher prospects.
