@@ -103,6 +103,7 @@ class DevicePolicyTest extends TestCase
 
     public function test_organization_device_approval_flow_blocks_new_devices(): void
     {
+        config(['device_policy.approval_required' => true]);
         $this->seed();
         [$organization, $admin, $student] = $this->organizationWithStudent();
 
@@ -173,6 +174,43 @@ class DevicePolicyTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.0.event', 'new_device_detected')
             ->assertJsonPath('data.0.user.email', $student->email);
+    }
+
+    public function test_device_approval_can_be_disabled_for_trial_testing(): void
+    {
+        config([
+            'device_policy.approval_required' => false,
+            'device_policy.max_approved_devices_per_member' => 1,
+        ]);
+        $this->seed();
+        [$organization, , $student] = $this->organizationWithStudent();
+
+        $this->postJson('/api/v1/auth/login', [
+            'email' => $student->email,
+            'password' => 'password',
+            'deviceName' => 'Primary laptop',
+            'installationId' => 'primary-installation',
+            'platform' => 'web',
+        ])
+            ->assertOk();
+
+        $this->postJson('/api/v1/auth/login', [
+            'email' => $student->email,
+            'password' => 'password',
+            'deviceName' => 'Second phone',
+            'installationId' => 'second-installation',
+            'platform' => 'android',
+        ])
+            ->assertOk();
+
+        $this->assertSame(
+            2,
+            UserDevice::query()
+                ->where('organization_id', $organization->id)
+                ->where('user_id', $student->id)
+                ->where('status', 'approved')
+                ->count(),
+        );
     }
 
     public function test_blocking_member_device_revokes_linked_sessions(): void

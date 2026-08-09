@@ -87,6 +87,9 @@ class DeviceRegistry
         }
 
         $status = $existing?->status ?? $this->initialStatus($user, $organizationId);
+        if ($status === 'pending' && ! config('device_policy.approval_required')) {
+            $status = 'approved';
+        }
         if ($status === 'pending') {
             $this->touchDevice(
                 $user,
@@ -166,6 +169,10 @@ class DeviceRegistry
 
     private function initialStatus(User $user, string $organizationId): string
     {
+        if (! config('device_policy.approval_required')) {
+            return 'approved';
+        }
+
         $approvedDevices = UserDevice::query()
             ->where('organization_id', $organizationId)
             ->where('user_id', $user->id)

@@ -10,7 +10,7 @@ export const organizations = [
     logo: "TC",
     color: "#2563eb",
     pendingActions: 3,
-    enabledModules: ["courses", "meetings", "tasks"]
+    enabledModules: ["meetings", "tasks"]
   },
   {
     id: "org-elite-academy",

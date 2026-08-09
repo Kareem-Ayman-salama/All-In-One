@@ -77,6 +77,7 @@ export const ROLE_PERMISSIONS = {
 };
 
 const sharedModules = ["rooms", "content", "announcements", "calendar", "meetings", "tasks", "analytics"];
+const educationModules = new Set(["courses", "batches", "bookings", "attendance", "guardians", "promotions", "live_sessions", "exams"]);
 
 export const PLAN_ENTITLEMENTS = {
   Starter: {
@@ -103,8 +104,14 @@ export function permissionsForMembership(membership) {
 export function modulesForOrganization(organization) {
   const planModules = PLAN_ENTITLEMENTS[organization?.plan]?.modules || sharedModules;
   const disabledModules = new Set(organization?.disabledModules || []);
+  const allowedByType = (module) => (
+    ["academy", "training_center", "educational_institution"].includes(organization?.type)
+    || !educationModules.has(module)
+  );
+
   return [...new Set([...planModules, ...(organization?.enabledModules || [])])]
-    .filter((module) => !disabledModules.has(module));
+    .filter((module) => !disabledModules.has(module))
+    .filter(allowedByType);
 }
 
 export function roleDestination(role) {

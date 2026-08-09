@@ -100,14 +100,30 @@ const nav = [
   { id: "settings", label: "Settings", icon: "settings", path: "/tenant-admin/settings" }
 ];
 
+const educationOnlyNav = new Set([
+  "courses",
+  "batches",
+  "bookingRequests",
+  "attendance",
+  "guardians",
+  "reports",
+  "academyProfile",
+  "instructors",
+  "promotions"
+]);
+
+function isEducationOrganization(organization) {
+  return ["academy", "training_center", "educational_institution"].includes(organization?.type);
+}
+
 export function TenantAdminApp({ data, user }) {
   const { page = "dashboard" } = useParams();
   const tx = useBilingualText();
-  const { isModuleEnabled, can } = useOrganization();
+  const { isModuleEnabled, can, activeOrganization } = useOrganization();
   const appUser = { ...user, roleLabel: tx("مدير الشركة", "Tenant Admin") };
   const workspace = useWorkspace();
   const appData = { ...data, rooms: workspace.rooms, files: workspace.files, members: workspace.members, notifications: workspace.notifications };
-  const visibleNav = nav;
+  const visibleNav = nav.filter((item) => isEducationOrganization(activeOrganization) || !educationOnlyNav.has(item.id));
   const currentItem = nav.find((item) => item.id === page);
   const moduleLocked = currentItem?.module && !isModuleEnabled(currentItem.module);
 
@@ -150,7 +166,7 @@ function Dashboard({ data, user }) {
   const [inviteOpen, setInviteOpen] = useState(false);
   const tx = useBilingualText();
   const { activeOrganization, activeMembership } = useOrganization();
-  const { activity } = useWorkspace();
+  const { activity, events } = useWorkspace();
   const { academies, instructors, courses, batches, bookings, enrollments } = useMarketplace();
   const organizationId = activeOrganization?.id;
   const publishedCourses = courses.filter((item) => item.organizationId === organizationId && item.status === "published").length;
@@ -163,6 +179,7 @@ function Dashboard({ data, user }) {
     : null;
   const planName = activeOrganization?.planName || activeOrganization?.plan || tx("بدون باقة", "No plan");
   const academy = academies.find((item) => item.organizationId === organizationId);
+  const educationWorkspace = isEducationOrganization(activeOrganization);
   const academySteps = [
     {
       title: tx("أكمل ملف الأكاديمية", "Complete academy profile"),
@@ -195,7 +212,34 @@ function Dashboard({ data, user }) {
       done: batches.some((item) => item.organizationId === organizationId)
     }
   ];
-  const academyProgress = Math.round((academySteps.filter((item) => item.done).length / academySteps.length) * 100);
+  const companySteps = [
+    {
+      title: tx("أنشئ أول روم للموظفين", "Create your first employee room"),
+      description: tx("استخدم الروم للسياسات والملفات والرسائل والمواعيد الداخلية.", "Use rooms for policies, files, messages, and internal schedules."),
+      href: "/tenant-admin/rooms",
+      done: Boolean(data.rooms?.length)
+    },
+    {
+      title: tx("ادعُ موظفًا", "Invite an employee"),
+      description: tx("أضف الموظفين للغرف المناسبة بدون ربطهم بكورسات أو دفعات.", "Add employees to the right rooms without courses or batches."),
+      href: "/tenant-admin/members",
+      done: Boolean(data.members?.length)
+    },
+    {
+      title: tx("ارفع ملفات الشركة", "Upload company material"),
+      description: tx("سياسات، مستندات HR، ملفات تدريب داخلي، أو محتوى محمي.", "Policies, HR documents, internal training files, or protected content."),
+      href: "/tenant-admin/files",
+      done: Boolean(data.files?.length)
+    },
+    {
+      title: tx("حدد اجتماعًا أو مهمة", "Schedule a meeting or task"),
+      description: tx("اربط المواعيد بالروم عشان الموظفين يلاقوا كل حاجة في مكان واحد.", "Attach schedules to rooms so employees find everything in one place."),
+      href: "/tenant-admin/calendar",
+      done: events.some((event) => event.roomId)
+    }
+  ];
+  const launchSteps = educationWorkspace ? academySteps : companySteps;
+  const launchProgress = Math.round((launchSteps.filter((item) => item.done).length / launchSteps.length) * 100);
 
   return (
     <>
@@ -210,18 +254,18 @@ function Dashboard({ data, user }) {
 
       <section className="academy-launch-guide">
         <header>
-          <span><GraduationCap size={21} /></span>
+          <span>{educationWorkspace ? <GraduationCap size={21} /> : <Building2 size={21} />}</span>
           <div>
-            <small>{tx("تشغيل الأكاديمية", "Academy launch")}</small>
-            <h2>{tx("أضف المدرسين والكورسات من هنا بالترتيب", "Add instructors and courses in the right order")}</h2>
+            <small>{educationWorkspace ? tx("تشغيل الأكاديمية", "Academy launch") : tx("تشغيل الشركة", "Company workspace setup")}</small>
+            <h2>{educationWorkspace ? tx("أضف المدرسين والكورسات من هنا بالترتيب", "Add instructors and courses in the right order") : tx("جهز مساحة الشركة للموظفين بدون كورسات أو دفعات", "Set up the company workspace for employees without courses or batches")}</h2>
           </div>
-          <div className="academy-launch-progress" aria-label={`${academyProgress}%`}>
-            <strong>{academyProgress}%</strong>
-            <progress max="100" value={academyProgress} />
+          <div className="academy-launch-progress" aria-label={`${launchProgress}%`}>
+            <strong>{launchProgress}%</strong>
+            <progress max="100" value={launchProgress} />
           </div>
         </header>
         <div className="academy-launch-steps">
-          {academySteps.map((step, index) => (
+          {launchSteps.map((step, index) => (
             <a className={step.done ? "done" : ""} href={step.href} key={step.href}>
               <span>{step.done ? <CheckCircle2 size={19} /> : index + 1}</span>
               <div><strong>{step.title}</strong><small>{step.description}</small></div>
@@ -232,9 +276,9 @@ function Dashboard({ data, user }) {
 
       <section className="stitch-stat-grid five">
         <StatCard title={tx("الغرف النشطة", "Active rooms")} value={String(data.rooms?.length || 0)} hint={tx("مساحات العمل", "Workspaces")} icon={<Building2 />} tone="primary" />
-        <StatCard title={tx("الكورسات المنشورة", "Published courses")} value={String(publishedCourses)} hint={`${activeBatches} ${tx("دفعات نشطة", "active batches")}`} icon={<BookOpen />} tone="success" />
-        <StatCard title={tx("الحجوزات المعلقة", "Pending bookings")} value={String(pendingBookings)} hint={tx("تحتاج إجراء", "Need action")} icon={<AlertTriangle />} tone="warning" />
-        <StatCard title={tx("الطلاب النشطون", "Active students")} value={String(activeEnrollments)} hint={tx("وصول مؤكد", "Confirmed access")} icon={<Users />} tone="primary" />
+        <StatCard title={educationWorkspace ? tx("الكورسات المنشورة", "Published courses") : tx("الموظفون", "Employees")} value={educationWorkspace ? String(publishedCourses) : String(data.members?.length || 0)} hint={educationWorkspace ? `${activeBatches} ${tx("دفعات نشطة", "active batches")}` : tx("أعضاء مساحة العمل", "Workspace members")} icon={educationWorkspace ? <BookOpen /> : <Users />} tone="success" />
+        <StatCard title={educationWorkspace ? tx("الحجوزات المعلقة", "Pending bookings") : tx("مواعيد الروم", "Room events")} value={educationWorkspace ? String(pendingBookings) : String(events.filter((event) => event.roomId).length)} hint={educationWorkspace ? tx("تحتاج إجراء", "Need action") : tx("مرتبطة بالغرف", "Linked to rooms")} icon={<AlertTriangle />} tone="warning" />
+        <StatCard title={educationWorkspace ? tx("الطلاب النشطون", "Active students") : tx("صلاحيات الموظفين", "Employee access")} value={educationWorkspace ? String(activeEnrollments) : tx("مفصولة", "Separated")} hint={educationWorkspace ? tx("وصول مؤكد", "Confirmed access") : tx("بدون كورسات أو دفعات", "No courses or batches")} icon={<Users />} tone="primary" />
         <StatCard title={tx("الملفات المحمية", "Protected files")} value={String(data.files?.length || 0)} hint={tx("محتوى مؤمّن", "Secured content")} icon={<Shield />} tone="success" />
       </section>
 
