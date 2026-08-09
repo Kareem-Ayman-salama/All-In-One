@@ -27,7 +27,7 @@ Legend:
 - [~] Firebase code wiring for push notifications.
 - [~] Content access logs.
 - [~] Watermark display in mobile content viewer.
-- [~] User sessions and session revoke.
+- [x] User sessions and session revoke.
 
 ## 2. Phase 1 - Product Trial Must-Haves
 
@@ -159,15 +159,15 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 
 ### 2.6 Session Policy
 
-- [~] List active sessions.
-- [~] Revoke sessions.
+- [x] List active sessions.
+- [x] Revoke sessions.
 - [ ] Enforce max active sessions per student.
 - [ ] Default product-trial policy: one active session.
 - [ ] Link sessions to approved device.
 - [ ] Block concurrent student login when policy requires it.
-- [ ] Add admin revoke all member sessions.
-- [ ] Add logout all endpoint.
-- [ ] Log session revoked event.
+- [x] Add admin revoke all member sessions.
+- [x] Add logout all endpoint.
+- [x] Log session revoked event.
 - [ ] Log concurrent session blocked event.
 
 ### 2.7 Security Logs
@@ -325,7 +325,7 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 - [x] Add right-click blocking on playback page.
 - [x] Add shortcut blocking on playback page.
 - [ ] Add member devices page.
-- [ ] Add active sessions page for admins.
+- [x] Add active sessions page for admins.
 - [x] Add security logs page.
 - [ ] Add plan usage page.
 - [ ] Add trial limits page for super admin.
@@ -361,8 +361,8 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 - [ ] Add device register endpoint.
 - [ ] Add device approve/block/revoke endpoints.
 - [ ] Add member devices endpoint.
-- [ ] Add admin member sessions endpoint.
-- [ ] Add revoke all member sessions endpoint.
+- [x] Add admin member sessions endpoint.
+- [x] Add revoke all member sessions endpoint.
 - [ ] Add security logs endpoint.
 - [ ] Add security logs export endpoint later.
 - [ ] Add plan limits enforcement middleware/service.
@@ -370,7 +370,7 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 - [ ] Add Email OTP service.
 - [ ] Add tests for all tenant/role boundaries.
 - [ ] Add tests for playback authorization.
-- [ ] Add tests for device/session enforcement.
+- [x] Add tests for device/session enforcement.
 - [ ] Add tests for trial limits.
 
 ## 10. Anti-Leakage Definition

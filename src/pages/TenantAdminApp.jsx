@@ -524,8 +524,10 @@ function SecurityPageLive() {
   const { activeOrganization } = useOrganization();
   const { showToast } = useToast();
   const [logs, setLogs] = useState([]);
+  const [sessions, setSessions] = useState([]);
   const [filter, setFilter] = useState("all");
   const [loading, setLoading] = useState(false);
+  const [sessionLoading, setSessionLoading] = useState(false);
 
   useEffect(() => {
     if (!activeOrganization?.id) {
@@ -539,6 +541,18 @@ function SecurityPageLive() {
       .finally(() => setLoading(false));
   }, [activeOrganization?.id, filter, showToast]);
 
+  useEffect(() => {
+    if (!activeOrganization?.id) {
+      return;
+    }
+
+    setSessionLoading(true);
+    api.getMemberSessions(activeOrganization.id)
+      .then(setSessions)
+      .catch((error) => showToast(error.message, "danger"))
+      .finally(() => setSessionLoading(false));
+  }, [activeOrganization?.id, showToast]);
+
   const blocked = logs.filter((item) => ["denied", "warning", "failed"].includes(item.result)).length;
   const denied = logs.filter((item) => item.result === "denied").length;
   const allowed = logs.filter((item) => item.result === "allowed").length;
@@ -549,6 +563,22 @@ function SecurityPageLive() {
     if (result === "allowed") return "success";
     if (result === "denied" || result === "failed") return "danger";
     return "warning";
+  };
+  const revokeMember = async (memberId) => {
+    if (!activeOrganization?.id || !memberId) {
+      return;
+    }
+
+    try {
+      const result = await api.revokeMemberSessions(activeOrganization.id, memberId);
+      setSessions((current) => current.filter((item) => item.user?.id !== memberId));
+      showToast(tx("تم إلغاء جلسات العضو.", "Member sessions revoked."), "success");
+      if (result.revokedSessions === 0) {
+        showToast(tx("لا توجد جلسات نشطة لهذا العضو.", "No active sessions were found for this member."), "info");
+      }
+    } catch (error) {
+      showToast(error.message, "danger");
+    }
   };
 
   return (
@@ -596,6 +626,47 @@ function SecurityPageLive() {
             <span>{item.contentItem?.title || item.contentItemId || "—"}</span>
             <span>{item.ipAddress || "—"}</span>
             <small>{formatTime(item.createdAt)}</small>
+          </div>
+        ))}
+      </div>
+      <MemberSessionsBlock
+        sessions={sessions}
+        sessionLoading={sessionLoading}
+        formatTime={formatTime}
+        revokeMember={revokeMember}
+      />
+    </>
+  );
+}
+
+function MemberSessionsBlock({ sessions, sessionLoading, formatTime, revokeMember }) {
+  const tx = useBilingualText();
+  return (
+    <>
+      <div className="stitch-page-head compact">
+        <div>
+          <h2>{tx("الجلسات النشطة", "Active member sessions")}</h2>
+          <p>{tx("راجع الأجهزة المفتوحة وألغ جلسات أي عضو عند الاشتباه في مشاركة الحساب.", "Review open devices and revoke a member's sessions when account sharing is suspected.")}</p>
+        </div>
+        <Badge tone={sessions.length ? "warning" : "success"}>{sessions.length} {tx("جلسة", "sessions")}</Badge>
+      </div>
+      <div className="audit-table">
+        <div className="audit-head">
+          <span>{tx("العضو", "Member")}</span>
+          <span>{tx("الجهاز", "Device")}</span>
+          <span>{tx("المنصة", "Platform")}</span>
+          <span>{tx("آخر استخدام", "Last used")}</span>
+          <span>{tx("إجراء", "Action")}</span>
+        </div>
+        {sessionLoading && <div className="audit-row"><span>{tx("جاري التحميل...", "Loading...")}</span><span /><span /><span /><span /></div>}
+        {!sessionLoading && sessions.length === 0 && <div className="audit-row"><span>{tx("لا توجد جلسات نشطة", "No active sessions")}</span><span /><span /><span /><span /></div>}
+        {!sessionLoading && sessions.map((session) => (
+          <div className="audit-row" key={session.id}>
+            <strong>{session.user?.name || session.user?.email || "-"}</strong>
+            <span>{session.name || session.installationId || "-"}</span>
+            <span>{session.platform || session.appVersion || "web"}</span>
+            <small>{formatTime(session.lastUsedAt)}</small>
+            <Button variant="ghost" onClick={() => revokeMember(session.user?.id)}><Lock size={15} /> {tx("إلغاء الجلسات", "Revoke")}</Button>
           </div>
         ))}
       </div>

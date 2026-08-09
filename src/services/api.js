@@ -173,6 +173,14 @@ export const api = {
     const suffix = query.toString() ? `?${query}` : "";
     return endpoint(`${organizationPath(organizationId, "content-access-logs")}${suffix}`, []).then(camelize);
   },
+  getMemberSessions: (organizationId) => endpoint(
+    organizationPath(organizationId, "member-sessions"),
+    []
+  ).then(camelize),
+  revokeMemberSessions: (organizationId, memberId) => httpClient(
+    `${organizationPath(organizationId, "members")}/${memberId}/sessions`,
+    { method: "DELETE" }
+  ).then(camelize),
   deleteRoom: (organizationId, roomId) => httpClient(`${organizationPath(organizationId, "rooms")}/${roomId}`, { method: "DELETE" }),
   deleteContent: (organizationId, contentId) => httpClient(`${organizationPath(organizationId, "content")}/${contentId}`, { method: "DELETE" }),
   removeMember: (organizationId, membershipId) => httpClient(`${organizationPath(organizationId, "members")}/${membershipId}`, { method: "DELETE" }),

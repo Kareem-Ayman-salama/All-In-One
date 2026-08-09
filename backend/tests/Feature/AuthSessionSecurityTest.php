@@ -2,8 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\Organization;
+use App\Models\OrganizationMembership;
 use App\Models\User;
 use App\Models\UserSession;
+use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -115,6 +118,70 @@ class AuthSessionSecurityTest extends TestCase
         $this->withToken($token->plainTextToken)
             ->getJson('/api/v1/auth/me')
             ->assertUnauthorized();
+    }
+
+    public function test_organization_admin_can_list_and_revoke_member_sessions(): void
+    {
+        $this->seed();
+        $admin = User::factory()->create();
+        $member = User::factory()->create();
+        $organization = Organization::query()->create([
+            'name' => 'Session Academy',
+            'slug' => 'session-academy',
+            'type' => 'academy',
+        ]);
+        $ownerRole = Role::query()
+            ->whereNull('organization_id')
+            ->where('name', 'organization_owner')
+            ->firstOrFail();
+        $studentRole = Role::query()
+            ->whereNull('organization_id')
+            ->where('name', 'student')
+            ->firstOrFail();
+        OrganizationMembership::query()->create([
+            'organization_id' => $organization->id,
+            'user_id' => $admin->id,
+            'role_id' => $ownerRole->id,
+            'status' => 'active',
+            'joined_at' => now(),
+        ]);
+        OrganizationMembership::query()->create([
+            'organization_id' => $organization->id,
+            'user_id' => $member->id,
+            'role_id' => $studentRole->id,
+            'status' => 'active',
+            'joined_at' => now(),
+        ]);
+
+        $adminToken = $admin->createToken('admin-browser');
+        $memberToken = $member->createToken('student-browser');
+        $session = $this->createSessionRecord(
+            $member,
+            $memberToken->accessToken->id,
+            bin2hex(random_bytes(48)),
+        );
+
+        $this->withToken($adminToken->plainTextToken)
+            ->getJson("/api/v1/organizations/{$organization->id}/member-sessions")
+            ->assertOk()
+            ->assertJsonPath('data.0.id', $session->id)
+            ->assertJsonPath('data.0.user.email', $member->email);
+
+        $this->withToken($adminToken->plainTextToken)
+            ->deleteJson("/api/v1/organizations/{$organization->id}/members/{$member->id}/sessions")
+            ->assertOk()
+            ->assertJsonPath('data.revokedSessions', 1);
+
+        $this->assertNotNull($session->fresh()->revoked_at);
+        $this->assertDatabaseMissing('personal_access_tokens', [
+            'id' => $memberToken->accessToken->id,
+        ]);
+        $this->assertDatabaseHas('audit_logs', [
+            'organization_id' => $organization->id,
+            'actor_id' => $admin->id,
+            'action' => 'session.revoked',
+            'entity_id' => $member->id,
+        ]);
     }
 
     private function createSessionRecord(
