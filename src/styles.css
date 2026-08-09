@@ -5442,6 +5442,102 @@ tr:last-child td { border-bottom: 0; }
   border-color: rgba(79, 70, 229, .34);
 }
 
+.stitch-room-footer button:not([title]) {
+  display: none;
+}
+
+.room-detail-modal {
+  display: grid;
+  gap: 18px;
+}
+
+.room-detail-modal header {
+  display: grid;
+  gap: 8px;
+}
+
+.room-detail-modal header p {
+  margin: 0;
+  color: var(--stitch-muted, var(--muted));
+  line-height: 1.7;
+}
+
+.room-detail-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.room-detail-stats span {
+  min-height: 72px;
+  padding: 14px;
+  border: 1px solid var(--stitch-border, var(--border));
+  border-radius: 8px;
+  background: var(--stitch-soft, var(--panel-soft));
+  display: grid;
+  gap: 4px;
+  color: var(--stitch-muted, var(--muted));
+  font-size: 12px;
+}
+
+.room-detail-stats strong {
+  color: var(--stitch-text, var(--text));
+  font-size: 22px;
+}
+
+.room-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.room-detail-grid article {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--stitch-border, var(--border));
+  border-radius: 8px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.room-detail-grid h3,
+.room-detail-grid p {
+  margin: 0;
+}
+
+.room-detail-grid p {
+  color: var(--stitch-muted, var(--muted));
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.room-detail-row {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+}
+
+.room-detail-row svg {
+  color: var(--stitch-primary, var(--primary));
+}
+
+.room-detail-row span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  font-weight: 800;
+}
+
+.room-detail-row small {
+  color: var(--stitch-muted, var(--muted));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .stitch-room-top,
 .stitch-card-actions,
 .stitch-room-footer,
@@ -5749,6 +5845,11 @@ tr:last-child td { border-bottom: 0; }
   .stitch-dashboard-grid,
   .stitch-room-grid,
   .stitch-pricing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .room-detail-stats,
+  .room-detail-grid {
     grid-template-columns: 1fr;
   }
 

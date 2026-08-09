@@ -280,8 +280,9 @@ function Dashboard({ data, user }) {
 function RoomsPage({ rooms }) {
   const [open, setOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
+  const [selectedRoom, setSelectedRoom] = useState(null);
   const location = useLocation();
-  const { removeItem } = useWorkspace();
+  const { events, files, members, removeItem } = useWorkspace();
   const { showToast } = useToast();
   const tx = useBilingualText();
 
@@ -326,7 +327,8 @@ function RoomsPage({ rooms }) {
             <div className="stitch-room-footer">
               <span>{tx("آخر نشاط", "Last activity")}<br /><strong>{index === 0 ? tx("منذ دقيقتين", "2 minutes ago") : tx("أمس، 11:45 م", "Yesterday, 11:45 PM")}</strong></span>
               <div>
-                <button type="button"><Lock size={20} /></button>
+                <button type="button" title={tx("حماية الغرفة", "Room security")}><Lock size={20} /></button>
+                <button type="button" onClick={() => setSelectedRoom(room)} title={tx("فتح الغرفة", "Open room")}>Open</button>
                 <button type="button">↪</button>
               </div>
             </div>
@@ -334,8 +336,66 @@ function RoomsPage({ rooms }) {
         ))}
       </section>
       <CreateRoomModal open={open} onClose={() => setOpen(false)} />
+      <RoomDetailsModal room={selectedRoom} files={files} members={members} events={events} onClose={() => setSelectedRoom(null)} />
       <ConfirmActionDialog open={Boolean(pendingDelete)} onClose={() => setPendingDelete(null)} onConfirm={confirmDelete} title={tx("حذف الغرفة؟", "Delete this room?")} description={tx("سيتم حذف الغرفة ومواعيدها المرتبطة من التقويم. يمكنك التراجع مباشرة لاستعادتها معًا.", "The room and its linked calendar events will be removed. You can immediately undo to restore them together.")} confirmLabel={tx("حذف الغرفة", "Delete room")} />
     </>
+  );
+}
+
+function RoomDetailsModal({ room, files, members, events, onClose }) {
+  const tx = useBilingualText();
+  if (!room) return null;
+
+  const roomFiles = files.filter((file) => file.roomId === room.id || file.room === room.name);
+  const roomEvents = events.filter((event) => event.roomId === room.id || event.roomName === room.name);
+  const visibleMembers = members.slice(0, Math.max(Number(room.members || 0), 3));
+
+  return (
+    <Modal title={room.name} open={Boolean(room)} onClose={onClose}>
+      <section className="room-detail-modal">
+        <header>
+          <Badge tone={room.status === "Private" ? "neutral" : "success"}>{room.status || tx("نشطة", "Active")}</Badge>
+          <p>{room.description || tx("مساحة آمنة للمحتوى والأعضاء والمواعيد المرتبطة.", "A secure space for linked content, members, and schedule.")}</p>
+        </header>
+        <div className="room-detail-stats">
+          <span><strong>{room.members || visibleMembers.length || 0}</strong>{tx("أعضاء", "Members")}</span>
+          <span><strong>{room.files || roomFiles.length || 0}</strong>{tx("ملفات", "Files")}</span>
+          <span><strong>{roomEvents.length}</strong>{tx("مواعيد", "Events")}</span>
+        </div>
+        <div className="room-detail-grid">
+          <article>
+            <h3>{tx("المحتوى", "Content")}</h3>
+            {roomFiles.length === 0 && <p>{tx("لا توجد ملفات داخل الغرفة بعد.", "No files in this room yet.")}</p>}
+            {roomFiles.slice(0, 5).map((file) => (
+              <div className="room-detail-row" key={file.id}>
+                <FileText size={17} />
+                <span>{file.name}<small>{file.size || file.type || ""}</small></span>
+              </div>
+            ))}
+          </article>
+          <article>
+            <h3>{tx("الأعضاء", "Members")}</h3>
+            {visibleMembers.length === 0 && <p>{tx("لم تتم إضافة أعضاء بعد.", "No members have been added yet.")}</p>}
+            {visibleMembers.map((member) => (
+              <div className="room-detail-row" key={member.id}>
+                <Users size={17} />
+                <span>{member.name}<small>{member.role || member.email || ""}</small></span>
+              </div>
+            ))}
+          </article>
+          <article>
+            <h3>{tx("المواعيد", "Schedule")}</h3>
+            {roomEvents.length === 0 && <p>{tx("لا توجد مواعيد مرتبطة.", "No linked events yet.")}</p>}
+            {roomEvents.slice(0, 5).map((event) => (
+              <div className="room-detail-row" key={event.id}>
+                <Bell size={17} />
+                <span>{event.title}<small>{event.date} {event.time}</small></span>
+              </div>
+            ))}
+          </article>
+        </div>
+      </section>
+    </Modal>
   );
 }
 
