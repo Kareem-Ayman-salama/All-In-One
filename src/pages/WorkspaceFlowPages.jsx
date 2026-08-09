@@ -1,6 +1,6 @@
-import { ArrowLeft, Building2, Check, CloudUpload, KeyRound, LockKeyhole, Mail, Search, ShieldCheck, UserPlus } from "lucide-react";
+import { ArrowLeft, Building2, Check, CloudUpload, GraduationCap, KeyRound, LockKeyhole, Mail, Search, ShieldCheck, UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { AuthHeader, AuthLayout } from "../components/AuthLayout";
 import { Button } from "../components/Button";
 import { FormField } from "../components/FormField";
@@ -98,20 +98,33 @@ export function RegisterCompanyPage() {
   const { language, t } = useLanguage();
   const copy = flowCopy[language];
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const requestedType = searchParams.get("type");
+  const [accountType, setAccountType] = useState(["company", "academy", "training_center"].includes(requestedType) ? requestedType : "company");
   const [form, setForm] = useState({ company: "", name: "", email: "", password: "", confirm: "" });
+  const profile = signupProfile(accountType, language);
+  const Icon = profile.icon;
   const valid = form.company.trim().length > 1 && form.name.trim().length > 1 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) && form.password.length >= 10 && form.password === form.confirm;
 
   return (
     <AuthLayout>
       <div className="auth-panel-card">
-        <AuthHeader icon={<Building2 size={23} />} title={copy.companyTitle} subtitle={copy.companySubtitle} />
-        <form className="auth-form" onSubmit={(event) => { event.preventDefault(); if (valid) navigate("/company-onboarding"); }}>
-          <FormField label={copy.companyName}><input className="auth-plain-input" value={form.company} onChange={(event) => setForm((current) => ({ ...current, company: event.target.value }))} required /></FormField>
+        <AuthHeader icon={<Icon size={23} />} title={profile.title} subtitle={profile.subtitle} />
+        <div className="auth-type-choice">
+          {["company", "academy", "training_center"].map((type) => {
+            const item = signupProfile(type, language);
+            const ItemIcon = item.icon;
+            return <button className={accountType === type ? "selected" : ""} type="button" onClick={() => setAccountType(type)} key={type}><ItemIcon size={18} /><span><strong>{item.cardTitle}</strong><small>{item.cardText}</small></span></button>;
+          })}
+        </div>
+        <div className="auth-feature-strip">{profile.features.map((feature) => <span key={feature}><Check size={14} />{feature}</span>)}</div>
+        <form className="auth-form" onSubmit={(event) => { event.preventDefault(); if (valid) navigate(`/company-onboarding?type=${accountType}`); }}>
+          <FormField label={profile.organizationLabel}><input className="auth-plain-input" value={form.company} onChange={(event) => setForm((current) => ({ ...current, company: event.target.value }))} required /></FormField>
           <FormField label={copy.yourName}><input className="auth-plain-input" value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} required /></FormField>
           <FormField label={t.common.email}><div className="auth-input-wrap"><Mail size={18} /><input type="email" value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} required /></div></FormField>
           <FormField label={t.common.password}><PasswordInput autoComplete="new-password" value={form.password} onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))} /><PasswordStrength password={form.password} /></FormField>
           <FormField label={t.auth.confirmPassword}><PasswordInput autoComplete="new-password" value={form.confirm} onChange={(event) => setForm((current) => ({ ...current, confirm: event.target.value }))} /></FormField>
-          <Button className="auth-submit" type="submit" disabled={!valid}>{copy.createCompany}</Button>
+          <Button className="auth-submit" type="submit" disabled={!valid}>{profile.cta}</Button>
         </form>
       </div>
     </AuthLayout>
@@ -122,22 +135,76 @@ export function CompanyOnboardingPage() {
   const { language, t } = useLanguage();
   const copy = flowCopy[language];
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const profile = signupProfile(searchParams.get("type") || "company", language);
   const [color, setColor] = useState("#4f46e5");
 
   return (
     <AuthLayout>
       <div className="auth-panel-card">
-        <AuthHeader icon={<CloudUpload size={23} />} title={copy.onboardingTitle} subtitle={copy.onboardingSubtitle} />
+        <AuthHeader icon={<CloudUpload size={23} />} title={profile.onboardingTitle} subtitle={profile.onboardingSubtitle} />
         <div className="auth-form">
           <label className="workspace-upload"><CloudUpload size={28} /><strong>{copy.logo}</strong><span>{copy.logoHint}</span><input type="file" accept="image/png,image/jpeg,image/svg+xml" /></label>
-          <FormField label={copy.companyName}><input className="auth-plain-input" defaultValue="TechCorp Egypt" /></FormField>
-          <FormField label={copy.bio}><textarea className="workspace-textarea" defaultValue={language === "ar" ? "شركة متخصصة في حلول البرمجيات والتدريب." : "A company specializing in software and training solutions."} /></FormField>
+          <FormField label={profile.organizationLabel}><input className="auth-plain-input" defaultValue={profile.exampleName} /></FormField>
+          <FormField label={profile.bioLabel}><textarea className="workspace-textarea" defaultValue={profile.exampleBio} /></FormField>
           <div className="workspace-colors">{["#4f46e5", "#16458f", "#0e7490", "#047857", "#be123c"].map((item) => <button type="button" style={{ background: item }} className={color === item ? "selected" : ""} onClick={() => setColor(item)} key={item}>{color === item && <Check size={16} />}</button>)}</div>
           <Button className="auth-submit" onClick={() => navigate("/login?role=tenant-admin")}>{copy.finish}</Button>
         </div>
       </div>
     </AuthLayout>
   );
+}
+
+function signupProfile(type, language) {
+  const isArabic = language === "ar";
+  const profiles = {
+    company: {
+      icon: Building2,
+      cardTitle: isArabic ? "شركة" : "Company",
+      cardText: isArabic ? "موظفين، غرف، ملفات، مواعيد" : "Employees, rooms, files, schedules",
+      title: isArabic ? "أنشئ مساحة عمل لشركتك" : "Create your company workspace",
+      subtitle: isArabic ? "للشركات والفرق الداخلية: أضف الموظفين، أنشئ غرف عمل، ارفع ملفات محمية، وحدد مواعيد ورسائل لكل روم." : "For companies and internal teams: invite employees, create rooms, upload protected files, and manage room messages and schedules.",
+      organizationLabel: isArabic ? "اسم الشركة" : "Company name",
+      cta: isArabic ? "إنشاء مساحة شركة" : "Create company workspace",
+      onboardingTitle: isArabic ? "جهّز هوية الشركة" : "Set up company identity",
+      onboardingSubtitle: isArabic ? "هذه المساحة ستفتح أدوات الشركات فقط: أعضاء، غرف، ملفات، رسائل ومواعيد." : "This workspace opens company tools only: members, rooms, files, messages, and schedules.",
+      bioLabel: isArabic ? "نبذة عن الشركة" : "Company bio",
+      exampleName: "TechCorp Egypt",
+      exampleBio: isArabic ? "شركة متخصصة في حلول البرمجيات وإدارة الفرق." : "A company specializing in software solutions and team operations.",
+      features: isArabic ? ["موظفين وأعضاء", "غرف عمل", "ملفات محمية", "بدون كورسات"] : ["Employees", "Work rooms", "Protected files", "No courses"]
+    },
+    academy: {
+      icon: GraduationCap,
+      cardTitle: isArabic ? "أكاديمية" : "Academy",
+      cardText: isArabic ? "كورسات، طلاب، مدرسين، حجوزات" : "Courses, students, instructors, bookings",
+      title: isArabic ? "أنشئ مساحة أكاديمية أو دروس" : "Create an academy workspace",
+      subtitle: isArabic ? "للأكاديميات والمدرسين: انشر كورسات، أضف دفعات وطلاب ومدرسين، وتابع الحجوزات والحضور." : "For academies and instructors: publish courses, add batches, students, instructors, bookings, and attendance.",
+      organizationLabel: isArabic ? "اسم الأكاديمية" : "Academy name",
+      cta: isArabic ? "إنشاء مساحة أكاديمية" : "Create academy workspace",
+      onboardingTitle: isArabic ? "جهّز هوية الأكاديمية" : "Set up academy identity",
+      onboardingSubtitle: isArabic ? "هذه المساحة ستفتح أدوات التعليم: كورسات، دفعات، طلاب، مدرسين، حجوزات وحضور." : "This workspace opens learning tools: courses, batches, students, instructors, bookings, and attendance.",
+      bioLabel: isArabic ? "نبذة عن الأكاديمية" : "Academy bio",
+      exampleName: "Elite Academy",
+      exampleBio: isArabic ? "أكاديمية تقدم كورسات مباشرة ومسجلة للطلاب." : "An academy offering live and recorded courses for students.",
+      features: isArabic ? ["كورسات ودفعات", "طلاب ومدرسين", "حجوزات", "حضور"] : ["Courses and batches", "Students and instructors", "Bookings", "Attendance"]
+    },
+    training_center: {
+      icon: GraduationCap,
+      cardTitle: isArabic ? "مركز تدريب" : "Training center",
+      cardText: isArabic ? "برامج، مجموعات، حضور، محتوى" : "Programs, groups, attendance, content",
+      title: isArabic ? "أنشئ مساحة مركز تدريب" : "Create a training center workspace",
+      subtitle: isArabic ? "لمراكز التدريب واللغات: نظم البرامج والدفعات والطلاب والمحتوى المحمي من مكان واحد." : "For training and language centers: manage programs, batches, students, and protected content from one place.",
+      organizationLabel: isArabic ? "اسم المركز" : "Center name",
+      cta: isArabic ? "إنشاء مساحة مركز تدريب" : "Create training center workspace",
+      onboardingTitle: isArabic ? "جهّز هوية مركز التدريب" : "Set up training center identity",
+      onboardingSubtitle: isArabic ? "هذه المساحة ستفتح أدوات التعليم والتدريب: برامج، دفعات، حضور ومحتوى." : "This workspace opens learning and training tools: programs, batches, attendance, and content.",
+      bioLabel: isArabic ? "نبذة عن المركز" : "Center bio",
+      exampleName: "Language Center",
+      exampleBio: isArabic ? "مركز تدريب يقدم برامج لغات ومهارات للطلاب." : "A training center offering language and skills programs.",
+      features: isArabic ? ["برامج تدريب", "مجموعات طلاب", "حضور", "محتوى محمي"] : ["Training programs", "Student groups", "Attendance", "Protected content"]
+    }
+  };
+  return profiles[type] || profiles.company;
 }
 
 export function JoinWorkspacePage() {

@@ -26,13 +26,14 @@
     </a>
     <div class="nav-links">
       <button type="button" onclick="scrollToId('how')">إزاي بتشتغل</button>
+      <button type="button" onclick="scrollToId('paths')">اختار مسارك</button>
       <button type="button" onclick="scrollToId('protection')">الحماية</button>
       <button type="button" onclick="scrollToId('pricing')">الشهر المجاني</button>
       <button type="button" onclick="scrollToId('faq')">الأسئلة</button>
     </div>
     <div class="nav-actions">
       <a class="ghost-link" href="/login">دخول</a>
-      <button class="primary-button small" type="button" onclick="openLeadModal('trial-modal')">ابدأ شهر مجاني</button>
+      <a class="primary-button small" href="/register-company?type=academy">ابدأ شهر مجاني</a>
     </div>
   </nav>
 
@@ -48,10 +49,10 @@
           بدل ما محتواك يضيع بين واتساب ويوتيوب وروابط مفتوحة، كل طالب يدخل من حسابه ويشاهد المحتوى المسموح له فقط.
         </p>
         <div class="hero-actions">
-          <button class="primary-button" type="button" onclick="openLeadModal('trial-modal')">
+          <a class="primary-button" href="/register-company?type=academy">
             <i class="ti ti-rocket"></i>
             ابدأ شهر مجاني
-          </button>
+          </a>
           <button class="secondary-button" type="button" onclick="scrollToId('explainer')">
             <i class="ti ti-player-play"></i>
             افهم المنصة في دقيقة
@@ -76,6 +77,62 @@
           <div><strong>2</strong><span>تقسم الطلاب داخل Rooms أو Courses.</span></div>
           <div><strong>3</strong><span>تضيف فيديوهات YouTube Unlisted أو ملفات تعليمية.</span></div>
           <div><strong>4</strong><span>الطالب يدخل بحسابه ويشاهد المحتوى المسموح له فقط.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section audience-section" id="paths">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="section-kicker">اختار مسارك</p>
+          <h2>من أول صفحة لازم تعرف أنت داخل كإيه، وكل نوع يفتح أدواته المناسبة.</h2>
+          <p class="muted">AIN مش نفس الشاشة لكل الناس. الشركة لها إدارة موظفين وغرف وملفات، والأكاديمية لها كورسات وطلاب ومدرسين وحجوزات، والطالب أو الموظف يدخلوا على المساحة المسموح لهم بها.</p>
+        </div>
+        <div class="audience-grid">
+          <article class="company">
+            <i class="ti ti-building"></i>
+            <h3>شركة أو فريق عمل</h3>
+            <p>للموظفين والأقسام: غرف عمل، رسائل، ملفات محمية، مواعيد، وصلاحيات أعضاء.</p>
+            <ul>
+              <li>إضافة موظفين وأدمن</li>
+              <li>Rooms لكل فريق أو قسم</li>
+              <li>ملفات بلا تحميل وWatermark</li>
+            </ul>
+            <a class="primary-button" href="/register-company?type=company">ابدأ كشركة</a>
+          </article>
+          <article class="academy">
+            <i class="ti ti-school"></i>
+            <h3>أكاديمية أو مدرس</h3>
+            <p>للتعليم والدروس: كورسات، دفعات، طلاب، مدرسين، حجوزات، حضور ومحتوى محمي.</p>
+            <ul>
+              <li>إنشاء كورسات ودفعات</li>
+              <li>إضافة طلاب ومدرسين</li>
+              <li>حجوزات وحضور وتقارير</li>
+            </ul>
+            <a class="primary-button" href="/register-company?type=academy">ابدأ كأكاديمية</a>
+          </article>
+          <article class="student">
+            <i class="ti ti-user-check"></i>
+            <h3>طالب أو متعلم</h3>
+            <p>تدخل تشوف كورساتك أو تحجز كورس/مدرس، وبعد التأكيد يظهر لك الروم والمحتوى.</p>
+            <ul>
+              <li>استكشاف الكورسات</li>
+              <li>حجز دفعة أو مدرس</li>
+              <li>مشاهدة المحتوى المسموح</li>
+            </ul>
+            <a class="secondary-light-button" href="/create-account?type=student">إنشاء حساب طالب</a>
+          </article>
+          <article class="member">
+            <i class="ti ti-users"></i>
+            <h3>موظف أو عضو مدعو</h3>
+            <p>لو شركتك أو أكاديميتك بعتت لك دعوة، تدخل بالكود وتظهر لك الغرف الخاصة بك فقط.</p>
+            <ul>
+              <li>قبول دعوة مؤسسة</li>
+              <li>الوصول للغرف المسموحة</li>
+              <li>رسائل وملفات ومواعيد</li>
+            </ul>
+            <a class="secondary-light-button" href="/join">عندي كود دعوة</a>
+          </article>
         </div>
       </div>
     </section>

@@ -153,6 +153,26 @@ a {
   transform: translateY(-2px);
 }
 
+.secondary-light-button {
+  min-height: 48px;
+  border-radius: 8px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--blue);
+  background: #eef4ff;
+  border: 1px solid #c8d8f4;
+  font-weight: 900;
+  transition: transform 0.16s ease, background 0.16s ease;
+}
+
+.secondary-light-button:hover {
+  background: #dfeafb;
+  transform: translateY(-2px);
+}
+
 .primary-button.small {
   min-height: 40px;
   padding-inline: 16px;
@@ -311,6 +331,72 @@ h2 {
   color: var(--muted);
   line-height: 1.7;
   font-weight: 700;
+}
+
+.audience-section {
+  background: #fbfcff;
+}
+
+.audience-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.audience-grid article {
+  min-width: 0;
+  min-height: 360px;
+  padding: 22px;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--blue);
+  border-radius: 8px;
+  box-shadow: 0 12px 30px rgba(18, 35, 70, 0.08);
+}
+
+.audience-grid article.company { border-top-color: #0e7490; }
+.audience-grid article.academy { border-top-color: #7c3aed; }
+.audience-grid article.student { border-top-color: var(--green); }
+.audience-grid article.member { border-top-color: var(--amber); }
+
+.audience-grid i {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--blue);
+  background: #eef4ff;
+  border-radius: 8px;
+  font-size: 24px;
+}
+
+.audience-grid h3,
+.audience-grid p {
+  margin: 0;
+}
+
+.audience-grid h3 {
+  font-size: 20px;
+}
+
+.audience-grid p,
+.audience-grid li {
+  color: var(--muted);
+  line-height: 1.75;
+  font-size: 14px;
+}
+
+.audience-grid ul {
+  margin: 0;
+  padding-inline-start: 18px;
+}
+
+.audience-grid a {
+  align-self: end;
+  width: 100%;
 }
 
 .section {
@@ -685,6 +771,7 @@ h2 {
 
   .steps,
   .use-cases,
+  .audience-grid,
   .protection-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -737,6 +824,7 @@ h2 {
   .answer-list,
   .steps,
   .use-cases,
+  .audience-grid,
   .protection-grid,
   .lead-form {
     grid-template-columns: 1fr;

@@ -1,4 +1,4 @@
-import { ArrowLeft, KeyRound, Mail, ShieldCheck, UserPlus } from "lucide-react";
+import { ArrowLeft, Building2, GraduationCap, KeyRound, Mail, ShieldCheck, UserPlus, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { AuthHeader, AuthLayout } from "../components/AuthLayout";
@@ -18,9 +18,11 @@ const showDemoCodes = import.meta.env.VITE_SHOW_DEMO_ACCOUNTS === "true";
 
 export function CreateAccountPage() {
   const { user, createPersonalAccount } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [accountType, setAccountType] = useState(["student", "employee"].includes(searchParams.get("type")) ? searchParams.get("type") : "student");
   const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "", terms: false });
   const [touched, setTouched] = useState({});
   const [loading, setLoading] = useState(false);
@@ -54,8 +56,20 @@ export function CreateAccountPage() {
   return (
     <AuthLayout>
       <div className="auth-panel-card">
-        <AuthHeader icon={<UserPlus size={23} />} title={t.auth.createTitle} subtitle={t.auth.createSubtitle} />
+        <AuthHeader icon={<UserPlus size={23} />} title={language === "ar" ? "حدد نوع الحساب" : "Choose your account type"} subtitle={language === "ar" ? "اختيارك هنا يحدد هنفتح لك تجربة طالب/موظف، أو نوديك لإنشاء مساحة شركة أو أكاديمية." : "Your choice decides whether you enter as a learner/member or create an organization workspace."} />
+        <div className="auth-type-choice">
+          <button className={accountType === "student" ? "selected" : ""} type="button" onClick={() => setAccountType("student")}><GraduationCap size={18} /><span><strong>{language === "ar" ? "طالب / متعلم" : "Student / learner"}</strong><small>{language === "ar" ? "كورسات، حجوزات، محتوى، حضور" : "Courses, bookings, content, attendance"}</small></span></button>
+          <button className={accountType === "employee" ? "selected" : ""} type="button" onClick={() => setAccountType("employee")}><Users size={18} /><span><strong>{language === "ar" ? "موظف / عضو شركة" : "Employee / company member"}</strong><small>{language === "ar" ? "ينضم بدعوة للشركة والغرف" : "Joins company rooms by invitation"}</small></span></button>
+          <Link to="/register-company?type=company"><Building2 size={18} /><span><strong>{language === "ar" ? "صاحب شركة" : "Company owner"}</strong><small>{language === "ar" ? "إنشاء مساحة شركة" : "Create company workspace"}</small></span></Link>
+          <Link to="/register-company?type=academy"><GraduationCap size={18} /><span><strong>{language === "ar" ? "أكاديمية / مدرس" : "Academy / instructor"}</strong><small>{language === "ar" ? "إنشاء كورسات ودفعات" : "Create courses and batches"}</small></span></Link>
+        </div>
         <form className="auth-form auth-form-two" onSubmit={submit} noValidate>
+          <div className="auth-feature-strip">
+            {(accountType === "student"
+              ? (language === "ar" ? ["يتابع كورساته", "يدخل روم الكورس", "يحجز مدرس", "يشاهد محتوى محمي"] : ["Track courses", "Open course rooms", "Book instructors", "View protected content"])
+              : (language === "ar" ? ["ينضم بدعوة", "يدخل غرف الشركة", "يشاهد ملفات محمية", "يتابع المواعيد"] : ["Join by invite", "Open company rooms", "View protected files", "Track schedules"])
+            ).map((feature) => <span key={feature}><ShieldCheck size={14} />{feature}</span>)}
+          </div>
           <FormField label={t.auth.fullName} error={touched.name ? errors.name : ""}>
             <input className="auth-plain-input" autoComplete="name" value={form.name} onBlur={() => setTouched((current) => ({ ...current, name: true }))} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} />
           </FormField>
@@ -75,6 +89,7 @@ export function CreateAccountPage() {
           </label>
           {touched.terms && errors.terms && <small className="auth-inline-error">{errors.terms}</small>}
           <Button className="auth-submit" type="submit" disabled={loading || !isValid}>{loading ? t.auth.creating : t.auth.createAccount}</Button>
+          {accountType === "employee" && <Button as={Link} to="/join" variant="ghost">{language === "ar" ? "معايا كود دعوة شركة" : "I have a company invite code"}</Button>}
           <div className="auth-switch"><span>{t.auth.haveAccount}</span><Link to="/login">{t.auth.signIn}</Link></div>
         </form>
       </div>
