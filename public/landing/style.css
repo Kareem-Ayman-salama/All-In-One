@@ -777,6 +777,7 @@ h2 {
   grid-template-columns: repeat(4, 1fr);
   gap: 18px;
   margin-top: 46px;
+  direction: rtl;
 }
 
 .plan-card {
@@ -787,11 +788,13 @@ h2 {
   box-shadow: 0 18px 42px rgba(7, 18, 38, 0.07);
   position: relative;
   overflow: hidden;
+  direction: rtl;
 }
 
 .plan-card.featured {
   border: 3px solid var(--violet);
   box-shadow: 0 24px 46px rgba(83, 70, 229, 0.18);
+  transform: translateY(-10px);
 }
 
 .plan-card.featured::before {
@@ -842,14 +845,16 @@ h2 {
 }
 
 .plan-card h3 {
-  margin: 18px 0 6px;
-  font-size: 22px;
+  margin: 20px 0 12px;
+  font-size: 24px;
+  text-align: right;
 }
 
 .plan-price {
   padding-bottom: 24px;
   margin-bottom: 20px;
   border-bottom: 1px solid var(--line);
+  text-align: right;
 }
 
 .plan-price strong {
@@ -869,9 +874,10 @@ h2 {
 
 .plan-card p {
   min-height: 48px;
-  margin: 10px 0 0;
+  margin: 0 0 18px;
   color: var(--muted);
   line-height: 1.65;
+  text-align: right;
 }
 
 .plan-card ul {
@@ -1249,6 +1255,10 @@ h2 {
     min-width: 86vw;
     padding: 44px 22px 22px;
     scroll-snap-align: center;
+  }
+
+  .plan-card.featured {
+    transform: none;
   }
 
   .plan-price strong {
