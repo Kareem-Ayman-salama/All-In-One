@@ -14,13 +14,17 @@ import {
   Grid2X2,
   GraduationCap,
   Lock,
+  MessageSquare,
   MoreVertical,
+  Paperclip,
   Plus,
   Rocket,
   Search,
+  Send,
   Shield,
   Smartphone,
   Trash2,
+  Upload,
   UserPlus,
   Users
 } from "lucide-react";
@@ -281,6 +285,9 @@ function RoomsPage({ rooms }) {
   const [open, setOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
   const [selectedRoom, setSelectedRoom] = useState(null);
+  const [uploadRoom, setUploadRoom] = useState(null);
+  const [inviteRoom, setInviteRoom] = useState(null);
+  const [scheduleRoom, setScheduleRoom] = useState(null);
   const location = useLocation();
   const { events, files, members, removeItem } = useWorkspace();
   const { showToast } = useToast();
@@ -336,9 +343,138 @@ function RoomsPage({ rooms }) {
         ))}
       </section>
       <CreateRoomModal open={open} onClose={() => setOpen(false)} />
-      <RoomDetailsModal room={selectedRoom} files={files} members={members} events={events} onClose={() => setSelectedRoom(null)} />
+      <RoomWorkspaceModal
+        room={selectedRoom}
+        files={files}
+        members={members}
+        events={events}
+        onClose={() => setSelectedRoom(null)}
+        onInvite={(room) => setInviteRoom(room)}
+        onUpload={(room) => setUploadRoom(room)}
+        onSchedule={(room) => setScheduleRoom(room)}
+      />
+      <InviteMemberModal open={Boolean(inviteRoom)} initialRoom={inviteRoom} onClose={() => setInviteRoom(null)} />
+      <UploadFileModal open={Boolean(uploadRoom)} initialRoom={uploadRoom} onClose={() => setUploadRoom(null)} />
+      <ScheduleRoomEventModal open={Boolean(scheduleRoom)} room={scheduleRoom} onClose={() => setScheduleRoom(null)} />
       <ConfirmActionDialog open={Boolean(pendingDelete)} onClose={() => setPendingDelete(null)} onConfirm={confirmDelete} title={tx("حذف الغرفة؟", "Delete this room?")} description={tx("سيتم حذف الغرفة ومواعيدها المرتبطة من التقويم. يمكنك التراجع مباشرة لاستعادتها معًا.", "The room and its linked calendar events will be removed. You can immediately undo to restore them together.")} confirmLabel={tx("حذف الغرفة", "Delete room")} />
     </>
+  );
+}
+
+function RoomWorkspaceModal({ room, files, members, events, onClose, onInvite, onUpload, onSchedule }) {
+  const [activeTab, setActiveTab] = useState("chat");
+  const [message, setMessage] = useState("");
+  const tx = useBilingualText();
+  const { roomMessages, sendRoomMessage } = useWorkspace();
+  if (!room) return null;
+
+  const roomFiles = files.filter((file) => file.roomId === room.id || file.room === room.name);
+  const roomEvents = events.filter((event) => event.roomId === room.id || event.roomName === room.name);
+  const visibleMembers = members.slice(0, Math.max(Number(room.members || 0), 3));
+  const messages = roomMessages.filter((item) => item.roomId === room.id || item.roomName === room.name);
+  const tabs = [
+    { id: "chat", label: tx("الرسائل", "Messages"), icon: MessageSquare, count: messages.length },
+    { id: "material", label: tx("الماتريال", "Material"), icon: Paperclip, count: roomFiles.length },
+    { id: "members", label: tx("الأعضاء", "Members"), icon: Users, count: visibleMembers.length },
+    { id: "schedule", label: tx("المواعيد", "Schedule"), icon: CalendarDays, count: roomEvents.length }
+  ];
+
+  const submitMessage = (event) => {
+    event.preventDefault();
+    const body = message.trim();
+    if (!body) return;
+    sendRoomMessage({ roomId: room.id, roomName: room.name, body });
+    setMessage("");
+  };
+
+  return (
+    <Modal
+      title={room.name}
+      open={Boolean(room)}
+      onClose={onClose}
+      footer={<div className="room-workspace-footer"><Button variant="ghost" onClick={() => onInvite(room)}><UserPlus size={16} /> {tx("إضافة عضو", "Add member")}</Button><Button variant="ghost" onClick={() => onUpload(room)}><Upload size={16} /> {tx("رفع ماتريال", "Upload material")}</Button><Button onClick={() => onSchedule(room)}><CalendarDays size={16} /> {tx("تحديد موعد", "Schedule")}</Button></div>}
+    >
+      <section className="room-detail-modal room-workspace-modal">
+        <header>
+          <Badge tone={room.status === "Private" ? "neutral" : "success"}>{room.status || tx("نشطة", "Active")}</Badge>
+          <p>{room.description || tx("كل حاجة تخص الروم في مكان واحد: رسائل، ماتريال، أعضاء، ومواعيد.", "Everything for this room in one place: messages, material, members, and schedule.")}</p>
+        </header>
+        <div className="room-detail-stats">
+          <span><strong>{room.members || visibleMembers.length || 0}</strong>{tx("أعضاء", "Members")}</span>
+          <span><strong>{room.files || roomFiles.length || 0}</strong>{tx("ملفات", "Files")}</span>
+          <span><strong>{roomEvents.length}</strong>{tx("مواعيد", "Events")}</span>
+        </div>
+        <nav className="room-workspace-tabs" aria-label={tx("أقسام الروم", "Room sections")}>
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button className={activeTab === tab.id ? "active" : ""} type="button" onClick={() => setActiveTab(tab.id)} key={tab.id}>
+                <Icon size={17} />
+                <span>{tab.label}</span>
+                <small>{tab.count}</small>
+              </button>
+            );
+          })}
+        </nav>
+
+        {activeTab === "chat" && (
+          <article className="room-chat-panel">
+            <div className="room-chat-list">
+              {messages.length === 0 && <div className="room-chat-empty"><MessageSquare size={34} /><strong>{tx("ابدأ المحادثة", "Start the conversation")}</strong><span>{tx("اكتب رسالة أو تحديث سريع لكل أعضاء الروم.", "Post a quick update for everyone in this room.")}</span></div>}
+              {messages.map((item) => (
+                <div className="room-message" key={item.id}>
+                  <i>{item.author?.slice(0, 2).toUpperCase() || "AI"}</i>
+                  <div><strong>{item.author}</strong><p>{item.body}</p><small>{item.time}</small></div>
+                </div>
+              ))}
+            </div>
+            <form className="room-message-box" onSubmit={submitMessage}>
+              <input value={message} onChange={(event) => setMessage(event.target.value)} placeholder={tx("اكتب رسالة للروم...", "Write a message to the room...")} />
+              <Button type="submit" disabled={!message.trim()}><Send size={16} /> {tx("إرسال", "Send")}</Button>
+            </form>
+          </article>
+        )}
+
+        {activeTab === "material" && (
+          <article className="room-section-panel">
+            <div className="room-section-head"><h3>{tx("الماتريال والملفات", "Material and files")}</h3><Button variant="ghost" onClick={() => onUpload(room)}><Upload size={16} /> {tx("رفع", "Upload")}</Button></div>
+            {roomFiles.length === 0 && <p>{tx("لا توجد ملفات داخل الروم بعد.", "No files in this room yet.")}</p>}
+            {roomFiles.slice(0, 8).map((file) => (
+              <div className="room-detail-row" key={file.id}>
+                <FileText size={17} />
+                <span>{file.name}<small>{file.size || file.type || ""}</small></span>
+              </div>
+            ))}
+          </article>
+        )}
+
+        {activeTab === "members" && (
+          <article className="room-section-panel">
+            <div className="room-section-head"><h3>{tx("الأعضاء والصلاحيات", "Members and access")}</h3><Button variant="ghost" onClick={() => onInvite(room)}><UserPlus size={16} /> {tx("دعوة", "Invite")}</Button></div>
+            {visibleMembers.length === 0 && <p>{tx("لم تتم إضافة أعضاء بعد.", "No members have been added yet.")}</p>}
+            {visibleMembers.map((member) => (
+              <div className="room-detail-row" key={member.id}>
+                <Users size={17} />
+                <span>{member.name || member.email}<small>{member.role || member.email || ""}</small></span>
+              </div>
+            ))}
+          </article>
+        )}
+
+        {activeTab === "schedule" && (
+          <article className="room-section-panel">
+            <div className="room-section-head"><h3>{tx("المواعيد والجلسات", "Schedule and sessions")}</h3><Button variant="ghost" onClick={() => onSchedule(room)}><CalendarDays size={16} /> {tx("إضافة موعد", "Add event")}</Button></div>
+            {roomEvents.length === 0 && <p>{tx("لا توجد مواعيد مرتبطة.", "No linked events yet.")}</p>}
+            {roomEvents.slice(0, 8).map((event) => (
+              <div className="room-detail-row" key={event.id}>
+                <Bell size={17} />
+                <span>{event.title}<small>{event.date} {event.time}</small></span>
+              </div>
+            ))}
+          </article>
+        )}
+      </section>
+    </Modal>
   );
 }
 
@@ -1079,18 +1215,84 @@ function CreateRoomModal({ open, onClose }) {
   );
 }
 
-function InviteMemberModal({ open, onClose }) {
-  const [form, setForm] = useState({ name: "", email: "", room: "HR & Policies" });
-  const { inviteMember: inviteWorkspaceMember } = useWorkspace();
+function ScheduleRoomEventModal({ open, room, onClose }) {
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+  const [form, setForm] = useState({ title: "", date: tomorrow, time: "10:00", duration: 60, description: "" });
+  const { addRoomEvent } = useWorkspace();
   const { activeOrganization } = useOrganization();
   const { showToast } = useToast();
   const tx = useBilingualText();
+
+  useEffect(() => {
+    if (open) {
+      setForm((current) => ({
+        ...current,
+        title: room?.name ? `${room.name} session` : current.title
+      }));
+    }
+  }, [open, room]);
+
   const submit = async (event) => {
     event.preventDefault();
+    if (!room) return;
+    const startsAt = new Date(`${form.date}T${form.time}:00`);
+    const endsAt = new Date(startsAt.getTime() + Number(form.duration) * 60000);
+    const payload = {
+      roomId: room.id,
+      title: form.title.trim(),
+      description: form.description || null,
+      type: "meeting",
+      startsAt: startsAt.toISOString(),
+      endsAt: endsAt.toISOString(),
+      status: "scheduled"
+    };
+    await api.createEvent(activeOrganization.id, payload);
+    addRoomEvent({
+      ...form,
+      roomId: room.id,
+      roomName: room.name,
+      attendees: room.members || 0,
+      status: "scheduled"
+    });
+    showToast(tx("تم إضافة الموعد داخل الروم والتقويم", "Event added to the room and calendar"));
+    setForm({ title: "", date: tomorrow, time: "10:00", duration: 60, description: "" });
+    onClose();
+  };
+
+  return (
+    <Modal title={tx("تحديد موعد للروم", "Schedule room event")} open={open} onClose={onClose} footer={<Button form="schedule-room-event-form">{tx("حفظ الموعد", "Save event")}</Button>}>
+      <form id="schedule-room-event-form" className="form-grid" onSubmit={submit}>
+        <FormField label={tx("الروم", "Room")}><input value={room?.name || ""} readOnly /></FormField>
+        <FormField label={tx("عنوان الموعد", "Event title")}><input required value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} /></FormField>
+        <div className="form-grid two">
+          <FormField label={tx("التاريخ", "Date")}><input required min={new Date().toISOString().slice(0, 10)} type="date" value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} /></FormField>
+          <FormField label={tx("الوقت", "Time")}><input required type="time" value={form.time} onChange={(event) => setForm({ ...form, time: event.target.value })} /></FormField>
+        </div>
+        <FormField label={tx("المدة بالدقائق", "Duration in minutes")}><input min="15" step="15" type="number" value={form.duration} onChange={(event) => setForm({ ...form, duration: event.target.value })} /></FormField>
+        <FormField label={tx("وصف مختصر", "Short description")}><textarea className="workspace-textarea" value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} /></FormField>
+      </form>
+    </Modal>
+  );
+}
+
+function InviteMemberModal({ open, onClose, initialRoom = null }) {
+  const [form, setForm] = useState({ name: "", email: "", room: initialRoom?.name || "HR & Policies" });
+  const { inviteMember: inviteWorkspaceMember, rooms } = useWorkspace();
+  const { activeOrganization } = useOrganization();
+  const { showToast } = useToast();
+  const tx = useBilingualText();
+  useEffect(() => {
+    if (open && initialRoom?.name) {
+      setForm((current) => ({ ...current, room: initialRoom.name }));
+    }
+  }, [initialRoom, open]);
+  const submit = async (event) => {
+    event.preventDefault();
+    const selectedRoom = rooms.find((item) => item.name === form.room) || initialRoom;
     await api.inviteMember(activeOrganization.id, {
       email: form.email,
       role: "member",
-      roomIds: [],
+      roomIds: selectedRoom?.id ? [selectedRoom.id] : [],
       note: form.name ? `Invitation for ${form.name}` : null,
       expiresInDays: 7
     });
@@ -1111,10 +1313,10 @@ function InviteMemberModal({ open, onClose }) {
   );
 }
 
-function UploadFileModal({ open, onClose }) {
+function UploadFileModal({ open, onClose, initialRoom = null }) {
   const [mode, setMode] = useState("file");
   const [file, setFile] = useState(null);
-  const [room, setRoom] = useState("HR & Policies");
+  const [room, setRoom] = useState(initialRoom?.name || "HR & Policies");
   const [title, setTitle] = useState("");
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [allowFullscreen, setAllowFullscreen] = useState(true);
@@ -1123,6 +1325,11 @@ function UploadFileModal({ open, onClose }) {
   const { activeOrganization } = useOrganization();
   const { showToast } = useToast();
   const tx = useBilingualText();
+  useEffect(() => {
+    if (open && initialRoom?.name) {
+      setRoom(initialRoom.name);
+    }
+  }, [initialRoom, open]);
   const submit = async (event) => {
     event.preventDefault();
     const selectedRoom = rooms.find((item) => item.name === room) || rooms[0];
@@ -1141,7 +1348,7 @@ function UploadFileModal({ open, onClose }) {
         watermarkEnabled,
         allowFullscreen
       });
-      uploadFile({ name: title.trim(), room: selectedRoom.name, type: "Video", size: "YouTube", protected: true });
+      uploadFile({ name: title.trim(), room: selectedRoom.name, roomId: selectedRoom.id, type: "Video", size: "YouTube", protected: true });
       showToast(tx("تمت إضافة فيديو YouTube إلى المكتبة", "YouTube video added to the library"));
       setTitle("");
       setYoutubeUrl("");
@@ -1167,7 +1374,7 @@ function UploadFileModal({ open, onClose }) {
       downloadAllowed: false,
       watermarkEnabled: true
     });
-    uploadFile({ name: file.name, room: selectedRoom.name, type: extension, size: `${(file.size / 1024 / 1024).toFixed(1)} MB`, protected: true });
+    uploadFile({ name: file.name, room: selectedRoom.name, roomId: selectedRoom.id, type: extension, size: `${(file.size / 1024 / 1024).toFixed(1)} MB`, protected: true });
     showToast(tx("تمت إضافة الملف إلى المكتبة وسجل النشاط", "File added to the library and audit log"));
     setFile(null);
     onClose();

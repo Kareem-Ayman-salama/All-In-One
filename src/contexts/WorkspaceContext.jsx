@@ -41,6 +41,23 @@ const defaultActivity = [
   { id: "activity-3", action: "security.signin_failed", actor: "Unknown device", target: "185.42.16.9", area: "Security", time: "2 hours ago", tone: "danger" }
 ];
 
+const defaultRoomMessages = [
+  {
+    id: "message-1",
+    roomId: 1,
+    author: "Sarah Ahmed",
+    body: "Please review the new attendance policy before tomorrow's meeting.",
+    time: "10:15"
+  },
+  {
+    id: "message-2",
+    roomId: 3,
+    author: "Omar Hassan",
+    body: "The product roadmap file is ready in the material tab.",
+    time: "14:35"
+  }
+];
+
 function loadPersistedState(storageKey) {
   try {
     return JSON.parse(window.localStorage.getItem(storageKey) || "null");
@@ -70,14 +87,15 @@ export function WorkspaceProvider({ initialData, children }) {
   const [events, setEvents] = useState(persisted?.events || (mock ? defaultEvents : initialData.events || []));
   const [activity, setActivity] = useState(persisted?.activity || (mock ? defaultActivity : initialData.activity || []));
   const [bookings, setBookings] = useState(persisted?.bookings || []);
+  const [roomMessages, setRoomMessages] = useState(persisted?.roomMessages || (mock ? defaultRoomMessages : []));
 
   useEffect(() => {
-    if (mock) savePersistedState(storageKey, { rooms, files, members, notifications, events, activity, bookings });
-  }, [activity, bookings, events, files, members, mock, notifications, rooms, storageKey]);
+    if (mock) savePersistedState(storageKey, { rooms, files, members, notifications, events, activity, bookings, roomMessages });
+  }, [activity, bookings, events, files, members, mock, notifications, roomMessages, rooms, storageKey]);
 
   const persist = useCallback((overrides = {}) => {
-    if (mock) savePersistedState(storageKey, { rooms, files, members, notifications, events, activity, bookings, ...overrides });
-  }, [activity, bookings, events, files, members, mock, notifications, rooms, storageKey]);
+    if (mock) savePersistedState(storageKey, { rooms, files, members, notifications, events, activity, bookings, roomMessages, ...overrides });
+  }, [activity, bookings, events, files, members, mock, notifications, roomMessages, rooms, storageKey]);
 
   const recordActivity = useCallback((entry) => {
     const nextEntry = { id: createId("activity"), time: "Just now", tone: "primary", ...entry };
@@ -187,6 +205,7 @@ export function WorkspaceProvider({ initialData, children }) {
       id: createId("file"),
       name: payload.name,
       room: payload.room,
+      roomId: payload.roomId,
       type: payload.type || "File",
       size: payload.size || "Unknown",
       views: 0,
@@ -200,6 +219,42 @@ export function WorkspaceProvider({ initialData, children }) {
     persist({ files: nextFiles, activity: nextActivity });
     return file;
   }, [activity, files, persist]);
+
+  const addRoomEvent = useCallback((payload) => {
+    const event = {
+      id: payload.id || createId("event"),
+      title: payload.title,
+      titleAr: payload.titleAr || payload.title,
+      roomId: payload.roomId,
+      roomName: payload.roomName,
+      date: payload.date,
+      time: payload.time,
+      duration: Number(payload.duration || 60),
+      attendees: Number(payload.attendees || 0),
+      description: payload.description || "",
+      status: payload.status || "scheduled"
+    };
+    const nextEvents = [...events, event];
+    setEvents(nextEvents);
+    recordActivity({ action: "event.scheduled", actor: "Workspace admin", target: event.title, area: event.roomName, tone: "success" });
+    persist({ events: nextEvents });
+    return event;
+  }, [events, persist, recordActivity]);
+
+  const sendRoomMessage = useCallback((payload) => {
+    const message = {
+      id: createId("message"),
+      roomId: payload.roomId,
+      author: payload.author || "Workspace admin",
+      body: payload.body,
+      time: "Just now"
+    };
+    const nextMessages = [...roomMessages, message];
+    setRoomMessages(nextMessages);
+    recordActivity({ action: "room.message_sent", actor: message.author, target: payload.roomName || "Room", area: "Rooms", tone: "primary" });
+    persist({ roomMessages: nextMessages });
+    return message;
+  }, [persist, recordActivity, roomMessages]);
 
   const removeItem = useCallback(async (collection, id) => {
     const maps = { rooms: [rooms, setRooms], files: [files, setFiles], members: [members, setMembers] };
@@ -315,16 +370,19 @@ export function WorkspaceProvider({ initialData, children }) {
     events,
     activity,
     bookings,
+    roomMessages,
     createRoom,
     inviteMember,
     uploadFile,
+    addRoomEvent,
+    sendRoomMessage,
     removeItem,
     recordActivity,
     addNotification,
     markNotificationRead,
     markAllNotificationsRead,
     createBooking
-  }), [activity, addNotification, bookings, createBooking, createRoom, events, files, inviteMember, markAllNotificationsRead, markNotificationRead, members, notifications, recordActivity, removeItem, rooms, tenants, uploadFile]);
+  }), [activity, addNotification, addRoomEvent, bookings, createBooking, createRoom, events, files, inviteMember, markAllNotificationsRead, markNotificationRead, members, notifications, recordActivity, removeItem, roomMessages, rooms, sendRoomMessage, tenants, uploadFile]);
 
   return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;
 }
