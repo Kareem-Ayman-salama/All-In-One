@@ -7,6 +7,7 @@
 :root {
   --blue: #16458f;
   --blue-dark: #0d2d64;
+  --violet: #5346e5;
   --cyan: #04a6c2;
   --green: #17a36b;
   --amber: #f59e0b;
@@ -729,42 +730,91 @@ h2 {
   margin-inline: auto;
 }
 
+.billing-toggle {
+  width: fit-content;
+  margin: 26px auto 0;
+  padding: 6px;
+  display: inline-flex;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--white);
+  box-shadow: 0 12px 28px rgba(7, 18, 38, 0.08);
+}
+
+.billing-toggle button {
+  min-width: 118px;
+  min-height: 54px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.billing-toggle button.active {
+  color: var(--white);
+  background: var(--violet);
+  box-shadow: 0 12px 24px rgba(83, 70, 229, 0.22);
+}
+
+.billing-toggle span {
+  display: inline-grid;
+  place-items: center;
+  min-height: 28px;
+  margin-right: 8px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #dff8ed;
+  color: #07523a;
+  font-size: 13px;
+}
+
 .plans-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
+  gap: 18px;
+  margin-top: 46px;
 }
 
 .plan-card {
-  padding: 22px;
+  padding: 46px 28px 28px;
   display: flex;
   flex-direction: column;
   min-height: 100%;
-  box-shadow: 0 16px 36px rgba(7, 18, 38, 0.08);
+  box-shadow: 0 18px 42px rgba(7, 18, 38, 0.07);
   position: relative;
   overflow: hidden;
 }
 
 .plan-card.featured {
-  border-color: rgba(22, 69, 143, 0.38);
-  box-shadow: 0 20px 42px rgba(22, 69, 143, 0.16);
+  border: 3px solid var(--violet);
+  box-shadow: 0 24px 46px rgba(83, 70, 229, 0.18);
 }
 
 .plan-card.featured::before {
-  content: "الأكثر طلبا للشركات";
+  content: none;
+}
+
+.plan-ribbon {
   position: absolute;
-  inset: 0 0 auto;
+  inset: 0 50% auto auto;
+  transform: translateX(50%);
+  min-width: 172px;
   min-height: 34px;
   display: grid;
   place-items: center;
   color: var(--white);
-  background: linear-gradient(90deg, var(--blue), var(--cyan));
+  background: var(--violet);
+  border-radius: 0 0 18px 18px;
   font-size: 13px;
   font-weight: 900;
 }
 
 .plan-card.featured .plan-label {
-  margin-top: 28px;
+  margin-top: 0;
 }
 
 .plan-label {
@@ -793,14 +843,28 @@ h2 {
 
 .plan-card h3 {
   margin: 18px 0 6px;
-  font-size: 23px;
+  font-size: 22px;
 }
 
-.plan-card strong {
+.plan-price {
+  padding-bottom: 24px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.plan-price strong {
   display: block;
-  color: var(--ink);
-  font-size: 24px;
+  color: var(--violet);
+  font-size: 52px;
+  line-height: 1;
   font-weight: 900;
+}
+
+.plan-price span {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-weight: 800;
 }
 
 .plan-card p {
@@ -811,7 +875,7 @@ h2 {
 }
 
 .plan-card ul {
-  margin: 18px 0 22px;
+  margin: 0 0 26px;
   padding: 0;
   list-style: none;
   display: grid;
@@ -819,15 +883,24 @@ h2 {
 }
 
 .plan-card li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   color: var(--muted);
   line-height: 1.55;
 }
 
 .plan-card li::before {
+  content: none;
+}
+
+.plan-card li::after {
   content: "✓";
   color: var(--green);
   font-weight: 900;
-  margin-left: 8px;
+  font-size: 20px;
+  flex: 0 0 auto;
 }
 
 .plan-card .primary-button,
@@ -1146,8 +1219,40 @@ h2 {
     text-align: right;
   }
 
+  .billing-toggle {
+    width: 100%;
+    margin-top: 20px;
+  }
+
+  .billing-toggle button {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .plans-grid {
+    display: flex;
+    grid-template-columns: none;
+    gap: 16px;
+    margin: 34px -14px 0;
+    padding: 0 14px 12px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .plans-grid::-webkit-scrollbar {
+    display: none;
+  }
+
   .plan-card {
-    padding: 20px;
+    min-width: 86vw;
+    padding: 44px 22px 22px;
+    scroll-snap-align: center;
+  }
+
+  .plan-price strong {
+    font-size: 48px;
   }
 
   .plan-card p {

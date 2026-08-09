@@ -64,6 +64,20 @@ function openWhatsApp(message) {
   window.open(url, "_blank", "noopener,noreferrer");
 }
 
+function setBillingMode(mode) {
+  const yearly = mode === "yearly";
+  document.querySelectorAll("[data-billing]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.billing === mode);
+  });
+  document.querySelectorAll(".plan-price").forEach((price) => {
+    const amount = price.querySelector("strong");
+    const period = price.querySelector("span");
+    if (!amount || !period) return;
+    amount.textContent = yearly ? amount.dataset.yearly : amount.dataset.monthly;
+    period.textContent = yearly ? "جنيه / سنة" : "جنيه / شهر";
+  });
+}
+
 async function captureTrialLead(data) {
   const payload = Object.fromEntries(data.entries());
   const response = await fetch(`${AIN_CONTACT.apiBaseUrl}/public/trial-leads`, {
@@ -113,6 +127,10 @@ async function submitTrialForm(event) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("[data-billing]").forEach((button) => {
+    button.addEventListener("click", () => setBillingMode(button.dataset.billing || "monthly"));
+  });
+
   document.querySelectorAll(".overlay").forEach((overlay) => {
     overlay.addEventListener("click", (event) => {
       if (event.target === overlay) closeLeadModal(overlay.id);

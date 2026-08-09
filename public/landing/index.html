@@ -258,13 +258,18 @@
             الشركات لها باقات موظفين وغرف. الأكاديميات والمدرسين لهم باقات طلاب وكورسات.
             الدفع يدوي وبسيط عبر InstaPay أو Vodafone Cash أو تحويل بنكي بعد التأكيد.
           </p>
+          <div class="billing-toggle" role="group" aria-label="اختيار مدة الاشتراك">
+            <button class="active" type="button" data-billing="monthly">شهري</button>
+            <button type="button" data-billing="yearly">سنوي <span>خصم 20%</span></button>
+          </div>
         </div>
 
         <div class="plans-grid">
           <article class="plan-card company-plan featured">
+            <div class="plan-ribbon">الأكثر مبيعا</div>
             <div class="plan-label"><i class="ti ti-building"></i> للشركات</div>
             <h3>Company Starter</h3>
-            <strong>499 ج.م / شهر</strong>
+            <div class="plan-price"><strong data-monthly="499" data-yearly="4,790">499</strong><span>جنيه / شهر</span></div>
             <p>حتى 50 موظف و5 غرف عمل.</p>
             <ul>
               <li>أدمن للشركة وإدارة أعضاء</li>
@@ -277,7 +282,7 @@
           <article class="plan-card company-plan">
             <div class="plan-label"><i class="ti ti-building-skyscraper"></i> للشركات</div>
             <h3>Company Growth</h3>
-            <strong>999 ج.م / شهر</strong>
+            <div class="plan-price"><strong data-monthly="999" data-yearly="9,590">999</strong><span>جنيه / شهر</span></div>
             <p>حتى 200 موظف و15 غرفة عمل.</p>
             <ul>
               <li>صلاحيات أدمن ومشرفين</li>
@@ -290,7 +295,7 @@
           <article class="plan-card academy-plan">
             <div class="plan-label"><i class="ti ti-school"></i> للتعليم</div>
             <h3>Academy Starter</h3>
-            <strong>699 ج.م / شهر</strong>
+            <div class="plan-price"><strong data-monthly="699" data-yearly="6,710">699</strong><span>جنيه / شهر</span></div>
             <p>حتى 100 طالب و5 كورسات.</p>
             <ul>
               <li>كورسات وغرف للدفعات</li>
@@ -303,7 +308,7 @@
           <article class="plan-card academy-plan">
             <div class="plan-label"><i class="ti ti-users-group"></i> للتعليم</div>
             <h3>Academy Growth</h3>
-            <strong>1499 ج.م / شهر</strong>
+            <div class="plan-price"><strong data-monthly="1,499" data-yearly="14,390">1,499</strong><span>جنيه / شهر</span></div>
             <p>حتى 300 طالب و20 كورس.</p>
             <ul>
               <li>مدرسين ومجموعات متعددة</li>
