@@ -8,7 +8,10 @@ import { OrganizationProvider } from "./contexts/OrganizationContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { ToastProvider } from "./contexts/ToastContext";
 import { MarketplaceProvider } from "./contexts/MarketplaceContext";
+import { installBrowserProtection } from "./services/browserProtection";
 import "./styles.css";
+
+installBrowserProtection();
 
 createRoot(document.getElementById("root")).render(
   <ErrorBoundary>

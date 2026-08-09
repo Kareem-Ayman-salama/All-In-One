@@ -39,6 +39,32 @@ body {
 }
 button, input, select, textarea { font: inherit; }
 
+.aio-browser-protection body,
+.aio-browser-protection body * {
+  -webkit-user-drag: none;
+}
+
+.aio-browser-protection body :not(input):not(textarea):not(select):not([contenteditable="true"]):not(.allow-copy) {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+@media print {
+  .aio-browser-protection body > * {
+    display: none !important;
+  }
+
+  .aio-browser-protection body::before {
+    content: "Protected content cannot be printed.";
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
+    color: #111827;
+    background: #fff;
+    font: 700 24px/1.4 system-ui, sans-serif;
+  }
+}
+
 html {
   scroll-behavior: smooth;
 }

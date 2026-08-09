@@ -3,6 +3,36 @@ const AIN_CONTACT = {
   apiBaseUrl: window.AIN_API_BASE_URL || "/api/v1",
 };
 
+const AIN_BLOCKED_EVENTS = ["contextmenu", "copy", "cut", "dragstart", "selectstart"];
+
+function isEditableTarget(target) {
+  return Boolean(target?.closest?.("input, textarea, select, [contenteditable='true'], .allow-copy"));
+}
+
+function protectBrowserActions() {
+  document.documentElement.classList.add("aio-browser-protection");
+  AIN_BLOCKED_EVENTS.forEach((eventName) => {
+    document.addEventListener(eventName, (event) => {
+      if (event.type !== "contextmenu" && isEditableTarget(event.target)) return;
+      event.preventDefault();
+      event.stopPropagation();
+    }, true);
+  });
+  window.addEventListener("keydown", (event) => {
+    const key = event.key.toLowerCase();
+    const blocked = event.key === "F12"
+      || event.key === "PrintScreen"
+      || ((event.ctrlKey || event.metaKey) && ["p", "s", "u"].includes(key))
+      || ((event.ctrlKey || event.metaKey) && event.shiftKey && ["c", "i", "j", "s"].includes(key));
+    if (!blocked) return;
+    event.preventDefault();
+    event.stopPropagation();
+  }, true);
+  window.addEventListener("beforeprint", (event) => event.preventDefault?.(), true);
+}
+
+protectBrowserActions();
+
 function scrollToId(id) {
   const target = document.getElementById(id);
   if (!target) return;
