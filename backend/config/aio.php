@@ -8,6 +8,7 @@ return [
     'cookie_same_site' => env('COOKIE_SAME_SITE', 'lax'),
     'frontend_url' => env('FRONTEND_URL', 'http://localhost:5173'),
     'redis_required' => (bool) env('REDIS_REQUIRED', false),
+    'trial_days' => (int) env('AIO_TRIAL_DAYS', 30),
     'demo_access' => [
         'enabled' => filter_var(
             env('AIO_DEMO_ACCESS_ENABLED', false),

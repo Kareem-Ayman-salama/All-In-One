@@ -203,8 +203,8 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 
 - [~] Plans and subscriptions exist.
 - [ ] Add explicit trial plan.
-- [ ] Set default MVP trial duration to one month.
-- [ ] Show one-month free trial in plan/subscription UI.
+- [x] Set default MVP trial duration to one month.
+- [x] Show one-month free trial in plan/subscription UI.
 - [ ] Add editable plan limits:
   - max rooms
   - max members

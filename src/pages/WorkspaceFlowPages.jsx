@@ -16,7 +16,7 @@ const showDemoAccounts = import.meta.env.VITE_SHOW_DEMO_ACCOUNTS === "true";
 const flowCopy = {
   ar: {
     companyTitle: "أنشئ مساحة عمل لشركتك",
-    companySubtitle: "ابدأ تجربة مجانية، واضبط هوية الشركة قبل دعوة فريقك.",
+    companySubtitle: "ابدأ تجربة شهر مجاني، واضبط هوية الشركة قبل دعوة فريقك.",
     companyName: "اسم الشركة",
     yourName: "اسمك الكامل",
     createCompany: "إنشاء مساحة الشركة",
@@ -55,7 +55,7 @@ const flowCopy = {
   },
   en: {
     companyTitle: "Create your company workspace",
-    companySubtitle: "Start a free trial and set up your company identity before inviting your team.",
+    companySubtitle: "Start a one-month free trial and set up your company identity before inviting your team.",
     companyName: "Company name",
     yourName: "Your full name",
     createCompany: "Create company workspace",

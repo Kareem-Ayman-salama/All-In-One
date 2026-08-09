@@ -52,6 +52,15 @@ class WorkspaceOperationsTest extends TestCase
             'user_id' => $owner->id,
             'status' => 'active',
         ]);
+        $subscription = OrganizationSubscription::query()
+            ->where('organization_id', $organizationId)
+            ->firstOrFail();
+        $this->assertSame(
+            30,
+            (int) $subscription->current_period_starts_at->diffInDays(
+                $subscription->trial_ends_at,
+            ),
+        );
         $this->assertDatabaseHas('audit_logs', [
             'organization_id' => $organizationId,
             'action' => 'organization.created',

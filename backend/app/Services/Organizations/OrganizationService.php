@@ -62,15 +62,18 @@ class OrganizationService
                 ->where('code', $planCode)
                 ->where('active', true)
                 ->firstOrFail();
+            $now = now();
+            $trialDays = max(1, (int) config('aio.trial_days', 30));
+            $trialEndsAt = $now->copy()->addDays($trialDays);
 
             OrganizationSubscription::query()->create([
                 'organization_id' => $organization->id,
                 'plan_id' => $plan->id,
                 'status' => 'trial',
                 'billing_interval' => 'monthly',
-                'trial_ends_at' => now()->addDays(14),
-                'current_period_starts_at' => now(),
-                'current_period_ends_at' => now()->addDays(14),
+                'trial_ends_at' => $trialEndsAt,
+                'current_period_starts_at' => $now,
+                'current_period_ends_at' => $trialEndsAt,
             ]);
 
             $this->recorder->record(
