@@ -47,6 +47,7 @@ button, input, select, textarea { font: inherit; }
 .aio-browser-protection body :not(input):not(textarea):not(select):not([contenteditable="true"]):not(.allow-copy) {
   user-select: none;
   -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 @media print {

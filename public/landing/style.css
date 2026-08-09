@@ -39,6 +39,7 @@ body {
 .aio-browser-protection body :not(input):not(textarea):not(select):not([contenteditable="true"]):not(.allow-copy) {
   user-select: none;
   -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 @media print {
@@ -326,6 +327,7 @@ h2 {
 .use-cases article,
 .protection-grid article,
 .trial-card,
+.plan-card,
 .comparison > div,
 .faq-list details {
   border: 1px solid var(--line);
@@ -718,6 +720,161 @@ h2 {
   margin-left: 8px;
 }
 
+.pricing-head {
+  max-width: 800px;
+}
+
+.pricing-head p {
+  max-width: 760px;
+  margin-inline: auto;
+}
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.plan-card {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  box-shadow: 0 16px 36px rgba(7, 18, 38, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.plan-card.featured {
+  border-color: rgba(22, 69, 143, 0.38);
+  box-shadow: 0 20px 42px rgba(22, 69, 143, 0.16);
+}
+
+.plan-card.featured::before {
+  content: "الأكثر طلبا للشركات";
+  position: absolute;
+  inset: 0 0 auto;
+  min-height: 34px;
+  display: grid;
+  place-items: center;
+  color: var(--white);
+  background: linear-gradient(90deg, var(--blue), var(--cyan));
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.plan-card.featured .plan-label {
+  margin-top: 28px;
+}
+
+.plan-label {
+  width: fit-content;
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #e8f0ff;
+  color: var(--blue);
+  font-weight: 900;
+  font-size: 14px;
+}
+
+.company-plan .plan-label {
+  background: #eaf7ff;
+  color: #075985;
+}
+
+.academy-plan .plan-label {
+  background: #ecfdf3;
+  color: #07523a;
+}
+
+.plan-card h3 {
+  margin: 18px 0 6px;
+  font-size: 23px;
+}
+
+.plan-card strong {
+  display: block;
+  color: var(--ink);
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.plan-card p {
+  min-height: 48px;
+  margin: 10px 0 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.plan-card ul {
+  margin: 18px 0 22px;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.plan-card li {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.plan-card li::before {
+  content: "✓";
+  color: var(--green);
+  font-weight: 900;
+  margin-left: 8px;
+}
+
+.plan-card .primary-button,
+.plan-card .secondary-button {
+  width: 100%;
+  margin-top: auto;
+}
+
+.plan-card .secondary-button {
+  color: var(--blue);
+  border-color: var(--line);
+  background: var(--white);
+}
+
+.plan-card .secondary-button:hover {
+  background: #eef5ff;
+}
+
+.payment-note {
+  margin-top: 18px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(22, 69, 143, 0.14);
+  border-radius: 8px;
+  background: #f7fbff;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.payment-note i {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--blue);
+  color: var(--white);
+  font-size: 22px;
+  flex: 0 0 auto;
+}
+
+.payment-note span {
+  flex: 1;
+}
+
 .faq-list {
   display: grid;
   gap: 12px;
@@ -898,7 +1055,8 @@ h2 {
   .use-cases,
   .audience-grid,
   .audience-secondary,
-  .protection-grid {
+  .protection-grid,
+  .plans-grid {
     grid-template-columns: 1fr 1fr;
   }
 }
@@ -920,8 +1078,8 @@ h2 {
   }
 
   .hero {
-    min-height: 92vh;
-    padding: 96px 18px 58px;
+    min-height: 86vh;
+    padding: 92px 18px 42px;
   }
 
   .hero-overlay {
@@ -947,12 +1105,19 @@ h2 {
     padding: 20px;
   }
 
+  .problem-section,
+  #how,
+  .who-section {
+    display: none;
+  }
+
   .answer-list,
   .steps,
   .use-cases,
   .audience-grid,
   .audience-secondary,
   .protection-grid,
+  .plans-grid,
   .lead-form {
     grid-template-columns: 1fr;
   }
@@ -970,7 +1135,32 @@ h2 {
   }
 
   .section {
-    padding: 62px 0;
+    padding: 48px 0;
+  }
+
+  .quick-answer {
+    margin-top: -24px;
+  }
+
+  .pricing-head {
+    text-align: right;
+  }
+
+  .plan-card {
+    padding: 20px;
+  }
+
+  .plan-card p {
+    min-height: 0;
+  }
+
+  .payment-note {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .payment-note .primary-button.small {
+    width: 100%;
   }
 
   .modal-head,
