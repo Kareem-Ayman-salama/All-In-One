@@ -326,7 +326,7 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 - [x] Add shortcut blocking on playback page.
 - [ ] Add member devices page.
 - [ ] Add active sessions page for admins.
-- [ ] Add security logs page.
+- [x] Add security logs page.
 - [ ] Add plan usage page.
 - [ ] Add trial limits page for super admin.
 - [ ] Add subscription approval page for super admin.

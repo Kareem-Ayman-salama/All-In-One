@@ -269,6 +269,8 @@ Route::prefix('v1')->group(function (): void {
 
                 Route::get('/audit-logs', [AuditLogController::class, 'organization'])
                     ->middleware('permission:audit.view');
+                Route::get('/content-access-logs', [AuditLogController::class, 'contentAccess'])
+                    ->middleware('permission:audit.view');
                 Route::get('/analytics/overview', [AnalyticsController::class, 'organization'])
                     ->middleware(['module:analytics', 'permission:analytics.view']);
             });

@@ -134,7 +134,7 @@ export function TenantAdminApp({ data, user }) {
       {page === "notifications" && <NotificationCenterPage user={user} />}
       {page === "calendar" && <WorkspaceCalendarPage allowCreate />}
       {page === "analytics" && <AnalyticsPage />}
-      {page === "security" && <SecurityPage />}
+      {page === "security" && <SecurityPageLive />}
       {page === "subscription" && <BillingSubscriptionPage />}
       {page === "activity" && <ActivityAuditPage />}
       {page === "settings" && <AccountSettings user={user} workspaceLabel="Tenant Admin workspace" />}
@@ -517,6 +517,90 @@ function AnalyticsPage() {
 function SecurityPage() {
   const tx = useBilingualText();
   return <SimplePanel title={tx("الأمان", "Security")} subtitle={tx("سياسات الحماية والأجهزة ومحاولات الدخول.", "Protection policies, devices, and sign-in attempts.")} />;
+}
+
+function SecurityPageLive() {
+  const tx = useBilingualText();
+  const { activeOrganization } = useOrganization();
+  const { showToast } = useToast();
+  const [logs, setLogs] = useState([]);
+  const [filter, setFilter] = useState("all");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!activeOrganization?.id) {
+      return;
+    }
+
+    setLoading(true);
+    api.getContentAccessLogs(activeOrganization.id, filter === "all" ? {} : { result: filter })
+      .then(setLogs)
+      .catch((error) => showToast(error.message, "danger"))
+      .finally(() => setLoading(false));
+  }, [activeOrganization?.id, filter, showToast]);
+
+  const blocked = logs.filter((item) => ["denied", "warning", "failed"].includes(item.result)).length;
+  const denied = logs.filter((item) => item.result === "denied").length;
+  const allowed = logs.filter((item) => item.result === "allowed").length;
+  const formatTime = (value) => value
+    ? new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value))
+    : "—";
+  const resultTone = (result) => {
+    if (result === "allowed") return "success";
+    if (result === "denied" || result === "failed") return "danger";
+    return "warning";
+  };
+
+  return (
+    <>
+      <div className="stitch-page-head">
+        <div>
+          <h1>{tx("الأمان", "Security")}</h1>
+          <p>{tx("مراقبة الوصول للمحتوى ومحاولات الحظر والتنزيل داخل المؤسسة.", "Monitor content access, blocked actions, and download attempts inside the organization.")}</p>
+        </div>
+        <Button variant="ghost"><Download size={17} /> {tx("تصدير CSV", "Export CSV")}</Button>
+      </div>
+
+      <section className="stitch-stat-grid three">
+        <StatCard title={tx("محاولات محظورة", "Blocked attempts")} value={String(blocked)} hint={tx("تحذير أو رفض", "Warnings or denials")} icon={<AlertTriangle />} tone={blocked ? "warning" : "success"} />
+        <StatCard title={tx("تنزيلات مرفوضة", "Denied downloads")} value={String(denied)} hint={tx("سياسة الحماية فعالة", "Protection policy active")} icon={<Lock />} tone={denied ? "danger" : "success"} />
+        <StatCard title={tx("جلسات مسموحة", "Allowed sessions")} value={String(allowed)} hint={tx("مشاهدات مصرح بها", "Authorized views")} icon={<Shield />} tone="primary" />
+      </section>
+
+      <SavedViewToolbar
+        storageId="tenant-security-logs"
+        activeFilter={filter}
+        onFilterChange={setFilter}
+        filters={[
+          { value: "all", label: tx("كل الأحداث", "All events") },
+          { value: "warning", label: tx("تحذيرات", "Warnings") },
+          { value: "denied", label: tx("مرفوض", "Denied") },
+          { value: "allowed", label: tx("مسموح", "Allowed") }
+        ]}
+      />
+
+      <div className="audit-table">
+        <div className="audit-head">
+          <span>{tx("الإجراء", "Action")}</span>
+          <span>{tx("المستخدم", "User")}</span>
+          <span>{tx("المحتوى", "Content")}</span>
+          <span>{tx("IP", "IP")}</span>
+          <span>{tx("الوقت", "Time")}</span>
+        </div>
+        {loading && <div className="audit-row"><span>{tx("جاري التحميل...", "Loading...")}</span><span /><span /><span /><span /></div>}
+        {!loading && logs.length === 0 && <div className="audit-row"><span>{tx("لا توجد أحداث بعد", "No events yet")}</span><span /><span /><span /><span /></div>}
+        {!loading && logs.map((item) => (
+          <div className="audit-row" key={item.id}>
+            <span className={`audit-event ${resultTone(item.result)}`}><i />{item.action}</span>
+            <strong>{item.user?.name || item.user?.email || "—"}</strong>
+            <span>{item.contentItem?.title || item.contentItemId || "—"}</span>
+            <span>{item.ipAddress || "—"}</span>
+            <small>{formatTime(item.createdAt)}</small>
+          </div>
+        ))}
+      </div>
+    </>
+  );
 }
 
 function SubscriptionPage() {

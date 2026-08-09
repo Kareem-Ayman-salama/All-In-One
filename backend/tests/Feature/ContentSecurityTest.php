@@ -372,6 +372,43 @@ class ContentSecurityTest extends TestCase
         ]);
     }
 
+    public function test_organization_admin_can_list_content_access_logs(): void
+    {
+        Storage::fake('local');
+        [$organization, $owner, $room] = $this->workspace();
+        Sanctum::actingAs($owner);
+
+        $upload = $this->post(
+            "/api/v1/organizations/{$organization->id}/content",
+            [
+                'roomId' => $room->id,
+                'title' => 'Logged PDF',
+                'type' => 'pdf',
+                'file' => UploadedFile::fake()->createWithContent(
+                    'logged.pdf',
+                    "%PDF-1.4\n1 0 obj\n<<>>\nendobj\n%%EOF",
+                ),
+            ],
+            ['Accept' => 'application/json'],
+        );
+
+        $this->postJson(
+            "/api/v1/organizations/{$organization->id}/content/{$upload->json('data.id')}/viewer-audit",
+            [
+                'event' => 'shortcut_blocked',
+                'viewerSessionId' => 'web-session-2',
+                'message' => 'Blocked shortcut: p',
+            ],
+        )->assertCreated();
+
+        $this->getJson("/api/v1/organizations/{$organization->id}/content-access-logs?result=warning")
+            ->assertOk()
+            ->assertJsonPath('data.0.action', 'viewer_shortcut_blocked')
+            ->assertJsonPath('data.0.result', 'warning')
+            ->assertJsonPath('data.0.content_item.title', 'Logged PDF')
+            ->assertJsonPath('data.0.user.email', $owner->email);
+    }
+
     public function test_html_disguised_as_pdf_is_rejected(): void
     {
         [$organization, $owner, $room] = $this->workspace();
