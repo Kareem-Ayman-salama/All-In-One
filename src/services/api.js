@@ -197,6 +197,10 @@ export const api = {
     `${organizationPath(organizationId, "members")}/${memberId}/devices/${deviceId}/revoke`,
     { method: "POST", body: "{}" }
   ).then(camelize),
+  getPlanUsage: (organizationId) => endpoint(
+    organizationPath(organizationId, "plan-usage"),
+    null
+  ).then(camelize),
   revokeMemberSessions: (organizationId, memberId) => httpClient(
     `${organizationPath(organizationId, "members")}/${memberId}/sessions`,
     { method: "DELETE" }

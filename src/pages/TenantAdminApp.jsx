@@ -830,6 +830,89 @@ function MemberSessionsBlock({ sessions, sessionLoading, formatTime, revokeMembe
 
 function SubscriptionPage() {
   const tx = useBilingualText();
+  const { activeOrganization } = useOrganization();
+  const { showToast } = useToast();
+  const [usage, setUsage] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!activeOrganization?.id) {
+      return;
+    }
+
+    setLoading(true);
+    api.getPlanUsage(activeOrganization.id)
+      .then(setUsage)
+      .catch((error) => showToast(error.message, "danger"))
+      .finally(() => setLoading(false));
+  }, [activeOrganization?.id, showToast]);
+
+  const subscription = usage?.subscription;
+  const metrics = usage?.usage || [];
+  const metricLabel = (metric) => ({
+    rooms: tx("Rooms", "Rooms"),
+    members: tx("Members", "Members"),
+    pendingMembers: tx("Pending invites", "Pending invites"),
+    admins: tx("Admins", "Admins"),
+    courses: tx("Courses", "Courses"),
+    content: tx("Content items", "Content items"),
+    videos: tx("Videos", "Videos"),
+    storageBytes: tx("Storage", "Storage")
+  }[metric] || metric);
+  const metricValue = (metric, value) => {
+    if (metric === "storageBytes") {
+      return `${(Number(value || 0) / 1024 / 1024).toFixed(1)} MB`;
+    }
+    return String(value ?? 0);
+  };
+  const percent = (item) => item.limit ? Math.min(100, Math.round((item.current / item.limit) * 100)) : 0;
+
+  return (
+    <>
+      <div className="stitch-page-head">
+        <div>
+          <h1>{tx("الاشتراكات", "Subscriptions")}</h1>
+          <p>{tx("تابع الخطة والحدود ومتبقي التجربة المجانية.", "Track the plan, limits, and remaining free trial time.")}</p>
+        </div>
+        <Badge tone={subscription?.status === "trial" ? "warning" : "success"}>{subscription?.status || tx("No plan", "No plan")}</Badge>
+      </div>
+
+      <section className="billing-hero">
+        <div>
+          <Badge tone="primary">{subscription?.plan?.code || "trial"}</Badge>
+          <h2>{subscription?.plan?.name || tx("لا توجد خطة نشطة", "No active plan")}</h2>
+          <p>{subscription?.daysRemaining != null ? tx(`${subscription.daysRemaining} يوم متبقي`, `${subscription.daysRemaining} days remaining`) : tx("لا توجد بيانات اشتراك", "No subscription data")}</p>
+        </div>
+        <div className="billing-price">
+          <strong>{subscription?.plan ? `${(subscription.plan.monthlyPriceMinor / 100).toLocaleString()} ${subscription.plan.currency}` : "0"}</strong>
+          <span>{tx("شهرياً بعد التجربة", "Monthly after trial")}</span>
+        </div>
+      </section>
+
+      <section className="plan-usage-grid">
+        {loading && <div className="stitch-empty-panel"><Cloud size={32} /><strong>{tx("جاري تحميل الاستهلاك...", "Loading usage...")}</strong></div>}
+        {!loading && metrics.map((item) => (
+          <article className="plan-usage-card" key={item.metric}>
+            <header>
+              <strong>{metricLabel(item.metric)}</strong>
+              <Badge tone={item.limit && item.current >= item.limit ? "danger" : "success"}>
+                {item.limit ? `${metricValue(item.metric, item.remaining)} ${tx("متبقي", "left")}` : tx("غير محدود", "Unlimited")}
+              </Badge>
+            </header>
+            <div className="usage-meter"><span style={{ width: `${percent(item)}%` }} /></div>
+            <footer>
+              <span>{metricValue(item.metric, item.current)}</span>
+              <small>{item.limit ? metricValue(item.metric, item.limit) : tx("غير محدود", "Unlimited")}</small>
+            </footer>
+          </article>
+        ))}
+      </section>
+    </>
+  );
+}
+
+function LegacySubscriptionPage() {
+  const tx = useBilingualText();
   return <SimplePanel title={tx("الاشتراكات", "Subscriptions")} subtitle={tx("إدارة الاشتراك الشهري والسنوي وحالة التجديد.", "Manage monthly and yearly billing and renewal status.")} />;
 }
 

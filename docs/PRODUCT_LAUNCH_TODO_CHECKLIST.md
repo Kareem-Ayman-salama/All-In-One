@@ -205,7 +205,7 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 - [ ] Add explicit trial plan.
 - [x] Set default trial duration to one month.
 - [x] Show one-month free trial in plan/subscription UI.
-- [ ] Add editable plan limits:
+- [~] Add editable plan limits:
   - max rooms
   - max members
   - max videos
@@ -215,10 +215,10 @@ Important note: browser protections are deterrents, not guaranteed protection. W
   - analytics enabled
 - [ ] Enforce max rooms.
 - [ ] Enforce max members.
-- [ ] Enforce max videos.
-- [ ] Add plan usage endpoint.
-- [ ] Add plan usage UI for organization admin.
-- [ ] Add trial status and trial end date.
+- [x] Enforce max videos.
+- [x] Add plan usage endpoint.
+- [x] Add plan usage UI for organization admin.
+- [x] Add trial status and trial end date.
 - [ ] Add super admin trial settings.
 
 ### 2.9 Manual Subscription Activation
@@ -327,7 +327,7 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 - [x] Add member devices page.
 - [x] Add active sessions page for admins.
 - [x] Add security logs page.
-- [ ] Add plan usage page.
+- [x] Add plan usage page.
 - [ ] Add trial limits page for super admin.
 - [ ] Add subscription approval page for super admin.
 - [ ] Add suspicious activity page.
@@ -365,13 +365,13 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 - [x] Add revoke all member sessions endpoint.
 - [ ] Add security logs endpoint.
 - [ ] Add security logs export endpoint later.
-- [ ] Add plan limits enforcement middleware/service.
+- [x] Add plan limits enforcement middleware/service.
 - [ ] Add manual subscription approval endpoints.
 - [ ] Add Email OTP service.
 - [ ] Add tests for all tenant/role boundaries.
 - [ ] Add tests for playback authorization.
 - [x] Add tests for device/session enforcement.
-- [ ] Add tests for trial limits.
+- [x] Add tests for trial limits.
 
 ## 10. Anti-Leakage Definition
 

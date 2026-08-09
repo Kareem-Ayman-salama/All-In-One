@@ -84,6 +84,18 @@ class ContentController extends Controller
             $entitlements,
             $youTube,
         ): ContentItem {
+            Organization::query()
+                ->whereKey($organization->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+            $entitlements->assertCurrentCount(
+                $organization,
+                'content',
+                ContentItem::query()
+                    ->where('organization_id', $organization->id)
+                    ->count(),
+            );
+
             $asset = null;
             $videoProvider = null;
             $externalVideoId = null;
@@ -98,10 +110,6 @@ class ContentController extends Controller
 
             if ($request->hasFile('file')) {
                 $file = $request->file('file');
-                Organization::query()
-                    ->whereKey($organization->id)
-                    ->lockForUpdate()
-                    ->firstOrFail();
                 $entitlements->assertCurrentCount(
                     $organization,
                     'storage_bytes',

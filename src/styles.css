@@ -6400,6 +6400,14 @@ button.stitch-search {
 .billing-price { display: grid; justify-items: end; gap: 8px; }
 .billing-price > strong { font-size: 38px; color: var(--stitch-primary-container); }
 .billing-price > span { color: var(--stitch-muted); }
+.plan-usage-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.plan-usage-card { border: 1px solid var(--stitch-border); border-radius: 8px; background: var(--stitch-surface); padding: 18px; display: grid; gap: 14px; }
+.plan-usage-card header,
+.plan-usage-card footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.plan-usage-card footer span { font-weight: 800; color: var(--stitch-text); }
+.plan-usage-card footer small { color: var(--stitch-muted); }
+.usage-meter { height: 9px; border-radius: 999px; background: var(--stitch-soft); overflow: hidden; }
+.usage-meter span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #2563eb, #059669); }
 .usage-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; margin-bottom: 22px; }
 .usage-grid article { border: 1px solid var(--stitch-border); border-radius: 10px; background: var(--stitch-surface); padding: 18px; display: grid; gap: 12px; }
 .usage-grid article > div:first-child { display: grid; grid-template-columns: 38px 1fr auto; align-items: center; gap: 9px; }
@@ -6510,6 +6518,7 @@ button.stitch-search {
   .audit-row { min-width: 760px; }
   .billing-hero { align-items: flex-start; flex-direction: column; }
   .billing-price { justify-items: start; }
+  .plan-usage-grid { grid-template-columns: 1fr; }
   .usage-grid { grid-template-columns: 1fr; }
   .invoice-card { overflow-x: auto; }
   .invoice-row { min-width: 650px; }

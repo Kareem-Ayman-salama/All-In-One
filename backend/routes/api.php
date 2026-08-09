@@ -26,6 +26,7 @@ use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\NotificationPreferenceController;
 use App\Http\Controllers\Api\V1\OrganizationController;
 use App\Http\Controllers\Api\V1\OtpOperationsController;
+use App\Http\Controllers\Api\V1\PlanUsageController;
 use App\Http\Controllers\Api\V1\PrivacyController;
 use App\Http\Controllers\Api\V1\PromotionController;
 use App\Http\Controllers\Api\V1\PublicMarketplaceController;
@@ -303,6 +304,8 @@ Route::prefix('v1')->group(function (): void {
                     ->middleware('permission:audit.view');
                 Route::get('/analytics/overview', [AnalyticsController::class, 'organization'])
                     ->middleware(['module:analytics', 'permission:analytics.view']);
+                Route::get('/plan-usage', [PlanUsageController::class, 'show'])
+                    ->middleware('permission:subscriptions.view');
             });
 
         Route::prefix('/admin')
