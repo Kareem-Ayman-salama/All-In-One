@@ -443,7 +443,8 @@ function RoomWorkspaceModal({ room, files, members, events, onClose, onInvite, o
 
   const roomFiles = files.filter((file) => file.roomId === room.id || file.room === room.name);
   const roomEvents = events.filter((event) => event.roomId === room.id || event.roomName === room.name);
-  const visibleMembers = members.slice(0, Math.max(Number(room.members || 0), 3));
+  const roomMembers = members.filter((member) => member.roomId === room.id || member.room === room.name || member.roomName === room.name);
+  const visibleMembers = roomMembers.length ? roomMembers : members.slice(0, Math.max(Number(room.members || 0), 0));
   const localMessages = roomMessages.filter((item) => item.roomId === room.id || item.roomName === room.name);
   const messages = serverMessages.length ? serverMessages : localMessages;
   const tabs = [
@@ -473,17 +474,24 @@ function RoomWorkspaceModal({ room, files, members, events, onClose, onInvite, o
       title={room.name}
       open={Boolean(room)}
       onClose={onClose}
-      footer={<div className="room-workspace-footer"><Button variant="ghost" onClick={() => onInvite(room)}><UserPlus size={16} /> {tx("إضافة عضو", "Add member")}</Button><Button variant="ghost" onClick={() => onUpload(room)}><Upload size={16} /> {tx("رفع ماتريال", "Upload material")}</Button><Button onClick={() => onSchedule(room)}><CalendarDays size={16} /> {tx("تحديد موعد", "Schedule")}</Button></div>}
+      footer={<div className="room-workspace-footer"><Button variant="ghost" onClick={() => onUpload(room)}><Upload size={16} /> {tx("رفع ماتريال", "Upload material")}</Button><Button variant="ghost" onClick={() => onSchedule(room)}><CalendarDays size={16} /> {tx("تحديد موعد", "Schedule")}</Button><Button onClick={() => onInvite(room)}><UserPlus size={16} /> {tx("إضافة عضو أو طالب", "Add member or student")}</Button></div>}
     >
       <section className="room-detail-modal room-workspace-modal">
-        <header>
-          <Badge tone={room.status === "Private" ? "neutral" : "success"}>{room.status || tx("نشطة", "Active")}</Badge>
-          <p>{room.description || tx("كل حاجة تخص الروم في مكان واحد: رسائل، ماتريال، أعضاء، ومواعيد.", "Everything for this room in one place: messages, material, members, and schedule.")}</p>
+        <header className="room-workspace-hero">
+          <div>
+            <Badge tone={room.status === "Private" ? "neutral" : "success"}>{room.status || tx("نشطة", "Active")}</Badge>
+            <p>{room.description || tx("كل حاجة تخص الروم في مكان واحد: رسائل، ماتريال، أعضاء، ومواعيد.", "Everything for this room in one place: messages, material, members, and schedule.")}</p>
+          </div>
+          <div className="room-workspace-actions">
+            <Button onClick={() => onInvite(room)}><UserPlus size={16} /> {tx("إضافة عضو", "Add member")}</Button>
+            <Button variant="ghost" onClick={() => onUpload(room)}><Upload size={16} /> {tx("رفع ملف", "Upload")}</Button>
+            <Button variant="ghost" onClick={() => onSchedule(room)}><CalendarDays size={16} /> {tx("موعد", "Event")}</Button>
+          </div>
         </header>
         <div className="room-detail-stats">
-          <span><strong>{room.members || visibleMembers.length || 0}</strong>{tx("أعضاء", "Members")}</span>
-          <span><strong>{room.files || roomFiles.length || 0}</strong>{tx("ملفات", "Files")}</span>
-          <span><strong>{roomEvents.length}</strong>{tx("مواعيد", "Events")}</span>
+          <span><Users size={17} /><strong>{visibleMembers.length || room.members || 0}</strong>{tx("أعضاء", "Members")}</span>
+          <span><FileText size={17} /><strong>{roomFiles.length || room.files || 0}</strong>{tx("ملفات", "Files")}</span>
+          <span><CalendarDays size={17} /><strong>{roomEvents.length}</strong>{tx("مواعيد", "Events")}</span>
         </div>
         <nav className="room-workspace-tabs" aria-label={tx("أقسام الروم", "Room sections")}>
           {tabs.map((tab) => {
@@ -532,12 +540,13 @@ function RoomWorkspaceModal({ room, files, members, events, onClose, onInvite, o
 
         {activeTab === "members" && (
           <article className="room-section-panel">
-            <div className="room-section-head"><h3>{tx("الأعضاء والصلاحيات", "Members and access")}</h3><Button variant="ghost" onClick={() => onInvite(room)}><UserPlus size={16} /> {tx("دعوة", "Invite")}</Button></div>
-            {visibleMembers.length === 0 && <p>{tx("لم تتم إضافة أعضاء بعد.", "No members have been added yet.")}</p>}
+            <div className="room-section-head"><div><h3>{tx("الأعضاء والصلاحيات", "Members and access")}</h3><p>{tx("ادعُ طالب أو موظف بالبريد، وحدد له الروم والدور المناسب.", "Invite a student or team member by email and assign the right room access.")}</p></div><Button onClick={() => onInvite(room)}><UserPlus size={16} /> {tx("إضافة عضو", "Add member")}</Button></div>
+            {visibleMembers.length === 0 && <div className="room-empty-action"><Users size={34} /><strong>{tx("لا يوجد أعضاء داخل الروم بعد", "No members in this room yet")}</strong><span>{tx("اضغط إضافة عضو لإرسال دعوة وربط الشخص بهذا الروم مباشرة.", "Use Add member to send an invite and attach the person to this room.")}</span><Button onClick={() => onInvite(room)}><UserPlus size={16} /> {tx("إضافة أول عضو", "Add first member")}</Button></div>}
             {visibleMembers.map((member) => (
               <div className="room-detail-row" key={member.id}>
                 <Users size={17} />
-                <span>{member.name || member.email}<small>{member.role || member.email || ""}</small></span>
+                <span>{member.name || member.email}<small>{member.email || member.role || ""}</small></span>
+                <Badge tone={member.status === "Active" || member.status === "active" ? "success" : "warning"}>{member.status || tx("دعوة معلقة", "Pending invite")}</Badge>
               </div>
             ))}
           </article>
@@ -1358,11 +1367,23 @@ function ScheduleRoomEventModal({ open, room, onClose }) {
 }
 
 function InviteMemberModal({ open, onClose, initialRoom = null }) {
-  const [form, setForm] = useState({ name: "", email: "", room: initialRoom?.name || "HR & Policies" });
+  const [form, setForm] = useState({ name: "", email: "", role: "member", room: initialRoom?.name || "HR & Policies" });
   const { inviteMember: inviteWorkspaceMember, rooms } = useWorkspace();
   const { activeOrganization } = useOrganization();
   const { showToast } = useToast();
   const tx = useBilingualText();
+  const roleOptions = activeOrganization?.type === "company"
+    ? [
+      { value: "member", label: tx("موظف / عضو", "Employee / member") },
+      { value: "staff", label: tx("مشرف", "Staff") },
+      { value: "organization_admin", label: tx("أدمن شركة", "Company admin") }
+    ]
+    : [
+      { value: "student", label: tx("طالب", "Student") },
+      { value: "instructor", label: tx("مدرس", "Instructor") },
+      { value: "staff", label: tx("مشرف", "Staff") },
+      { value: "member", label: tx("عضو", "Member") }
+    ];
   useEffect(() => {
     if (open && initialRoom?.name) {
       setForm((current) => ({ ...current, room: initialRoom.name }));
@@ -1373,23 +1394,28 @@ function InviteMemberModal({ open, onClose, initialRoom = null }) {
     const selectedRoom = rooms.find((item) => item.name === form.room) || initialRoom;
     await api.inviteMember(activeOrganization.id, {
       email: form.email,
-      role: "member",
+      role: form.role,
       roomIds: selectedRoom?.id ? [selectedRoom.id] : [],
       note: form.name ? `Invitation for ${form.name}` : null,
       expiresInDays: 7
     });
     inviteWorkspaceMember(form);
     showToast(tx("تم إرسال الدعوة وإضافتها للسجل", "Invitation sent and added to the audit log"));
-    setForm({ name: "", email: "", room: "HR & Policies" });
+    setForm({ name: "", email: "", role: "member", room: rooms[0]?.name || "HR & Policies" });
     onClose();
   };
 
   return (
-    <Modal title={tx("دعوة عضو", "Invite member")} open={open} onClose={onClose} footer={<Button form="invite-member-form">{tx("إرسال الدعوة", "Send invitation")}</Button>}>
+    <Modal title={tx("إضافة عضو للروم", "Add member to room")} open={open} onClose={onClose} footer={<Button form="invite-member-form"><UserPlus size={16} /> {tx("إرسال الدعوة", "Send invitation")}</Button>}>
       <form id="invite-member-form" className="form-grid" onSubmit={submit}>
+        {initialRoom && <div className="invite-room-summary"><span>{initialRoom.logo || initialRoom.name?.slice(0, 2).toUpperCase()}</span><div><strong>{initialRoom.name}</strong><small>{tx("سيتم ربط الدعوة بهذا الروم مباشرة", "The invite will be attached to this room.")}</small></div></div>}
         <FormField label={tx("الاسم", "Name")}><input required value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></FormField>
         <FormField label={tx("البريد الإلكتروني", "Email address")}><input type="email" required value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} /></FormField>
-        <FormField label={tx("الغرفة", "Room")}><input required value={form.room} onChange={(event) => setForm({ ...form, room: event.target.value })} /></FormField>
+        <div className="form-grid two">
+          <FormField label={tx("الدور", "Role")}><select required value={form.role} onChange={(event) => setForm({ ...form, role: event.target.value })}>{roleOptions.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select></FormField>
+          <FormField label={tx("الغرفة", "Room")}><select required value={form.room} onChange={(event) => setForm({ ...form, room: event.target.value })}>{rooms.map((room) => <option value={room.name} key={room.id}>{room.name}</option>)}</select></FormField>
+        </div>
+        <div className="invite-flow-note"><CheckCircle2 size={17} /><span>{tx("بعد الإرسال سيظهر العضو Pending لحد ما يقبل الدعوة، وبعدها يدخل الرسائل والملفات والمواعيد الخاصة بالروم.", "After sending, the member appears as Pending until they accept, then they can access this room's messages, files, and schedule.")}</span></div>
       </form>
     </Modal>
   );
