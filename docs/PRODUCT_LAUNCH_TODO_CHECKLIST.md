@@ -223,15 +223,15 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 
 ### 2.9 Manual Subscription Activation
 
-- [~] Subscription model exists.
-- [ ] Add payment proof upload or payment proof note.
-- [ ] Add subscription activation request.
-- [ ] Add super admin subscription approval page.
-- [ ] Add approve subscription action.
-- [ ] Add reject subscription action with reason.
-- [ ] Add workspace suspension/activation controls.
-- [ ] Add audit log for subscription changes.
-- [ ] Keep payment gateway out of the first public trial.
+- [x] Subscription model exists.
+- [x] Add payment proof upload or payment proof note.
+- [x] Add subscription activation request.
+- [x] Add super admin subscription approval page.
+- [x] Add approve subscription action.
+- [x] Add reject subscription action with reason.
+- [x] Add workspace suspension/activation controls.
+- [x] Add audit log for subscription changes.
+- [x] Keep payment gateway out of the first public trial.
 
 ## 3. Phase 2 - After First Pilot Feedback
 
@@ -283,12 +283,12 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 
 ### Deployment Tasks
 
-- [ ] Convert local SQLite config to production Postgres config.
-- [ ] Add production `.env` template.
-- [ ] Add CORS config for deployed frontend domain.
-- [ ] Add backend health check endpoint to hosting config.
-- [ ] Add Laravel queue strategy for free hosting.
-- [ ] Use sync queue for transactional emails if no worker is available.
+- [x] Convert local SQLite config to production Postgres config.
+- [x] Add production `.env` template.
+- [x] Add CORS config for deployed frontend domain.
+- [x] Add backend health check endpoint to hosting config.
+- [x] Add Laravel queue strategy for free hosting.
+- [x] Use sync queue for transactional emails if no worker is available.
 - [ ] Run migrations on hosted database.
 - [ ] Seed initial super admin.
 - [ ] Deploy frontend.

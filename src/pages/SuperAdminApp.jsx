@@ -1,5 +1,5 @@
 import { AlertTriangle, Building2, CreditCard, Download, MoreVertical, Plus, Shield, TrendingUp, Users } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { AccountSettings } from "../components/AccountSettings";
 import { OtpOperationsPanel } from "../components/OtpOperationsPanel";
@@ -144,7 +144,114 @@ function TenantsPage({ tenants }) {
   );
 }
 
-function SubscriptionsPage({ tenants }) {
+function SubscriptionsPage() {
+  const tx = useBilingualText();
+  const [subscriptions, setSubscriptions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [draft, setDraft] = useState({ subscription: null, action: null, note: "" });
+
+  const load = () => {
+    setLoading(true);
+    api.getPlatformSubscriptions()
+      .then(setSubscriptions)
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const closeDraft = () => setDraft({ subscription: null, action: null, note: "" });
+  const approve = async () => {
+    await api.approvePlatformSubscription(draft.subscription.id, {
+      periodMonths: draft.subscription.billingInterval === "yearly" ? 12 : 1,
+      note: draft.note || "Manual activation approved."
+    });
+    closeDraft();
+    load();
+  };
+  const reject = async () => {
+    await api.rejectPlatformSubscription(draft.subscription.id, draft.note || "Payment proof was not accepted.");
+    closeDraft();
+    load();
+  };
+  const suspend = async () => {
+    await api.suspendOrganization(draft.subscription.organization.id, draft.note || "Manual suspension from subscription review.");
+    closeDraft();
+    load();
+  };
+  const activate = async (organization) => {
+    await api.activateOrganization(organization.id);
+    load();
+  };
+
+  return (
+    <>
+      <div className="stitch-page-head">
+        <div>
+          <h1>{tx("الاشتراكات", "Subscriptions")}</h1>
+          <p>{tx("راجع طلبات التفعيل اليدوي ووافق أو ارفض أو علق مساحة العمل.", "Review manual activation requests, approve, reject, or suspend workspaces.")}</p>
+        </div>
+        <Button variant="ghost" onClick={load}><Download size={18} /> {tx("تحديث", "Refresh")}</Button>
+      </div>
+      <div className="stitch-table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>{tx("المؤسسة", "Organization")}</th>
+              <th>{tx("الخطة", "Plan")}</th>
+              <th>{tx("الحالة", "Status")}</th>
+              <th>{tx("إثبات الدفع", "Proof")}</th>
+              <th>{tx("نهاية الفترة", "Period end")}</th>
+              <th>{tx("إجراءات", "Actions")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading && <tr><td colSpan="6">{tx("جاري التحميل...", "Loading...")}</td></tr>}
+            {!loading && subscriptions.length === 0 && <tr><td colSpan="6">{tx("لا توجد اشتراكات بعد", "No subscriptions yet")}</td></tr>}
+            {!loading && subscriptions.map((subscription) => (
+              <tr key={subscription.id}>
+                <td><AvatarName initials={(subscription.organization?.name || "?").slice(0, 2).toUpperCase()} name={subscription.organization?.name || "-"} sub={subscription.organization?.status} /></td>
+                <td>{subscription.plan?.name || subscription.plan?.code || "-"}</td>
+                <td><Badge tone={subscription.status === "pending_activation" ? "warning" : subscription.status === "rejected" ? "danger" : "success"}>{subscription.status}</Badge></td>
+                <td>{subscription.paymentProofReference || subscription.activationNote || "—"}</td>
+                <td>{subscription.currentPeriodEndsAt ? new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(new Date(subscription.currentPeriodEndsAt)) : "—"}</td>
+                <td>
+                  <div className="inline-actions">
+                    <Button variant="ghost" onClick={() => setDraft({ subscription, action: "approve", note: "" })}>Approve</Button>
+                    <Button variant="ghost" onClick={() => setDraft({ subscription, action: "reject", note: "" })}>Reject</Button>
+                    {subscription.organization?.status === "suspended"
+                      ? <Button variant="ghost" onClick={() => activate(subscription.organization)}>Activate</Button>
+                      : <Button variant="ghost" onClick={() => setDraft({ subscription, action: "suspend", note: "" })}>Suspend</Button>}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <Modal
+        title={draft.action === "approve" ? "Approve subscription" : draft.action === "reject" ? "Reject subscription" : "Suspend workspace"}
+        open={Boolean(draft.subscription)}
+        onClose={closeDraft}
+        footer={<Button onClick={() => {
+          if (draft.action === "approve") return approve();
+          if (draft.action === "reject") return reject();
+          return suspend();
+        }}>Confirm</Button>}
+      >
+        <div className="form-grid">
+          <p>{draft.subscription?.organization?.name} / {draft.subscription?.plan?.name}</p>
+          <FormField label={draft.action === "reject" ? "Reason" : "Note"}>
+            <textarea value={draft.note} onChange={(event) => setDraft({ ...draft, note: event.target.value })} />
+          </FormField>
+        </div>
+      </Modal>
+    </>
+  );
+}
+
+function LegacySubscriptionsPage({ tenants }) {
   const tx = useBilingualText();
   return (
     <>

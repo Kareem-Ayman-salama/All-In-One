@@ -91,6 +91,30 @@ export const api = {
       };
     }))
     : Promise.resolve([]),
+  getPlatformSubscriptions: (filters = {}) => {
+    const query = new URLSearchParams({ perPage: "100", ...filters });
+    return endpoint(`/admin/subscriptions?${query}`, []).then(camelize);
+  },
+  requestSubscriptionActivation: (organizationId, payload) => httpClient(
+    `/admin/organizations/${organizationId}/subscriptions/request-activation`,
+    { method: "POST", body: JSON.stringify(payload) }
+  ).then(camelize),
+  approvePlatformSubscription: (subscriptionId, payload = {}) => httpClient(
+    `/admin/subscriptions/${subscriptionId}/approve`,
+    { method: "POST", body: JSON.stringify(payload) }
+  ).then(camelize),
+  rejectPlatformSubscription: (subscriptionId, reason) => httpClient(
+    `/admin/subscriptions/${subscriptionId}/reject`,
+    { method: "POST", body: JSON.stringify({ reason }) }
+  ).then(camelize),
+  suspendOrganization: (organizationId, reason) => httpClient(
+    `/admin/organizations/${organizationId}/suspend`,
+    { method: "POST", body: JSON.stringify({ reason }) }
+  ).then(camelize),
+  activateOrganization: (organizationId) => httpClient(
+    `/admin/organizations/${organizationId}/activate`,
+    { method: "POST", body: "{}" }
+  ).then(camelize),
   getNotifications: (organizationId) => endpoint(
     `/notifications?perPage=100${organizationId ? `&organizationId=${organizationId}` : ""}`,
     notifications

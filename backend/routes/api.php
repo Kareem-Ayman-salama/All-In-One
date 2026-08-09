@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AcademyProfileController;
 use App\Http\Controllers\Api\V1\AdminCategoryController;
 use App\Http\Controllers\Api\V1\AdminModerationController;
+use App\Http\Controllers\Api\V1\AdminSubscriptionController;
 use App\Http\Controllers\Api\V1\AnalyticsController;
 use App\Http\Controllers\Api\V1\AnnouncementController;
 use App\Http\Controllers\Api\V1\AttendanceController;
@@ -331,6 +332,12 @@ Route::prefix('v1')->group(function (): void {
                 Route::get('/analytics/overview', [AnalyticsController::class, 'platform']);
                 Route::get('/support', [SupportController::class, 'index']);
                 Route::middleware('platform.role:super_admin')->group(function (): void {
+                    Route::get('/subscriptions', [AdminSubscriptionController::class, 'index']);
+                    Route::post('/organizations/{organization}/subscriptions/request-activation', [AdminSubscriptionController::class, 'requestActivation']);
+                    Route::post('/subscriptions/{subscription}/approve', [AdminSubscriptionController::class, 'approve']);
+                    Route::post('/subscriptions/{subscription}/reject', [AdminSubscriptionController::class, 'reject']);
+                    Route::post('/organizations/{organization}/suspend', [AdminSubscriptionController::class, 'suspendWorkspace']);
+                    Route::post('/organizations/{organization}/activate', [AdminSubscriptionController::class, 'activateWorkspace']);
                     Route::get('/otp/status', [OtpOperationsController::class, 'status']);
                     Route::post('/otp/test', [OtpOperationsController::class, 'sendTest'])
                         ->middleware('throttle:otp-operations');
