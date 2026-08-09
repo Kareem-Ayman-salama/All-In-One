@@ -364,14 +364,43 @@ function RoomsPage({ rooms }) {
 function RoomWorkspaceModal({ room, files, members, events, onClose, onInvite, onUpload, onSchedule }) {
   const [activeTab, setActiveTab] = useState("chat");
   const [message, setMessage] = useState("");
+  const [serverMessages, setServerMessages] = useState([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
   const tx = useBilingualText();
+  const { activeOrganization } = useOrganization();
+  const { showToast } = useToast();
   const { roomMessages, sendRoomMessage } = useWorkspace();
+
+  useEffect(() => {
+    if (!room || !activeOrganization?.id) {
+      setServerMessages([]);
+      return;
+    }
+    let active = true;
+    setMessagesLoading(true);
+    api.getRoomMessages(activeOrganization.id, room.id)
+      .then((items) => {
+        if (active) setServerMessages(items);
+      })
+      .catch(() => {
+        if (active) setServerMessages([]);
+      })
+      .finally(() => {
+        if (active) setMessagesLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [activeOrganization?.id, room]);
+
   if (!room) return null;
 
   const roomFiles = files.filter((file) => file.roomId === room.id || file.room === room.name);
   const roomEvents = events.filter((event) => event.roomId === room.id || event.roomName === room.name);
   const visibleMembers = members.slice(0, Math.max(Number(room.members || 0), 3));
-  const messages = roomMessages.filter((item) => item.roomId === room.id || item.roomName === room.name);
+  const localMessages = roomMessages.filter((item) => item.roomId === room.id || item.roomName === room.name);
+  const messages = serverMessages.length ? serverMessages : localMessages;
   const tabs = [
     { id: "chat", label: tx("الرسائل", "Messages"), icon: MessageSquare, count: messages.length },
     { id: "material", label: tx("الماتريال", "Material"), icon: Paperclip, count: roomFiles.length },
@@ -379,12 +408,19 @@ function RoomWorkspaceModal({ room, files, members, events, onClose, onInvite, o
     { id: "schedule", label: tx("المواعيد", "Schedule"), icon: CalendarDays, count: roomEvents.length }
   ];
 
-  const submitMessage = (event) => {
+  const submitMessage = async (event) => {
     event.preventDefault();
     const body = message.trim();
     if (!body) return;
-    sendRoomMessage({ roomId: room.id, roomName: room.name, body });
     setMessage("");
+    try {
+      const saved = await api.sendRoomMessage(activeOrganization.id, room.id, { body });
+      setServerMessages((current) => [...current, saved]);
+      sendRoomMessage({ roomId: room.id, roomName: room.name, body, author: saved.author });
+    } catch (error) {
+      sendRoomMessage({ roomId: room.id, roomName: room.name, body });
+      showToast(error.message || tx("تم حفظ الرسالة محليًا مؤقتًا", "Message saved locally for now"), "warning");
+    }
   };
 
   return (
@@ -420,7 +456,8 @@ function RoomWorkspaceModal({ room, files, members, events, onClose, onInvite, o
         {activeTab === "chat" && (
           <article className="room-chat-panel">
             <div className="room-chat-list">
-              {messages.length === 0 && <div className="room-chat-empty"><MessageSquare size={34} /><strong>{tx("ابدأ المحادثة", "Start the conversation")}</strong><span>{tx("اكتب رسالة أو تحديث سريع لكل أعضاء الروم.", "Post a quick update for everyone in this room.")}</span></div>}
+              {messagesLoading && <div className="room-chat-empty"><MessageSquare size={34} /><strong>{tx("جاري تحميل الرسائل...", "Loading messages...")}</strong></div>}
+              {!messagesLoading && messages.length === 0 && <div className="room-chat-empty"><MessageSquare size={34} /><strong>{tx("ابدأ المحادثة", "Start the conversation")}</strong><span>{tx("اكتب رسالة أو تحديث سريع لكل أعضاء الروم.", "Post a quick update for everyone in this room.")}</span></div>}
               {messages.map((item) => (
                 <div className="room-message" key={item.id}>
                   <i>{item.author?.slice(0, 2).toUpperCase() || "AI"}</i>

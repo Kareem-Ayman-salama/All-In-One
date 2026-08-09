@@ -19,6 +19,7 @@ Legend:
 - [x] Workspaces / organizations / tenants.
 - [x] Roles and permissions.
 - [x] Rooms.
+- [x] Backend + frontend room messages.
 - [x] Courses and course batches.
 - [x] Public course marketplace endpoints.
 - [x] Demo accounts and demo marketplace seed data.
@@ -43,6 +44,7 @@ Legend:
 - [x] Add real lead capture backend endpoint instead of WhatsApp-only handoff.
 - [ ] Add screenshots from the actual dashboard to the landing page.
 - [ ] Add short demo video when the product flow is stable.
+- [ ] Add clearer landing links to marketplace, company setup, and course demo flows.
 - [ ] Run landing page user test with 3 academy/teacher prospects.
 - [ ] Update landing copy after user feedback.
 

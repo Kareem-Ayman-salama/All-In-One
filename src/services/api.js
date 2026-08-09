@@ -150,6 +150,50 @@ export const api = {
     method: "POST",
     body: JSON.stringify(payload)
   }).then(camelize),
+  getRoomMessages: (organizationId, roomId) => endpoint(
+    `${organizationPath(organizationId, `rooms/${roomId}/messages`)}?perPage=100`,
+    []
+  ).then((items) => items.map((item) => ({
+    ...item,
+    roomId: item.roomId || roomId,
+    author: item.user?.name || item.user?.email || "Member",
+    body: item.body,
+    time: item.createdAt
+      ? new Intl.DateTimeFormat(document.documentElement.lang || "en", {
+        dateStyle: "medium",
+        timeStyle: "short"
+      }).format(new Date(item.createdAt))
+      : item.time
+  }))),
+  sendRoomMessage: (organizationId, roomId, payload) => {
+    const shape = (item) => ({
+      ...item,
+      roomId: item.roomId || roomId,
+      author: item.user?.name || item.user?.email || item.author || "Member",
+      body: item.body,
+      time: item.createdAt
+        ? new Intl.DateTimeFormat(document.documentElement.lang || "en", {
+          dateStyle: "medium",
+          timeStyle: "short"
+        }).format(new Date(item.createdAt))
+        : "Just now"
+    });
+    if (shouldUseMockApi()) {
+      return delay(shape({
+        id: `message-${Date.now()}`,
+        body: payload.body,
+        user: { name: "Workspace admin" }
+      }));
+    }
+
+    return httpClient(
+      organizationPath(organizationId, `rooms/${roomId}/messages`),
+      {
+        method: "POST",
+        body: JSON.stringify(payload)
+      }
+    ).then(camelize).then(shape);
+  },
   inviteMember: (organizationId, payload) => httpClient(organizationPath(organizationId, "invitations"), {
     method: "POST",
     body: JSON.stringify(payload)

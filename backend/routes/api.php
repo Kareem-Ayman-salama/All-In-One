@@ -34,6 +34,7 @@ use App\Http\Controllers\Api\V1\PublicMarketplaceController;
 use App\Http\Controllers\Api\V1\ReportExportController;
 use App\Http\Controllers\Api\V1\RoomController;
 use App\Http\Controllers\Api\V1\RoomMembershipController;
+use App\Http\Controllers\Api\V1\RoomMessageController;
 use App\Http\Controllers\Api\V1\SessionController;
 use App\Http\Controllers\Api\V1\StudentController;
 use App\Http\Controllers\Api\V1\SupportController;
@@ -145,6 +146,10 @@ Route::prefix('v1')->group(function (): void {
                     ->middleware(['module:rooms', 'permission:rooms.update']);
                 Route::delete('/rooms/{room}/members/{roomMembership}', [RoomMembershipController::class, 'destroy'])
                     ->middleware(['module:rooms', 'permission:rooms.update']);
+                Route::get('/rooms/{room}/messages', [RoomMessageController::class, 'index'])
+                    ->middleware(['module:rooms', 'permission:rooms.view']);
+                Route::post('/rooms/{room}/messages', [RoomMessageController::class, 'store'])
+                    ->middleware(['module:rooms', 'permission:rooms.view']);
 
                 Route::get('/invitations', [InvitationController::class, 'index'])
                     ->middleware(['module:members', 'permission:members.view']);
