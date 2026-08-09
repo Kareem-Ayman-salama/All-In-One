@@ -157,11 +157,11 @@ Route::prefix('v1')->group(function (): void {
                 Route::post('/content', [ContentController::class, 'store'])
                     ->middleware(['module:content', 'permission:content.create']);
                 Route::get('/content/{content}/download', [ContentController::class, 'download'])
-                    ->middleware(['module:content', 'permission:content.view']);
+                    ->middleware(['module:content', 'permission:content.view', 'throttle:content-playback']);
                 Route::get('/content/{content}/view-session', [ContentController::class, 'viewSession'])
-                    ->middleware(['module:content', 'permission:content.view']);
+                    ->middleware(['module:content', 'permission:content.view', 'throttle:content-playback']);
                 Route::post('/content/{content}/viewer-audit', [ContentController::class, 'viewerAudit'])
-                    ->middleware(['module:content', 'permission:content.view', 'throttle:120,1']);
+                    ->middleware(['module:content', 'permission:content.view', 'throttle:content-playback']);
                 Route::delete('/content/{content}', [ContentController::class, 'destroy'])
                     ->middleware(['module:content', 'permission:content.delete']);
 

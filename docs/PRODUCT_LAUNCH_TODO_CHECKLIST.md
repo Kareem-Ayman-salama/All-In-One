@@ -78,13 +78,13 @@ Legend:
   - validates device policy
   - validates session policy
   - returns short-lived playback configuration
-- [ ] Do not allow playback by only knowing `content_id`.
+- [x] Do not allow playback by only knowing `content_id`.
 - [x] Add short-lived viewer session expiration.
 - [x] Add frontend secure video viewer.
 - [ ] Add mobile secure video viewer.
 - [x] Render YouTube embedded player without showing a raw YouTube link in UI.
 - [x] Hide or disable download actions when `download_allowed = false`.
-- [ ] Return `403 DOWNLOAD_DISABLED` from backend download endpoints.
+- [x] Return `403 DOWNLOAD_DISABLED` from backend download endpoints.
 - [x] Add friendly UI for blocked playback reasons.
 
 ### 2.3 Dynamic Watermark
@@ -121,9 +121,9 @@ Legend:
 - [x] Add warning toast when blocked action is attempted.
 - [x] Log blocked right-click attempts.
 - [x] Log blocked shortcut attempts.
-- [ ] Prevent direct backend content download when disabled.
-- [ ] Prevent unsigned content access.
-- [ ] Add rate limiting on playback/session endpoints.
+- [x] Prevent direct backend content download when disabled.
+- [x] Prevent unsigned content access.
+- [x] Add rate limiting on playback/session endpoints.
 - [ ] Add suspicious IP/device change detection.
 - [ ] Add admin alert flag for repeated blocked actions.
 

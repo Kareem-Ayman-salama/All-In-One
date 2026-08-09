@@ -93,6 +93,83 @@ class ContentSecurityTest extends TestCase
         ]);
     }
 
+    public function test_direct_content_view_requires_a_valid_signature(): void
+    {
+        Storage::fake('local');
+        [$organization, $owner, $room] = $this->workspace();
+        Sanctum::actingAs($owner);
+
+        $upload = $this->post(
+            "/api/v1/organizations/{$organization->id}/content",
+            [
+                'roomId' => $room->id,
+                'title' => 'Unsigned PDF',
+                'type' => 'pdf',
+                'file' => UploadedFile::fake()->createWithContent(
+                    'unsigned.pdf',
+                    "%PDF-1.4\n1 0 obj\n<<>>\nendobj\n%%EOF",
+                ),
+            ],
+            ['Accept' => 'application/json'],
+        );
+
+        $this->get("/api/v1/content-view/{$upload->json('data.id')}")
+            ->assertForbidden();
+    }
+
+    public function test_content_view_session_requires_same_organization_access(): void
+    {
+        Storage::fake('local');
+        [$organization, $owner, $room] = $this->workspace();
+        $otherUser = User::factory()->create();
+        $otherOrganization = Organization::query()->create([
+            'name' => 'Other Academy',
+            'slug' => 'other-academy',
+            'type' => 'academy',
+        ]);
+        $role = Role::query()
+            ->whereNull('organization_id')
+            ->where('name', 'organization_owner')
+            ->firstOrFail();
+        OrganizationMembership::query()->create([
+            'organization_id' => $otherOrganization->id,
+            'user_id' => $otherUser->id,
+            'role_id' => $role->id,
+            'status' => 'active',
+            'joined_at' => now(),
+        ]);
+        OrganizationSubscription::query()->create([
+            'organization_id' => $otherOrganization->id,
+            'plan_id' => Plan::query()->where('code', 'growth')->firstOrFail()->id,
+            'status' => 'active',
+            'billing_interval' => 'monthly',
+            'current_period_starts_at' => now(),
+            'current_period_ends_at' => now()->addMonth(),
+        ]);
+
+        Sanctum::actingAs($owner);
+        $upload = $this->post(
+            "/api/v1/organizations/{$organization->id}/content",
+            [
+                'roomId' => $room->id,
+                'title' => 'Tenant scoped PDF',
+                'type' => 'pdf',
+                'file' => UploadedFile::fake()->createWithContent(
+                    'tenant.pdf',
+                    "%PDF-1.4\n1 0 obj\n<<>>\nendobj\n%%EOF",
+                ),
+            ],
+            ['Accept' => 'application/json'],
+        );
+
+        Sanctum::actingAs($otherUser);
+        $this->getJson(
+            "/api/v1/organizations/{$otherOrganization->id}/content/{$upload->json('data.id')}/view-session",
+        )
+            ->assertNotFound()
+            ->assertJsonPath('error.code', 'RESOURCE_NOT_FOUND');
+    }
+
     public function test_youtube_content_stores_video_id_and_returns_playback_config(): void
     {
         [$organization, $owner, $room] = $this->workspace();
