@@ -87,14 +87,37 @@ class ProductionReadinessService
                 (string) config('mail.default'),
                 'a transactional mail transport',
             ),
+            'transactional_mail_credentials' => $this->check(
+                $this->mailCredentialsConfigured(),
+                $this->mailCredentialsConfigured() ? 'configured' : 'missing',
+                'configured SMTP credentials and sender',
+            ),
+            'demo_access_disabled' => $this->check(
+                config('aio.demo_access.enabled') === false,
+                config('aio.demo_access.enabled') ? 'enabled' : 'disabled',
+                'disabled',
+            ),
+            'push_notifications_configured' => $this->check(
+                $this->pushNotificationsConfigured(),
+                $this->pushNotificationsConfigured() ? 'configured' : (string) config('push.provider'),
+                'fcm with service account credentials',
+            ),
+            'backup_strategy_configured' => $this->check(
+                config('backups.enabled') === true
+                    && config('backups.disk') === 's3'
+                    && (int) config('backups.retention_days') >= 7,
+                $this->backupActual(),
+                'enabled on s3 with at least 7 days retention',
+            ),
             'production_log_level' => $this->check(
-                ! in_array(
-                    mb_strtolower((string) config('logging.channels.single.level')),
-                    ['debug'],
-                    true,
-                ),
-                (string) config('logging.channels.single.level'),
+                ! in_array($this->logLevel(), ['debug'], true),
+                $this->logLevel(),
                 'info or stricter',
+            ),
+            'server_log_stream' => $this->check(
+                $this->serverLogStreamConfigured(),
+                $this->loggingActual(),
+                'stderr/syslog/papertrail or stack including one of them',
             ),
             'redis_health_required' => $this->check(
                 config('aio.redis_required') === true,
@@ -134,5 +157,100 @@ class ProductionReadinessService
             $url === '' ? 'missing' : $url,
             'an HTTPS URL',
         );
+    }
+
+    private function backupActual(): string
+    {
+        return sprintf(
+            '%s/%s/%d days',
+            config('backups.enabled') ? 'enabled' : 'disabled',
+            (string) config('backups.disk'),
+            (int) config('backups.retention_days'),
+        );
+    }
+
+    private function loggingActual(): string
+    {
+        $channel = (string) config('logging.default');
+
+        if ($channel !== 'stack') {
+            return $channel;
+        }
+
+        return 'stack:'.implode(',', $this->stackLogChannels());
+    }
+
+    private function logLevel(): string
+    {
+        $channel = (string) config('logging.default');
+
+        if ($channel === 'stack') {
+            foreach ($this->stackLogChannels() as $stackedChannel) {
+                $level = config("logging.channels.{$stackedChannel}.level");
+
+                if (is_string($level) && $level !== '') {
+                    return mb_strtolower($level);
+                }
+            }
+        }
+
+        return mb_strtolower((string) config(
+            "logging.channels.{$channel}.level",
+            'debug',
+        ));
+    }
+
+    private function mailCredentialsConfigured(): bool
+    {
+        if (config('mail.default') !== 'smtp') {
+            return true;
+        }
+
+        return collect([
+            config('mail.mailers.smtp.host'),
+            config('mail.mailers.smtp.username'),
+            config('mail.mailers.smtp.password'),
+            config('mail.from.address'),
+        ])->every(fn (mixed $value): bool => is_string($value) && trim($value) !== '');
+    }
+
+    private function pushNotificationsConfigured(): bool
+    {
+        if (config('push.provider') !== 'fcm') {
+            return false;
+        }
+
+        $hasServiceAccount = filled(config('push.fcm.service_account_json_base64'))
+            || filled(config('push.fcm.service_account_path'));
+
+        return filled(config('push.fcm.project_id')) && $hasServiceAccount;
+    }
+
+    private function serverLogStreamConfigured(): bool
+    {
+        $channels = (string) config('logging.default') === 'stack'
+            ? $this->stackLogChannels()
+            : [(string) config('logging.default')];
+
+        return collect($channels)
+            ->intersect(['stderr', 'syslog', 'papertrail'])
+            ->isNotEmpty();
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function stackLogChannels(): array
+    {
+        $channels = config('logging.channels.stack.channels', []);
+
+        if (is_string($channels)) {
+            $channels = explode(',', $channels);
+        }
+
+        return array_values(array_filter(array_map(
+            fn (mixed $channel): string => trim((string) $channel),
+            is_array($channels) ? $channels : [],
+        )));
     }
 }

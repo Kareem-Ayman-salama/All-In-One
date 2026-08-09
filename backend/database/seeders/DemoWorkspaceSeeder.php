@@ -154,7 +154,7 @@ class DemoWorkspaceSeeder extends Seeder
         ], [
             'slug' => 'elite-academy',
             'public_name' => 'Elite Academy',
-            'public_name_ar' => 'إيليت أكاديمي',
+            'public_name_ar' => 'إليت أكاديمي',
             'description' => 'Practical technology academy for AI, data, and digital skills.',
             'description_ar' => 'أكاديمية عملية لتعلم الذكاء الاصطناعي وتحليل البيانات والمهارات الرقمية.',
             'phone' => '+201000000000',

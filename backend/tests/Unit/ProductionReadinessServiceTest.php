@@ -25,6 +25,7 @@ class ProductionReadinessServiceTest extends TestCase
             'aio.cookie_secure' => true,
             'aio.cookie_same_site' => 'lax',
             'aio.redis_required' => true,
+            'aio.demo_access.enabled' => false,
             'cors.allowed_origins' => ['https://app.aio.example'],
             'database.default' => 'pgsql',
             'cache.default' => 'redis',
@@ -32,7 +33,19 @@ class ProductionReadinessServiceTest extends TestCase
             'session.driver' => 'redis',
             'filesystems.default' => 's3',
             'mail.default' => 'smtp',
-            'logging.channels.single.level' => 'info',
+            'mail.mailers.smtp.host' => 'smtp.example.test',
+            'mail.mailers.smtp.username' => 'mailer',
+            'mail.mailers.smtp.password' => 'configured',
+            'mail.from.address' => 'noreply@aio.example',
+            'push.provider' => 'fcm',
+            'push.fcm.project_id' => 'aio-example',
+            'push.fcm.service_account_json_base64' => base64_encode('{}'),
+            'backups.enabled' => true,
+            'backups.disk' => 's3',
+            'backups.retention_days' => 14,
+            'logging.default' => 'stack',
+            'logging.channels.stack.channels' => ['stderr'],
+            'logging.channels.stderr.level' => 'info',
         ]);
 
         $service = app(ProductionReadinessService::class);
