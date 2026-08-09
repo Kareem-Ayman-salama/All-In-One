@@ -7200,16 +7200,31 @@ button.stitch-search {
 .workspace-selection-search:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, .1); }
 .workspace-selection-search svg { color: var(--muted); }
 .workspace-selection-search input { width: 100%; color: var(--text); background: transparent; border: 0; outline: 0; }
+.workspace-type-switch { width: min(760px, 100%); margin: 0 auto 16px; padding: 6px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; }
+.workspace-type-switch button { min-width: 0; min-height: 46px; padding: 8px 10px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px; color: var(--muted); background: transparent; border: 0; border-radius: 8px; font-weight: 800; cursor: pointer; }
+.workspace-type-switch button span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.workspace-type-switch button small { min-width: 24px; height: 24px; display: grid; place-items: center; color: var(--primary); background: rgba(79, 70, 229, .12); border-radius: 999px; }
+.workspace-type-switch button.active { color: var(--text); background: var(--panel-soft); box-shadow: 0 8px 20px rgba(15, 23, 42, .06); }
+.workspace-type-switch button.company.active { background: rgba(14, 116, 144, .1); }
+.workspace-type-switch button.education.active { background: rgba(124, 58, 237, .1); }
 .workspace-selection-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .workspace-selection-grid > article { display: grid; gap: 18px; padding: 20px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 10px 28px rgba(15, 23, 42, .05); transition: transform .2s ease, border-color .2s ease; }
 .workspace-selection-grid > article:hover { transform: translateY(-2px); border-color: rgba(79, 70, 229, .46); }
 .workspace-selection-grid > article.selected { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(79, 70, 229, .08); }
+.workspace-selection-grid > article.workspace-type-card.company { border-top: 4px solid #0e7490; }
+.workspace-selection-grid > article.workspace-type-card.education { border-top: 4px solid #7c3aed; }
+.workspace-type-ribbon { width: max-content; max-width: 100%; padding: 7px 10px; display: inline-flex; align-items: center; gap: 7px; color: var(--text); background: var(--panel-soft); border: 1px solid var(--border); border-radius: 999px; font-size: 12px; }
+.workspace-type-card.company .workspace-type-ribbon { color: #0e7490; background: rgba(14, 116, 144, .1); border-color: rgba(14, 116, 144, .22); }
+.workspace-type-card.education .workspace-type-ribbon { color: #7c3aed; background: rgba(124, 58, 237, .1); border-color: rgba(124, 58, 237, .22); }
 .workspace-card-head { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; }
 .workspace-card-logo { width: 48px; height: 48px; display: grid; place-items: center; color: #fff; border-radius: 8px; font-weight: 800; }
 .workspace-card-head h2, .workspace-card-head p { margin: 0; }
 .workspace-card-head h2 { font-size: 17px; }
 .workspace-card-head p { margin-top: 4px; color: var(--muted); font-size: 12px; }
 .workspace-card-head > svg { color: var(--primary); }
+.workspace-card-purpose { margin: -4px 0 0; color: var(--muted); line-height: 1.7; font-size: 12px; }
+.workspace-card-tools { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.workspace-card-tools span { padding: 6px 8px; color: var(--text); background: var(--panel-soft); border: 1px solid var(--border); border-radius: 999px; font-size: 11px; font-weight: 800; }
 .workspace-card-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .workspace-card-meta > span { display: grid; gap: 4px; padding: 11px; background: var(--panel-soft); border-radius: 8px; }
 .workspace-card-meta small { color: var(--muted); font-size: 10px; }
@@ -7247,6 +7262,7 @@ button.stitch-search {
   .workspace-selection-page { padding: 16px; }
   .workspace-selection-topbar > div > span { display: none; }
   .workspace-selection-heading { margin-top: 45px; }
+  .workspace-type-switch { grid-template-columns: 1fr; }
   .workspace-selection-grid { grid-template-columns: 1fr; }
   .workspace-selection-footer { align-items: stretch; flex-direction: column; }
   .workspace-selection-footer .btn { justify-content: center; }

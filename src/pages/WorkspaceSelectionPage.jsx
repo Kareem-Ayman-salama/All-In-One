@@ -1,4 +1,4 @@
-import { ArrowRight, Building2, CheckCircle2, LogOut, Plus, Search, ShieldCheck } from "lucide-react";
+import { ArrowRight, Building2, CheckCircle2, GraduationCap, LogOut, Plus, Search, ShieldCheck } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { Badge } from "../components/Badge";
@@ -15,6 +15,7 @@ export function WorkspaceSelectionPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [query, setQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
   const autoOpen = new URLSearchParams(location.search).get("auto") === "1";
 
   useEffect(() => {
@@ -24,10 +25,16 @@ export function WorkspaceSelectionPage() {
     }
   }, [autoOpen, loading, memberships, navigate, selectOrganization]);
 
+  const companyCount = memberships.filter((membership) => membership.organization?.type === "company").length;
+  const educationCount = memberships.filter((membership) => isEducationWorkspace(membership.organization)).length;
   const filtered = useMemo(() => memberships.filter((membership) => {
     const organization = membership.organization;
-    return `${organization.name} ${organization.nameAr} ${organization.type}`.toLowerCase().includes(query.toLowerCase());
-  }), [memberships, query]);
+    const matchesQuery = `${organization.name} ${organization.nameAr} ${organization.type}`.toLowerCase().includes(query.toLowerCase());
+    const matchesType = typeFilter === "all"
+      || (typeFilter === "company" && organization.type === "company")
+      || (typeFilter === "education" && isEducationWorkspace(organization));
+    return matchesQuery && matchesType;
+  }), [memberships, query, typeFilter]);
 
   const openWorkspace = (membership) => {
     const selected = selectOrganization(membership.organizationId);
@@ -50,6 +57,12 @@ export function WorkspaceSelectionPage() {
           <p>{tx("دورك وصلاحياتك وأدواتك تتغير تلقائيًا حسب الشركة أو الأكاديمية التي تفتحها.", "Your role, permissions, and enabled tools update automatically for each company or academy.")}</p>
         </div>
 
+        <div className="workspace-type-switch" role="tablist" aria-label={tx("فلتر نوع المساحة", "Workspace type filter")}>
+          <button className={typeFilter === "all" ? "active" : ""} type="button" onClick={() => setTypeFilter("all")}><ShieldCheck size={17} /><span>{tx("الكل", "All")}</span><small>{memberships.length}</small></button>
+          <button className={typeFilter === "company" ? "active company" : "company"} type="button" onClick={() => setTypeFilter("company")}><Building2 size={17} /><span>{tx("الشركات", "Companies")}</span><small>{companyCount}</small></button>
+          <button className={typeFilter === "education" ? "active education" : "education"} type="button" onClick={() => setTypeFilter("education")}><GraduationCap size={17} /><span>{tx("الأكاديميات والتعليم", "Academies and learning")}</span><small>{educationCount}</small></button>
+        </div>
+
         {memberships.length > 1 && <label className="workspace-selection-search"><Search size={19} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={tx("ابحث باسم الشركة أو الأكاديمية", "Search companies and academies")} /></label>}
 
         <div className="workspace-selection-grid">
@@ -57,13 +70,18 @@ export function WorkspaceSelectionPage() {
             const organization = membership.organization;
             const type = ORGANIZATION_TYPES[organization.type];
             const selected = activeOrganization?.id === organization.id;
+            const profile = workspaceProfile(organization, tx);
+            const TypeIcon = profile.icon;
             return (
-              <article className={selected ? "selected" : ""} key={organization.id}>
+              <article className={`${selected ? "selected " : ""}workspace-type-card ${profile.kind}`} key={organization.id}>
+                <div className="workspace-type-ribbon"><TypeIcon size={17} /><strong>{profile.label}</strong></div>
                 <div className="workspace-card-head">
                   <span className="workspace-card-logo" style={{ backgroundColor: organization.color }}>{organization.logo}</span>
                   <div><h2>{tx(organization.nameAr, organization.name)}</h2><p>{tx(type?.labelAr, type?.label)}</p></div>
                   {selected && <CheckCircle2 size={20} />}
                 </div>
+                <p className="workspace-card-purpose">{profile.description}</p>
+                <div className="workspace-card-tools">{profile.tools.map((tool) => <span key={tool}>{tool}</span>)}</div>
                 <div className="workspace-card-meta">
                   <span><small>{tx("دورك", "Your role")}</small><strong>{formatRole(membership.role, tx)}</strong></span>
                   <span><small>{tx("الباقة", "Plan")}</small><strong>{organization.plan}</strong></span>
@@ -93,4 +111,28 @@ function formatRole(role, tx) {
     member: "عضو"
   };
   return tx(arabic[role], ORGANIZATION_ROLES[role] || role);
+}
+
+function isEducationWorkspace(organization) {
+  return ["academy", "training_center", "educational_institution"].includes(organization?.type);
+}
+
+function workspaceProfile(organization, tx) {
+  if (organization?.type === "company") {
+    return {
+      kind: "company",
+      icon: Building2,
+      label: tx("مساحة شركة", "Company workspace"),
+      description: tx("مخصصة للموظفين والفرق: غرف، ملفات محمية، رسائل، مواعيد وصلاحيات. بدون كورسات أو دفعات.", "For employees and teams: rooms, protected files, messages, schedules, and access roles. No courses or batches."),
+      tools: [tx("موظفين", "Employees"), tx("غرف عمل", "Work rooms"), tx("ملفات محمية", "Protected files")]
+    };
+  }
+
+  return {
+    kind: "education",
+    icon: GraduationCap,
+    label: tx("مساحة تعليم", "Learning workspace"),
+    description: tx("مخصصة للأكاديميات: كورسات، دفعات، طلاب، مدرسين، حجوزات وحضور.", "For academies: courses, batches, students, instructors, bookings, and attendance."),
+    tools: [tx("كورسات", "Courses"), tx("طلاب", "Students"), tx("حجوزات", "Bookings")]
+  };
 }
