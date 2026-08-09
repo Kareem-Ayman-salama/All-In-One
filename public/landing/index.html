@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
-  <link rel="stylesheet" href="/landing/style.css?v=pricing-cards-v2">
+  <link rel="stylesheet" href="/landing/style.css?v=pricing-cards-v3">
 </head>
 <body>
   <nav class="site-nav" aria-label="التنقل الرئيسي">
@@ -259,8 +259,8 @@
             الدفع يدوي وبسيط عبر InstaPay أو Vodafone Cash أو تحويل بنكي بعد التأكيد.
           </p>
           <div class="billing-toggle" role="group" aria-label="اختيار مدة الاشتراك">
-            <button class="active" type="button" data-billing="monthly">شهري</button>
-            <button type="button" data-billing="yearly">سنوي <span>خصم 20%</span></button>
+            <button class="active" type="button" data-billing="monthly" onclick="setBillingMode('monthly')">شهري</button>
+            <button type="button" data-billing="yearly" onclick="setBillingMode('yearly')">سنوي <span>خصم 20%</span></button>
           </div>
         </div>
 
@@ -449,6 +449,6 @@
     </div>
   </div>
 
-  <script src="/landing/script.js?v=pricing-cards-v2"></script>
+  <script src="/landing/script.js?v=pricing-cards-v3"></script>
 </body>
 </html>

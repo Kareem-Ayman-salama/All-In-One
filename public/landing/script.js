@@ -68,6 +68,7 @@ function setBillingMode(mode) {
   const yearly = mode === "yearly";
   document.querySelectorAll("[data-billing]").forEach((button) => {
     button.classList.toggle("active", button.dataset.billing === mode);
+    button.setAttribute("aria-pressed", String(button.dataset.billing === mode));
   });
   document.querySelectorAll(".plan-price").forEach((price) => {
     const amount = price.querySelector("strong");
@@ -77,6 +78,8 @@ function setBillingMode(mode) {
     period.textContent = yearly ? "جنيه / سنة" : "جنيه / شهر";
   });
 }
+
+window.setBillingMode = setBillingMode;
 
 async function captureTrialLead(data) {
   const payload = Object.fromEntries(data.entries());
@@ -127,8 +130,13 @@ async function submitTrialForm(event) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  setBillingMode("monthly");
+
   document.querySelectorAll("[data-billing]").forEach((button) => {
-    button.addEventListener("click", () => setBillingMode(button.dataset.billing || "monthly"));
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      setBillingMode(button.dataset.billing || "monthly");
+    });
   });
 
   document.querySelectorAll(".overlay").forEach((overlay) => {
@@ -137,6 +145,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
+
+document.addEventListener("click", (event) => {
+  const button = event.target?.closest?.("[data-billing]");
+  if (!button) return;
+  event.preventDefault();
+  setBillingMode(button.dataset.billing || "monthly");
+}, true);
 
 document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") return;
