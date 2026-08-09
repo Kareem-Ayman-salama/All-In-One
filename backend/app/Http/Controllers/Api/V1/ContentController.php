@@ -478,7 +478,9 @@ class ContentController extends Controller
             'failed' => 'failed',
             'screenshot_warning',
             'screen_capture_started',
-            'download_blocked' => 'warning',
+            'download_blocked',
+            'right_click_blocked',
+            'shortcut_blocked' => 'warning',
             default => 'allowed',
         };
     }

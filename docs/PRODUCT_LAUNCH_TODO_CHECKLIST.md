@@ -80,12 +80,12 @@ Legend:
   - returns short-lived playback configuration
 - [ ] Do not allow playback by only knowing `content_id`.
 - [x] Add short-lived viewer session expiration.
-- [ ] Add frontend secure video viewer.
+- [x] Add frontend secure video viewer.
 - [ ] Add mobile secure video viewer.
-- [ ] Render YouTube embedded player without showing a raw YouTube link in UI.
-- [ ] Hide or disable download actions when `download_allowed = false`.
+- [x] Render YouTube embedded player without showing a raw YouTube link in UI.
+- [x] Hide or disable download actions when `download_allowed = false`.
 - [ ] Return `403 DOWNLOAD_DISABLED` from backend download endpoints.
-- [ ] Add friendly UI for blocked playback reasons.
+- [x] Add friendly UI for blocked playback reasons.
 
 ### 2.3 Dynamic Watermark
 
@@ -95,32 +95,32 @@ Legend:
 - [x] Include user ID or short user reference.
 - [x] Include date/time.
 - [x] Include short session ID.
-- [ ] Move watermark position every few seconds.
-- [ ] Keep watermark above video player.
-- [ ] Keep watermark visible during playback.
-- [ ] Make watermark hard to crop by changing position.
-- [ ] Add web implementation.
+- [x] Move watermark position every few seconds.
+- [x] Keep watermark above video player.
+- [x] Keep watermark visible during playback.
+- [x] Make watermark hard to crop by changing position.
+- [x] Add web implementation.
 - [ ] Complete mobile implementation.
 - [x] Add tests for watermark payload.
 
 ### 2.4 Anti-Leakage Controls
 
-- [ ] Disable right click on video playback pages in web.
-- [ ] Disable text selection on playback pages.
-- [ ] Disable drag/save behavior for video area and thumbnails.
-- [ ] Block common shortcuts on playback pages:
+- [x] Disable right click on video playback pages in web.
+- [x] Disable text selection on playback pages.
+- [x] Disable drag/save behavior for video area and thumbnails.
+- [x] Block common shortcuts on playback pages:
   - `Ctrl+S`
   - `Ctrl+U`
   - `Ctrl+Shift+I`
   - `F12`
   - `Ctrl+P`
-- [ ] Add CSS protections:
+- [x] Add CSS protections:
   - `user-select: none`
   - `-webkit-user-drag: none`
   - protected overlay layer
 - [ ] Add warning toast when blocked action is attempted.
-- [ ] Log blocked right-click attempts.
-- [ ] Log blocked shortcut attempts.
+- [x] Log blocked right-click attempts.
+- [x] Log blocked shortcut attempts.
 - [ ] Prevent direct backend content download when disabled.
 - [ ] Prevent unsigned content access.
 - [ ] Add rate limiting on playback/session endpoints.
@@ -320,10 +320,10 @@ Important note: browser protections are deterrents, not guaranteed protection. W
 
 - [x] Add YouTube video creation form.
 - [ ] Add video security settings form.
-- [ ] Add secure video player page.
-- [ ] Add moving watermark overlay.
-- [ ] Add right-click blocking on playback page.
-- [ ] Add shortcut blocking on playback page.
+- [x] Add secure video player page.
+- [x] Add moving watermark overlay.
+- [x] Add right-click blocking on playback page.
+- [x] Add shortcut blocking on playback page.
 - [ ] Add member devices page.
 - [ ] Add active sessions page for admins.
 - [ ] Add security logs page.

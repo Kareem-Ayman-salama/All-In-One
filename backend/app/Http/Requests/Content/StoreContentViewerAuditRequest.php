@@ -29,6 +29,8 @@ class StoreContentViewerAuditRequest extends FormRequest
                     'screen_capture_started',
                     'screen_capture_stopped',
                     'download_blocked',
+                    'right_click_blocked',
+                    'shortcut_blocked',
                     'watermark_rendered',
                 ]),
             ],

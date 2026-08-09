@@ -4429,6 +4429,105 @@ tr:last-child td { border-bottom: 0; }
   white-space: nowrap;
 }
 
+.protected-viewer-shell {
+  outline: 0;
+}
+
+.protected-viewer-shell .stitch-document-stage {
+  min-height: 520px;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+}
+
+.protected-viewer-shell iframe {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #050505;
+}
+
+.protected-viewer-blocker {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.stitch-document-stage .watermark.moving {
+  z-index: 4;
+  inset: auto;
+  display: block;
+  max-width: min(72%, 520px);
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, .68);
+  color: rgba(15, 23, 42, .72);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+  transform: none;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  mix-blend-mode: screen;
+}
+
+.stitch-document-stage .watermark.moving.top-left {
+  top: 18px;
+  left: 18px;
+}
+
+.stitch-document-stage .watermark.moving.top-right {
+  top: 18px;
+  right: 18px;
+}
+
+.stitch-document-stage .watermark.moving.center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.stitch-document-stage .watermark.moving.bottom-left {
+  bottom: 18px;
+  left: 18px;
+}
+
+.stitch-document-stage .watermark.moving.bottom-right {
+  right: 18px;
+  bottom: 18px;
+}
+
+.viewer-state {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  gap: 10px;
+  place-items: center;
+  align-content: center;
+  padding: 24px;
+  color: var(--stitch-text, var(--text));
+  text-align: center;
+  background: linear-gradient(135deg, #f8fafc, #eef2ff);
+}
+
+.viewer-state span {
+  max-width: 520px;
+  color: var(--stitch-muted, var(--muted));
+  overflow-wrap: anywhere;
+}
+
+.viewer-state.danger {
+  color: #991b1b;
+  background: #fef2f2;
+}
+
 .stitch-document-stage > strong {
   position: absolute;
   inset: auto auto 80px 80px;

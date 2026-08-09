@@ -6,6 +6,8 @@ export const CONTENT_VIEWER_EVENTS = {
   screenCaptureStarted: "screen_capture_started",
   screenCaptureStopped: "screen_capture_stopped",
   downloadBlocked: "download_blocked",
+  rightClickBlocked: "right_click_blocked",
+  shortcutBlocked: "shortcut_blocked",
   watermarkRendered: "watermark_rendered"
 };
 

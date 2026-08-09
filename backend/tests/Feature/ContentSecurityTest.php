@@ -236,6 +236,65 @@ class ContentSecurityTest extends TestCase
         ]);
     }
 
+    public function test_web_viewer_blocked_actions_are_logged(): void
+    {
+        Storage::fake('local');
+        [$organization, $owner, $room] = $this->workspace();
+        Sanctum::actingAs($owner);
+
+        $upload = $this->post(
+            "/api/v1/organizations/{$organization->id}/content",
+            [
+                'roomId' => $room->id,
+                'title' => 'Protected lesson',
+                'type' => 'pdf',
+                'file' => UploadedFile::fake()->createWithContent(
+                    'protected.pdf',
+                    "%PDF-1.4\n1 0 obj\n<<>>\nendobj\n%%EOF",
+                ),
+            ],
+            ['Accept' => 'application/json'],
+        );
+        $contentId = $upload->json('data.id');
+
+        $this->postJson(
+            "/api/v1/organizations/{$organization->id}/content/{$contentId}/viewer-audit",
+            [
+                'event' => 'right_click_blocked',
+                'viewerSessionId' => 'web-session-1',
+                'message' => 'Right click blocked in web content viewer.',
+            ],
+        )
+            ->assertCreated()
+            ->assertJsonPath('data.logged', true);
+
+        $this->postJson(
+            "/api/v1/organizations/{$organization->id}/content/{$contentId}/viewer-audit",
+            [
+                'event' => 'shortcut_blocked',
+                'viewerSessionId' => 'web-session-1',
+                'message' => 'Blocked shortcut: s',
+            ],
+        )
+            ->assertCreated()
+            ->assertJsonPath('data.logged', true);
+
+        $this->assertDatabaseHas('content_access_logs', [
+            'organization_id' => $organization->id,
+            'content_item_id' => $contentId,
+            'user_id' => $owner->id,
+            'action' => 'viewer_right_click_blocked',
+            'result' => 'warning',
+        ]);
+        $this->assertDatabaseHas('content_access_logs', [
+            'organization_id' => $organization->id,
+            'content_item_id' => $contentId,
+            'user_id' => $owner->id,
+            'action' => 'viewer_shortcut_blocked',
+            'result' => 'warning',
+        ]);
+    }
+
     public function test_html_disguised_as_pdf_is_rejected(): void
     {
         [$organization, $owner, $room] = $this->workspace();
