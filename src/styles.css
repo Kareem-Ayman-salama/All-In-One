@@ -2625,6 +2625,23 @@ tr:last-child td { border-bottom: 0; }
   border-bottom: 0;
   justify-content: flex-start;
 }
+
+.modal:has(.room-workspace-modal) {
+  width: min(1120px, calc(100vw - 32px));
+  max-height: min(860px, calc(100vh - 28px));
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+}
+
+.modal:has(.room-workspace-modal) .modal-body {
+  min-height: 0;
+  overflow: auto;
+  padding: 18px;
+  background:
+    radial-gradient(circle at top left, rgba(79, 70, 229, .08), transparent 28%),
+    var(--stitch-soft, #f8fafc);
+}
 .toast-stack {
   position: fixed;
   left: 18px;
@@ -5715,6 +5732,7 @@ body.content-protection-active * {
 
 .room-workspace-modal {
   gap: 16px;
+  max-width: 100%;
 }
 
 .room-workspace-hero {
@@ -5723,7 +5741,7 @@ body.content-protection-active * {
   gap: 18px;
   padding: 16px;
   border: 1px solid var(--stitch-border, var(--border));
-  border-radius: 12px;
+  border-radius: 14px;
   background: linear-gradient(135deg, rgba(79, 70, 229, .08), rgba(14, 165, 233, .08));
 }
 
@@ -5755,7 +5773,7 @@ body.content-protection-active * {
   gap: 8px;
   padding: 6px;
   border: 1px solid var(--stitch-border, var(--border));
-  border-radius: 10px;
+  border-radius: 14px;
   background: var(--stitch-soft, var(--panel-soft));
 }
 
@@ -5793,26 +5811,30 @@ body.content-protection-active * {
 
 .room-chat-panel,
 .room-section-panel {
-  min-height: 310px;
+  min-height: 500px;
   border: 1px solid var(--stitch-border, var(--border));
-  border-radius: 12px;
+  border-radius: 16px;
   background: var(--stitch-surface, var(--panel));
-  padding: 14px;
+  padding: 16px;
 }
 
 .room-chat-panel {
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
   gap: 12px;
+  background:
+    linear-gradient(180deg, rgba(79, 70, 229, .04), rgba(14, 165, 233, .04)),
+    var(--stitch-surface, var(--panel));
 }
 
 .room-chat-list {
-  min-height: 210px;
-  max-height: 320px;
+  min-height: 390px;
+  max-height: 520px;
   overflow: auto;
   display: grid;
   align-content: start;
-  gap: 10px;
+  gap: 12px;
+  padding: 4px;
 }
 
 .room-chat-empty {
@@ -5833,6 +5855,23 @@ body.content-protection-active * {
   grid-template-columns: 38px minmax(0, 1fr);
   gap: 10px;
   align-items: start;
+  max-width: 76%;
+}
+
+.room-message:nth-child(even) {
+  margin-inline-start: auto;
+  grid-template-columns: minmax(0, 1fr) 38px;
+}
+
+.room-message:nth-child(even) > i {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.room-message:nth-child(even) > div {
+  grid-column: 1;
+  grid-row: 1;
+  background: rgba(79, 70, 229, .11);
 }
 
 .room-message > i {
@@ -5850,8 +5889,8 @@ body.content-protection-active * {
 
 .room-message > div {
   min-width: 0;
-  padding: 10px 12px;
-  border-radius: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
   background: var(--stitch-soft, var(--panel-soft));
 }
 
@@ -5875,10 +5914,10 @@ body.content-protection-active * {
 .room-message-box input {
   min-width: 0;
   flex: 1;
-  min-height: 44px;
+  min-height: 50px;
   border: 1px solid var(--stitch-border, var(--border));
-  border-radius: 8px;
-  padding: 0 12px;
+  border-radius: 999px;
+  padding: 0 16px;
   background: var(--stitch-surface, var(--panel));
   color: var(--stitch-text, var(--text));
 }
@@ -5891,10 +5930,10 @@ body.content-protection-active * {
 
 .room-section-panel .room-detail-row {
   grid-template-columns: auto minmax(0, 1fr) auto;
-  min-height: 54px;
-  padding: 10px 12px;
+  min-height: 68px;
+  padding: 12px 14px;
   border: 1px solid var(--stitch-border, var(--border));
-  border-radius: 10px;
+  border-radius: 14px;
   background: var(--stitch-soft, var(--panel-soft));
 }
 
@@ -5982,6 +6021,15 @@ body.content-protection-active * {
 }
 
 @media (max-width: 720px) {
+  .modal:has(.room-workspace-modal) {
+    width: calc(100vw - 14px);
+    max-height: calc(100vh - 14px);
+  }
+
+  .modal:has(.room-workspace-modal) .modal-body {
+    padding: 12px;
+  }
+
   .room-workspace-tabs {
     grid-template-columns: 1fr 1fr;
   }
@@ -5997,6 +6045,22 @@ body.content-protection-active * {
   .room-workspace-actions .btn {
     flex: 1 1 100%;
     justify-content: center;
+  }
+
+  .room-chat-panel,
+  .room-section-panel {
+    min-height: 430px;
+    padding: 12px;
+  }
+
+  .room-chat-list {
+    min-height: 300px;
+    max-height: 48vh;
+  }
+
+  .room-message,
+  .room-message:nth-child(even) {
+    max-width: 92%;
   }
 
   .room-workspace-footer,

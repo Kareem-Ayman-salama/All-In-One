@@ -27,7 +27,7 @@ export function DetailPanel({ open, title, subtitle, meta = [], actions = [], ac
           </div>
           <div className="detail-activity">
             <h3>Activity</h3>
-            {(activity.length ? activity : ["Created in AIO workspace", "Permissions checked", "Ready for backend action"]).map((item) => (
+            {(activity.length ? activity : ["Created in AIN workspace", "Permissions checked", "Ready for backend action"]).map((item) => (
               <div className="timeline-row" key={item}>
                 <span className="timeline-dot" />
                 <strong>{item}</strong>

@@ -34,7 +34,7 @@ export function ProductVisual() {
     <div className="product-visual" aria-hidden="true">
       <div className="product-card card-a">
         <Sparkles size={18} />
-        <strong>AIO OS</strong>
+        <strong>AIN OS</strong>
         <span>Rooms, files, members</span>
       </div>
       <div className="product-card card-b">

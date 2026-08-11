@@ -41,10 +41,11 @@ export function AuthLayout({ children, compact = false }) {
       </div>
 
       <footer className="auth-footer">
-        <span>© 2026 AIO SaaS. {t.shell.footerRights}</span>
+        <span>© 2026 AIN. {t.shell.footerRights}</span>
         <nav aria-label="Legal">
           <a href="/privacy">{t.shell.privacy}</a>
           <a href="/terms">{t.shell.terms}</a>
+          <a href="/refund">{language === "ar" ? "سياسة الاسترجاع" : "Refund policy"}</a>
           <a href="/support">{t.shell.support}</a>
         </nav>
       </footer>

@@ -58,7 +58,7 @@ export function AccountSettings({ user, workspaceLabel = "Workspace" }) {
     { id: "appearance", label: t.settings.appearance, icon: Palette }
   ];
 
-  const initials = useMemo(() => (profile.name || user.email || "AIO").split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase(), [profile.name, user.email]);
+  const initials = useMemo(() => (profile.name || user.email || "AIN").split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase(), [profile.name, user.email]);
 
   const changeAvatar = (event) => {
     const file = event.target.files?.[0];

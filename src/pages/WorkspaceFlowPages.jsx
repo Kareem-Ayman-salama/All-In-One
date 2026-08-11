@@ -277,7 +277,7 @@ export function InviteAcceptPage() {
         organization: { name: "Demo workspace" },
         role: "member",
         rooms: [],
-        inviter: { name: "AIO Demo" },
+        inviter: { name: "AIN Demo" },
         status: "pending"
       });
       return () => { active = false; };
@@ -316,7 +316,7 @@ export function InviteAcceptPage() {
   return (
     <AuthLayout compact>
       <div className="auth-panel-card invite-pro-card">
-        <AuthHeader icon={<UserPlus size={23} />} title={copy.invitation} subtitle={invitation.note || `${invitation.inviter?.name || "AIO"} ${copy.invitation}`} />
+        <AuthHeader icon={<UserPlus size={23} />} title={copy.invitation} subtitle={invitation.note || `${invitation.inviter?.name || "AIN"} ${copy.invitation}`} />
         <div className="invite-company-mark"><span>{invitation.organization?.name?.slice(0, 2).toUpperCase() || "AI"}</span><div><strong>{invitation.organization?.name}</strong><small>{invitation.status}</small></div></div>
         <div className="invite-details-pro">
           <div><span>{copy.role}</span><strong>{invitation.role}</strong></div>
@@ -346,14 +346,17 @@ export function LegalPage({ type }) {
   const { language } = useLanguage();
   const content = {
     privacy: language === "ar"
-      ? ["سياسة الخصوصية", "نحمي بيانات الحساب ومساحة العمل، ولا نستخدمها إلا لتقديم الخدمة وتأمينها. عند ربط الباك اند ستوضح هذه الصفحة فترات الاحتفاظ بالبيانات وحقوق المستخدم بالتفصيل."]
-      : ["Privacy policy", "We protect account and workspace data and only use it to deliver and secure the service. The production policy will detail retention periods and user rights when the backend is connected."],
+      ? ["سياسة الخصوصية", "تحمي AIN بيانات الحسابات ومساحات العمل ولا تستخدمها إلا لتقديم الخدمة وتأمينها وتشغيل الدعوات والصلاحيات والتقارير. لا نبيع بيانات العملاء، ويتم تقييد الوصول الداخلي حسب الحاجة التشغيلية."]
+      : ["Privacy policy", "AIN protects account and workspace data and only uses it to deliver, secure, and operate invitations, permissions, and reporting. We do not sell customer data, and internal access is limited to operational need."],
     terms: language === "ar"
-      ? ["شروط الخدمة", "باستخدام AIO، يوافق المستخدم على الالتزام بصلاحيات مساحة العمل وسياسات حماية المحتوى وعدم محاولة تجاوز قيود الوصول."]
-      : ["Terms of service", "By using AIO, users agree to follow workspace permissions, content protection policies, and access restrictions."],
+      ? ["شروط الخدمة", "باستخدام AIN، يوافق المستخدم على الالتزام بصلاحيات مساحة العمل وسياسات حماية المحتوى، وعدم مشاركة الحسابات أو محاولة تجاوز قيود الوصول أو تحميل محتوى غير مصرح به."]
+      : ["Terms of service", "By using AIN, users agree to follow workspace permissions and content protection rules, and not to share accounts, bypass access controls, or upload unauthorized content."],
+    refund: language === "ar"
+      ? ["سياسة الاسترجاع والإلغاء", "أول شهر مجاني بدون كارت دفع ولا يوجد تجديد تلقائي. بعد التفعيل اليدوي، يمكن إلغاء الاشتراك قبل بداية الدورة التالية، وتتم مراجعة طلبات الاسترجاع حسب حالة التفعيل والاستخدام الفعلي للخدمة."]
+      : ["Refund and cancellation policy", "The first month is free with no card and no automatic renewal. After manual activation, subscriptions can be cancelled before the next cycle, and refund requests are reviewed based on activation state and actual service usage."],
     support: language === "ar"
-      ? ["الدعم الفني", "للمساعدة في الحساب أو الدعوات أو الوصول إلى المحتوى، تواصل مع مسؤول مساحة عملك أو فريق دعم AIO."]
-      : ["Support", "For help with your account, invitations, or content access, contact your workspace admin or the AIO support team."]
+      ? ["الدعم الفني", "للمساعدة في الحساب أو الدعوات أو الوصول إلى المحتوى، تواصل مع مسؤول مساحة عملك أو فريق دعم AIN عبر واتساب أو البريد المسجل لديك."]
+      : ["Support", "For help with your account, invitations, or content access, contact your workspace admin or AIN support through WhatsApp or your registered email."]
   }[type];
 
   return (

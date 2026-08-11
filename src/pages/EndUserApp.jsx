@@ -103,7 +103,7 @@ function ProtectedFiles({ data, user }) {
           <span>{tx("تقرير الميزانية السنوي.pdf", "annual-budget-report.pdf")}</span>
         </div>
         <div className="stitch-document-stage">
-          <div className="watermark">{user.email} / AIO / 192.168.1.42</div>
+          <div className="watermark">{user.email} / AIN / 192.168.1.42</div>
           <div className="doc-line short" />
           <div className="doc-line" />
           <div className="doc-line mid" />
@@ -144,7 +144,7 @@ function ProtectedFilesSecure({ data, user }) {
   const [protectionFlash, setProtectionFlash] = useState(false);
   const selectedFile = data.files.find((file) => file.id === selectedFileId) || data.files[0];
   const watermarkPositions = ["top-left", "top-right", "center", "bottom-left", "bottom-right"];
-  const watermarkText = session?.watermark?.text || `${user.email} / AIO`;
+  const watermarkText = session?.watermark?.text || `${user.email} / AIN`;
 
   useEffect(() => {
     if (!activeOrganization?.id || !selectedFile?.id) {

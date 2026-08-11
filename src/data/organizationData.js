@@ -28,8 +28,8 @@ export const organizations = [
   {
     id: "org-language-center",
     slug: "language-center",
-    name: "AIO Language Center",
-    nameAr: "مركز AIO للغات",
+    name: "AIN Language Center",
+    nameAr: "مركز AIN للغات",
     type: "training_center",
     plan: "Starter",
     subscriptionStatus: "trial",

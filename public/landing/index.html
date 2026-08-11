@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
-  <link rel="stylesheet" href="/landing/style.css?v=mobile-cards-v4">
+  <link rel="stylesheet" href="/landing/style.css?v=trust-room-v5">
 </head>
 <body>
   <nav class="site-nav" aria-label="التنقل الرئيسي">
@@ -62,6 +62,33 @@
           <span><i class="ti ti-circle-check"></i> بدون كارت دفع — InstaPay أو Vodafone Cash بعد التأكيد</span>
           <span><i class="ti ti-circle-check"></i> مساحات شركات وأكاديميات منفصلة</span>
           <span><i class="ti ti-circle-check"></i> Watermark وتتبع مشاهدة</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="product-demo-strip" aria-label="شكل لوحة التحكم">
+      <div class="wrap demo-shell">
+        <div class="demo-copy">
+          <p class="section-kicker">شوف المنتج</p>
+          <h2>لوحة تحكم واضحة للشركة أو الأكاديمية من أول يوم.</h2>
+          <p>أرقام، غرف، أعضاء، ملفات، حجوزات، ومتابعة نشاط في شاشة واحدة بدل ما العميل يقرأ وعود بس.</p>
+          <div class="demo-actions">
+            <a class="primary-button" href="/login">شاهد Demo تفاعلي</a>
+            <button class="secondary-light-button" type="button" onclick="scrollToId('paths')">اختار مسارك</button>
+          </div>
+        </div>
+        <div class="dashboard-mockup" role="img" aria-label="AIN dashboard preview">
+          <header><span>AIN Dashboard</span><strong>Today</strong></header>
+          <div class="mockup-stats">
+            <span><strong>124</strong> طالب / موظف</span>
+            <span><strong>8</strong> كورسات</span>
+            <span><strong>92%</strong> حضور</span>
+            <span><strong>347</strong> مشاهدة</span>
+          </div>
+          <div class="mockup-body">
+            <div><b>الغرف النشطة</b><i style="width:88%"></i><i style="width:64%"></i><i style="width:72%"></i></div>
+            <div><b>آخر النشاط</b><p>تم رفع ملف جديد</p><p>رسالة جديدة في غرفة Growth</p><p>حجز جديد قيد التأكيد</p></div>
+          </div>
         </div>
       </div>
     </section>
@@ -370,18 +397,23 @@
     <div class="wrap footer-grid">
       <div>
         <div class="footer-brand"><img src="/images/ain-logo.png" alt=""> AIN</div>
-        <p>منصة للكورسات المحمية، مبنية لتشغيل الأكاديميات والمدرسين بتكلفة قليلة وتجربة استخدام واضحة.</p>
+        <p>AIN منصة لإدارة الشركات والأكاديميات والمحتوى، تجمع الأعضاء والملفات والكورسات والصلاحيات والمتابعة في مكان واحد.</p>
       </div>
       <div>
         <h3>المنصة</h3>
         <a href="#how">إزاي بتشتغل</a>
+        <a href="#paths">اختار مسارك</a>
         <a href="#protection">الحماية</a>
         <a href="#pricing">الشهر المجاني</a>
       </div>
       <div>
-        <h3>تجربة</h3>
+        <h3>الثقة والدعم</h3>
         <a href="/courses">استكشف الكورسات</a>
         <a href="/login">تسجيل الدخول</a>
+        <a href="/privacy">سياسة الخصوصية</a>
+        <a href="/terms">الشروط</a>
+        <a href="/refund">الاسترجاع والإلغاء</a>
+        <a href="/support">الدعم</a>
         <button type="button" onclick="openLeadModal('trial-modal')">اطلب Demo</button>
       </div>
     </div>
@@ -393,7 +425,7 @@
         <div>
           <p class="section-kicker">تجربة شهر مجاني</p>
           <h2 id="trial-title">احجز تجربة على AIN</h2>
-          <p>املأ البيانات، وهنجهز رسالة WhatsApp منظمة للمتابعة.</p>
+          <p>املأ البيانات، وهنجهز رسالة WhatsApp منظمة حسب نوع استخدامك: شركة أو أكاديمية.</p>
         </div>
         <button class="icon-button" type="button" onclick="closeLeadModal('trial-modal')" aria-label="إغلاق">
           <i class="ti ti-x"></i>
@@ -413,33 +445,33 @@
           <input name="email" type="email" required autocomplete="email" dir="ltr" placeholder="you@example.com">
         </label>
         <label>
-          اسم الأكاديمية أو المركز
-          <input name="organization" required autocomplete="organization" placeholder="مثال: Elite Academy">
+          اسم الشركة أو الأكاديمية
+          <input name="organization" required autocomplete="organization" placeholder="مثال: Elite Academy أو ACME Company">
         </label>
         <label>
           نوع النشاط
           <select name="type" required>
             <option value="">اختر النوع</option>
+            <option>شركة أو فريق داخلي</option>
             <option>أكاديمية تدريب</option>
             <option>مدرس مستقل</option>
             <option>مركز لغات</option>
             <option>مدرسة أو مركز تعليمي</option>
-            <option>شركة تدريب</option>
           </select>
         </label>
         <label>
-          عدد الطلاب المتوقع في التجربة
+          حجم التجربة
           <select name="students" required>
             <option value="">اختر العدد</option>
-            <option>أقل من 20</option>
-            <option>20 - 50</option>
-            <option>50 - 100</option>
-            <option>أكثر من 100</option>
+            <option>أقل من 20 عضو أو طالب</option>
+            <option>20 - 50 عضو أو طالب</option>
+            <option>50 - 100 عضو أو طالب</option>
+            <option>أكثر من 100 عضو أو طالب</option>
           </select>
         </label>
         <label class="wide">
-          إيه المحتوى اللي عايز تحميه؟
-          <textarea name="content" required placeholder="مثال: كورس برمجة، كورس لغة، فيديوهات مراجعة، ملفات PDF"></textarea>
+          محتاج تنظم إيه على AIN؟
+          <textarea name="content" required placeholder="مثال: موظفين وغرف عمل وملفات، أو كورسات وطلاب وفيديوهات وPDF"></textarea>
         </label>
         <button class="primary-button wide" type="submit">
           <i class="ti ti-brand-whatsapp"></i>
@@ -449,6 +481,6 @@
     </div>
   </div>
 
-  <script src="/landing/script.js?v=mobile-cards-v4"></script>
+  <script src="/landing/script.js?v=trust-room-v5"></script>
 </body>
 </html>

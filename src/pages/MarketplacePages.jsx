@@ -38,7 +38,7 @@ export function MarketplaceShell({ children }) {
   const { theme, toggleTheme } = useTheme();
   return <div className="marketplace-shell" dir={direction}>
     <header className="marketplace-nav">
-      <Link className="marketplace-brand" to="/courses"><img src="/images/aio-logo-64.png" alt="" /><strong>All In One</strong></Link>
+      <Link className="marketplace-brand" to="/courses"><img src="/images/aio-logo-64.png" alt="" /><strong>AIN</strong></Link>
       <button className="marketplace-menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label={copy("فتح القائمة", "Open menu")}><Menu /></button>
       <nav className={menuOpen ? "open" : ""}>
         <Link to="/courses">{copy("استكشف الكورسات", "Explore courses")}</Link><Link to="/academies">{copy("الأكاديميات", "Academies")}</Link><Link to="/register-company">{copy("للأكاديميات والشركات", "For organizations")}</Link><Link to="/login">{copy("تسجيل الدخول", "Sign in")}</Link>
@@ -47,7 +47,7 @@ export function MarketplaceShell({ children }) {
       <Button as={Link} to="/register-company">{copy("ابدأ كأكاديمية", "Start as an academy")}</Button>
     </header>
     {children}
-    <footer className="marketplace-footer"><div><strong>AIO</strong><p>{copy("منصة واحدة للتعلم وإدارة المحتوى والحجوزات ومساحات العمل.", "One platform for learning, content, bookings, and workspaces.")}</p></div><div><Link to="/courses">{copy("الكورسات", "Courses")}</Link><Link to="/academies">{copy("الأكاديميات", "Academies")}</Link><Link to="/privacy">{copy("الخصوصية", "Privacy")}</Link><Link to="/support">{copy("الدعم", "Support")}</Link></div><small>© 2026 All In One. {copy("جميع الحقوق محفوظة.", "All rights reserved.")}</small></footer>
+    <footer className="marketplace-footer"><div><strong>AIN</strong><p>{copy("منصة واحدة للتعلم وإدارة المحتوى والحجوزات ومساحات العمل.", "One platform for learning, content, bookings, and workspaces.")}</p></div><div><Link to="/courses">{copy("الكورسات", "Courses")}</Link><Link to="/academies">{copy("الأكاديميات", "Academies")}</Link><Link to="/privacy">{copy("الخصوصية", "Privacy")}</Link><Link to="/refund">{copy("الاسترجاع", "Refund")}</Link><Link to="/support">{copy("الدعم", "Support")}</Link></div><small>© 2026 AIN. {copy("جميع الحقوق محفوظة.", "All rights reserved.")}</small></footer>
   </div>;
 }
 
@@ -74,7 +74,7 @@ export function CoursesMarketplacePage() {
   const [params, setParams] = useSearchParams();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const { isArabic, copy } = useMarketI18n();
-  useMarketplaceSeo(copy("الكورسات | All In One", "Courses | All In One"), copy("ابحث عن كورسات ومدرسين وأكاديميات واحجز دفعتك على منصة AIO.", "Discover courses, instructors, and academies and reserve your batch on AIO."));
+  useMarketplaceSeo(copy("الكورسات | AIN", "Courses | AIN"), copy("ابحث عن كورسات ومدرسين وأكاديميات واحجز دفعتك على منصة AIN.", "Discover courses, instructors, and academies and reserve your batch on AIN."));
   const query = params.get("q") || "";
   const category = params.get("category") || "all";
   const delivery = params.get("delivery") || "all";
@@ -113,7 +113,7 @@ export function CourseDetailsPage() {
   const instructor = instructors.find((item) => item.id === course.instructorId);
   const category = categories.find((item) => item.id === course.categoryId);
   const courseBatches = batches.filter((item) => item.courseId === course.id && item.status === "open");
-  useMarketplaceSeo(`${nameOf(course, isArabic)} | AIO`, isArabic ? course.shortDescriptionAr : course.shortDescription);
+  useMarketplaceSeo(`${nameOf(course, isArabic)} | AIN`, isArabic ? course.shortDescriptionAr : course.shortDescription);
   return <MarketplaceShell><main className="course-detail-main">
     <div className="market-breadcrumbs"><Link to="/courses">{copy("الكورسات", "Courses")}</Link><span>/</span><span>{nameOf(category, isArabic)}</span><span>/</span><strong>{nameOf(course, isArabic)}</strong></div>
     <section className="course-detail-hero"><div><Badge tone="primary">{nameOf(category, isArabic)}</Badge><h1>{nameOf(course, isArabic)}</h1><p>{isArabic ? course.shortDescriptionAr : course.shortDescription}</p><div className="course-detail-owner"><span style={{ background: academy?.color }}>{academy?.initials}</span><div><strong>{nameOf(academy, isArabic)} {academy?.verified && <BadgeCheck />}</strong><small>{copy("بواسطة", "By")} {nameOf(instructor, isArabic)}</small></div></div><div className="course-detail-facts"><span><Clock3 />{course.duration}</span><span><BookOpen />{course.sessions} {copy("حصة", "sessions")}</span><span><MonitorPlay />{course.deliveryType}</span></div></div><div className="course-visual">{course.coverUrl ? <img src={course.coverUrl} alt="" /> : <GraduationCap />}</div></section>
@@ -127,9 +127,9 @@ export function AcademiesPage() {
   const { academies, courses } = useMarketplace();
   const [query, setQuery] = useState("");
   const { isArabic, copy } = useMarketI18n();
-  useMarketplaceSeo(copy("الأكاديميات | AIO", "Academies | AIO"), copy("اكتشف الأكاديميات الموثقة والكورسات المتاحة.", "Discover verified academies and their available courses."));
+  useMarketplaceSeo(copy("الأكاديميات | AIN", "Academies | AIN"), copy("اكتشف الأكاديميات الموثقة والكورسات المتاحة.", "Discover verified academies and their available courses."));
   const visible = academies.filter((item) => item.public && item.status === "approved" && nameOf(item, isArabic).toLowerCase().includes(query.toLowerCase()));
-  return <MarketplaceShell><main className="marketplace-main"><section className="marketplace-simple-hero"><Building2 /><div><h1>{copy("الأكاديميات على AIO", "Academies on AIO")}</h1><p>{copy("تصفح الأكاديميات الموثوقة وشاهد كورساتها ودفعاتها المتاحة.", "Browse verified academies, courses, and available batches.")}</p></div><label><Search /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={copy("ابحث باسم الأكاديمية", "Search academies")} /></label></section><section className="academy-public-grid">{visible.map((academy) => <article key={academy.id}><header><span style={{ background: academy.color }}>{academy.initials}</span><div><h2>{nameOf(academy, isArabic)} {academy.verified && <BadgeCheck />}</h2><p><MapPin />{academy.location}</p></div></header><p>{isArabic ? academy.descriptionAr : academy.description}</p><div>{academy.deliveryMethods.map((item) => <Badge key={item} tone="neutral">{item}</Badge>)}</div><footer><span>{courses.filter((course) => course.academyId === academy.id && course.status === "published").length} {copy("كورسات منشورة", "published courses")}</span><Button as={Link} to={`/academies/${academy.slug}`}>{copy("عرض الأكاديمية", "View academy")}</Button></footer></article>)}</section></main></MarketplaceShell>;
+  return <MarketplaceShell><main className="marketplace-main"><section className="marketplace-simple-hero"><Building2 /><div><h1>{copy("الأكاديميات على AIN", "Academies on AIN")}</h1><p>{copy("تصفح الأكاديميات الموثوقة وشاهد كورساتها ودفعاتها المتاحة.", "Browse verified academies, courses, and available batches.")}</p></div><label><Search /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={copy("ابحث باسم الأكاديمية", "Search academies")} /></label></section><section className="academy-public-grid">{visible.map((academy) => <article key={academy.id}><header><span style={{ background: academy.color }}>{academy.initials}</span><div><h2>{nameOf(academy, isArabic)} {academy.verified && <BadgeCheck />}</h2><p><MapPin />{academy.location}</p></div></header><p>{isArabic ? academy.descriptionAr : academy.description}</p><div>{academy.deliveryMethods.map((item) => <Badge key={item} tone="neutral">{item}</Badge>)}</div><footer><span>{courses.filter((course) => course.academyId === academy.id && course.status === "published").length} {copy("كورسات منشورة", "published courses")}</span><Button as={Link} to={`/academies/${academy.slug}`}>{copy("عرض الأكاديمية", "View academy")}</Button></footer></article>)}</section></main></MarketplaceShell>;
 }
 
 export function AcademyProfilePage() {
@@ -140,7 +140,7 @@ export function AcademyProfilePage() {
   const { isArabic, copy } = useMarketI18n();
   const academyCourses = courses.filter((item) => item.academyId === academy.id && item.status === "published");
   const academyInstructors = instructors.filter((item) => item.organizationId === academy.organizationId && item.active);
-  useMarketplaceSeo(`${nameOf(academy, isArabic)} | AIO`, isArabic ? academy.descriptionAr : academy.description);
+  useMarketplaceSeo(`${nameOf(academy, isArabic)} | AIN`, isArabic ? academy.descriptionAr : academy.description);
   return <MarketplaceShell><main className="academy-profile-main"><section className="academy-profile-cover"><div className="academy-profile-logo" style={{ background: academy.color }}>{academy.initials}</div><div><Badge tone="success">{academy.verified ? copy("أكاديمية موثقة", "Verified academy") : copy("قيد التحقق", "Verification pending")}</Badge><h1>{nameOf(academy, isArabic)}</h1><p>{isArabic ? academy.descriptionAr : academy.description}</p><span><MapPin />{academy.location}</span></div></section><nav className="academy-profile-stats"><span><strong>{academyCourses.length}</strong> {copy("كورسات", "courses")}</span><span><strong>{academyInstructors.length}</strong> {copy("مدرسين", "instructors")}</span><span><strong>{academy.branches.length || 1}</strong> {copy("فرع / أونلاين", "branches / online")}</span></nav><section className="academy-profile-section"><h2>{copy("الكورسات المتاحة", "Available courses")}</h2><div className="market-course-grid">{academyCourses.map((course) => <CourseCard course={course} key={course.id} />)}</div></section><section className="academy-profile-section"><h2>{copy("المدرسون", "Instructors")}</h2><div className="instructors-public-grid">{academyInstructors.map((item) => <article key={item.id}><span>{item.initials}</span><h3>{nameOf(item, isArabic)}</h3><strong>{item.specialty}</strong><p>{item.bio}</p></article>)}</div></section></main></MarketplaceShell>;
 }
 
@@ -157,7 +157,7 @@ export function PublicBookingPage() {
   if (!course) return <Navigate to="/courses" replace />;
   const { isArabic, copy } = useMarketI18n();
   const academy = academies.find((item) => item.id === course.academyId);
-  useMarketplaceSeo(copy("إتمام الحجز | AIO", "Complete booking | AIO"), copy("اختر الدفعة وأرسل طلب حجزك للأكاديمية.", "Select a batch and send your booking request."));
+  useMarketplaceSeo(copy("إتمام الحجز | AIN", "Complete booking | AIN"), copy("اختر الدفعة وأرسل طلب حجزك للأكاديمية.", "Select a batch and send your booking request."));
   const submit = async (event) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);

@@ -3,8 +3,8 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 const translations = {
   ar: {
     common: {
-      appName: "All In One",
-      shortName: "AIO",
+      appName: "AIN",
+      shortName: "AIN",
       save: "حفظ التغييرات",
       cancel: "إلغاء",
       loading: "جاري التحميل...",
@@ -172,8 +172,8 @@ const translations = {
   },
   en: {
     common: {
-      appName: "All In One",
-      shortName: "AIO",
+      appName: "AIN",
+      shortName: "AIN",
       save: "Save changes",
       cancel: "Cancel",
       loading: "Loading...",
@@ -211,7 +211,7 @@ const translations = {
       signingIn: "Signing in...",
       remember: "Remember me on this device",
       forgot: "Forgot password?",
-      noAccount: "New to AIO?",
+      noAccount: "New to AIN?",
       createAccount: "Create an account",
       createTitle: "Start with your personal account",
       createSubtitle: "Create a secure account, then join your company through an invitation sent to the same email.",

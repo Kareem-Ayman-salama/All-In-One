@@ -1,7 +1,7 @@
 export const roles = [
   { id: "end-user", label: "End User", subtitle: "Employee workspace access", company: "TechCorp Egypt" },
   { id: "tenant-admin", label: "Tenant Admin", subtitle: "Company workspace owner", company: "TechCorp Egypt" },
-  { id: "super-admin", label: "Super Admin", subtitle: "AIO platform operator", company: "All In One (AIO)" }
+  { id: "super-admin", label: "Super Admin", subtitle: "AIN platform operator", company: "AIN" }
 ];
 
 export const rooms = [

@@ -82,7 +82,7 @@ export function AppLayout({ appTitle, user, nav, children }) {
   const accountRef = useRef(null);
   const workspaceRef = useRef(null);
   const navigate = useNavigate();
-  const workspaceName = activeOrganization?.name || user.company || "AIO SaaS";
+  const workspaceName = activeOrganization?.name || user.company || "AIN";
   const rolePath = user.role === "super-admin" ? "/super-admin" : user.role === "tenant-admin" ? "/tenant-admin" : "/end-user";
   const unreadCount = notifications.filter((item) => item.unread && item.target?.startsWith(rolePath)).length;
 
@@ -130,7 +130,7 @@ export function AppLayout({ appTitle, user, nav, children }) {
       <aside className={`stitch-sidebar ${mobileOpen ? "mobile-open" : ""}`}>
         <div className="stitch-brand">
           <div className="stitch-brand-icon"><img src="/images/aio-logo-64.png" alt="" /></div>
-          <div><strong>AIO SaaS</strong><span>{workspaceName}</span></div>
+          <div><strong>AIN</strong><span>{workspaceName}</span></div>
           <button className="stitch-sidebar-close" type="button" onClick={() => setMobileOpen(false)} aria-label={t.shell.closeMenu}><X size={20} /></button>
         </div>
 
@@ -184,7 +184,7 @@ export function AppLayout({ appTitle, user, nav, children }) {
         </header>
 
         <div className="stitch-content">{children}</div>
-        <footer className="stitch-footer"><div><strong>AIO SaaS</strong><span>© 2026 AIO SaaS Solutions. {t.shell.footerRights}</span></div><nav><a href="/privacy">{t.shell.privacy}</a><a href="/terms">{t.shell.terms}</a><a href="/support">{t.shell.support}</a></nav></footer>
+        <footer className="stitch-footer"><div><strong>AIN</strong><span>© 2026 AIN. {t.shell.footerRights}</span></div><nav><a href="/privacy">{t.shell.privacy}</a><a href="/terms">{t.shell.terms}</a><a href="/refund">{language === "ar" ? "سياسة الاسترجاع" : "Refund policy"}</a><a href="/support">{t.shell.support}</a></nav></footer>
       </main>
 
       <SearchCommandOverlay open={searchOpen} onClose={() => setSearchOpen(false)} user={user} onHelp={() => setHelpOpen(true)} />

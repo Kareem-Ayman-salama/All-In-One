@@ -13,7 +13,7 @@ const mockAccounts = {
     name: "Platform Admin",
     role: "super-admin",
     roleLabel: "Super Admin",
-    company: "All In One (AIO)",
+    company: "AIN",
     tenantId: null,
     permissions: ["manage_platform", "manage_tenants", "manage_billing"]
   },

@@ -47,7 +47,7 @@ export function WorkspaceSelectionPage() {
     <main className="workspace-selection-page">
       <section className="workspace-selection-shell">
         <header className="workspace-selection-topbar">
-          <Link className="workspace-selection-brand" to="/"><img src="/images/aio-logo-64.png" alt="" /><strong>AIO</strong></Link>
+          <Link className="workspace-selection-brand" to="/"><img src="/images/aio-logo-64.png" alt="" /><strong>AIN</strong></Link>
           <div><span>{user.email}</span><button type="button" onClick={() => { logout(); navigate("/login", { replace: true }); }}><LogOut size={17} /> {tx("تسجيل الخروج", "Sign out")}</button></div>
         </header>
 

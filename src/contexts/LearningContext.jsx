@@ -68,7 +68,7 @@ export function LearningProvider({ children }) {
     if (duplicate) return { duplicate: true };
     const booking = addEntity("bookings", "booking", {
       studentId: user?.id || user?.email,
-      studentName: user?.name || "AIO learner",
+      studentName: user?.name || "AIN learner",
       email: user?.email,
       phone: "",
       status: "pending_confirmation",

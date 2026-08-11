@@ -187,7 +187,7 @@ export function HelpCenterDrawer({ open, onClose }) {
   const tx = useBilingualText();
   const [query, setQuery] = useState("");
   const topics = [
-    [tx("بدء استخدام AIO", "Getting started with AIO"), tx("إعداد الحساب ومساحة العمل والدعوات", "Account, workspace, and invitations")],
+    [tx("بدء استخدام AIN", "Getting started with AIN"), tx("إعداد الحساب ومساحة العمل والدعوات", "Account, workspace, and invitations")],
     [tx("الغرف والمواعيد", "Rooms and scheduling"), tx("إنشاء غرفة وربط موعدها بالتقويم", "Create a room and add its calendar event")],
     [tx("الأمان والصلاحيات", "Security and permissions"), tx("الأدوار والأجهزة والوصول للملفات", "Roles, devices, and file access")],
     [tx("الاشتراك والفواتير", "Subscription and billing"), tx("الاستخدام والحدود والفواتير", "Usage, limits, and invoices")]
@@ -224,7 +224,7 @@ export function OnboardingChecklist({ user }) {
   return (
     <section className="onboarding-card">
       <div className="onboarding-progress"><svg viewBox="0 0 42 42"><circle cx="21" cy="21" r="17" /><circle cx="21" cy="21" r="17" style={{ strokeDashoffset: 107 - (107 * progress / 100) }} /></svg><strong>{progress}%</strong></div>
-      <div className="onboarding-copy"><span><Sparkles size={16} /> {tx("إعداد مساحة العمل", "Workspace setup")}</span><h2>{tx("خطوات قليلة لتجربة أفضل", "A few steps to get the most from AIO")}</h2><p>{tx(`${completed} من ${items.length} خطوات مكتملة`, `${completed} of ${items.length} steps completed`)}</p></div>
+      <div className="onboarding-copy"><span><Sparkles size={16} /> {tx("إعداد مساحة العمل", "Workspace setup")}</span><h2>{tx("خطوات قليلة لتجربة أفضل", "A few steps to get the most from AIN")}</h2><p>{tx(`${completed} من ${items.length} خطوات مكتملة`, `${completed} of ${items.length} steps completed`)}</p></div>
       <div className="onboarding-steps">{items.map((item) => <a className={item.done ? "done" : ""} href={item.target} key={item.title}>{item.done ? <CheckCircle2 size={18} /> : <span />}{item.title}</a>)}</div>
       {progress === 100 && <button className="onboarding-dismiss" type="button" onClick={() => { window.localStorage.setItem("ain-onboarding-dismissed", "1"); setDismissed(true); }}><X size={18} /></button>}
     </section>

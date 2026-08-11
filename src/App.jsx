@@ -45,6 +45,8 @@ export function App() {
       <Route path="/workspace" element={<LandingRedirect />} />
       <Route path="/choose" element={<LandingRedirect />} />
       <Route path="/" element={<MarketingLandingRedirect />} />
+      <Route path="/business" element={<MarketingAnchorRedirect anchor="paths" />} />
+      <Route path="/academy" element={<MarketingAnchorRedirect anchor="paths" />} />
       <Route path="/register-company" element={<RegisterCompanyPage />} />
       <Route path="/company-onboarding" element={<CompanyOnboardingPage />} />
       <Route path="/join" element={<JoinWorkspacePage />} />
@@ -52,6 +54,7 @@ export function App() {
       <Route path="/invite/:token" element={<InviteAcceptPage />} />
       <Route path="/privacy" element={<LegalPage type="privacy" />} />
       <Route path="/terms" element={<LegalPage type="terms" />} />
+      <Route path="/refund" element={<LegalPage type="refund" />} />
       <Route path="/support" element={<LegalPage type="support" />} />
       <Route path="/courses" element={<CoursesMarketplacePage />} />
       <Route path="/courses/:courseSlug" element={<CourseDetailsPage />} />
@@ -87,6 +90,11 @@ function LandingRedirect() {
 
 function MarketingLandingRedirect() {
   window.location.replace("/landing/index.html");
+  return <Loading />;
+}
+
+function MarketingAnchorRedirect({ anchor }) {
+  window.location.replace(`/landing/index.html#${anchor}`);
   return <Loading />;
 }
 

@@ -110,10 +110,10 @@ async function submitTrialForm(event) {
     `الاسم: ${value(data, "name")}`,
     `الهاتف / WhatsApp: ${value(data, "phone")}`,
     `البريد الإلكتروني: ${value(data, "email")}`,
-    `اسم الأكاديمية / المركز: ${value(data, "organization")}`,
+    `اسم الشركة / الأكاديمية: ${value(data, "organization")}`,
     `نوع النشاط: ${value(data, "type")}`,
-    `عدد الطلاب المتوقع: ${value(data, "students")}`,
-    `المحتوى المطلوب حمايته: ${value(data, "content")}`,
+    `حجم التجربة: ${value(data, "students")}`,
+    `المطلوب تنظيمه على AIN: ${value(data, "content")}`,
   ].join("\n");
 
   submit?.setAttribute("disabled", "disabled");

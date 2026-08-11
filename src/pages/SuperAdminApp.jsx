@@ -37,7 +37,7 @@ const nav = [
 export function SuperAdminApp({ data, user }) {
   const { page = "dashboard" } = useParams();
   const tx = useBilingualText();
-  const appUser = { ...user, roleLabel: tx("مدير المنصة", "Super Admin"), company: "AIO SaaS Workspace" };
+  const appUser = { ...user, roleLabel: tx("مدير المنصة", "Super Admin"), company: "AIN Workspace" };
 
   if (!nav.some((item) => item.id === page)) {
     return <Navigate to="/super-admin/dashboard" replace />;
