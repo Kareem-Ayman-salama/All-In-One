@@ -1193,12 +1193,54 @@ h2 {
   .answer-list,
   .steps,
   .use-cases,
+  .lead-form {
+    grid-template-columns: 1fr;
+  }
+
+  .answer-list,
   .audience-grid,
   .audience-secondary,
   .protection-grid,
-  .plans-grid,
-  .lead-form {
-    grid-template-columns: 1fr;
+  .plans-grid {
+    display: flex;
+    grid-template-columns: none;
+    gap: 16px;
+    margin-inline: -14px;
+    padding-inline: 14px;
+    padding-bottom: 12px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .answer-list::-webkit-scrollbar,
+  .audience-grid::-webkit-scrollbar,
+  .audience-secondary::-webkit-scrollbar,
+  .protection-grid::-webkit-scrollbar,
+  .plans-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .answer-list > *,
+  .audience-grid > *,
+  .audience-secondary > *,
+  .protection-grid > *,
+  .plans-grid > * {
+    min-width: 84vw;
+    scroll-snap-align: center;
+  }
+
+  .answer-list {
+    margin-top: 18px;
+  }
+
+  .protection-grid article {
+    min-height: 250px;
+  }
+
+  .audience-secondary a {
+    align-items: flex-start;
   }
 
   .path-shell {
@@ -1236,19 +1278,7 @@ h2 {
   }
 
   .plans-grid {
-    display: flex;
-    grid-template-columns: none;
-    gap: 16px;
     margin: 34px -14px 0;
-    padding: 0 14px 12px;
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-  }
-
-  .plans-grid::-webkit-scrollbar {
-    display: none;
   }
 
   .plan-card {
