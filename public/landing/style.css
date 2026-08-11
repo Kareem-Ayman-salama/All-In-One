@@ -429,6 +429,134 @@ h2 {
 }
 
 .answer-list div,
+.audience-card,
+.steps article,
+.use-cases article,
+.protection-grid article,
+.plan-card,
+.dashboard-mockup,
+.mockup-stats span,
+.mockup-body > div,
+.faq-list details {
+  --mx: 50%;
+  --my: 50%;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition:
+    transform .22s ease,
+    border-color .22s ease,
+    box-shadow .22s ease,
+    background .22s ease;
+}
+
+.answer-list div::before,
+.audience-card::before,
+.steps article::before,
+.use-cases article::before,
+.protection-grid article::before,
+.plan-card::before,
+.dashboard-mockup::before,
+.mockup-stats span::before,
+.mockup-body > div::before,
+.faq-list details::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  opacity: 0;
+  background:
+    radial-gradient(circle at var(--mx) var(--my), rgba(83, 70, 229, .20), transparent 34%),
+    linear-gradient(135deg, rgba(4, 166, 194, .10), transparent 42%);
+  transition: opacity .22s ease;
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .answer-list div:hover,
+  .audience-card:hover,
+  .steps article:hover,
+  .use-cases article:hover,
+  .protection-grid article:hover,
+  .plan-card:hover,
+  .dashboard-mockup:hover,
+  .mockup-stats span:hover,
+  .mockup-body > div:hover,
+  .faq-list details:hover {
+    transform: translateY(-7px);
+    border-color: rgba(83, 70, 229, .38);
+    box-shadow: 0 24px 58px rgba(15, 23, 42, .14);
+  }
+
+  .answer-list div:hover::before,
+  .audience-card:hover::before,
+  .steps article:hover::before,
+  .use-cases article:hover::before,
+  .protection-grid article:hover::before,
+  .plan-card:hover::before,
+  .dashboard-mockup:hover::before,
+  .mockup-stats span:hover::before,
+  .mockup-body > div:hover::before,
+  .faq-list details:hover::before {
+    opacity: 1;
+  }
+
+  .audience-card:hover .audience-card-head i,
+  .protection-grid article:hover i,
+  .use-cases article:hover i {
+    transform: translateY(-4px) scale(1.06) rotate(-3deg);
+  }
+
+  .answer-list div:hover strong,
+  .steps article:hover span {
+    transform: scale(1.08);
+  }
+
+  .plan-card:hover .plan-price strong,
+  .mockup-stats span:hover strong {
+    transform: translateY(-2px) scale(1.03);
+  }
+
+  .plan-card:hover .primary-button,
+  .plan-card:hover .secondary-button,
+  .audience-card:hover .primary-button {
+    box-shadow: 0 16px 34px rgba(83, 70, 229, .22);
+  }
+}
+
+.audience-card-head i,
+.protection-grid i,
+.use-cases i,
+.answer-list strong,
+.steps span,
+.plan-price strong,
+.mockup-stats strong {
+  transition: transform .22s ease, box-shadow .22s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .answer-list div,
+  .audience-card,
+  .steps article,
+  .use-cases article,
+  .protection-grid article,
+  .plan-card,
+  .dashboard-mockup,
+  .mockup-stats span,
+  .mockup-body > div,
+  .faq-list details,
+  .audience-card-head i,
+  .protection-grid i,
+  .use-cases i,
+  .answer-list strong,
+  .steps span,
+  .plan-price strong,
+  .mockup-stats strong {
+    transition: none;
+  }
+}
+
+.answer-list div,
 .steps article,
 .use-cases article,
 .protection-grid article,
@@ -903,7 +1031,7 @@ h2 {
 }
 
 .plan-card.featured::before {
-  content: none;
+  content: "";
 }
 
 .plan-ribbon {

@@ -81,6 +81,32 @@ function setBillingMode(mode) {
 
 window.setBillingMode = setBillingMode;
 
+function installCardSpotlight() {
+  if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+  const selectors = [
+    ".answer-list div",
+    ".audience-card",
+    ".steps article",
+    ".use-cases article",
+    ".protection-grid article",
+    ".plan-card",
+    ".dashboard-mockup",
+    ".mockup-stats span",
+    ".mockup-body > div",
+    ".faq-list details",
+  ].join(",");
+
+  document.querySelectorAll(selectors).forEach((card) => {
+    card.addEventListener("pointermove", (event) => {
+      const rect = card.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * 100;
+      const y = ((event.clientY - rect.top) / rect.height) * 100;
+      card.style.setProperty("--mx", `${x.toFixed(1)}%`);
+      card.style.setProperty("--my", `${y.toFixed(1)}%`);
+    });
+  });
+}
+
 async function captureTrialLead(data) {
   const payload = Object.fromEntries(data.entries());
   const response = await fetch(`${AIN_CONTACT.apiBaseUrl}/public/trial-leads`, {
@@ -131,6 +157,7 @@ async function submitTrialForm(event) {
 
 document.addEventListener("DOMContentLoaded", () => {
   setBillingMode("monthly");
+  installCardSpotlight();
 
   document.querySelectorAll("[data-billing]").forEach((button) => {
     button.addEventListener("click", (event) => {
