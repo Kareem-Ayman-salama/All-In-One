@@ -18,7 +18,7 @@ Root Directory: /backend
 The service reads `backend/railway.json`. For the first server test, configure:
 
 ```text
-APP_NAME=AIO API
+APP_NAME=AIN API
 APP_ENV=production
 APP_KEY=base64:GENERATE_A_REAL_KEY
 APP_DEBUG=false

@@ -1,0 +1,570 @@
+{
+  "info": {
+    "_postman_id": "8d3a2990-0d21-4af5-8bb4-ain-api-flow",
+    "name": "AIN API - Full Review Flow",
+    "description": "Postman collection for the AIN Laravel backend review flow. Set base_url, then run Auth Login and the collection will store token/user/organization IDs when responses include them.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "https://YOUR-BACKEND.up.railway.app/api/v1", "type": "string" },
+    { "key": "frontend_url", "value": "https://YOUR-FRONTEND.up.railway.app", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "refresh_token", "value": "", "type": "string" },
+    { "key": "user_id", "value": "", "type": "string" },
+    { "key": "organization_id", "value": "", "type": "string" },
+    { "key": "room_id", "value": "", "type": "string" },
+    { "key": "room_membership_id", "value": "", "type": "string" },
+    { "key": "content_id", "value": "", "type": "string" },
+    { "key": "course_id", "value": "", "type": "string" },
+    { "key": "batch_id", "value": "", "type": "string" },
+    { "key": "booking_id", "value": "", "type": "string" },
+    { "key": "academy_id", "value": "", "type": "string" },
+    { "key": "subscription_id", "value": "", "type": "string" },
+    { "key": "invitation_token", "value": "", "type": "string" },
+    { "key": "notification_id", "value": "", "type": "string" },
+    { "key": "device_id", "value": "", "type": "string" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{token}}", "type": "string" }
+    ]
+  },
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "let json = {};",
+          "try { json = pm.response.json(); } catch (e) {}",
+          "const data = json.data || json;",
+          "function setIf(key, value) { if (value !== undefined && value !== null && String(value).length) pm.collectionVariables.set(key, String(value)); }",
+          "setIf('token', data.token || data.accessToken || data.access_token);",
+          "setIf('refresh_token', data.refreshToken || data.refresh_token);",
+          "setIf('user_id', data.user?.id || data.id);",
+          "const firstWorkspace = Array.isArray(data.workspaces) ? data.workspaces[0] : null;",
+          "const firstOrg = firstWorkspace?.organization || (Array.isArray(data.organizations) ? data.organizations[0] : null);",
+          "setIf('organization_id', data.organization?.id || data.organizationId || firstOrg?.id);",
+          "const list = Array.isArray(data) ? data : (Array.isArray(data.items) ? data.items : null);",
+          "if (list && list[0]) {",
+          "  const item = list[0];",
+          "  if (pm.request.url.toString().includes('/rooms')) setIf('room_id', item.id);",
+          "  if (pm.request.url.toString().includes('/content')) setIf('content_id', item.id);",
+          "  if (pm.request.url.toString().includes('/courses')) setIf('course_id', item.id);",
+          "  if (pm.request.url.toString().includes('/batches')) setIf('batch_id', item.id);",
+          "  if (pm.request.url.toString().includes('/bookings')) setIf('booking_id', item.id);",
+          "  if (pm.request.url.toString().includes('/academies')) setIf('academy_id', item.id);",
+          "  if (pm.request.url.toString().includes('/notifications')) setIf('notification_id', item.id);",
+          "  if (pm.request.url.toString().includes('/member-devices') || pm.request.url.toString().includes('/devices')) setIf('device_id', item.id);",
+          "}",
+          "setIf('room_id', data.room?.id || data.roomId || data.id);",
+          "setIf('room_membership_id', data.roomMembership?.id || data.membership?.id);",
+          "setIf('content_id', data.content?.id || data.contentId);",
+          "setIf('course_id', data.course?.id || data.courseId);",
+          "setIf('batch_id', data.batch?.id || data.batchId);",
+          "setIf('booking_id', data.booking?.id || data.bookingId);",
+          "pm.test('Response is not 500', function () { pm.expect(pm.response.code).to.be.below(500); });"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "00 Health and Metadata",
+      "item": [
+        {
+          "name": "Live health",
+          "request": { "method": "GET", "url": "{{base_url}}/health/live" }
+        },
+        {
+          "name": "Ready health",
+          "request": { "method": "GET", "url": "{{base_url}}/health/ready" }
+        },
+        {
+          "name": "OTP health",
+          "request": { "method": "GET", "url": "{{base_url}}/health/otp" }
+        },
+        {
+          "name": "Error catalog",
+          "request": { "method": "GET", "url": "{{base_url}}/meta/error-catalog" }
+        },
+        {
+          "name": "Deep links",
+          "request": { "method": "GET", "url": "{{base_url}}/meta/deep-links" }
+        },
+        {
+          "name": "Device policy",
+          "request": { "method": "GET", "url": "{{base_url}}/meta/device-policy" }
+        }
+      ]
+    },
+    {
+      "name": "01 Public Marketplace and Leads",
+      "auth": { "type": "noauth" },
+      "item": [
+        {
+          "name": "List public courses",
+          "request": { "method": "GET", "url": "{{base_url}}/public/courses" }
+        },
+        {
+          "name": "Get public course",
+          "request": { "method": "GET", "url": "{{base_url}}/public/courses/{{course_id}}" }
+        },
+        {
+          "name": "List academies",
+          "request": { "method": "GET", "url": "{{base_url}}/public/academies" }
+        },
+        {
+          "name": "Get academy",
+          "request": { "method": "GET", "url": "{{base_url}}/public/academies/{{academy_id}}" }
+        },
+        {
+          "name": "List categories",
+          "request": { "method": "GET", "url": "{{base_url}}/public/categories" }
+        },
+        {
+          "name": "Trial lead",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/public/trial-leads",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Backend Reviewer\",\n  \"phone\": \"+201000000000\",\n  \"email\": \"reviewer@example.com\",\n  \"organization\": \"AIN Review Company\",\n  \"type\": \"شركة أو فريق داخلي\",\n  \"students\": \"20 - 50 عضو أو طالب\",\n  \"content\": \"Rooms, files, messages, courses and protected video review\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Support ticket",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/support",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Backend Reviewer\",\n  \"email\": \"reviewer@example.com\",\n  \"subject\": \"API review access\",\n  \"message\": \"Please review auth, tenant isolation, room messages, content and payments flow.\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 Auth Flow",
+      "auth": { "type": "noauth" },
+      "item": [
+        {
+          "name": "Register account",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Backend Reviewer\",\n  \"email\": \"reviewer+ain@example.com\",\n  \"password\": \"Password12345\",\n  \"password_confirmation\": \"Password12345\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Verify email",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/auth/verify-email",
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"reviewer+ain@example.com\",\n  \"code\": \"123456\"\n}" }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@ain.local\",\n  \"password\": \"Password12345\",\n  \"deviceName\": \"Postman Review\",\n  \"deviceFingerprint\": \"postman-review-device\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Refresh token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/auth/refresh",
+            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}" }
+          }
+        },
+        {
+          "name": "Forgot password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/auth/forgot-password",
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"reviewer+ain@example.com\"\n}" }
+          }
+        },
+        {
+          "name": "Reset password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/auth/reset-password",
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"reviewer+ain@example.com\",\n  \"code\": \"123456\",\n  \"password\": \"Password12345\",\n  \"password_confirmation\": \"Password12345\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 Authenticated Account",
+      "item": [
+        {
+          "name": "Me",
+          "request": { "method": "GET", "url": "{{base_url}}/auth/me" }
+        },
+        {
+          "name": "Update profile",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/auth/me",
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Backend Reviewer Updated\"\n}" }
+          }
+        },
+        {
+          "name": "List sessions",
+          "request": { "method": "GET", "url": "{{base_url}}/auth/sessions" }
+        },
+        {
+          "name": "Logout",
+          "request": { "method": "POST", "url": "{{base_url}}/auth/logout" }
+        }
+      ]
+    },
+    {
+      "name": "04 Workspaces and Organization",
+      "item": [
+        {
+          "name": "List workspaces",
+          "request": { "method": "GET", "url": "{{base_url}}/workspaces" }
+        },
+        {
+          "name": "Create organization",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/organizations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"AIN Review Workspace\",\n  \"nameAr\": \"مساحة مراجعة AIN\",\n  \"type\": \"company\",\n  \"plan\": \"Company Starter\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Organization context",
+          "request": { "method": "GET", "url": "{{base_url}}/organizations/{{organization_id}}/context" }
+        },
+        {
+          "name": "Update organization",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/organizations/{{organization_id}}",
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"AIN Review Workspace Updated\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 Rooms, Members, Messages",
+      "item": [
+        {
+          "name": "List rooms",
+          "request": { "method": "GET", "url": "{{base_url}}/organizations/{{organization_id}}/rooms" }
+        },
+        {
+          "name": "Create room",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/organizations/{{organization_id}}/rooms",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Growth Review Room\",\n  \"description\": \"Room for messages, files, material and schedule review.\",\n  \"status\": \"active\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get room",
+          "request": { "method": "GET", "url": "{{base_url}}/organizations/{{organization_id}}/rooms/{{room_id}}" }
+        },
+        {
+          "name": "Update room",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/organizations/{{organization_id}}/rooms/{{room_id}}",
+            "body": { "mode": "raw", "raw": "{\n  \"description\": \"Updated room description from Postman.\"\n}" }
+          }
+        },
+        {
+          "name": "List room members",
+          "request": { "method": "GET", "url": "{{base_url}}/organizations/{{organization_id}}/rooms/{{room_id}}/members" }
+        },
+        {
+          "name": "Add room member",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/organizations/{{organization_id}}/rooms/{{room_id}}/members",
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"member@example.com\",\n  \"role\": \"member\"\n}" }
+          }
+        },
+        {
+          "name": "List room messages",
+          "request": { "method": "GET", "url": "{{base_url}}/organizations/{{organization_id}}/rooms/{{room_id}}/messages" }
+        },
+        {
+          "name": "Send room message",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/organizations/{{organization_id}}/rooms/{{room_id}}/messages",
+            "body": { "mode": "raw", "raw": "{\n  \"body\": \"Hello from Postman. This tests the room chat endpoint.\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 Invitations and Memberships",
+      "item": [
+        {
+          "name": "List invitations",
+          "request": { "method": "GET", "url": "{{base_url}}/organizations/{{organization_id}}/invitations" }
+        },
+        {
+          "name": "Create invitation",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/organizations/{{organization_id}}/invitations",
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"invitee@example.com\",\n  \"role\": \"member\",\n  \"roomId\": \"{{room_id}}\"\n}" }
+          }
+        },
+        {
+          "name": "Preview public invitation",
+          "auth": { "type": "noauth" },
+          "request": { "method": "GET", "url": "{{base_url}}/public/invitations/{{invitation_token}}" }
+        },
+        {
+          "name": "Accept invitation",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/invitations/accept",
+            "body": { "mode": "raw", "raw": "{\n  \"token\": \"{{invitation_token}}\"\n}" }
+          }
+        },
+        {
+          "name": "List members",
+          "request": { "method": "GET", "url": "{{base_url}}/organizations/{{organization_id}}/members" }
+        }
+      ]
+    },
+    {
+      "name": "07 Content, Files, Playback",
+      "item": [
+        {
+          "name": "List content",
+          "request": { "method": "GET", "url": "{{base_url}}/organizations/{{organization_id}}/content" }
+        },
+        {
+          "name": "Create content item",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/organizations/{{organization_id}}/content",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Review PDF Material\",\n  \"type\": \"file\",\n  \"roomId\": \"{{room_id}}\",\n  \"url\": \"https://example.com/review.pdf\",\n  \"protected\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Download content",
+          "request": { "method": "GET", "url": "{{base_url}}/organizations/{{organization_id}}/content/{{content_id}}/download" }
+        },
+        {
+          "name": "View session",
+          "request": { "method": "GET", "url": "{{base_url}}/organizations/{{organization_id}}/content/{{content_id}}/view-session" }
+        },
+        {
+          "name": "Viewer audit",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/organizations/{{organization_id}}/content/{{content_id}}/viewer-audit",
+            "body": { "mode": "raw", "raw": "{\n  \"event\": \"play\",\n  \"progress\": 12,\n  \"metadata\": { \"source\": \"postman\" }\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 Academy, Courses, Batches",
+      "item": [
+        {
+          "name": "Get academy profile",
+          "request": { "method": "GET", "url": "{{base_url}}/organizations/{{organization_id}}/academy-profile" }
+        },
+        {
+          "name": "Upsert academy profile",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/organizations/{{organization_id}}/academy-profile",
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"AIN Review Academy\",\n  \"nameAr\": \"أكاديمية مراجعة AIN\",\n  \"description\": \"Review academy profile\",\n  \"descriptionAr\": \"ملف أكاديمية للمراجعة\",\n  \"location\": \"Cairo\",\n  \"phone\": \"+201000000000\",\n  \"email\": \"academy@example.com\"\n}" }
+          }
+        },
+        {
+          "name": "List courses",
+          "request": { "method": "GET", "url": "{{base_url}}/organizations/{{organization_id}}/courses" }
+        },
+        {
+          "name": "Create course",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/organizations/{{organization_id}}/courses",
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Review Course\",\n  \"titleAr\": \"كورس مراجعة\",\n  \"description\": \"Course created from Postman\",\n  \"descriptionAr\": \"كورس تم إنشاؤه من بوستمان\",\n  \"price\": 699,\n  \"status\": \"draft\"\n}" }
+          }
+        },
+        {
+          "name": "Submit course for review",
+          "request": { "method": "POST", "url": "{{base_url}}/organizations/{{organization_id}}/courses/{{course_id}}/submit-review" }
+        },
+        {
+          "name": "List batches",
+          "request": { "method": "GET", "url": "{{base_url}}/organizations/{{organization_id}}/batches" }
+        },
+        {
+          "name": "Create batch",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/organizations/{{organization_id}}/batches",
+            "body": { "mode": "raw", "raw": "{\n  \"courseId\": \"{{course_id}}\",\n  \"title\": \"Review Batch\",\n  \"capacity\": 20,\n  \"startDate\": \"2026-09-01\",\n  \"endDate\": \"2026-10-01\",\n  \"roomId\": \"{{room_id}}\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 Bookings and Attendance",
+      "item": [
+        {
+          "name": "Reserve booking",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/public/bookings",
+            "body": { "mode": "raw", "raw": "{\n  \"courseId\": \"{{course_id}}\",\n  \"batchId\": \"{{batch_id}}\",\n  \"studentName\": \"Review Student\",\n  \"email\": \"student@example.com\",\n  \"phone\": \"+201000000001\"\n}" }
+          }
+        },
+        {
+          "name": "Organization bookings",
+          "request": { "method": "GET", "url": "{{base_url}}/organizations/{{organization_id}}/bookings" }
+        },
+        {
+          "name": "Confirm booking",
+          "request": { "method": "POST", "url": "{{base_url}}/organizations/{{organization_id}}/bookings/{{booking_id}}/confirm" }
+        },
+        {
+          "name": "Student bookings",
+          "request": { "method": "GET", "url": "{{base_url}}/student/bookings" }
+        },
+        {
+          "name": "Student enrollments",
+          "request": { "method": "GET", "url": "{{base_url}}/student/enrollments" }
+        },
+        {
+          "name": "Learning sessions",
+          "request": { "method": "GET", "url": "{{base_url}}/organizations/{{organization_id}}/learning-sessions" }
+        },
+        {
+          "name": "Student attendance",
+          "request": { "method": "GET", "url": "{{base_url}}/student/attendance" }
+        }
+      ]
+    },
+    {
+      "name": "10 Notifications, Devices, Privacy",
+      "item": [
+        {
+          "name": "List notifications",
+          "request": { "method": "GET", "url": "{{base_url}}/notifications" }
+        },
+        {
+          "name": "Mark all notifications read",
+          "request": { "method": "POST", "url": "{{base_url}}/notifications/read-all" }
+        },
+        {
+          "name": "Notification preferences",
+          "request": { "method": "GET", "url": "{{base_url}}/notification-preferences" }
+        },
+        {
+          "name": "Register push token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/devices/push-tokens",
+            "body": { "mode": "raw", "raw": "{\n  \"token\": \"fake-fcm-token-postman\",\n  \"platform\": \"android\",\n  \"deviceId\": \"postman-review-device\"\n}" }
+          }
+        },
+        {
+          "name": "Member devices",
+          "request": { "method": "GET", "url": "{{base_url}}/organizations/{{organization_id}}/member-devices" }
+        },
+        {
+          "name": "Privacy export",
+          "request": { "method": "GET", "url": "{{base_url}}/privacy/export" }
+        },
+        {
+          "name": "Request account deletion",
+          "request": { "method": "POST", "url": "{{base_url}}/privacy/deletion" }
+        }
+      ]
+    },
+    {
+      "name": "11 Admin Review",
+      "item": [
+        {
+          "name": "Admin organizations",
+          "request": { "method": "GET", "url": "{{base_url}}/admin/organizations" }
+        },
+        {
+          "name": "Admin academies",
+          "request": { "method": "GET", "url": "{{base_url}}/admin/academies" }
+        },
+        {
+          "name": "Admin courses",
+          "request": { "method": "GET", "url": "{{base_url}}/admin/courses" }
+        },
+        {
+          "name": "Approve course",
+          "request": { "method": "POST", "url": "{{base_url}}/admin/courses/{{course_id}}/approve" }
+        },
+        {
+          "name": "Admin subscriptions",
+          "request": { "method": "GET", "url": "{{base_url}}/admin/subscriptions" }
+        },
+        {
+          "name": "Approve subscription",
+          "request": { "method": "POST", "url": "{{base_url}}/admin/subscriptions/{{subscription_id}}/approve" }
+        },
+        {
+          "name": "OTP status",
+          "request": { "method": "GET", "url": "{{base_url}}/admin/otp/status" }
+        }
+      ]
+    }
+  ]
+}
