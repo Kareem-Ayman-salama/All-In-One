@@ -31,7 +31,7 @@ function securityHeaders(req) {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
       "font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net",
       "img-src 'self' data: blob:",
-      "connect-src 'self' https: http://localhost:* http://127.0.0.1:*"
+      "connect-src 'self' https: https://*.up.railway.app http://localhost:* http://127.0.0.1:*"
     ].join("; "),
     "Cross-Origin-Opener-Policy": "same-origin",
     "Permissions-Policy": "camera=(), microphone=(), geolocation=()",

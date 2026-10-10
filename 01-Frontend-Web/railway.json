@@ -1,12 +1,18 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
-    "builder": "NIXPACKS",
-    "buildCommand": "corepack enable && pnpm install --frozen-lockfile && pnpm build"
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile",
+    "buildArgs": {
+      "VITE_API_BASE_URL": "${{VITE_API_BASE_URL}}",
+      "VITE_USE_MOCK_API": "${{VITE_USE_MOCK_API}}",
+      "VITE_SHOW_DEMO_ACCOUNTS": "${{VITE_SHOW_DEMO_ACCOUNTS}}"
+    }
   },
   "deploy": {
-    "startCommand": "pnpm start",
+    "healthcheckPath": "/",
+    "healthcheckTimeout": 30,
     "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 10
+    "restartPolicyMaxRetries": 3
   }
 }
