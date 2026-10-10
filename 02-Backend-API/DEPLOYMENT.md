@@ -8,7 +8,12 @@ transactional mail provider.
 
 ### API
 
-Uses `railway.json`.
+Set in Railway Service Settings (**Source** -> **Root Directory**):
+```text
+Root Directory: 02-Backend-API
+```
+
+Uses `02-Backend-API/railway.json`.
 
 ```text
 sh -c 'if [ "$AIO_DEPLOYMENT_MODE" = "staging" ]; then php artisan aio:production-check || true; else php artisan aio:production-check; fi && php artisan migrate --force && php artisan optimize && php artisan serve --host=0.0.0.0 --port=$PORT'

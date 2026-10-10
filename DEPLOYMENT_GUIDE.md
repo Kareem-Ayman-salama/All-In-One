@@ -32,6 +32,12 @@
 
 ## الخطوة 1 — Backend API
 
+### Railway (موصى به للـ Monorepo)
+
+- **Root Directory**: `02-Backend-API` (من Service Settings -> Source -> Root Directory)
+- يستخدم تلقائيًا: `02-Backend-API/railway.json`
+- لا تنسَ ربط قاعدة بيانات PostgreSQL في نفس المشروع وضبط متغيرات البيئة من `02-Backend-API/.env.production.example`.
+
 ### Koyeb / Render
 
 ```bash
@@ -52,13 +58,12 @@ php artisan serve --host=0.0.0.0 --port=$PORT
 
 ## الخطوة 2 — Frontend Web
 
-### Cloudflare Pages
+### Cloudflare Pages / Railway
 
-```
-Root directory:  01-Frontend-Web
-Build command:   corepack enable && pnpm install --frozen-lockfile && pnpm build
-Output dir:      dist
-```
+- **Railway Root Directory**: `01-Frontend-Web` (يستخدم `01-Frontend-Web/railway.json`)
+- **Cloudflare Pages Root directory**: `01-Frontend-Web`
+- **Build command**: `corepack enable && pnpm install --frozen-lockfile && pnpm build`
+- **Output dir**: `dist`
 
 متغيرات البيئة:
 ```

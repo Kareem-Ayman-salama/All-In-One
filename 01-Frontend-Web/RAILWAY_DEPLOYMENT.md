@@ -12,10 +12,10 @@ Add a PostgreSQL database to the Railway project before deploying the API.
 Create a service from the repository and set:
 
 ```text
-Root Directory: /backend
+Root Directory: 02-Backend-API
 ```
 
-The service reads `backend/railway.json`. For the first server test, configure:
+The service reads `02-Backend-API/railway.json`. For the first server test, configure:
 
 ```text
 APP_NAME=AIO API
@@ -61,10 +61,13 @@ It must return status `ready`.
 
 ## 3. Frontend service
 
-Create another service from the same repository. Leave Root Directory empty
-because the frontend is in the repository root.
+Create another service from the same repository and set:
 
-Set:
+```text
+Root Directory: 01-Frontend-Web
+```
+
+The service reads `01-Frontend-Web/railway.json`. Set:
 
 ```text
 VITE_API_BASE_URL=https://YOUR-BACKEND.up.railway.app/api/v1
