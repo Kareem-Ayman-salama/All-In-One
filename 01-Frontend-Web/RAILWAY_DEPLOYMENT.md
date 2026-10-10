@@ -43,7 +43,12 @@ QUEUE_CONNECTION=database
 FILESYSTEM_DISK=local
 MAIL_MAILER=log
 REDIS_REQUIRED=false
+AIO_SEED_DEMO=true
 ```
+
+`AIO_SEED_DEMO=true` is only for the isolated review environment. The backend
+refuses to seed demo data when `AIO_DEPLOYMENT_MODE=production`. Switch it back
+to `false` after the first successful deploy.
 
 Generate `APP_KEY` locally with:
 
@@ -54,14 +59,12 @@ php artisan key:generate --show
 After deployment, verify:
 
 ```text
-https://YOUR-BACKEND.up.railway.app/api/v1/health/live
-```
-
-It must return `status: ok`. Once database and credentials are fully configured, you can also check:
-
-```text
 https://YOUR-BACKEND.up.railway.app/api/v1/health/ready
 ```
+
+It must return HTTP 200, `status: ready`, and `database: true`. A deployment
+without PostgreSQL now fails instead of silently creating an ephemeral SQLite
+database.
 
 ## 3. Frontend service
 
@@ -81,6 +84,10 @@ VITE_SHOW_DEMO_ACCOUNTS=false
 
 Deploy the backend first, copy its public URL into the frontend variable, then
 deploy the frontend.
+
+Railway exposes service variables to Docker builds. The frontend Dockerfile
+declares the three `VITE_` values as build arguments and intentionally fails if
+`VITE_API_BASE_URL` is missing, preventing a bundle that points to the wrong API.
 
 ## 4. Update backend URLs
 

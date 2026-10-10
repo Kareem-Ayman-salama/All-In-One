@@ -1,0 +1,17 @@
+**
+!Dockerfile
+!02-Backend-API/
+!02-Backend-API/**
+02-Backend-API/vendor/
+02-Backend-API/node_modules/
+02-Backend-API/.env
+02-Backend-API/.env.*
+!02-Backend-API/.env.example
+!02-Backend-API/.env.*.example
+02-Backend-API/database/*.sqlite
+02-Backend-API/storage/logs/*
+02-Backend-API/storage/framework/cache/*
+02-Backend-API/storage/framework/sessions/*
+02-Backend-API/storage/framework/views/*
+02-Backend-API/tests/
+02-Backend-API/*.log

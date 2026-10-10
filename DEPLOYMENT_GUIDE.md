@@ -37,6 +37,7 @@
 - **Root Directory**: `02-Backend-API` (من Service Settings -> Source -> Root Directory)
 - يستخدم تلقائيًا: `02-Backend-API/railway.json`
 - لا تنسَ ربط قاعدة بيانات PostgreSQL في نفس المشروع وضبط متغيرات البيئة من `02-Backend-API/.env.production.example`.
+- النشر يتوقف فورًا إذا كان `APP_KEY` مفقودًا أو PostgreSQL غير متاحة؛ لا يوجد fallback إلى SQLite على السيرفر.
 
 ### Koyeb / Render
 
@@ -98,6 +99,10 @@ flutter build appbundle --release
 # بعد ربط قاعدة البيانات:
 php artisan migrate --force
 ```
+
+لبيئة المراجعة فقط يمكن ضبط `AIO_SEED_DEMO=true` لأول نشر لإضافة حسابات
+وكورسات تجريبية فعلية، ثم إعادته إلى `false`. لا يعمل هذا الخيار عندما تكون
+`AIO_DEPLOYMENT_MODE=production`.
 
 جداول مهمة يجب أن تكون موجودة: `users`, `organizations`, `user_devices`, `video_watch_progress`, `content_access_logs`, `audit_logs`, `certificates`, `invoices`, `live_meetings`.
 

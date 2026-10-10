@@ -1,13 +1,8 @@
 {
-  "$schema": "https://railway.app/railway.schema.json",
+  "$schema": "https://railway.com/railway.schema.json",
   "build": {
     "builder": "DOCKERFILE",
-    "dockerfilePath": "Dockerfile",
-    "buildArgs": {
-      "VITE_API_BASE_URL": "${{VITE_API_BASE_URL}}",
-      "VITE_USE_MOCK_API": "${{VITE_USE_MOCK_API}}",
-      "VITE_SHOW_DEMO_ACCOUNTS": "${{VITE_SHOW_DEMO_ACCOUNTS}}"
-    }
+    "dockerfilePath": "Dockerfile"
   },
   "deploy": {
     "healthcheckPath": "/",

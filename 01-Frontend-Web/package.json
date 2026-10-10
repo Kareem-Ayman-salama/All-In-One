@@ -31,6 +31,6 @@
     "baseline-browser-mapping": "^2.11.26"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22.13"
   }
 }

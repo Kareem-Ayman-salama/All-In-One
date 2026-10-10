@@ -2,22 +2,30 @@ FROM php:8.3-cli-alpine
 
 # Install system dependencies & build tools
 RUN apk add --no-cache \
-    postgresql-dev \
     postgresql-client \
-    sqlite-dev \
-    linux-headers \
-    netcat-openbsd \
-    libzip-dev \
+    postgresql-libs \
+    libzip \
+    icu-libs \
+    oniguruma \
+    libcurl \
     zip \
     unzip \
     git \
     curl \
-    $PHPIZE_DEPS
+    && apk add --no-cache --virtual .build-deps \
+        $PHPIZE_DEPS \
+        postgresql-dev \
+        libzip-dev \
+        icu-dev \
+        oniguruma-dev \
+        curl-dev \
+        linux-headers
 
 # Install required PHP extensions
-RUN docker-php-ext-install pdo pdo_pgsql pgsql pdo_sqlite pcntl bcmath zip opcache \
+RUN docker-php-ext-install curl intl mbstring pdo_pgsql pcntl bcmath zip opcache \
     && pecl install redis \
-    && docker-php-ext-enable redis
+    && docker-php-ext-enable redis \
+    && apk del .build-deps
 
 # Install Composer
 COPY --from=composer:2.8 /usr/bin/composer /usr/bin/composer
@@ -27,16 +35,17 @@ WORKDIR /var/www/html
 # Copy composer files first for caching
 COPY composer.json composer.lock ./
 
-RUN composer install --no-scripts --no-autoloader --prefer-dist
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction --no-progress
 
 # Copy application source
 COPY . .
 
-RUN composer dump-autoload --optimize
+RUN composer dump-autoload --no-dev --optimize --classmap-authoritative
 
 # Ensure storage directories exist and have proper permissions
 RUN mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache storage/logs bootstrap/cache \
-    && chmod -R 777 storage bootstrap/cache
+    && chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
 
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh

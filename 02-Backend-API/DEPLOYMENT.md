@@ -15,11 +15,13 @@ Root Directory: 02-Backend-API
 
 Uses `02-Backend-API/railway.json`.
 
-```text
-sh -c 'if [ "$AIO_DEPLOYMENT_MODE" = "production" ]; then php artisan aio:production-check; else php artisan aio:production-check || true; fi && (php artisan migrate --force || echo "[WARN] Database migration failed or database not reachable") && php artisan optimize && php artisan serve --host=0.0.0.0 --port=$PORT'
-```
+The Docker entrypoint validates `APP_KEY` and PostgreSQL, runs migrations, then
+starts the API. It exits immediately on a database or migration error. Health
+check: `/api/v1/health/ready`.
 
-Health check: `/api/v1/health/live`
+If an existing Railway backend service still points at the repository root,
+the root `Dockerfile` remains a compatibility wrapper for the API. New services
+should use `02-Backend-API` as the Root Directory.
 
 ### Queue Worker
 
@@ -81,7 +83,13 @@ CACHE_STORE=database
 QUEUE_CONNECTION=sync
 FILESYSTEM_DISK=local
 REDIS_REQUIRED=false
+AIO_SEED_DEMO=true
 ```
+
+Use `AIO_SEED_DEMO=true` only on an isolated review database. It creates the
+documented demo accounts and sample marketplace courses idempotently. Set it to
+`false` after the first successful deployment. Production mode rejects demo
+seeding.
 
 ### Free OTP email for the MVP
 

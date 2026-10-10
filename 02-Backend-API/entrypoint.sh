@@ -1,54 +1,59 @@
 #!/bin/sh
+set -eu
 
-echo "==> AIO Backend starting up on Railway..."
+echo "==> Starting AIO Backend..."
 
-# 1. Ensure .env exists so artisan commands work
-if [ ! -f .env ]; then
-    echo "==> Creating .env from .env.example..."
-    cp .env.example .env 2>/dev/null || touch .env
+if [ -z "${APP_KEY:-}" ]; then
+    echo "[ERROR] APP_KEY is required and must remain stable across deployments." >&2
+    exit 1
 fi
 
-# 2. Database configuration & fallback
-mkdir -p database
-touch database/database.sqlite
-
-# If no external PostgreSQL is provided, fall back to SQLite
-if [ -z "$DATABASE_URL" ] && [ -z "$PGHOST" ] && { [ "$DB_HOST" = "127.0.0.1" ] || [ -z "$DB_HOST" ]; }; then
-    echo "==> No external PostgreSQL detected. Using local SQLite database..."
-    sed -i 's/DB_CONNECTION=pgsql/DB_CONNECTION=sqlite/' .env 2>/dev/null || true
+if [ -z "${DATABASE_URL:-}" ] && [ -z "${DB_HOST:-}" ]; then
+    echo "[ERROR] PostgreSQL is not configured. Attach Railway Postgres and set DATABASE_URL or DB_HOST." >&2
+    exit 1
 fi
 
-# 3. Ensure storage directories and permissions
+if [ "${DB_CONNECTION:-pgsql}" != "pgsql" ]; then
+    echo "[ERROR] Railway deployments must use PostgreSQL; DB_CONNECTION must be pgsql." >&2
+    exit 1
+fi
+
 mkdir -p storage/framework/sessions \
          storage/framework/views \
          storage/framework/cache \
          storage/logs \
          bootstrap/cache
-chmod -R 777 storage bootstrap/cache 2>/dev/null || true
+chmod -R 775 storage bootstrap/cache
 
-# 4. Generate application key if missing
-if [ -z "$APP_KEY" ]; then
-    echo "==> Generating application key..."
-    php artisan key:generate --force || true
-fi
+php artisan optimize:clear
 
-# 5. Clear stale caches
-php artisan config:clear || true
-php artisan route:clear || true
-php artisan view:clear || true
-
-# 6. Production check (informational)
-if [ "$AIO_DEPLOYMENT_MODE" = "production" ]; then
-    php artisan aio:production-check || true
-else
-    echo "==> Running in staging mode (production check relaxed)"
-fi
-
-# 7. Run migrations safely
 echo "==> Running database migrations..."
-php artisan migrate --force || echo "[WARN] Migrations skipped or failed. Check database connection."
+php artisan migrate --force
 
-# 8. Start Laravel web server
+if [ "${AIO_SEED_DEMO:-false}" = "true" ]; then
+    if [ "${AIO_DEPLOYMENT_MODE:-staging}" = "production" ]; then
+        echo "[ERROR] Demo data cannot be seeded in production mode." >&2
+        exit 1
+    fi
+
+    echo "==> Seeding idempotent staging demo data..."
+    php artisan db:seed --class=DemoWorkspaceSeeder --force
+fi
+
+php artisan optimize
+
+if [ "${AIO_DEPLOYMENT_MODE:-staging}" = "production" ]; then
+    php artisan aio:production-check
+else
+    echo "==> Staging mode: optional production integrations are not enforced."
+fi
+
+if [ "${QUEUE_CONNECTION:-sync}" != "sync" ]; then
+    php artisan queue:work --queue=notifications,outbox,default --sleep=2 --tries=5 --timeout=120 --max-time=3600 > /tmp/aio-queue.log 2>&1 &
+fi
+
+php artisan schedule:work > /tmp/aio-scheduler.log 2>&1 &
+
 PORT="${PORT:-8000}"
 echo "==> Starting web server on 0.0.0.0:$PORT..."
 exec php artisan serve --host=0.0.0.0 --port="$PORT"

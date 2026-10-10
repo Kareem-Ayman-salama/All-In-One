@@ -27,7 +27,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22.13"
           cache: "pnpm"
           cache-dependency-path: 01-Frontend-Web/pnpm-lock.yaml
 
@@ -110,7 +110,19 @@ jobs:
           DB_DATABASE: aio_test
           DB_USERNAME: aio
           DB_PASSWORD: aio_test_password
-        run: php artisan migrate:fresh --force
+        run: php artisan migrate:fresh --seed --force
+
+      - name: Run feature tests against PostgreSQL
+        env:
+          APP_ENV: testing
+          APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: aio_test
+          DB_USERNAME: aio
+          DB_PASSWORD: aio_test_password
+        run: php artisan test --testsuite=Feature
 
       - name: Audit production dependencies
         run: composer audit --locked --no-dev

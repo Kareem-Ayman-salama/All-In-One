@@ -328,6 +328,8 @@ const mobileHomePage = read("mobile/lib/src/features/home/presentation/home_page
 const mobilePlaceholderPage = read("mobile/lib/src/shared/presentation/placeholder_page.dart");
 const backendRailway = JSON.parse(read("backend/railway.json"));
 const frontendRailway = JSON.parse(read("railway.json"));
+const backendEntrypoint = read("backend/entrypoint.sh");
+const frontendDockerfile = read("Dockerfile");
 
 const contracts = [
   [auth, '"/auth/login"', routes, "Route::post('/login'"],
@@ -357,15 +359,20 @@ for (const [client, clientMarker, server, serverMarker] of contracts) {
   assert.ok(server.includes(serverMarker), `Backend contract missing ${serverMarker}`);
 }
 
-assert.equal(frontendRailway.deploy.startCommand, "pnpm start");
+assert.equal(frontendRailway.build.builder, "DOCKERFILE");
 assert.ok(
-  frontendRailway.build.buildCommand.includes("pnpm install --frozen-lockfile"),
-  "Frontend deployment must install the locked pnpm dependency graph"
+  frontendDockerfile.includes("pnpm install --frozen-lockfile")
+    && frontendDockerfile.includes('CMD ["node", "server.js"]')
+    && frontendDockerfile.includes("ARG VITE_API_BASE_URL"),
+  "Frontend Docker deployment must install the lockfile, configure the API, and start the server"
 );
 assert.equal(backendRailway.deploy.healthcheckPath, "/api/v1/health/ready");
 assert.ok(
-  backendRailway.deploy.startCommand.includes("AIO_DEPLOYMENT_MODE"),
-  "Backend deployment mode guard is missing"
+  backendRailway.build.builder === "DOCKERFILE"
+    && backendEntrypoint.includes("AIO_DEPLOYMENT_MODE")
+    && backendEntrypoint.includes("php artisan migrate --force")
+    && !backendEntrypoint.includes("Migrations skipped or failed"),
+  "Backend Docker deployment must guard its mode and fail on migration errors"
 );
 assert.ok(
   deployment.includes("--queue=notifications,outbox,default"),
