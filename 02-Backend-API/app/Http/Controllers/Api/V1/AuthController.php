@@ -105,16 +105,17 @@ class AuthController extends Controller
         // ─── Log successful authentication event ───────────────────────────
         try {
             AuditLog::query()->create([
-                'auditable_type' => 'User',
-                'auditable_id' => $result['user']->id,
-                'event' => 'login_success',
+                'organization_id' => null,
                 'actor_id' => $result['user']->id,
-                'actor_type' => 'user',
+                'action' => 'auth.login_succeeded',
+                'entity_type' => 'user',
+                'entity_id' => $result['user']->id,
                 'metadata' => [
-                    'ip' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
                     'platform' => $request->input('platform'),
                 ],
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'created_at' => now(),
             ]);
         } catch (\Throwable $e) {
             Log::warning('AuthController: could not write login_success audit log', ['error' => $e->getMessage()]);

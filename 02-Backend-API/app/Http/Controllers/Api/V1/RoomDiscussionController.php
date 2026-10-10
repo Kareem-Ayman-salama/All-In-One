@@ -32,7 +32,7 @@ class RoomDiscussionController extends Controller
         $this->ensureRoomAccess($user, $roomModel);
 
         $discussions = RoomDiscussion::query()
-            ->with(['user:id,name,email,avatar_url', 'comments.user:id,name,email,avatar_url'])
+            ->with(['user:id,name,email,avatar_path', 'comments.user:id,name,email,avatar_path'])
             ->where('room_id', $roomModel->id)
             ->orderByDesc('is_pinned')
             ->orderByDesc('created_at')

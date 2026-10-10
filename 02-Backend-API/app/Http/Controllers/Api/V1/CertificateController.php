@@ -24,7 +24,7 @@ class CertificateController extends Controller
         $query = Certificate::query()->with([
             'course:id,title,title_ar,cover_image_url',
             'student:id,name,email',
-            'organization:id,name,name_ar,logo_url',
+            'organization:id,name,logo_path',
         ]);
 
         if ($isOrgAdmin) {
@@ -90,7 +90,7 @@ class CertificateController extends Controller
                 'courseTitleAr' => $course->title_ar,
                 'studentName' => $student->name,
                 'organizationName' => $org->name,
-                'organizationNameAr' => $org->name_ar,
+                'organizationNameAr' => $org->name,
                 'notes' => $validated['notes'] ?? null,
             ],
         ]);
@@ -134,7 +134,7 @@ class CertificateController extends Controller
             ->with([
                 'course:id,title,title_ar',
                 'student:id,name',
-                'organization:id,name,name_ar,logo_url',
+                'organization:id,name,logo_path',
             ])
             ->where('verification_code', strtoupper(trim($code)))
             ->first();
@@ -157,8 +157,8 @@ class CertificateController extends Controller
                 'status' => $cert->status,
                 'studentName' => $cert->student?->name,
                 'courseTitle' => $cert->course?->title_ar ?: $cert->course?->title,
-                'organizationName' => $cert->organization?->name_ar ?: $cert->organization?->name,
-                'organizationLogo' => $cert->organization?->logo_url,
+                'organizationName' => $cert->organization?->name,
+                'organizationLogo' => $cert->organization?->logo_path,
             ],
         ]);
     }

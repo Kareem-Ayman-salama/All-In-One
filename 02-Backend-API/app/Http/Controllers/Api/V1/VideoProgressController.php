@@ -13,6 +13,7 @@ use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class VideoProgressController extends Controller
 {
@@ -27,11 +28,7 @@ class VideoProgressController extends Controller
             'lastPositionSeconds' => ['required', 'integer', 'min:0'],
         ]);
 
-        // Resolve ContentItem exclusively from persisted database records
-        $content = ContentItem::query()->with('room')
-            ->where('id', $validated['contentId'])
-            ->orWhere('external_video_id', $validated['contentId'])
-            ->first();
+        $content = $this->resolveContent($validated['contentId']);
 
         if (! $content) {
             throw new ApiException('CONTENT_NOT_FOUND', 'Video content not found.', 404);
@@ -71,7 +68,7 @@ class VideoProgressController extends Controller
         $progress = VideoWatchProgress::query()->updateOrCreate(
             [
                 'student_id' => $user->id,
-                'content_id' => $validated['contentId'],
+                'content_id' => $content->id,
             ],
             [
                 'organization_id' => $orgId,
@@ -109,7 +106,7 @@ class VideoProgressController extends Controller
         }
 
         return ApiResponse::success($request, [
-            'contentId' => $progress->content_id,
+            'contentId' => $validated['contentId'],
             'lastPositionSeconds' => $progress->last_position_seconds,
             'completionPercentage' => $progress->completion_percentage,
             'isCompleted' => $progress->is_completed,
@@ -129,11 +126,7 @@ class VideoProgressController extends Controller
             'event' => ['required', 'in:video_started,video_completed'],
         ]);
 
-        // Resolve ContentItem exclusively from persisted database records
-        $content = ContentItem::query()->with('room')
-            ->where('id', $validated['contentId'])
-            ->orWhere('external_video_id', $validated['contentId'])
-            ->first();
+        $content = $this->resolveContent($validated['contentId']);
 
         if (! $content) {
             throw new ApiException('CONTENT_NOT_FOUND', 'Video content not found.', 404);
@@ -190,10 +183,12 @@ class VideoProgressController extends Controller
     public function getProgress(Request $request, string $contentId): JsonResponse
     {
         $user = $request->user();
+        $content = $this->resolveContent($contentId);
+        $storedContentId = $content?->id ?? $contentId;
 
         $progress = VideoWatchProgress::query()
             ->where('student_id', $user->id)
-            ->where('content_id', $contentId)
+            ->whereIn('content_id', array_values(array_unique([$storedContentId, $contentId])))
             ->first();
 
         if (! $progress) {
@@ -206,12 +201,32 @@ class VideoProgressController extends Controller
         }
 
         return ApiResponse::success($request, [
-            'contentId' => $progress->content_id,
+            'contentId' => $contentId,
             'lastPositionSeconds' => $progress->last_position_seconds,
             'completionPercentage' => $progress->completion_percentage,
             'isCompleted' => $progress->is_completed,
             'watchedSeconds' => $progress->watched_seconds,
             'totalDurationSeconds' => $progress->total_duration_seconds,
         ]);
+    }
+
+    /**
+     * Resolve a persisted content item without comparing an invalid UUID in PostgreSQL.
+     */
+    private function resolveContent(string $identifier): ?ContentItem
+    {
+        $query = ContentItem::query()->with('room');
+
+        if (Str::isUuid($identifier)) {
+            return $query
+                ->where(function ($nestedQuery) use ($identifier): void {
+                    $nestedQuery
+                        ->where('id', $identifier)
+                        ->orWhere('external_video_id', $identifier);
+                })
+                ->first();
+        }
+
+        return $query->where('external_video_id', $identifier)->first();
     }
 }

@@ -18,7 +18,7 @@ class InvoiceController extends Controller
         $isOrgAdmin = $request->attributes->has('active_organization');
 
         $query = Invoice::query()->with([
-            'organization:id,name,name_ar,logo_url',
+            'organization:id,name,logo_path',
             'user:id,name,email,phone',
         ]);
 
