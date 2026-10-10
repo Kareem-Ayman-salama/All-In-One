@@ -8,9 +8,15 @@ if [ ! -f .env ]; then
     cp .env.example .env 2>/dev/null || touch .env
 fi
 
-# 2. Ensure database directory & sqlite file exist
+# 2. Database configuration & fallback
 mkdir -p database
 touch database/database.sqlite
+
+# If no external PostgreSQL is provided, fall back to SQLite
+if [ -z "$DATABASE_URL" ] && [ -z "$PGHOST" ] && { [ "$DB_HOST" = "127.0.0.1" ] || [ -z "$DB_HOST" ]; }; then
+    echo "==> No external PostgreSQL detected. Using local SQLite database..."
+    sed -i 's/DB_CONNECTION=pgsql/DB_CONNECTION=sqlite/' .env 2>/dev/null || true
+fi
 
 # 3. Ensure storage directories and permissions
 mkdir -p storage/framework/sessions \

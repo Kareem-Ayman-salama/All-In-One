@@ -4,6 +4,7 @@ FROM php:8.3-cli-alpine
 RUN apk add --no-cache \
     postgresql-dev \
     postgresql-client \
+    sqlite-dev \
     linux-headers \
     netcat-openbsd \
     libzip-dev \
@@ -14,7 +15,7 @@ RUN apk add --no-cache \
     $PHPIZE_DEPS
 
 # Install required PHP extensions
-RUN docker-php-ext-install pdo pdo_pgsql pgsql pcntl bcmath zip opcache \
+RUN docker-php-ext-install pdo pdo_pgsql pgsql pdo_sqlite pcntl bcmath zip opcache \
     && pecl install redis \
     && docker-php-ext-enable redis
 
