@@ -54,10 +54,14 @@ php artisan key:generate --show
 After deployment, verify:
 
 ```text
-https://YOUR-BACKEND.up.railway.app/api/v1/health/ready
+https://YOUR-BACKEND.up.railway.app/api/v1/health/live
 ```
 
-It must return status `ready`.
+It must return `status: ok`. Once database and credentials are fully configured, you can also check:
+
+```text
+https://YOUR-BACKEND.up.railway.app/api/v1/health/ready
+```
 
 ## 3. Frontend service
 

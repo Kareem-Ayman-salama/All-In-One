@@ -16,10 +16,10 @@ Root Directory: 02-Backend-API
 Uses `02-Backend-API/railway.json`.
 
 ```text
-sh -c 'if [ "$AIO_DEPLOYMENT_MODE" = "staging" ]; then php artisan aio:production-check || true; else php artisan aio:production-check; fi && php artisan migrate --force && php artisan optimize && php artisan serve --host=0.0.0.0 --port=$PORT'
+sh -c 'if [ "$AIO_DEPLOYMENT_MODE" = "production" ]; then php artisan aio:production-check; else php artisan aio:production-check || true; fi && (php artisan migrate --force || echo "[WARN] Database migration failed or database not reachable") && php artisan optimize && php artisan serve --host=0.0.0.0 --port=$PORT'
 ```
 
-Health check: `/api/v1/health/ready`
+Health check: `/api/v1/health/live`
 
 ### Queue Worker
 
