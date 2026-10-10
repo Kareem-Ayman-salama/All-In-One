@@ -2,8 +2,9 @@ FROM node:22.13-alpine AS builder
 
 WORKDIR /app
 
-# Keep the image and lockfile package-manager versions deterministic.
-RUN corepack enable && corepack prepare pnpm@11.19.0 --activate
+# Keep the image and lockfile package-manager versions deterministic. Installing
+# pnpm directly avoids Corepack's stale signature bundle in older Node images.
+RUN npm install --global pnpm@11.19.0
 
 # Copy only package files first for caching
 COPY pnpm-lock.yaml package.json pnpm-workspace.yaml* ./
