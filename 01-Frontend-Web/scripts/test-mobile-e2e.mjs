@@ -122,6 +122,23 @@ async function runE2ETests() {
     }
   }
 
+  async function reportHorizontalOverflow(page, label) {
+    const offenders = await page.evaluate(() => [...document.body.querySelectorAll("*")]
+      .map((element) => {
+        const rect = element.getBoundingClientRect();
+        return {
+          selector: `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ""}${element.classList.length ? `.${[...element.classList].join(".")}` : ""}`,
+          left: Math.round(rect.left * 100) / 100,
+          right: Math.round(rect.right * 100) / 100,
+          width: Math.round(rect.width * 100) / 100,
+        };
+      })
+      .filter(({ left, right }) => left < -0.5 || right > window.innerWidth + 0.5)
+      .slice(0, 12));
+
+    console.error(`  Horizontal overflow diagnostics (${label}): ${JSON.stringify(offenders)}`);
+  }
+
   // --- SECTION 1: Landing Page Tests ---
   console.log("\n==========================================");
   console.log("SECTION 1: Landing Page Tests");
@@ -147,6 +164,9 @@ async function runE2ETests() {
         rtlOverflow.ok,
         `Landing RTL fits viewport (${vp.width}px): doc=${rtlOverflow.doc}px, body=${rtlOverflow.body}px, win=${rtlOverflow.inner}px`
       );
+      if (!rtlOverflow.ok) {
+        await reportHorizontalOverflow(page, `RTL ${vp.width}px`);
+      }
 
       // 2. Switch to LTR and re-check overflow
       await page.evaluate(() => {
@@ -169,6 +189,9 @@ async function runE2ETests() {
         ltrOverflow.ok,
         `Landing LTR fits viewport (${vp.width}px): doc=${ltrOverflow.doc}px, body=${ltrOverflow.body}px, win=${ltrOverflow.inner}px`
       );
+      if (!ltrOverflow.ok) {
+        await reportHorizontalOverflow(page, `LTR ${vp.width}px`);
+      }
 
       // Reset back to RTL for drawer checks
       await page.evaluate(() => {

@@ -18,7 +18,6 @@ use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Cookie;
 
 class AuthController extends Controller
@@ -103,23 +102,19 @@ class AuthController extends Controller
         }
 
         // ─── Log successful authentication event ───────────────────────────
-        try {
-            AuditLog::query()->create([
-                'organization_id' => null,
-                'actor_id' => $result['user']->id,
-                'action' => 'auth.login_succeeded',
-                'entity_type' => 'user',
-                'entity_id' => $result['user']->id,
-                'metadata' => [
-                    'platform' => $request->input('platform'),
-                ],
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-                'created_at' => now(),
-            ]);
-        } catch (\Throwable $e) {
-            Log::warning('AuthController: could not write login_success audit log', ['error' => $e->getMessage()]);
-        }
+        AuditLog::query()->create([
+            'organization_id' => null,
+            'actor_id' => $result['user']->id,
+            'action' => 'auth.login_succeeded',
+            'entity_type' => 'user',
+            'entity_id' => $result['user']->id,
+            'metadata' => [
+                'platform' => $request->input('platform'),
+            ],
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'created_at' => now(),
+        ]);
 
         $response = ApiResponse::success($request, [
             'user' => $this->presenter->present($result['user']),

@@ -12,7 +12,6 @@ use App\Models\VideoWatchProgress;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class VideoProgressController extends Controller
@@ -83,27 +82,24 @@ class VideoProgressController extends Controller
             ]
         );
 
-        // Log security event
         $eventName = $isCompleted ? 'video_completed' : 'video_progress';
-        try {
-            ContentAccessLog::query()->create([
-                'user_id' => $user->id,
-                'organization_id' => $orgId,
-                'content_id' => $content->id,
-                'event' => $eventName,
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-                'metadata' => [
-                    'room_id' => $roomId,
-                    'course_id' => $courseId,
-                    'completion_percentage' => $percentage,
-                    'watched_seconds' => $validated['watchedSeconds'],
-                    'total_duration' => $validated['totalDurationSeconds'],
-                ],
-            ]);
-        } catch (\Throwable $e) {
-            Log::warning('VideoProgress: could not write access log', ['error' => $e->getMessage()]);
-        }
+        ContentAccessLog::query()->create([
+            'user_id' => $user->id,
+            'organization_id' => $orgId,
+            'content_item_id' => $content->id,
+            'action' => $eventName,
+            'result' => 'allowed',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'metadata' => [
+                'room_id' => $roomId,
+                'course_id' => $courseId,
+                'completion_percentage' => $percentage,
+                'watched_seconds' => $validated['watchedSeconds'],
+                'total_duration' => $validated['totalDurationSeconds'],
+            ],
+            'created_at' => now(),
+        ]);
 
         return ApiResponse::success($request, [
             'contentId' => $validated['contentId'],
@@ -160,22 +156,20 @@ class VideoProgressController extends Controller
             }
         }
 
-        try {
-            ContentAccessLog::query()->create([
-                'user_id' => $user->id,
-                'organization_id' => $orgId,
-                'content_id' => $content->id,
-                'event' => $validated['event'],
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-                'metadata' => [
-                    'room_id' => $roomId,
-                    'course_id' => $courseId,
-                ],
-            ]);
-        } catch (\Throwable $e) {
-            Log::warning('VideoEvent: could not write access log', ['error' => $e->getMessage()]);
-        }
+        ContentAccessLog::query()->create([
+            'user_id' => $user->id,
+            'organization_id' => $orgId,
+            'content_item_id' => $content->id,
+            'action' => $validated['event'],
+            'result' => 'allowed',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'metadata' => [
+                'room_id' => $roomId,
+                'course_id' => $courseId,
+            ],
+            'created_at' => now(),
+        ]);
 
         return ApiResponse::success($request, ['logged' => true]);
     }

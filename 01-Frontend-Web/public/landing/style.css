@@ -101,12 +101,9 @@ body {
   position: relative;
 }
 
-body > header,
-body > main,
-body > section,
-body > footer,
-body > aside {
+body > * {
   max-width: 100%;
+  overflow-x: clip;
 }
 
 [lang="en"] body,
