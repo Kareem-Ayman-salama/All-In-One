@@ -6,6 +6,11 @@ if [ -d "02-Backend-API" ]; then
     cd 02-Backend-API
 fi
 
+mkdir -p database && touch database/database.sqlite
+if [ -z "$APP_KEY" ]; then
+    php artisan key:generate --force
+fi
+
 if [ "$AIO_DEPLOYMENT_MODE" = "production" ]; then
     php artisan aio:production-check
 else
