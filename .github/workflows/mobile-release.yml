@@ -1,0 +1,113 @@
+name: AIN Mobile Production Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  android-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: 03-Mobile-App
+    env:
+      KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+      PRODUCTION_API_BASE_URL: ${{ secrets.PRODUCTION_API_BASE_URL }}
+      GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.ANDROID_GOOGLE_SERVICES_JSON_BASE64 }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.44.8"
+          channel: stable
+          cache: true
+
+      - name: Install mobile dependencies
+        run: flutter pub get
+
+      - name: Generate Dart sources
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Validate production signing secrets
+        run: |
+          missing=()
+          [ -n "$KEYSTORE_BASE64" ] || missing+=(ANDROID_KEYSTORE_BASE64)
+          [ -n "$KEY_ALIAS" ] || missing+=(ANDROID_KEY_ALIAS)
+          [ -n "$KEY_PASSWORD" ] || missing+=(ANDROID_KEY_PASSWORD)
+          [ -n "$STORE_PASSWORD" ] || missing+=(ANDROID_STORE_PASSWORD)
+          [ -n "$PRODUCTION_API_BASE_URL" ] || missing+=(PRODUCTION_API_BASE_URL)
+          [ -n "$GOOGLE_SERVICES_JSON_BASE64" ] || missing+=(ANDROID_GOOGLE_SERVICES_JSON_BASE64)
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "::error::Missing production release secrets: ${missing[*]}"
+            exit 1
+          fi
+          case "$PRODUCTION_API_BASE_URL" in
+            https://*) ;;
+            *) echo "::error::PRODUCTION_API_BASE_URL must use HTTPS"; exit 1 ;;
+          esac
+
+      - name: Configure Production Keystore from GitHub Secrets
+        run: |
+          echo "Decoding release keystore..."
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/upload-keystore.jks
+          cat <<EOF > android/key.properties
+          keyAlias=${KEY_ALIAS}
+          keyPassword=${KEY_PASSWORD}
+          storeFile=../upload-keystore.jks
+          storePassword=${STORE_PASSWORD}
+          EOF
+          echo "✓ Production keystore configured."
+
+      - name: Configure Firebase for production
+        run: |
+          mkdir -p android/app/src/production
+          echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 --decode > android/app/src/production/google-services.json
+
+      - name: Build Android App Bundle (AAB)
+        run: |
+          flutter build appbundle --flavor production -t lib/main.dart \
+            --dart-define=AIN_FLAVOR=production \
+            --dart-define=AIN_API_BASE_URL="$PRODUCTION_API_BASE_URL" \
+            --dart-define=AIN_ENABLE_FIREBASE=true \
+            --dart-define=AIN_ENABLE_CRASH_REPORTING=true
+
+      - name: Build Android Split APKs
+        run: |
+          flutter build apk --flavor production -t lib/main.dart \
+            --dart-define=AIN_FLAVOR=production \
+            --dart-define=AIN_API_BASE_URL="$PRODUCTION_API_BASE_URL" \
+            --dart-define=AIN_ENABLE_FIREBASE=true \
+            --dart-define=AIN_ENABLE_CRASH_REPORTING=true \
+            --split-per-abi
+
+      - name: Upload Production App Bundle Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ain-mobile-production-aab
+          path: 03-Mobile-App/build/app/outputs/bundle/productionRelease/*.aab
+          retention-days: 14
+
+      - name: Upload Production Split APKs Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ain-mobile-production-apks
+          path: 03-Mobile-App/build/app/outputs/flutter-apk/*.apk
+          retention-days: 14

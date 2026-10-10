@@ -1,0 +1,6 @@
+# Android Keystore configuration example for Production Release
+# Store this file as android/key.properties (do NOT commit real production passwords or keystores to Git)
+keyAlias=upload
+keyPassword=your-key-password
+storeFile=../upload-keystore.jks
+storePassword=your-store-password

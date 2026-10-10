@@ -1,163 +1,75 @@
-# All In One (AIO)
+# AIN Platform
 
-This repository contains the connected AIO platform:
+Production-oriented education platform for academies, independent instructors,
+students, staff, and platform operators.
 
-- The React frontend is in the repository root.
-- The Laravel API is in [`backend/`](backend/).
-- Railway should create two services from the same repository.
+## Repository layout
 
-## Run locally
+- `01-Frontend-Web/` — React 19 and Vite web application, public landing page,
+  course marketplace, and role-based dashboards.
+- `02-Backend-API/` — Laravel API, tenancy, billing, attendance, meetings,
+  notifications, privacy, and operational jobs.
+- `03-Mobile-App/` — Flutter student application.
+- `04-Docs-And-Specs/` — product, API, QA, security, and operational documents.
+- `05-Releases/RELEASE_MANIFEST.md` — checksums and metadata for release files.
+
+Generated builds, dependencies, local databases, environment files, APKs,
+screenshots, logs, and legacy archives are intentionally excluded from Git.
+
+## Local development
+
+### Web
 
 ```bash
-npm install
-npm run dev
+cd 01-Frontend-Web
+corepack enable
+pnpm install --frozen-lockfile
+pnpm dev
 ```
 
-## Production
+### API
 
 ```bash
-npm install
-npm run build
-npm start
-```
-
-For the API:
-
-```bash
-cd backend
+cd 02-Backend-API
 composer install
-php artisan test
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
 php artisan serve
 ```
 
-See [`RAILWAY_DEPLOYMENT.md`](RAILWAY_DEPLOYMENT.md) for the two-service setup.
+The default local URLs are:
 
-The current data source is mocked in `src/data/mockData.js`. Replace the functions in `src/services/api.js` with backend endpoints when APIs are ready.
+- Web: `http://127.0.0.1:5173`
+- API: `http://127.0.0.1:8000/api/v1`
 
-## Backend integration
-
-Copy `.env.example` to `.env` and set:
+## Quality gates
 
 ```bash
-VITE_API_BASE_URL=https://your-api-domain.com
-VITE_USE_MOCK_API=false
+cd 01-Frontend-Web
+pnpm test
+pnpm test:e2e
+VITE_USE_MOCK_API=false pnpm build
+
+cd ../02-Backend-API
+php artisan test
+php vendor/bin/pint --test
 ```
 
-Main integration files:
+## Staging review deployment
 
-- `src/services/httpClient.js`: base URL, token headers, and request errors.
-- `src/services/authService.js`: complete auth cycle, invitation acceptance, profile updates, and mock session handling.
-- `src/services/api.js`: rooms, files, members, tenants, analytics, and subscription endpoints.
-- `src/services/organizationRepository.js`: organization memberships and workspace selection.
-- `src/services/learningRepository.js`: courses, cohorts, bookings, enrollments, announcements, meetings, and tasks.
-- `src/domain/organization.js`: roles, permissions, plan entitlements, and module access rules.
+The repository supports two Railway services using the same GitHub repository:
 
-### Multi-organization model
+1. Frontend service with root directory `01-Frontend-Web`.
+2. Backend service with root directory `02-Backend-API` plus PostgreSQL.
 
-One account can belong to multiple organizations. Every request after sign-in should be scoped by an active `organizationId`; the backend remains authoritative for membership, role, permissions, and plan entitlements.
+Follow [`SERVER_REVIEW_GUIDE.md`](SERVER_REVIEW_GUIDE.md) for the exact setup,
+environment variables, health check, and reviewer checklist. Never commit real
+`.env` files or production credentials.
 
-Core organization roles:
+## Main documentation
 
-- `organization_owner`
-- `organization_admin`
-- `instructor`
-- `staff`
-- `student`
-- `member`
-
-Recommended API groups:
-
-- `/users/me/organization-memberships`
-- `/organizations/:organizationId`
-- `/organizations/:organizationId/courses`
-- `/organizations/:organizationId/batches`
-- `/organizations/:organizationId/bookings`
-- `/organizations/:organizationId/enrollments`
-- `/organizations/:organizationId/announcements`
-- `/organizations/:organizationId/meetings`
-- `/organizations/:organizationId/tasks`
-
-Course booking confirmation must be transactional: lock the cohort capacity, confirm the booking, create the enrollment, grant room access, and emit a notification in one backend transaction.
-
-### Auth routing contract
-
-The login screen no longer lets users choose their role manually. The backend should identify the user by email and return the correct role.
-
-`POST /auth/login`
-
-```json
-{
-  "email": "admin@techcorp.test",
-  "password": "********"
-}
-```
-
-Expected response:
-
-```json
-{
-  "token": "jwt_or_session_token",
-  "user": {
-    "id": "user_123",
-    "name": "Ahmed Mostafa",
-    "email": "admin@techcorp.test",
-    "role": "tenant-admin",
-    "roleLabel": "Tenant Admin",
-    "tenantId": "tenant_techcorp",
-    "company": "TechCorp Egypt",
-    "permissions": ["manage_rooms", "manage_members", "upload_files"]
-  }
-}
-```
-
-Frontend redirects by `user.role`:
-
-- `super-admin` -> `/super-admin/dashboard`
-- `tenant-admin` -> `/tenant-admin/dashboard`
-- `end-user` -> `/end-user/home`
-
-Mock accounts while backend auth is not connected:
-
-- `super@ain.test`
-- `admin@techcorp.test`
-- `employee@techcorp.test`
-- `student@ain.test`
-- password: `12345678`
-
-Production routes:
-
-- `/login`
-- `/create-account`
-- `/verify-email`
-- `/forgot-password`
-- `/reset-password`
-- `/join`
-- `/invite/:token`
-- `/no-workspace`
-- `/end-user/home`
-- `/end-user/files`
-- `/tenant-admin/dashboard`
-- `/tenant-admin/rooms`
-- `/tenant-admin/files`
-- `/tenant-admin/members`
-- `/super-admin/dashboard`
-- `/super-admin/tenants`
-- `/super-admin/subscriptions`
-- `/courses`
-- `/courses/:courseSlug`
-- `/academies`
-- `/academies/:academySlug`
-- `/booking/:courseId`
-- `/booking/success`
-- `/tenant-admin/academyProfile`
-- `/tenant-admin/instructors`
-- `/tenant-admin/invitations`
-- `/tenant-admin/promotions`
-- `/super-admin/academies`
-- `/super-admin/courseApprovals`
-- `/super-admin/promotions`
-- `/super-admin/categories`
-
-## QA demo
-
-The mock build includes visible test-account shortcuts on `/login`. Personal-account registration and password recovery use OTP `123456` in mock mode. Remove demo hints by switching `VITE_USE_MOCK_API=false` and connecting the documented endpoints.
+- [`DEPLOYMENT_GUIDE.md`](DEPLOYMENT_GUIDE.md)
+- [`PROJECT_STRUCTURE.md`](PROJECT_STRUCTURE.md)
+- [`02-Backend-API/DEPLOYMENT.md`](02-Backend-API/DEPLOYMENT.md)
+- [`04-Docs-And-Specs/`](04-Docs-And-Specs/)

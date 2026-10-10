@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIO — نموذج تطبيق الموبايل</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#4F46E5;
+    --brand-dark:#3730A3;
+    --brand-light:#EEF0FE;
+    --bg-page:#F1F1F6;
+    --surface:#FFFFFF;
+    --text-primary:#15151F;
+    --text-secondary:#65647A;
+    --text-muted:#9997AB;
+    --border:#E7E6F0;
+    --success:#0F9D6A;
+    --success-bg:#E4F7EF;
+    --warning:#B4790C;
+    --warning-bg:#FDF1DD;
+    --danger:#D6473C;
+    --radius-lg:20px;
+    --radius-md:14px;
+    --radius-sm:10px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'Tajawal', sans-serif;
+    background:var(--bg-page);
+    color:var(--text-primary);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:32px 16px 60px;
+  }
+  .lab-header{
+    text-align:center;
+    max-width:420px;
+    margin-bottom:24px;
+  }
+  .lab-header .brand-mark{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:var(--brand);
+    color:#fff;
+    font-weight:700;
+    font-size:13px;
+    padding:6px 14px;
+    border-radius:999px;
+    margin-bottom:14px;
+  }
+  .lab-header h1{
+    font-size:20px;
+    font-weight:700;
+    margin-bottom:6px;
+  }
+  .lab-header p{
+    font-size:13px;
+    color:var(--text-secondary);
+    line-height:1.7;
+  }
+
+  .device{
+    width:100%;
+    max-width:360px;
+    background:#0A0A12;
+    border-radius:44px;
+    padding:14px;
+    box-shadow:0 30px 60px -20px rgba(20,20,40,0.35);
+  }
+  .device-screen{
+    background:var(--bg-page);
+    border-radius:32px;
+    overflow:hidden;
+    position:relative;
+    height:720px;
+    display:flex;
+    flex-direction:column;
+  }
+  .status-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:14px 22px 4px;
+    font-size:13px;
+    font-weight:700;
+    color:var(--text-primary);
+    flex-shrink:0;
+  }
+  .status-bar .icons{display:flex; gap:5px; align-items:center;}
+  .notch{
+    position:absolute;
+    top:0; left:50%;
+    transform:translateX(-50%);
+    width:120px; height:24px;
+    background:#0A0A12;
+    border-radius:0 0 16px 16px;
+    z-index:5;
+  }
+
+  .screens{
+    flex:1;
+    position:relative;
+    overflow:hidden;
+  }
+  .screen{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    opacity:0;
+    pointer-events:none;
+    transform:translateY(8px);
+    transition:opacity .25s ease, transform .25s ease;
+  }
+  .screen.active{
+    opacity:1;
+    pointer-events:auto;
+    transform:translateY(0);
+  }
+  .screen-body{
+    flex:1;
+    overflow-y:auto;
+    padding:16px 16px 90px;
+  }
+  .screen-body::-webkit-scrollbar{display:none;}
+
+  /* shared bits */
+  .app-header{
+    background:var(--surface);
+    padding:14px 16px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-shrink:0;
+  }
+  .app-header h2{font-size:15px; font-weight:700;}
+  .icon-btn{
+    width:32px; height:32px;
+    border-radius:9px;
+    background:var(--brand-light);
+    color:var(--brand);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    border:none;
+  }
+
+  .bottom-nav{
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    background:var(--surface);
+    border-top:1px solid var(--border);
+    padding:10px 6px 14px;
+    position:absolute;
+    bottom:0; left:0; right:0;
+    z-index:4;
+  }
+  .nav-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:3px;
+    color:var(--text-muted);
+    cursor:pointer;
+    background:none;
+    border:none;
+    font-family:inherit;
+    padding:2px 8px;
+  }
+  .nav-item.active{color:var(--brand);}
+  .nav-item svg{width:20px; height:20px;}
+  .nav-item span{font-size:9.5px; font-weight:700;}
+
+  /* dashboard hero */
+  .hero-card{
+    background:var(--brand);
+    background-image:linear-gradient(135deg,var(--brand),var(--brand-dark));
+    border-radius:0 0 26px 26px;
+    padding:18px 16px 22px;
+    color:#fff;
+  }
+  .hero-top{display:flex; align-items:center; justify-content:space-between;}
+  .hero-id{display:flex; align-items:center; gap:10px;}
+  .logo-chip{
+    width:36px; height:36px;
+    border-radius:10px;
+    background:rgba(255,255,255,0.18);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:12px;
+  }
+  .hero-id .name{font-size:13px; font-weight:700;}
+  .hero-id .sub{font-size:10.5px; opacity:0.8;}
+  .bell-btn{
+    width:32px; height:32px;
+    border-radius:9px;
+    background:rgba(255,255,255,0.15);
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+  }
+  .bell-dot{
+    position:absolute; top:6px; right:7px;
+    width:6px; height:6px; border-radius:50%;
+    background:#FF6B6B;
+  }
+  .stat-row{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+    margin-top:18px;
+  }
+  .stat-box{
+    background:rgba(255,255,255,0.14);
+    border-radius:12px;
+    padding:10px 6px;
+    text-align:center;
+  }
+  .stat-box .num{font-size:17px; font-weight:900;}
+  .stat-box .lbl{font-size:9.5px; opacity:0.85; margin-top:2px;}
+
+  .section-label{
+    font-size:12.5px;
+    font-weight:700;
+    color:var(--text-secondary);
+    margin:18px 0 10px;
+  }
+  .quick-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  .quick-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    padding:13px;
+    display:flex;
+    align-items:center;
+    gap:9px;
+  }
+  .quick-card .qicon{
+    width:32px; height:32px;
+    border-radius:9px;
+    background:var(--brand-light);
+    color:var(--brand);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .quick-card span{font-size:12px; font-weight:700;}
+
+  .activity-item{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    padding:10px 12px;
+    margin-bottom:8px;
+  }
+  .act-icon{
+    width:30px; height:30px;
+    border-radius:9px;
+    background:var(--brand-light);
+    color:var(--brand);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .act-icon.warn{background:var(--warning-bg); color:var(--warning);}
+  .activity-item .title{font-size:12px; font-weight:700;}
+  .activity-item .meta{font-size:10px; color:var(--text-muted); margin-top:2px;}
+
+  /* rooms */
+  .room-card{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    padding:13px;
+    margin-bottom:10px;
+    cursor:pointer;
+  }
+  .room-icon{
+    width:38px; height:38px;
+    border-radius:10px;
+    background:var(--brand-light);
+    color:var(--brand);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .room-card .rname{font-size:13px; font-weight:700;}
+  .room-card .rmeta{font-size:10.5px; color:var(--text-muted); margin-top:2px;}
+  .room-card .lock{color:var(--text-muted); margin-inline-start:auto;}
+
+  /* files */
+  .protect-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    background:var(--success-bg);
+    color:var(--success);
+    font-size:10.5px;
+    font-weight:700;
+    padding:5px 10px;
+    border-radius:8px;
+    margin-top:8px;
+  }
+  .file-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:11px 0;
+    border-bottom:1px solid var(--border);
+  }
+  .file-row:last-child{border-bottom:none;}
+  .file-icon{
+    width:36px; height:36px;
+    border-radius:9px;
+    background:var(--bg-page);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .file-row .fname{font-size:12px; font-weight:700;}
+  .file-row .fmeta{font-size:10px; color:var(--text-muted); margin-top:2px;}
+  .file-row .eye{color:var(--text-muted); margin-inline-start:auto;}
+
+  /* notifications */
+  .notif-item{
+    display:flex;
+    gap:10px;
+    padding:11px 0;
+    border-bottom:1px solid var(--border);
+  }
+  .notif-item:last-child{border-bottom:none;}
+  .notif-dot{
+    width:8px; height:8px; border-radius:50%;
+    background:var(--brand);
+    margin-top:6px;
+    flex-shrink:0;
+  }
+  .notif-dot.muted{background:var(--border);}
+  .notif-item .ntitle{font-size:12px; font-weight:700;}
+  .notif-item .ntime{font-size:10px; color:var(--text-muted); margin-top:2px;}
+
+  /* pricing */
+  .plan-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    padding:13px;
+    margin-bottom:10px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .plan-card.featured{
+    border:2px solid var(--brand);
+    flex-direction:column;
+    align-items:stretch;
+  }
+  .featured-badge{
+    display:inline-block;
+    background:var(--brand-light);
+    color:var(--brand);
+    font-size:10px;
+    font-weight:700;
+    padding:3px 9px;
+    border-radius:7px;
+    margin-bottom:8px;
+    width:fit-content;
+  }
+  .plan-name{font-size:13px; font-weight:700;}
+  .plan-meta{font-size:10.5px; color:var(--text-muted); margin-top:2px;}
+  .plan-price{font-size:13px; font-weight:900;}
+  .plan-row{display:flex; align-items:center; justify-content:space-between;}
+  .primary-btn{
+    width:100%;
+    background:var(--brand);
+    color:#fff;
+    border:none;
+    border-radius:var(--radius-sm);
+    height:44px;
+    font-size:13px;
+    font-weight:700;
+    font-family:inherit;
+    cursor:pointer;
+    margin-top:8px;
+  }
+
+  /* login */
+  .login-wrap{
+    padding:36px 24px;
+    display:flex;
+    flex-direction:column;
+    flex:1;
+  }
+  .login-logo{
+    width:56px; height:56px;
+    border-radius:16px;
+    background:var(--brand-light);
+    color:var(--brand);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:900; font-size:15px;
+    margin:0 auto 14px;
+  }
+  .login-wrap h2{text-align:center; font-size:16px; font-weight:700;}
+  .login-wrap .sub{text-align:center; font-size:12px; color:var(--text-secondary); margin-top:6px; margin-bottom:26px;}
+  .field-label{font-size:11px; font-weight:700; color:var(--text-secondary); margin-bottom:5px; display:block;}
+  .field-input{
+    width:100%;
+    height:42px;
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    padding:0 14px;
+    font-family:inherit;
+    font-size:13px;
+    margin-bottom:14px;
+    background:var(--surface);
+  }
+  .forgot{font-size:11px; color:var(--brand); font-weight:700; text-align:left; margin-bottom:18px; cursor:pointer;}
+  .fine-print{font-size:10.5px; color:var(--text-muted); text-align:center; line-height:1.7;}
+  .login-footer{
+    border-top:1px solid var(--border);
+    margin-top:auto;
+    padding-top:14px;
+    text-align:center;
+    font-size:11px;
+  }
+  .login-footer .link{color:var(--brand); font-weight:700; cursor:pointer;}
+
+  /* profile */
+  .profile-hero{
+    background:var(--brand-light);
+    padding:20px 16px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .profile-avatar{
+    width:48px; height:48px;
+    border-radius:12px;
+    background:var(--surface);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:900; font-size:14px;
+    color:var(--brand);
+  }
+  .profile-hero .pname{font-size:14px; font-weight:700;}
+  .profile-hero .pplan{font-size:11px; color:var(--text-secondary); margin-top:2px;}
+  .menu-row{
+    display:flex;
+    align-items:center;
+    gap:11px;
+    padding:13px 4px;
+    border-bottom:1px solid var(--border);
+    cursor:pointer;
+  }
+  .menu-row .micon{color:var(--text-secondary); flex-shrink:0;}
+  .menu-row span.label{font-size:12.5px; font-weight:600; flex:1;}
+  .menu-row.danger .micon, .menu-row.danger span.label{color:var(--danger);}
+  .menu-row .chev{color:var(--text-muted);}
+
+  .lab-footer{
+    margin-top:26px;
+    font-size:11px;
+    color:var(--text-muted);
+    text-align:center;
+  }
+
+  @media (max-width:400px){
+    .device{max-width:100%;}
+    .device-screen{height:640px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="lab-header">
+  <div class="brand-mark">AIO</div>
+  <h1>نموذج تطبيق موبايل — All In One</h1>
+  <p>دوس على أيقونات الشريط السفلي أو الأزرار للتنقل بين الشاشات. النموذج مبني بنفس هوية موقع AIO.</p>
+</div>
+
+<div class="device">
+  <div class="device-screen">
+    <div class="notch"></div>
+
+    <div class="status-bar">
+      <span>9:41</span>
+      <span class="icons">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8.82a15 15 0 0 1 20 0M5 12.859a10 10 0 0 1 14 0M8.5 16.429a5 5 0 0 1 7 0M12 20h.01"/></svg>
+        <svg width="18" height="12" viewBox="0 0 24 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="19" height="14" rx="3"/><rect x="4" y="4" width="13" height="8" rx="1" fill="currentColor"/><path d="M22 6v4" stroke="currentColor" stroke-width="1.5"/></svg>
+      </span>
+    </div>
+
+    <div class="screens">
+
+      <!-- LOGIN -->
+      <div class="screen active" id="screen-login">
+        <div class="screen-body" style="padding-bottom:16px;">
+          <div class="login-wrap">
+            <div class="login-logo">AIO</div>
+            <h2>تسجيل الدخول</h2>
+            <p class="sub">ادخل بياناتك للمتابعة لداشبورد شركتك</p>
+
+            <label class="field-label">البريد الإلكتروني</label>
+            <input class="field-input" type="text" placeholder="name@company.com">
+
+            <label class="field-label">كلمة المرور</label>
+            <input class="field-input" type="password" placeholder="••••••••">
+
+            <div class="forgot">نسيت كلمة المرور؟</div>
+
+            <button class="primary-btn" onclick="showScreen('home')">دخول</button>
+
+            <p class="fine-print" style="margin-top:16px;">موظف مش عندك حساب؟ تواصل مع مسؤول شركتك للحصول على دعوة.</p>
+
+            <div class="login-footer">
+              لسه معندكش حساب شركة؟ <span class="link" onclick="showScreen('home')">ابدأ مجاناً</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HOME / DASHBOARD -->
+      <div class="screen" id="screen-home">
+        <div class="screen-body" style="padding:0 0 90px;">
+          <div class="hero-card">
+            <div class="hero-top">
+              <div class="hero-id">
+                <div class="logo-chip">TE</div>
+                <div>
+                  <div class="name">TechCorp Egypt</div>
+                  <div class="sub">مساحة عمل آمنة</div>
+                </div>
+              </div>
+              <div class="bell-btn" onclick="showScreen('notifs')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 21h4M4 17h16v-1l-2-2v-4a6 6 0 0 0-4-5.65V3h-4v1.35A6 6 0 0 0 6 10v4l-2 2z"/></svg>
+                <div class="bell-dot"></div>
+              </div>
+            </div>
+            <div class="stat-row">
+              <div class="stat-box"><div class="num">48</div><div class="lbl">الموظفين</div></div>
+              <div class="stat-box"><div class="num">5</div><div class="lbl">الرومات</div></div>
+              <div class="stat-box"><div class="num">142</div><div class="lbl">ملف محمي</div></div>
+            </div>
+          </div>
+
+          <div style="padding:0 16px;">
+            <div class="section-label">إجراءات سريعة</div>
+            <div class="quick-grid">
+              <div class="quick-card" onclick="showScreen('rooms')">
+                <div class="qicon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg></div>
+                <span>رومات آمنة</span>
+              </div>
+              <div class="quick-card" onclick="showScreen('files')">
+                <div class="qicon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
+                <span>ملفات محمية</span>
+              </div>
+              <div class="quick-card" onclick="showScreen('profile')">
+                <div class="qicon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+                <span>دعوة موظف</span>
+              </div>
+              <div class="quick-card" onclick="showScreen('pricing')">
+                <div class="qicon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-6 4 3 4-8"/></svg></div>
+                <span>الباقات</span>
+              </div>
+            </div>
+
+            <div class="section-label">آخر نشاط</div>
+            <div class="activity-item">
+              <div class="act-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 8l5-5 5 5M5 21h14"/></svg></div>
+              <div><div class="title">تم رفع ملف موقّع</div><div class="meta">روم الموارد البشرية · من دقيقتين</div></div>
+            </div>
+            <div class="activity-item">
+              <div class="act-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m17 11 2 2 4-4"/></svg></div>
+              <div><div class="title">موظف جديد انضم</div><div class="meta">قسم المبيعات · من ساعة</div></div>
+            </div>
+            <div class="activity-item">
+              <div class="act-icon warn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+              <div><div class="title">تذكير تجديد الاشتراك</div><div class="meta">باقة Growth · بعد 3 أيام</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROOMS -->
+      <div class="screen" id="screen-rooms">
+        <div class="app-header"><h2>الرومات</h2>
+          <button class="icon-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg></button>
+        </div>
+        <div class="screen-body">
+          <div class="room-card" onclick="showScreen('files')">
+            <div class="room-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg></div>
+            <div><div class="rname">الموارد البشرية</div><div class="rmeta">14 عضو · 22 ملف</div></div>
+            <div class="lock"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+          </div>
+          <div class="room-card" onclick="showScreen('files')">
+            <div class="room-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg></div>
+            <div><div class="rname">المبيعات</div><div class="rmeta">20 عضو · 48 ملف</div></div>
+            <div class="lock"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+          </div>
+          <div class="room-card" onclick="showScreen('files')">
+            <div class="room-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg></div>
+            <div><div class="rname">التطوير التقني</div><div class="rmeta">9 أعضاء · 60 ملف</div></div>
+            <div class="lock"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+          </div>
+          <div class="room-card" onclick="showScreen('files')">
+            <div class="room-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg></div>
+            <div><div class="rname">الإدارة العليا</div><div class="rmeta">5 أعضاء · 12 ملف</div></div>
+            <div class="lock"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+          </div>
+        </div>
+        <div class="bottom-nav" id="nav-rooms"></div>
+      </div>
+
+      <!-- FILES -->
+      <div class="screen" id="screen-files">
+        <div class="app-header">
+          <h2>روم الموارد البشرية</h2>
+          <button class="icon-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 8l5-5 5 5M5 21h14"/></svg></button>
+        </div>
+        <div style="padding:12px 16px 0;">
+          <div class="protect-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2 3 6v6c0 5 4 9 9 10 5-1 9-5 9-10V6z"/><path d="m9 12 2 2 4-4"/></svg>
+            Watermark فعّال · منع تحميل
+          </div>
+        </div>
+        <div class="screen-body">
+          <div class="file-row">
+            <div class="file-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D6473C" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
+            <div><div class="fname">سياسة الإجازات 2026.pdf</div><div class="fmeta">2.1 MB · قبل يومين</div></div>
+            <div class="eye"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          </div>
+          <div class="file-row">
+            <div class="file-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
+            <div><div class="fname">عقد عمل - نموذج.docx</div><div class="fmeta">540 KB · قبل 5 أيام</div></div>
+            <div class="eye"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          </div>
+          <div class="file-row">
+            <div class="file-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B4790C" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg></div>
+            <div><div class="fname">تدريب توجيهي - الجزء 1</div><div class="fmeta">86 MB · أسبوع</div></div>
+            <div class="eye"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          </div>
+          <div class="file-row">
+            <div class="file-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D6473C" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
+            <div><div class="fname">تقرير الأداء الربعي.pdf</div><div class="fmeta">1.4 MB · أسبوعين</div></div>
+            <div class="eye"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          </div>
+        </div>
+        <div class="bottom-nav" id="nav-files"></div>
+      </div>
+
+      <!-- NOTIFICATIONS -->
+      <div class="screen" id="screen-notifs">
+        <div class="app-header"><h2>الإشعارات</h2></div>
+        <div class="screen-body">
+          <div class="notif-item">
+            <div class="notif-dot"></div>
+            <div><div class="ntitle">ملف جديد في روم المبيعات</div><div class="ntime">منذ 10 دقائق</div></div>
+          </div>
+          <div class="notif-item">
+            <div class="notif-dot"></div>
+            <div><div class="ntitle">تذكير: تجديد الاشتراك خلال 3 أيام</div><div class="ntime">منذ ساعتين</div></div>
+          </div>
+          <div class="notif-item">
+            <div class="notif-dot muted"></div>
+            <div><div class="ntitle" style="color:var(--text-secondary)">موظف جديد قبل الدعوة</div><div class="ntime">أمس</div></div>
+          </div>
+          <div class="notif-item">
+            <div class="notif-dot muted"></div>
+            <div><div class="ntitle" style="color:var(--text-secondary)">تقرير مشاهدات جاهز</div><div class="ntime">قبل يومين</div></div>
+          </div>
+        </div>
+        <div class="bottom-nav" id="nav-notifs"></div>
+      </div>
+
+      <!-- PRICING -->
+      <div class="screen" id="screen-pricing">
+        <div class="app-header"><h2>اختار باقتك</h2></div>
+        <div class="screen-body">
+          <p style="font-size:11.5px; color:var(--text-muted); margin-bottom:14px;">أول شهر مجاناً على كل الباقات</p>
+
+          <div class="plan-card">
+            <div><div class="plan-name">Starter</div><div class="plan-meta">روم واحدة · 100 مستخدم</div></div>
+            <div class="plan-price">500 ج</div>
+          </div>
+
+          <div class="plan-card featured">
+            <div class="featured-badge">الأكثر شيوعاً</div>
+            <div class="plan-row">
+              <div><div class="plan-name">Growth</div><div class="plan-meta">10 رومات · Anti-leak</div></div>
+              <div class="plan-price">1,200 ج</div>
+            </div>
+          </div>
+
+          <div class="plan-card">
+            <div><div class="plan-name">Pro</div><div class="plan-meta">غير محدود · White label</div></div>
+            <div class="plan-price">2,500 ج</div>
+          </div>
+
+          <div class="plan-card">
+            <div><div class="plan-name">Enterprise</div><div class="plan-meta">AI assistant · دعم 24/7</div></div>
+            <div class="plan-price" style="font-size:11.5px; font-weight:700; color:var(--text-secondary);">حسب الاتفاق</div>
+          </div>
+
+          <button class="primary-btn">متابعة</button>
+        </div>
+        <div class="bottom-nav" id="nav-pricing"></div>
+      </div>
+
+      <!-- PROFILE -->
+      <div class="screen" id="screen-profile">
+        <div class="profile-hero">
+          <div class="profile-avatar">TE</div>
+          <div><div class="pname">TechCorp Egypt</div><div class="pplan">باقة Growth · نشطة</div></div>
+        </div>
+        <div class="screen-body">
+          <div class="menu-row">
+            <div class="micon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M6 21V8l6-4 6 4v13M10 21v-6h4v6"/></svg></div>
+            <span class="label">بيانات الشركة</span>
+            <div class="chev"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg></div>
+          </div>
+          <div class="menu-row" onclick="showScreen('pricing')">
+            <div class="micon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div>
+            <span class="label">الاشتراك والفواتير</span>
+            <div class="chev"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg></div>
+          </div>
+          <div class="menu-row">
+            <div class="micon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg></div>
+            <span class="label">سياسة الجهاز الواحد</span>
+            <div class="chev"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg></div>
+          </div>
+          <div class="menu-row">
+            <div class="micon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-6 4 3 4-8"/></svg></div>
+            <span class="label">التحليلات والتقارير</span>
+            <div class="chev"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg></div>
+          </div>
+          <div class="menu-row">
+            <div class="micon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+            <span class="label">الدعم الفني</span>
+            <div class="chev"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg></div>
+          </div>
+          <div class="menu-row danger" onclick="showScreen('login')">
+            <div class="micon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg></div>
+            <span class="label">تسجيل الخروج</span>
+          </div>
+        </div>
+        <div class="bottom-nav" id="nav-profile"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="lab-footer">All In One (AIO) — نموذج تصميم غير رسمي</div>
+
+<script>
+  const navPages = ['home','rooms','files','notifs','pricing','profile'];
+  const navItems = [
+    {id:'home', label:'الرئيسية', icon:'<path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>'},
+    {id:'rooms', label:'الرومات', icon:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/>'},
+    {id:'files', label:'الملفات', icon:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>'},
+    {id:'notifs', label:'الإشعارات', icon:'<path d="M10 21h4M4 17h16v-1l-2-2v-4a6 6 0 0 0-4-5.65V3h-4v1.35A6 6 0 0 0 6 10v4l-2 2z"/>'},
+    {id:'profile', label:'حسابي', icon:'<circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/>'}
+  ];
+
+  function buildNav(activeId){
+    return navItems.map(it => `
+      <button class="nav-item ${it.id===activeId?'active':''}" onclick="showScreen('${it.id}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${it.icon}</svg>
+        <span>${it.label}</span>
+      </button>
+    `).join('');
+  }
+
+  navPages.forEach(p => {
+    const nav = document.getElementById('nav-'+p);
+    if(nav) nav.innerHTML = buildNav(p === 'notifs' ? 'notifs' : p);
+  });
+
+  function showScreen(id){
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const target = document.getElementById('screen-'+id);
+    if(target) target.classList.add('active');
+  }
+</script>
+
+</body>
+</html>

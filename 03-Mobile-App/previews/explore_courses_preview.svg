@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+  <style>.t{font-family:Inter,Arial,sans-serif;fill:#0f172a}.m{font-family:Inter,Arial,sans-serif;fill:#64748b}.card{fill:#fff;stroke:#e2e8f0}.blue{fill:#2563eb}</style>
+  <rect width="390" height="844" rx="34" fill="#0f172a"/><rect x="10" y="10" width="370" height="824" rx="28" fill="#f8fafc"/><rect x="158" y="24" width="74" height="7" rx="4" fill="#111827"/>
+  <text x="28" y="72" class="t" font-size="21" font-weight="800">Explore courses</text>
+  <rect x="28" y="104" width="334" height="50" rx="8" fill="#fff" stroke="#e2e8f0"/><text x="50" y="135" class="m" font-size="14">Search courses, subjects, academies</text>
+  <rect x="28" y="176" width="334" height="152" rx="8" class="card"/><rect x="44" y="194" width="84" height="84" rx="8" fill="#dbeafe"/><text x="64" y="244" fill="#2563eb" font-family="Arial" font-size="30">Σ</text>
+  <text x="144" y="212" class="t" font-size="17" font-weight="800">Math Advanced</text><text x="144" y="236" class="m" font-size="13">AIN Learning Academy</text><text x="144" y="260" class="m" font-size="13">Online • 12 open seats</text><text x="144" y="292" fill="#2563eb" font-family="Inter,Arial" font-size="14" font-weight="800">View details</text>
+  <rect x="28" y="348" width="334" height="152" rx="8" class="card"/><rect x="44" y="366" width="84" height="84" rx="8" fill="#ecfdf5"/><text x="65" y="416" fill="#16a34a" font-family="Arial" font-size="30">A+</text>
+  <text x="144" y="384" class="t" font-size="17" font-weight="800">English Conversation</text><text x="144" y="408" class="m" font-size="13">Hybrid class</text><text x="144" y="432" class="m" font-size="13">Beginner • Evening batch</text><text x="144" y="464" fill="#2563eb" font-family="Inter,Arial" font-size="14" font-weight="800">View details</text>
+  <rect x="28" y="520" width="334" height="152" rx="8" class="card"/><rect x="44" y="538" width="84" height="84" rx="8" fill="#fff7ed"/><text x="67" y="588" fill="#ea580c" font-family="Arial" font-size="30">⚗</text>
+  <text x="144" y="556" class="t" font-size="17" font-weight="800">Chemistry Basics</text><text x="144" y="580" class="m" font-size="13">Recorded + live sessions</text><text x="144" y="604" class="m" font-size="13">Starts next week</text><text x="144" y="636" fill="#2563eb" font-family="Inter,Arial" font-size="14" font-weight="800">View details</text>
+</svg>

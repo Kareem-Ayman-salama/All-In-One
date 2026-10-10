@@ -1,5 +1,48 @@
-node_modules
-dist
+# Root Git Ignore
+node_modules/
+dist/
 .env
-.env.local
+.env.*
+!.env.example
+!.env.*.example
+
+# Backend
+02-Backend-API/vendor/
+02-Backend-API/storage/*.key
+02-Backend-API/storage/logs/*.log
+02-Backend-API/storage/framework/cache/*
+02-Backend-API/storage/framework/sessions/*
+02-Backend-API/storage/framework/views/*
+02-Backend-API/.phpunit.result.cache
+
+# Mobile
+03-Mobile-App/.dart_tool/
+03-Mobile-App/.flutter-plugins
+03-Mobile-App/.flutter-plugins-dependencies
+03-Mobile-App/build/
+03-Mobile-App/android/.gradle/
+03-Mobile-App/android/app/build/
+03-Mobile-App/android/key.properties
+03-Mobile-App/ios/Pods/
+03-Mobile-App/ios/.symlinks/
+03-Mobile-App/ios/Flutter/Flutter.framework
+03-Mobile-App/ios/Flutter/Flutter.podspec
+
+# System & IDE
+.DS_Store
+Thumbs.db
+*.apk
+*.aab
+.idea/
+.vscode/
+
+# Archive, screenshots, and legacy workflows
+99-Archive/
+emulator_screen*.png
+01-Frontend-Web/.github/
 *.log
+
+# Release binaries (APKs/ZIPs tracked in RELEASE_MANIFEST.md)
+05-Releases/**
+!05-Releases/
+!05-Releases/RELEASE_MANIFEST.md

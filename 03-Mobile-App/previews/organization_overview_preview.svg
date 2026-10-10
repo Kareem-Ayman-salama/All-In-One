@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+  <style>.t{font-family:Inter,Arial,sans-serif;fill:#0f172a}.m{font-family:Inter,Arial,sans-serif;fill:#64748b}.card{fill:#fff;stroke:#e2e8f0}.b{fill:#2563eb}</style>
+  <rect width="390" height="844" rx="34" fill="#0f172a"/><rect x="10" y="10" width="370" height="824" rx="28" fill="#f8fafc"/><rect x="158" y="24" width="74" height="7" rx="4" fill="#111827"/>
+  <text x="28" y="72" class="t" font-size="21" font-weight="800">Organization overview</text><text x="28" y="102" class="m" font-size="13">Workspace health and key management areas.</text>
+  <rect x="28" y="132" width="157" height="94" rx="8" class="card"/><text x="48" y="170" class="t" font-size="28" font-weight="800">18</text><text x="48" y="197" class="m" font-size="13">Active members</text>
+  <rect x="205" y="132" width="157" height="94" rx="8" class="card"/><text x="225" y="170" class="t" font-size="28" font-weight="800">7</text><text x="225" y="197" class="m" font-size="13">Pending bookings</text>
+  <text x="28" y="268" class="t" font-size="18" font-weight="800">Quick actions</text>
+  <rect x="28" y="292" width="334" height="58" rx="8" class="card"/><circle cx="58" cy="321" r="16" fill="#eff6ff"/><text x="84" y="327" class="t" font-size="15" font-weight="800">Review bookings</text>
+  <rect x="28" y="364" width="334" height="58" rx="8" class="card"/><circle cx="58" cy="393" r="16" fill="#ecfdf5"/><text x="84" y="399" class="t" font-size="15" font-weight="800">Manage courses</text>
+  <rect x="28" y="436" width="334" height="58" rx="8" class="card"/><circle cx="58" cy="465" r="16" fill="#fff7ed"/><text x="84" y="471" class="t" font-size="15" font-weight="800">Publish announcement</text>
+  <text x="28" y="538" class="t" font-size="18" font-weight="800">Today</text>
+  <rect x="28" y="562" width="334" height="118" rx="8" class="card"/><text x="48" y="596" class="t" font-size="16" font-weight="800">Operations snapshot</text><text x="48" y="624" class="m" font-size="13">Courses, rooms, members, content, events.</text><rect x="48" y="646" width="236" height="10" rx="5" fill="#dbeafe"/><rect x="48" y="646" width="168" height="10" rx="5" class="b"/>
+</svg>

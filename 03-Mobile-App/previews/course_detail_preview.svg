@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+  <style>.t{font-family:Inter,Arial,sans-serif;fill:#0f172a}.m{font-family:Inter,Arial,sans-serif;fill:#64748b}.card{fill:#fff;stroke:#e2e8f0}.b{fill:#2563eb}</style>
+  <rect width="390" height="844" rx="34" fill="#0f172a"/><rect x="10" y="10" width="370" height="824" rx="28" fill="#f8fafc"/><rect x="158" y="24" width="74" height="7" rx="4" fill="#111827"/>
+  <text x="28" y="72" class="t" font-size="20" font-weight="800">Course details</text>
+  <rect x="28" y="100" width="334" height="160" rx="12" fill="#dbeafe"/><text x="58" y="190" fill="#2563eb" font-family="Arial" font-size="52" font-weight="800">Physics</text>
+  <text x="28" y="304" class="t" font-size="25" font-weight="800">IGCSE Physics Foundation</text><text x="28" y="331" class="m" font-size="14">AIN Learning Academy • Online</text>
+  <rect x="28" y="358" width="334" height="74" rx="8" class="card"/><text x="48" y="386" class="t" font-size="16" font-weight="800">Batch A</text><text x="48" y="412" class="m" font-size="13">Sun / Tue 06:00 PM • 24 seats available</text>
+  <rect x="28" y="448" width="334" height="74" rx="8" class="card"/><text x="48" y="476" class="t" font-size="16" font-weight="800">Batch B</text><text x="48" y="502" class="m" font-size="13">Mon / Wed 04:00 PM • 8 seats available</text>
+  <text x="28" y="566" class="t" font-size="18" font-weight="800">What you will learn</text><text x="28" y="596" class="m" font-size="14">• Motion, forces, electricity, waves</text><text x="28" y="622" class="m" font-size="14">• Exam-style problem solving</text><text x="28" y="648" class="m" font-size="14">• Weekly practice and feedback</text>
+  <rect x="28" y="724" width="334" height="54" rx="8" class="b"/><text x="155" y="758" fill="#fff" font-family="Inter,Arial" font-size="15" font-weight="800">Book course</text>
+</svg>

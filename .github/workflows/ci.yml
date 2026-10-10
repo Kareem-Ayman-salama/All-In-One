@@ -12,34 +12,53 @@ jobs:
   frontend:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: 01-Frontend-Web
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.19.0
 
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: 01-Frontend-Web/pnpm-lock.yaml
 
       - name: Install frontend dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit frontend dependencies
+        run: pnpm audit --prod --audit-level high
 
       - name: Validate frontend and integration contracts
-        run: npm test
+        run: pnpm test
 
       - name: Build frontend
         env:
           VITE_API_BASE_URL: https://api.example.com/api/v1
           VITE_USE_MOCK_API: "false"
           VITE_SHOW_DEMO_ACCOUNTS: "false"
-        run: npm run build
+        run: pnpm run build
+
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run responsive browser smoke tests
+        run: pnpm run test:e2e
 
   backend:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     defaults:
       run:
-        working-directory: backend
+        working-directory: 02-Backend-API
 
     services:
       postgres:

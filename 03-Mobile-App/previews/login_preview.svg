@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+  <style>.t{font-family:Inter,Arial,sans-serif;fill:#0f172a}.m{font-family:Inter,Arial,sans-serif;fill:#64748b}.c{fill:#fff;stroke:#e2e8f0}.b{fill:#2563eb}</style>
+  <rect width="390" height="844" rx="34" fill="#0f172a"/><rect x="10" y="10" width="370" height="824" rx="28" fill="#f8fafc"/>
+  <rect x="158" y="24" width="74" height="7" rx="4" fill="#111827"/>
+  <circle cx="195" cy="112" r="42" fill="#eff6ff"/><text x="168" y="126" font-size="34" font-weight="800" fill="#2563eb" font-family="Arial">AIO</text>
+  <text x="40" y="205" class="t" font-size="28" font-weight="800">Welcome back</text><text x="40" y="232" class="m" font-size="14">Sign in to continue to your workspace.</text>
+  <rect x="40" y="280" width="310" height="58" rx="8" class="c"/><text x="58" y="315" class="m" font-size="14">Email address</text>
+  <rect x="40" y="356" width="310" height="58" rx="8" class="c"/><text x="58" y="391" class="m" font-size="14">Password</text>
+  <text x="222" y="443" fill="#2563eb" font-family="Inter,Arial" font-size="14" font-weight="700">Forgot password?</text>
+  <rect x="40" y="480" width="310" height="54" rx="8" class="b"/><text x="174" y="513" fill="#fff" font-family="Inter,Arial" font-size="15" font-weight="800">Login</text>
+  <rect x="40" y="552" width="310" height="54" rx="8" fill="#fff" stroke="#cbd5e1"/><text x="142" y="585" fill="#2563eb" font-family="Inter,Arial" font-size="15" font-weight="800">Create account</text>
+  <text x="77" y="720" class="m" font-size="13">Secure mobile access with tenant-aware sessions.</text>
+</svg>

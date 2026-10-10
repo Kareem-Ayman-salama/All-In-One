@@ -1,0 +1,168 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ain-staging-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:?DB_DATABASE is required}
+      POSTGRES_USER: ${DB_USERNAME:?DB_USERNAME is required}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_staging_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:?DB_USERNAME is required} -d ${DB_DATABASE:?DB_DATABASE is required}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ain_staging_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: ain-staging-redis
+    restart: unless-stopped
+    command: ["sh", "-c", "redis-server --requirepass \"$${REDIS_PASSWORD:?REDIS_PASSWORD is required}\""]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_staging_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD:?REDIS_PASSWORD is required}\" ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ain_staging_network
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: ain-staging-mailpit
+    restart: unless-stopped
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_DATABASE: /data/mailpit.db
+    ports:
+      - "127.0.0.1:1025:1025" # SMTP Port (localhost only)
+      - "127.0.0.1:8025:8025" # Web UI Port (localhost only)
+    volumes:
+      - mailpit_staging_data:/data
+    networks:
+      - ain_staging_network
+
+  minio:
+    image: minio/minio:latest
+    container_name: ain-staging-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${AWS_ACCESS_KEY_ID:?AWS_ACCESS_KEY_ID is required}
+      MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY:?AWS_SECRET_ACCESS_KEY is required}
+    ports:
+      - "127.0.0.1:9000:9000" # S3 API (localhost only)
+      - "127.0.0.1:9001:9001" # Web Console (localhost only)
+    volumes:
+      - minio_staging_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ain_staging_network
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: ain-staging-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_USER: ${AWS_ACCESS_KEY_ID:?AWS_ACCESS_KEY_ID is required}
+      MINIO_PASSWORD: ${AWS_SECRET_ACCESS_KEY:?AWS_SECRET_ACCESS_KEY is required}
+      MINIO_PRIVATE_BUCKET: ${AWS_BUCKET:?AWS_BUCKET is required}
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set localminio http://minio:9000 \"$$MINIO_USER\" \"$$MINIO_PASSWORD\";
+      /usr/bin/mc mb --ignore-existing \"localminio/$$MINIO_PRIVATE_BUCKET\";
+      /usr/bin/mc mb --ignore-existing localminio/ain-content-staging-public;
+      /usr/bin/mc anonymous set download localminio/ain-content-staging-public;
+      echo 'MinIO S3 Buckets Initialized Successfully.';
+      exit 0;
+      "
+    networks:
+      - ain_staging_network
+
+  clamav:
+    image: clamav/clamav:latest
+    container_name: ain-staging-clamav
+    restart: unless-stopped
+    environment:
+      CLAMAV_NO_FRESHCLAMD: "false"
+    ports:
+      - "127.0.0.1:3310:3310" # ClamD TCP daemon (localhost only)
+    volumes:
+      - clamav_staging_db:/var/lib/clamav
+    networks:
+      - ain_staging_network
+
+  backend-api:
+    build:
+      context: ./02-Backend-API
+      dockerfile: Dockerfile
+    container_name: ain-staging-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      clamav:
+        condition: service_started
+      mailpit:
+        condition: service_started
+      minio:
+        condition: service_healthy
+    env_file:
+      - ./02-Backend-API/.env.staging
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ./02-Backend-API:/var/www/html
+    networks:
+      - ain_staging_network
+
+  queue-worker:
+    build:
+      context: ./02-Backend-API
+      dockerfile: Dockerfile
+    container_name: ain-staging-worker
+    restart: unless-stopped
+    command: ["php", "artisan", "queue:work", "redis", "--queue=high,default,notifications,malware", "--tries=3", "--timeout=90"]
+    depends_on:
+      backend-api:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - ./02-Backend-API/.env.staging
+    volumes:
+      - ./02-Backend-API:/var/www/html
+    networks:
+      - ain_staging_network
+
+volumes:
+  postgres_staging_data:
+  redis_staging_data:
+  mailpit_staging_data:
+  minio_staging_data:
+  clamav_staging_db:
+
+networks:
+  ain_staging_network:
+    driver: bridge

@@ -3,18 +3,13 @@ name: AIN Mobile CI
 on:
   pull_request:
     paths:
-      - "mobile/**"
-      - "docs/mobile-openapi.json"
-      - "scripts/validate-integration.mjs"
+      - "03-Mobile-App/**"
       - ".github/workflows/mobile-ci.yml"
   push:
     branches: [main]
     paths:
-      - "mobile/**"
-      - "docs/mobile-openapi.json"
-      - "scripts/validate-integration.mjs"
+      - "03-Mobile-App/**"
       - ".github/workflows/mobile-ci.yml"
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -25,14 +20,21 @@ jobs:
     timeout-minutes: 25
     defaults:
       run:
-        working-directory: mobile
+        working-directory: 03-Mobile-App
 
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: "3.44.8"
           channel: stable
           cache: true
 

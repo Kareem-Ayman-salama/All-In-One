@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIN | المنصة الذكية المتكاملة للأكاديميات والمراكز التعليمية</title>
+  <meta name="description" content="منظومة AIN لإدارة الأكاديميات التعليمية: غرف وكورسات ومدفوعات وحضور QR، مع ضوابط للأجهزة وعلامة مائية قابلة للتتبع وربط فيديوهات YouTube Unlisted.">
+  <link rel="icon" type="image/png" href="/images/ain-logo.png">
+  <link rel="apple-touch-icon" href="/images/ain-logo.png">
+  <meta name="theme-color" content="#16458F">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="AIN - منصة الأكاديميات وحماية الكورسات التعليمية">
+  <meta property="og:description" content="احمِ كورساتك من التسريب، نظّم طلابك، وضاعف أرباحك بدون تكاليف استضافة باهظة. تجربة مجانية 30 يوماً.">
+  <meta property="og:locale" content="ar_EG">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+  <link rel="stylesheet" href="/landing/style.css">
+</head>
+<body>
+  <!-- Ambient background glow effects -->
+  <div class="ambient-glow glow-top" aria-hidden="true"></div>
+  <div class="ambient-glow glow-middle" aria-hidden="true"></div>
+
+  <!-- Header Navigation -->
+  <header class="site-header">
+    <nav class="site-nav" aria-label="التنقل الرئيسي">
+      <a class="brand" href="/" aria-label="AIN">
+        <div class="brand-badge">
+          <img src="/images/ain-logo.png" alt="AIN Logo">
+        </div>
+        <span class="brand-text">AIN<span class="brand-dot">.</span></span>
+      </a>
+
+      <!-- Clean Floating Island Nav Menu (Strictly Single Line) -->
+      <div class="nav-menu">
+        <a href="/courses" data-i18n="nav_marketplace">سوق الكورسات</a>
+        <button type="button" onclick="scrollToId('features')" data-i18n="nav_features">المميزات</button>
+        <button type="button" onclick="scrollToId('protection')" data-i18n="nav_protection">درع الحماية</button>
+        <button type="button" onclick="scrollToId('pricing')" data-i18n="nav_pricing">الأسعار</button>
+        <button type="button" onclick="scrollToId('faq')" data-i18n="nav_faq">الأسئلة الشائعة</button>
+      </div>
+
+      <!-- Action Buttons Group (No Wrap, Balanced Spacing) -->
+      <div class="nav-actions">
+        <!-- Language Switcher Pill -->
+        <button class="lang-toggle-btn" type="button" onclick="toggleLanguage()" aria-label="تغيير اللغة" title="Switch Language">
+          <i class="ti ti-world"></i>
+          <span id="lang-label">English</span>
+        </button>
+
+        <a class="ghost-link" href="/login" data-i18n="nav_login">تسجيل الدخول</a>
+        
+        <button class="primary-button small" type="button" onclick="openLeadModal('trial-modal')">
+          <span data-i18n="nav_start_trial">ابدأ مجاناً</span>
+          <i class="ti ti-arrow-left arrow-icon"></i>
+        </button>
+      </div>
+
+      <!-- Mobile Hamburger Button -->
+      <button class="mobile-menu-toggle" type="button" onclick="toggleMobileMenu()" aria-label="القائمة">
+        <i class="ti ti-menu-2"></i>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Mobile Navigation Drawer -->
+  <div class="mobile-drawer-overlay" id="drawer-overlay" onclick="toggleMobileMenu()"></div>
+  <aside class="mobile-drawer" id="mobile-drawer" aria-label="القائمة الجانبية">
+    <div class="drawer-head">
+      <div class="brand">
+        <div class="brand-badge small">
+          <img src="/images/ain-logo.png" alt="AIN">
+        </div>
+        <span class="brand-text">AIN<span class="brand-dot">.</span></span>
+      </div>
+      <button class="drawer-close" type="button" onclick="toggleMobileMenu()" aria-label="إغلاق"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="drawer-body">
+      <button type="button" onclick="toggleMobileMenu(); scrollToId('roles')" data-i18n="nav_roles">استكشف الأدوار</button>
+      <button type="button" onclick="toggleMobileMenu(); scrollToId('protection')" data-i18n="nav_protection">الحماية ضد التسريب</button>
+      <button type="button" onclick="toggleMobileMenu(); scrollToId('features')" data-i18n="nav_features">المميزات</button>
+      <button type="button" onclick="toggleMobileMenu(); scrollToId('pricing')" data-i18n="nav_pricing">الباقات</button>
+      <button type="button" onclick="toggleMobileMenu(); scrollToId('faq')" data-i18n="nav_faq">الأسئلة الشائعة</button>
+      <hr class="drawer-divider">
+      <a href="/courses" class="drawer-link"><i class="ti ti-shopping-bag"></i> <span data-i18n="nav_marketplace">سوق الكورسات</span></a>
+      <a href="/sell-courses" class="drawer-link"><i class="ti ti-speakerphone"></i> <span data-i18n="market_launch_sell">انشر كورسك</span></a>
+      <a href="/choose" class="drawer-link"><i class="ti ti-sparkles"></i> <span data-i18n="nav_role_picker">تجربة الأدوار المباشرة</span></a>
+      <a href="/login" class="drawer-link"><i class="ti ti-login"></i> <span data-i18n="nav_login">تسجيل الدخول</span></a>
+    </div>
+    <div class="drawer-footer">
+      <button class="primary-button full-width" type="button" onclick="toggleMobileMenu(); openLeadModal('trial-modal')" data-i18n="nav_start_trial">ابدأ شهر مجاني</button>
+    </div>
+  </aside>
+
+  <main>
+    <!-- HERO SECTION -->
+    <section class="hero-section">
+      <div class="hero-container">
+        <div class="hero-copy">
+          <div class="hero-header-badge">
+            <span class="pulse-dot"></span>
+            <span data-i18n="hero_badge">تشغيل الأكاديمية من مكان واحد</span>
+          </div>
+
+          <h1 class="hero-title" data-i18n="hero_title">
+            شغّل أكاديميتك <span class="gradient-text">باحتراف</span>، وامنح طلابك تجربة أفضل
+          </h1>
+
+          <p class="hero-description" data-i18n="hero_desc">
+            الكورسات، المدفوعات، الحضور، الجلسات والأجهزة في مساحة عمل واحدة بهوية أكاديميتك—بدون فوضى الأدوات المتفرقة.
+          </p>
+
+          <div class="hero-cta-group">
+            <button class="primary-button large glow-btn" type="button" onclick="openLeadModal('trial-modal')">
+              <span data-i18n="hero_cta_primary">ابدأ تجربة مجانية</span>
+              <i class="ti ti-arrow-left arrow-icon"></i>
+            </button>
+
+            <a class="secondary-button large" href="/choose">
+              <i class="ti ti-player-play"></i>
+              <span data-i18n="hero_cta_secondary">استكشف المنصة</span>
+            </a>
+          </div>
+
+          <div class="hero-trust-bar">
+            <div class="trust-pill">
+              <i class="ti ti-circle-check-filled"></i>
+              <span data-i18n="perk_no_card">بدون بطاقة بنكية</span>
+            </div>
+            <div class="trust-pill">
+              <i class="ti ti-shield-lock-filled"></i>
+              <span data-i18n="perk_watermark">علامة مائية قابلة للتتبع</span>
+            </div>
+            <div class="trust-pill">
+              <i class="ti ti-device-mobile-check"></i>
+              <span data-i18n="perk_device">إدارة الأجهزة والجلسات</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-product-preview" aria-label="معاينة لوحة تحكم AIN">
+          <div class="preview-glow"></div>
+          <div class="preview-window">
+            <div class="preview-window-bar">
+              <div class="preview-dots"><span></span><span></span><span></span></div>
+              <span class="preview-domain">academy.ainplatform.com</span>
+              <span class="preview-secure"><i class="ti ti-lock"></i></span>
+            </div>
+            <div class="preview-app">
+              <aside class="preview-sidebar">
+                <div class="preview-logo"><img src="/images/ain-logo.png" alt=""><strong>AIN</strong></div>
+                <span class="active"><i class="ti ti-layout-dashboard"></i></span>
+                <span><i class="ti ti-users"></i></span>
+                <span><i class="ti ti-book-2"></i></span>
+                <span><i class="ti ti-report-analytics"></i></span>
+              </aside>
+              <div class="preview-main">
+                <header>
+                  <div><small data-i18n="preview_workspace">مساحة عمل الأكاديمية</small><strong data-i18n="preview_overview">نظرة عامة</strong></div>
+                  <span class="preview-live"><i></i><span data-i18n="preview_live">تحديث مباشر</span></span>
+                </header>
+                <div class="preview-metrics">
+                  <article><span data-i18n="preview_revenue">إيراد الشهر</span><strong>96,400 <small>ج.م</small></strong><em>+12.4%</em></article>
+                  <article><span data-i18n="preview_students">طلاب نشطون</span><strong>482</strong><em>+28</em></article>
+                  <article><span data-i18n="preview_attendance">متوسط الحضور</span><strong>94%</strong><em>+6.2%</em></article>
+                </div>
+                <div class="preview-chart-card">
+                  <div class="preview-chart-head"><strong data-i18n="preview_growth">نمو الاشتراكات</strong><span>30 days</span></div>
+                  <div class="preview-chart"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                </div>
+                <div class="preview-activity">
+                  <span><i class="ti ti-shield-check"></i></span>
+                  <div><strong data-i18n="preview_activity_title">جلسة مشاهدة محمية</strong><small data-i18n="preview_activity_meta">38 طالباً متصلون الآن</small></div>
+                  <em data-i18n="preview_protected">محمية</em>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="preview-floating-card"><i class="ti ti-qrcode"></i><div><strong>42</strong><span data-i18n="preview_checked_in">حضور اليوم</span></div></div>
+        </div>
+
+        <div class="simulator-intro">
+          <span class="simulator-intro-badge" data-i18n="sim_intro_badge">حماية عملية بدون وعود مستحيلة</span>
+          <h2 data-i18n="sim_intro_title">شاهد كيف نردع مشاركة الحسابات ونجعل التسريب قابلاً للتتبع</h2>
+          <p data-i18n="sim_intro_desc">جرّب طبقة العلامة المائية المتحركة، ثم تعرّف على ربط الأجهزة والجلسات الذي يساعد فريقك على مراجعة محاولات الدخول غير المعتادة.</p>
+          <div class="simulator-intro-pills" aria-label="طبقات الحماية العملية">
+            <span><i class="ti ti-device-mobile-check"></i><span data-i18n="sim_intro_device">ربط الجهاز</span></span>
+            <span><i class="ti ti-droplet-lock"></i><span data-i18n="sim_intro_watermark">علامة قابلة للتتبع</span></span>
+            <span><i class="ti ti-key"></i><span data-i18n="sim_intro_access">ضبط الجلسات</span></span>
+          </div>
+        </div>
+
+        <!-- INTERACTIVE LIVE WATERMARK & SECURITY SIMULATOR -->
+        <div class="simulator-wrapper" id="simulator-block">
+          <div class="simulator-card">
+            <div class="simulator-topbar">
+              <div class="window-dots">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+              </div>
+              <div class="simulator-tab-pill">
+                <i class="ti ti-shield-check"></i>
+                <span data-i18n="sim_header">محاكي درع الحماية المباشر (Live Anti-Piracy Shield Engine)</span>
+              </div>
+              <div class="simulator-status-tag">
+                <span class="live-blink"></span>
+                <span data-i18n="sim_status">نظام ردع وتتبع نشط</span>
+              </div>
+            </div>
+
+            <div class="simulator-layout">
+              <!-- Player Screen Mockup -->
+              <div class="simulator-player" id="sim-player-stage" oncontextmenu="handleSimRightClick(event)">
+                <div class="sim-video-bg">
+                  <div class="sim-video-grid-lines"></div>
+                  <div class="sim-video-center-content">
+                    <div class="sim-play-ring">
+                      <i class="ti ti-player-play-filled"></i>
+                    </div>
+                    <h4 data-i18n="sim_video_title">كورس الرياضيات المتقدمة - المحاضرة 04</h4>
+                    <p data-i18n="sim_video_desc">جلسة فيديو بمشاهدة مقيدة وعلامة مائية ديناميكية</p>
+                  </div>
+                </div>
+
+                <!-- DYNAMIC WATERMARK OVERLAY -->
+                <div class="sim-watermark moving" id="sim-watermark-tag">
+                  <span id="sim-watermark-display">Ahmed Mohamed • 01025849793 • 197.48.22.14 • Session #4892</span>
+                </div>
+
+                <!-- TOAST WARNING ON ATTEMPTED RIGHT CLICK -->
+                <div class="sim-alert-toast" id="sim-blocked-toast">
+                  <i class="ti ti-shield-x"></i>
+                  <span data-i18n="sim_blocked_msg">تم اعتراض اختصار داخل المشغل. يعتمد الردع الفعلي على ربط الجهاز والعلامة المائية القابلة للتتبع.</span>
+                </div>
+
+                <!-- Player Controls Mock -->
+                <div class="sim-player-controls">
+                  <button type="button" class="ctrl-btn" onclick="toggleSimPlayback()"><i class="ti ti-player-play" id="sim-play-icon"></i></button>
+                  <div class="sim-progress-bar"><div class="sim-progress-fill"></div></div>
+                  <span class="sim-time">14:20 / 48:00</span>
+                  <button type="button" class="ctrl-btn" title="وضع الحماية السينمائي"><i class="ti ti-maximize"></i></button>
+                </div>
+              </div>
+
+              <!-- Interactive Controls Sidebar -->
+              <div class="simulator-sidebar">
+                <div class="sim-side-head">
+                  <i class="ti ti-adjustments-horizontal"></i>
+                  <h3 data-i18n="sim_controls_title">جرّب درع الحماية بنفسك الآن</h3>
+                </div>
+                <p class="sim-side-desc" data-i18n="sim_controls_desc">
+                  اكتب أي اسم ورقم هاتف ولاحظ كيف تظهر العلامة المائية فوق الشاشة وتتنقل تلقائياً كل 4 ثوانٍ لتردع أي محاولة تسجيل بكاميرا خارجية:
+                </p>
+
+                <div class="sim-input-group">
+                  <label for="sim-input-name" data-i18n="sim_input_name">اسم الطالب التجريبي:</label>
+                  <input type="text" id="sim-input-name" value="أحمد محمد الشناوي" oninput="updateSimWatermark()">
+                </div>
+
+                <div class="sim-input-group">
+                  <label for="sim-input-phone" data-i18n="sim_input_phone">رقم الهاتف / الـ IP:</label>
+                  <input type="text" id="sim-input-phone" value="+20 102 584 9793 • IP: 197.48.22.14" oninput="updateSimWatermark()">
+                </div>
+
+                <div class="sim-actions-list">
+                  <button type="button" class="sim-action-btn active" onclick="moveSimWatermarkRandomly()">
+                    <i class="ti ti-refresh"></i>
+                    <span data-i18n="sim_btn_move">تحريك العلامة المائية الآن</span>
+                  </button>
+
+                  <button type="button" class="sim-action-btn warning" onclick="triggerSimSecurityAlert()">
+                    <i class="ti ti-mouse"></i>
+                    <span data-i18n="sim_btn_test_click">اختبار محاولة نسخ / كليك يمين</span>
+                  </button>
+                </div>
+
+                <div class="sim-security-score">
+                  <div class="score-icon"><i class="ti ti-shield-check-filled"></i></div>
+                  <div>
+                    <strong data-i18n="sim_score_title">أعلى معدل حماية في السوق العربي</strong>
+                    <small data-i18n="sim_score_subtitle">يقلل مشاركة الحسابات بنسبة تتجاوز 90%</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 3 VALUE PILLARS (Modern Clean Bento Grid) -->
+        <div class="hero-floating-banner">
+          <div class="banner-grid">
+            <div class="banner-card">
+              <div class="banner-icon-box bg-blue">
+                <i class="ti ti-building-community"></i>
+              </div>
+              <div class="banner-card-info">
+                <h4 data-i18n="b1_title">أكاديميتك بهويتك المستقلة</h4>
+                <p data-i18n="b1_desc">مساحة عمل احترافية باسمك، شعارك، وروابط دفعك، مفصولة تماماً عن أي منافسين.</p>
+              </div>
+            </div>
+
+            <div class="banner-card">
+              <div class="banner-icon-box bg-emerald">
+                <i class="ti ti-shield-check"></i>
+              </div>
+              <div class="banner-card-info">
+                <h4 data-i18n="b2_title">درع حماية المحتوى والدروس</h4>
+                <p data-i18n="b2_desc">بث يوتيوب مشفر، علامة مائية متحركة، قفل الشاشة، ومنع أدوات المطورين والتحميل.</p>
+              </div>
+            </div>
+
+            <div class="banner-card">
+              <div class="banner-icon-box bg-amber">
+                <i class="ti ti-qrcode"></i>
+              </div>
+              <div class="banner-card-info">
+                <h4 data-i18n="b3_title">تحضير الحضور بـ QR Code</h4>
+                <p data-i18n="b3_desc">نظام حضور فوري للجلسات الحضورية والأونلاين يمنع التلاعب مع إشعارات مباشرة لولي الأمر.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- OPERATIONAL TRUST FOUNDATION -->
+    <section class="operational-trust" aria-label="أساسيات تشغيل AIN">
+      <div class="wrap trust-foundation-grid">
+        <article>
+          <span><i class="ti ti-lifebuoy"></i></span>
+          <div><strong data-i18n="trust_onboarding_title">تهيئة بمساعدة فريقنا</strong><small data-i18n="trust_onboarding_desc">نجهز معك أول مساحة وكورس قبل الانطلاق.</small></div>
+        </article>
+        <article>
+          <span><i class="ti ti-language"></i></span>
+          <div><strong data-i18n="trust_bilingual_title">واجهة عربية وإنجليزية</strong><small data-i18n="trust_bilingual_desc">تجربة واضحة لفريقك وطلابك باللغتين.</small></div>
+        </article>
+        <article>
+          <span><i class="ti ti-devices"></i></span>
+          <div><strong data-i18n="trust_devices_title">ويب وتطبيق Android</strong><small data-i18n="trust_devices_desc">وصول مرن من المتصفح أو تطبيق الطالب.</small></div>
+        </article>
+        <article>
+          <span><i class="ti ti-database-lock"></i></span>
+          <div><strong data-i18n="trust_isolation_title">فصل بيانات كل أكاديمية</strong><small data-i18n="trust_isolation_desc">مساحة مستقلة بهوية وصلاحيات فريقك.</small></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- INTERACTIVE ROLE SHOWCASE SWITCHER (How each persona experiences AIN) -->
+    <section class="section roles-section" id="roles">
+      <div class="wrap">
+        <div class="section-badge-center">
+          <i class="ti ti-users-group"></i>
+          <span data-i18n="roles_badge">تجربة شاملة لجميع الأطراف</span>
+        </div>
+        <h2 class="section-title-center" data-i18n="roles_title">منظومة مصممة بدقة لتلبي احتياجات فريقك بالكامل</h2>
+        <p class="section-desc-center" data-i18n="roles_desc">سواء كنت مديراً لأكاديمية، أو معلماً يقدم المحاضرات، أو طالباً يتعلم، صُممت كل شاشة لتوفر أقصى إنتاجية وسلاسة.</p>
+
+        <!-- Role Tabs -->
+        <div class="role-tabs-bar">
+          <button type="button" class="role-tab-btn active" onclick="switchRoleShowcase('admin')" id="role-btn-admin">
+            <i class="ti ti-building"></i>
+            <span data-i18n="role_tab_admin">مدير الأكاديمية والسنتر</span>
+          </button>
+          <button type="button" class="role-tab-btn" onclick="switchRoleShowcase('instructor')" id="role-btn-instructor">
+            <i class="ti ti-chalkboard"></i>
+            <span data-i18n="role_tab_instructor">المعلم والمحاضر</span>
+          </button>
+          <button type="button" class="role-tab-btn" onclick="switchRoleShowcase('student')" id="role-btn-student">
+            <i class="ti ti-school"></i>
+            <span data-i18n="role_tab_student">الطالب وولي الأمر</span>
+          </button>
+        </div>
+
+        <!-- Role Showcase Content -->
+        <div class="role-showcase-box" id="role-box">
+          <div class="role-content-col" id="role-content-col">
+            <span class="role-kicker" id="role-kicker"><i class="ti ti-shield-check"></i> تحكم تشغيلي وأمني متكامل</span>
+            <h3 class="role-heading" id="role-heading">لوحة تحكم مركزية لإدارة كل تفاصيل أكاديميتك</h3>
+            <p class="role-body" id="role-body">
+              راقب الاشتراكات والإيرادات في الوقت الحقيقي، اعتمد طلبات حجز الحصص، وأدر أجهزة الطلاب المصرح لها. إذا حاول أي طالب فتح حسابه من جهاز صديقه، يتم إيقافه تلقائياً وتصلك إشعار فوري لمراجعة وتأكيد استبدال الجهاز.
+            </p>
+            <ul class="role-bullets" id="role-bullets">
+              <li><i class="ti ti-check"></i> إدارة الدفعات والغرف التعليمية (Cohorts & Rooms) بمرونة تامة.</li>
+              <li><i class="ti ti-check"></i> قفل الحساب بجهاز واحد لكل طالب (1 Student = 1 Device Binding).</li>
+              <li><i class="ti ti-check"></i> تقارير مالية وتصدير كشوف الحضور والدرجات إلى Excel بضغطة زر.</li>
+              <li><i class="ti ti-check"></i> تحديد صلاحيات دقيقة للمساعدين والمدرسين دون الوصول للأرباح العامة.</li>
+            </ul>
+            <div class="role-actions">
+              <a href="/choose" class="primary-button small">
+                <span data-i18n="role_browse_dash">تصفح لوحة التحكم الحية</span>
+                <i class="ti ti-arrow-left arrow-icon"></i>
+              </a>
+            </div>
+          </div>
+
+          <div class="role-preview-col" id="role-preview-col">
+            <div class="mock-dash-card">
+              <div class="mock-dash-head">
+                <div class="mock-title">
+                  <i class="ti ti-dashboard"></i>
+                  <span id="mock-head-title">لوحة مدير الأكاديمية - نظرة سريعة</span>
+                </div>
+                <span class="mock-live-badge"><i class="ti ti-point-filled"></i> متصل الآن</span>
+              </div>
+              <div class="mock-metrics-row">
+                <div class="metric-pill">
+                  <small>الطلاب النشطون</small>
+                  <strong>482 طالب</strong>
+                </div>
+                <div class="metric-pill green">
+                  <small>إيراد الشهر</small>
+                  <strong>96,400 ج.م</strong>
+                </div>
+                <div class="metric-pill red">
+                  <small>محاولات دخول للمراجعة</small>
+                  <strong>14 محاولة</strong>
+                </div>
+              </div>
+              <div class="mock-list-box">
+                <div class="mock-list-item">
+                  <div class="item-icon green"><i class="ti ti-qrcode"></i></div>
+                  <div class="item-text">
+                    <strong>تحضير دفعة الثانوية العامة (المجموعة أ)</strong>
+                    <small>تم تسجيل حضور 42 طالباً عبر QR Code بنجاح</small>
+                  </div>
+                  <span class="item-time">منذ 3 دقائق</span>
+                </div>
+                <div class="mock-list-item">
+                  <div class="item-icon amber"><i class="ti ti-device-mobile"></i></div>
+                  <div class="item-text">
+                    <strong>طلب استبدال جهاز (محمود عادل)</strong>
+                    <small>حاول الدخول من كمبيوتر محمول جديد - بانتظار موافقتك</small>
+                  </div>
+                  <span class="badge-pending">قيد المراجعة</span>
+                </div>
+                <div class="mock-list-item">
+                  <div class="item-icon blue"><i class="ti ti-video"></i></div>
+                  <div class="item-text">
+                    <strong>جلسة مشاهدة نشطة: المحاضرة الخامسة</strong>
+                    <small>علامة مائية فعالة لـ 38 طالباً متزامناً</small>
+                  </div>
+                  <span class="badge-active">مشاهدة آمنة</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SAVINGS & ROI CALCULATOR (Helps the client see the exact financial benefit) -->
+    <section class="section calculator-section" id="calculator">
+      <div class="wrap">
+        <div class="section-badge-center">
+          <i class="ti ti-calculator"></i>
+          <span data-i18n="calc_badge">احسب أرباحك وتوفيرك</span>
+        </div>
+        <h2 class="section-title-center" data-i18n="calc_title">كم ستوفر وتجني مع AIN مقارنة بالمنصات التقليدية؟</h2>
+        <p class="section-desc-center" data-i18n="calc_desc">حرّك المؤشر وحدد عدد طلابك لتكتشف كم من الأموال تهدر في استضافة الفيديوهات، وكم من الاشتراكات تضيع بسبب الحسابات المشتركة.</p>
+
+        <div class="calc-card">
+          <div class="calc-inputs-col">
+            <div class="calc-slider-group">
+              <div class="slider-header">
+                <label for="calc-students-range" data-i18n="calc_lbl_students">عدد الطلاب في أكاديميتك:</label>
+                <span class="slider-val" id="calc-students-val">250 طالب</span>
+              </div>
+              <input type="range" id="calc-students-range" min="30" max="1500" step="10" value="250" oninput="calculateRoi()">
+            </div>
+
+            <div class="calc-slider-group">
+              <div class="slider-header">
+                <label for="calc-price-range" data-i18n="calc_lbl_price">متوسط سعر اشتراك الكورس / الشهر:</label>
+                <span class="slider-val" id="calc-price-val">250 ج.م</span>
+              </div>
+              <input type="range" id="calc-price-range" min="50" max="1000" step="25" value="250" oninput="calculateRoi()">
+            </div>
+
+            <div class="calc-callout">
+              <i class="ti ti-info-circle"></i>
+              <p data-i18n="calc_callout">تشتت أدوات الحضور والدروس والمدفوعات يرهق ميزانية السنتر ووقت الإدارة. AIN يجمع كل هذه الأدوات في منصة موحدة توفر ساعات من العمل اليدوي وتقلل هدر الحسابات المشتركة.</p>
+            </div>
+          </div>
+
+          <div class="calc-results-col">
+            <div class="roi-stat-box">
+              <small data-i18n="calc_res_hosting_lbl">توفير استضافة الفيديوهات سنوياً (Vimeo / Wistia):</small>
+              <strong class="green-text" id="res-hosting-savings">24,000 ج.م</strong>
+              <span data-i18n="calc_res_hosting_sub">مع AIN وفر تكاليف الاستضافة عبر ربط فيديوهاتك المباشر</span>
+            </div>
+
+            <div class="roi-stat-box">
+              <small data-i18n="calc_res_reclaim_lbl">تقدير العائد المحسن بالحد من الحسابات المشتركة:</small>
+              <strong class="blue-text" id="res-leak-recovered">187,500 ج.م</strong>
+              <span data-i18n="calc_res_reclaim_sub">توفير وقت الإدارة وضبط اشتراكات الطلاب الرسمية</span>
+            </div>
+
+            <div class="roi-grand-total">
+              <small data-i18n="calc_res_total_lbl">إجمالي العائد الإضافي المتوقع لأكاديميتك سنوياً:</small>
+              <h3 id="res-total-benefit">+211,500 ج.م</h3>
+              <button class="primary-button full-width" type="button" onclick="openLeadModal('trial-modal')">
+                <i class="ti ti-rocket"></i>
+                <span data-i18n="calc_res_cta_btn">احجز نسختك المجانية وضاعف أرباحك الآن</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROBLEM & SOLUTION MATRIX -->
+    <section class="section problem-solution-section" id="protection">
+      <div class="wrap">
+        <div class="section-badge-center">
+          <i class="ti ti-arrows-diff"></i>
+          <span data-i18n="comp_badge">المقارنة الصادقة</span>
+        </div>
+        <h2 class="section-title-center" data-i18n="comp_title">لماذا تفشل الطرق التقليدية في حماية كورساتك؟</h2>
+        <p class="section-desc-center" data-i18n="comp_desc">بيع الكورسات عبر واتساب ويوتيوب غير مدرج وروابط درايف يفتح الباب واسعاً للمشاركة المجانية وضياع مجهودك.</p>
+
+        <div class="comparison-grid">
+          <!-- The Bad Old Way -->
+          <div class="comp-card before-card">
+            <div class="comp-header">
+              <div class="comp-tag bad"><i class="ti ti-x"></i> <span data-i18n="comp_before_tag">الطرق التقليدية (واتساب / درايف / تليجرام)</span></div>
+              <h3 data-i18n="comp_before_title">خسائر مستمرة ومحتوى مسرب بلا رقيب</h3>
+            </div>
+            <ul class="comp-list">
+              <li>
+                <i class="ti ti-circle-x-filled"></i>
+                <div>
+                  <strong data-i18n="comp_b1_title">الروابط تتسرب في دقائق</strong>
+                  <p data-i18n="comp_b1_desc">بمجرد مشاركة رابط الفيديو، يستطيع أي شخص إرساله لأصدقائه بدون إذنك.</p>
+                </div>
+              </li>
+              <li>
+                <i class="ti ti-circle-x-filled"></i>
+                <div>
+                  <strong data-i18n="comp_b2_title">طالب واحد يدخل من 10 أجهزة</strong>
+                  <p data-i18n="comp_b2_desc">اشتراك واحد يتم توزيعه على دفعة كاملة لعدم وجود قفل للجلسات أو الأجهزة.</p>
+                </div>
+              </li>
+              <li>
+                <i class="ti ti-circle-x-filled"></i>
+                <div>
+                  <strong data-i18n="comp_b3_title">تسجيل الشاشة بدون أي إثبات</strong>
+                  <p data-i18n="comp_b3_desc">إذا قام أحدهم بتصوير الشاشة بهاتفه، لا يمكنك معرفة الفاعل لعدم وجود علامة مائية.</p>
+                </div>
+              </li>
+              <li>
+                <i class="ti ti-circle-x-filled"></i>
+                <div>
+                  <strong data-i18n="comp_b4_title">فوضى في تتبع الحضور والغياب</strong>
+                  <p data-i18n="comp_b4_desc">لا توجد سجلات من شاهد، من غاب، أو من حاول تنزيل الملفات بطرق ملتوية.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- The AIN Way -->
+          <div class="comp-card after-card">
+            <div class="glow-accent"></div>
+            <div class="comp-header">
+              <div class="comp-tag good"><i class="ti ti-check"></i> <span data-i18n="comp_after_tag">منظومة AIN الذكية</span></div>
+              <h3 data-i18n="comp_after_title">ضوابط وصول وتتبع تساعدك على حماية المحتوى</h3>
+            </div>
+            <ul class="comp-list">
+              <li>
+                <i class="ti ti-circle-check-filled"></i>
+                <div>
+                  <strong data-i18n="comp_a1_title">جلسات مشاهدة مؤقتة ومقيّدة</strong>
+                  <p data-i18n="comp_a1_desc">يُتحقق من صلاحية الطالب قبل بدء المشاهدة، وتستخدم الجلسة توكناً مؤقتاً يفقد صلاحيته ولا يعمل كرابط فيديو مستقل.</p>
+                </div>
+              </li>
+              <li>
+                <i class="ti ti-circle-check-filled"></i>
+                <div>
+                  <strong data-i18n="comp_a2_title">سياسة جهاز معتمد (1 Student = 1 Device)</strong>
+                  <p data-i18n="comp_a2_desc">حساب الطالب مقترن ببصمة جهازه فقط؛ إذا حاول فتحه من جهاز ثانٍ، يتوقف الدخول ويطلب موافقتك.</p>
+                </div>
+              </li>
+              <li>
+                <i class="ti ti-circle-check-filled"></i>
+                <div>
+                  <strong data-i18n="comp_a3_title">علامة مائية ديناميكية متحركة</strong>
+                  <p data-i18n="comp_a3_desc">تظهر بيانات تعريف الطالب فوق الفيديو وتتحرك دورياً، ما يردع التصوير الخارجي ويساعد على نسبة النسخة المتداولة إلى جلستها.</p>
+                </div>
+              </li>
+              <li>
+                <i class="ti ti-circle-check-filled"></i>
+                <div>
+                  <strong data-i18n="comp_a4_title">تحضير QR Code وسجل أحداث</strong>
+                  <p data-i18n="comp_a4_desc">تسجيل حضور سريع، مع سجل للأحداث التي تلتقطها المنصة مثل فتح الجلسة ومحاولات بعض الاختصارات داخل المشغل.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CORE FEATURES (PILLARS) -->
+    <section class="section features-section" id="features">
+      <div class="wrap">
+        <div class="section-badge-center">
+          <i class="ti ti-layout-grid"></i>
+          <span data-i18n="feat_badge">أدوات الأكاديمية المتكاملة</span>
+        </div>
+        <h2 class="section-title-center" data-i18n="feat_title">كل ما تحتاجه لإدارة وتوسيع أكاديميتك في مكان واحد</h2>
+        <p class="section-desc-center" data-i18n="feat_desc">صُممت المنصة لتلبي احتياجات المدرس المستقل والمراكز التعليمية الكبرى بأعلى كفاءة وأبسط تجربة.</p>
+
+        <div class="features-grid">
+          <article class="feature-card">
+            <div class="feature-icon"><i class="ti ti-building"></i></div>
+            <h3 data-i18n="f1_title">مساحة عمل مخصصة بهوية أكاديميتك</h3>
+            <p data-i18n="f1_desc">أكاديميتك باسمك وشعارك وهوية بصرية كاملة، مع فصل تام للبيانات وحماية خصوصية طلابك.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon"><i class="ti ti-chalkboard"></i></div>
+            <h3 data-i18n="f2_title">غرف تعليمية ودفعات (Cohorts)</h3>
+            <p data-i18n="f2_desc">قسّم طلابك حسب الدفعة، اليوم، أو المستوى الدراسي، مع تحديد دقيق لصلاحيات الوصول لكل غرفة.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon"><i class="ti ti-brand-youtube"></i></div>
+            <h3 data-i18n="f3_title">تشغيل YouTube Unlisted داخل المنصة</h3>
+            <p data-i18n="f3_desc">استخدم YouTube Unlisted لتقليل تكلفة استضافة الفيديو، مع تشغيل مدمج وضوابط وصول وعلامة مائية داخل المنصة.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon"><i class="ti ti-device-laptop"></i></div>
+            <h3 data-i18n="f4_title">إدارة الأجهزة والاستبدال الذكي</h3>
+            <p data-i18n="f4_desc">لوحة أمان كاملة لمتابعة أجهزة الطلاب، مع نظام طلب استبدال جهاز بضغطة زر للمدرس لمراجعة الطلب.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon"><i class="ti ti-qrcode"></i></div>
+            <h3 data-i18n="f5_title">تحضير الحضور بـ QR Code ديناميكي</h3>
+            <p data-i18n="f5_desc">نظام حضور فوري للجلسات الأونلاين والحضورية برمز QR مؤقت ومتجدد يحد من إعادة استخدام الرمز أو مشاركته.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon"><i class="ti ti-chart-arrows-vertical"></i></div>
+            <h3 data-i18n="f6_title">تقارير وإيرادات تفصيلية</h3>
+            <p data-i18n="f6_desc">متابعة دقيقة للحجوزات، اشتراكات الطلاب، نسب المشاهدة، وتصدير التقارير لـ Excel وCSV فوراً.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section market-launch-section" id="course-marketplace">
+      <div class="wrap market-launch-grid">
+        <div class="market-launch-copy">
+          <div class="section-badge"><i class="ti ti-building-store"></i><span data-i18n="market_launch_badge">سوق كورسات للمدرسين والأكاديميات</span></div>
+          <h2 data-i18n="market_launch_title">حوّل كورساتك إلى واجهة بيع جاهزة للطلاب</h2>
+          <p data-i18n="market_launch_desc">اعرض كورساتك المباشرة أو المسجلة، سوّق لها من صفحة عامة، واستقبل الحجوزات سواء كنت مدرسًا مستقلًا أو تدير أكاديمية كاملة.</p>
+          <div class="market-launch-actions">
+            <a class="primary-button large" href="/sell-courses"><span data-i18n="market_launch_sell">انشر كورسك</span><i class="ti ti-arrow-left arrow-icon"></i></a>
+            <a class="secondary-button large" href="/courses"><i class="ti ti-shopping-bag"></i><span data-i18n="market_launch_browse">تصفح السوق</span></a>
+          </div>
+        </div>
+        <div class="market-launch-options">
+          <article><span><i class="ti ti-user-star"></i></span><div><strong data-i18n="market_launch_teacher_title">للمدرس المستقل</strong><p data-i18n="market_launch_teacher_desc">صفحة باسمك، أسعارك ودفعاتك بدون الحاجة إلى سنتر.</p></div><a href="/register-company?type=independent_instructor" data-i18n="market_launch_start">ابدأ الآن</a></article>
+          <article><span><i class="ti ti-building-community"></i></span><div><strong data-i18n="market_launch_academy_title">للأكاديمية أو المركز</strong><p data-i18n="market_launch_academy_desc">متجر بهويتك مع عدة مدرسين وكورسات وفروع.</p></div><a href="/register-company?type=academy" data-i18n="market_launch_register">سجّل أكاديميتك</a></article>
+        </div>
+      </div>
+    </section>
+
+    <!-- CURRICULA & COURSES SHOWCASE (kept hidden until live inventory is available) -->
+    <section class="section curricula-section" id="curricula">
+      <div class="wrap">
+        <div class="section-badge-center">
+          <i class="ti ti-books"></i>
+          <span data-i18n="curr_badge">سوق الكورسات والمناهج</span>
+        </div>
+        <h2 class="section-title-center" data-i18n="curr_title">استكشف باقة من أقوى الكورسات والمناهج التعليمية</h2>
+        <p class="section-desc-center" data-i18n="curr_desc">تصفح نماذج من المقررات المنشورة عبر المنصة بمختلف المراحل والتخصصات.</p>
+
+        <!-- Category Filter Tabs -->
+        <div class="curricula-tabs">
+          <button type="button" class="curr-tab-btn active" onclick="filterCourses('all')" data-i18n="c_tab_all">الكل (All)</button>
+          <button type="button" class="curr-tab-btn" onclick="filterCourses('secondary')" data-i18n="c_tab_sec">الثانوية العامة (3)</button>
+          <button type="button" class="curr-tab-btn" onclick="filterCourses('tech')" data-i18n="c_tab_tech">برمجة وتقنية (2)</button>
+          <button type="button" class="curr-tab-btn" onclick="filterCourses('languages')" data-i18n="c_tab_lang">اللغات والترجمة (1)</button>
+        </div>
+
+        <!-- Course Cards Grid -->
+        <div class="courses-grid" id="courses-grid">
+          <!-- Course 1 -->
+          <div class="course-card" data-category="secondary">
+            <div class="course-thumb">
+              <img src="/images/courses/physics.jpg" alt="الفيزياء الحديثة" class="course-cover-img" loading="lazy">
+              <div class="course-thumb-overlay"></div>
+              <div class="thumb-badge" data-i18n="c1_badge">ثانوية عامة</div>
+              <span class="discount-badge">-25%</span>
+            </div>
+            <div class="course-body">
+              <div class="course-meta">
+                <span><i class="ti ti-clock"></i> <span data-i18n="c1_hours">32 ساعة تدريبية</span></span>
+                <span><i class="ti ti-users"></i> <span data-i18n="c1_students">148 طالباً</span></span>
+              </div>
+              <h3 class="course-name" data-i18n="c1_title">الفيزياء الحديثة للثانوية العامة 2026</h3>
+              <p class="course-desc" data-i18n="c1_desc">شرح تفصيلي للمنهج مع حل أكثر من 1500 فكرة وبنك أسئلة واختبارات دورية مشفرة ومحمية من التسريب.</p>
+              <div class="course-instructor">
+                <img src="/images/avatars/inst1.jpg" class="inst-avatar-img" alt="أ. أحمد النجار">
+                <div>
+                  <strong data-i18n="c1_inst">أ. أحمد النجار</strong>
+                  <small data-i18n="c1_role">خبير الفيزياء المعتمد</small>
+                </div>
+              </div>
+              <div class="course-footer">
+                <div class="price-box">
+                  <strong data-i18n="c1_price">240 ج.م</strong>
+                  <del data-i18n="c1_old_price">320 ج.م</del>
+                </div>
+                <a href="/courses" class="btn-enroll" data-i18n="c_btn_enroll">احجز الآن</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Course 2 -->
+          <div class="course-card" data-category="tech">
+            <div class="course-thumb">
+              <img src="/images/courses/coding.jpg" alt="معسكر تطوير تطبيقات الويب" class="course-cover-img" loading="lazy">
+              <div class="course-thumb-overlay"></div>
+              <div class="thumb-badge" data-i18n="c2_badge">برمجة وذكاء اصطناعي</div>
+              <span class="discount-badge">-30%</span>
+            </div>
+            <div class="course-body">
+              <div class="course-meta">
+                <span><i class="ti ti-clock"></i> <span data-i18n="c2_hours">48 ساعة تدريبية</span></span>
+                <span><i class="ti ti-users"></i> <span data-i18n="c2_students">312 طالباً</span></span>
+              </div>
+              <h3 class="course-name" data-i18n="c2_title">معسكر تطوير تطبيقات الويب الشامل (Full-Stack)</h3>
+              <p class="course-desc" data-i18n="c2_desc">من الصفر إلى الاحتراف: React, Node.js, قواعد البيانات مع بناء مشاريع إنتاجية حقيقية وتأهيل لسوق العمل.</p>
+              <div class="course-instructor">
+                <img src="/images/avatars/inst3.jpg" class="inst-avatar-img" alt="م. طارق المهدي">
+                <div>
+                  <strong data-i18n="c2_inst">م. طارق المهدي</strong>
+                  <small data-i18n="c2_role">Senior Software Architect</small>
+                </div>
+              </div>
+              <div class="course-footer">
+                <div class="price-box">
+                  <strong data-i18n="c2_price">650 ج.م</strong>
+                  <del data-i18n="c2_old_price">900 ج.م</del>
+                </div>
+                <a href="/courses" class="btn-enroll" data-i18n="c_btn_enroll">احجز الآن</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Course 3 -->
+          <div class="course-card" data-category="secondary">
+            <div class="course-thumb">
+              <img src="/images/courses/chemistry.jpg" alt="الكيمياء العضوية" class="course-cover-img" loading="lazy">
+              <div class="course-thumb-overlay"></div>
+              <div class="thumb-badge" data-i18n="c3_badge">ثانوية عامة</div>
+              <span class="discount-badge">-20%</span>
+            </div>
+            <div class="course-body">
+              <div class="course-meta">
+                <span><i class="ti ti-clock"></i> <span data-i18n="c3_hours">28 ساعة تدريبية</span></span>
+                <span><i class="ti ti-users"></i> <span data-i18n="c3_students">220 طالباً</span></span>
+              </div>
+              <h3 class="course-name" data-i18n="c3_title">الكيمياء العضوية الشاملة - الصف الثالث الثانوي</h3>
+              <p class="course-desc" data-i18n="c3_desc">مخططات المعادلات، آليات التفاعل، وحل امتحانات السنوات السابقة بنظام التابلت الحديث وبنك أسئلة ذكي.</p>
+              <div class="course-instructor">
+                <img src="/images/avatars/inst4.jpg" class="inst-avatar-img" alt="د. سامح عبد الرازق">
+                <div>
+                  <strong data-i18n="c3_inst">د. سامح عبد الرازق</strong>
+                  <small data-i18n="c3_role">مدرس الكيمياء الأول</small>
+                </div>
+              </div>
+              <div class="course-footer">
+                <div class="price-box">
+                  <strong data-i18n="c3_price">200 ج.م</strong>
+                  <del data-i18n="c3_old_price">250 ج.م</del>
+                </div>
+                <a href="/courses" class="btn-enroll" data-i18n="c_btn_enroll">احجز الآن</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Course 4 -->
+          <div class="course-card" data-category="languages">
+            <div class="course-thumb">
+              <img src="/images/courses/english.jpg" alt="اللغة الإنجليزية للأعمال" class="course-cover-img" loading="lazy">
+              <div class="course-thumb-overlay"></div>
+              <div class="thumb-badge" data-i18n="c4_badge">لغات وترجمة</div>
+              <span class="discount-badge">-15%</span>
+            </div>
+            <div class="course-body">
+              <div class="course-meta">
+                <span><i class="ti ti-clock"></i> <span data-i18n="c4_hours">36 ساعة تدريبية</span></span>
+                <span><i class="ti ti-users"></i> <span data-i18n="c4_students">180 طالباً</span></span>
+              </div>
+              <h3 class="course-name" data-i18n="c4_title">اللغة الإنجليزية للأعمال والتحدث بطلاقة</h3>
+              <p class="course-desc" data-i18n="c4_desc">تمارين نطق متقدمة، مصطلحات سوق العمل، وتدريبات استماع حية مع مدربين معتمدين دولياً مع شهادات معتمدة.</p>
+              <div class="course-instructor">
+                <img src="/images/avatars/inst2.jpg" class="inst-avatar-img" alt="أ. دينا الشافعي">
+                <div>
+                  <strong data-i18n="c4_inst">أ. دينا الشافعي</strong>
+                  <small data-i18n="c4_role">CELTA Certified Trainer</small>
+                </div>
+              </div>
+              <div class="course-footer">
+                <div class="price-box">
+                  <strong data-i18n="c4_price">350 ج.م</strong>
+                  <del data-i18n="c4_old_price">400 ج.م</del>
+                </div>
+                <a href="/courses" class="btn-enroll" data-i18n="c_btn_enroll">احجز الآن</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Course 5 -->
+          <div class="course-card" data-category="tech">
+            <div class="course-thumb">
+              <img src="/images/courses/mobile.jpg" alt="تطوير تطبيقات الموبايل" class="course-cover-img" loading="lazy">
+              <div class="course-thumb-overlay"></div>
+              <div class="thumb-badge" data-i18n="c5_badge">برمجة وتقنية</div>
+              <span class="discount-badge">-35%</span>
+            </div>
+            <div class="course-body">
+              <div class="course-meta">
+                <span><i class="ti ti-clock"></i> <span data-i18n="c5_hours">40 ساعة تدريبية</span></span>
+                <span><i class="ti ti-users"></i> <span data-i18n="c5_students">195 طالباً</span></span>
+              </div>
+              <h3 class="course-name" data-i18n="c5_title">تطوير تطبيقات الموبايل باستخدام Flutter & Dart</h3>
+              <p class="course-desc" data-i18n="c5_desc">بناء وتصدير تطبيقات iOS وAndroid احترافية وربطها بالخوادم والـ APIs مع نشرها على متجري App Store وGoogle Play.</p>
+              <div class="course-instructor">
+                <img src="/images/avatars/inst3.jpg" class="inst-avatar-img" alt="م. عبد الرحمن نبيل">
+                <div>
+                  <strong data-i18n="c5_inst">م. عبد الرحمن نبيل</strong>
+                  <small data-i18n="c5_role">Mobile Lead Developer</small>
+                </div>
+              </div>
+              <div class="course-footer">
+                <div class="price-box">
+                  <strong data-i18n="c5_price">500 ج.م</strong>
+                  <del data-i18n="c5_old_price">750 ج.م</del>
+                </div>
+                <a href="/courses" class="btn-enroll" data-i18n="c_btn_enroll">احجز الآن</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Course 6 -->
+          <div class="course-card" data-category="secondary">
+            <div class="course-thumb">
+              <img src="/images/courses/math.jpg" alt="التفاضل والتكامل والهندسة الفراغية" class="course-cover-img" loading="lazy">
+              <div class="course-thumb-overlay"></div>
+              <div class="thumb-badge" data-i18n="c6_badge">ثانوية عامة</div>
+              <span class="discount-badge">-20%</span>
+            </div>
+            <div class="course-body">
+              <div class="course-meta">
+                <span><i class="ti ti-clock"></i> <span data-i18n="c6_hours">45 ساعة تدريبية</span></span>
+                <span><i class="ti ti-users"></i> <span data-i18n="c6_students">340 طالباً</span></span>
+              </div>
+              <h3 class="course-name" data-i18n="c6_title">التفاضل والتكامل والهندسة الفراغية</h3>
+              <p class="course-desc" data-i18n="c6_desc">شرح مبسط لقوانين التفاضل والتكامل وتطبيقاتها مع أسرار حل المسائل الصعبة في دقائق ونماذج امتحانات وزارية.</p>
+              <div class="course-instructor">
+                <img src="/images/avatars/inst1.jpg" class="inst-avatar-img" alt="أ. محمد فوزي">
+                <div>
+                  <strong data-i18n="c6_inst">أ. محمد فوزي</strong>
+                  <small data-i18n="c6_role">مدرس أول الرياضيات</small>
+                </div>
+              </div>
+              <div class="course-footer">
+                <div class="price-box">
+                  <strong data-i18n="c6_price">220 ج.م</strong>
+                  <del data-i18n="c6_old_price">280 ج.م</del>
+                </div>
+                <a href="/courses" class="btn-enroll" data-i18n="c_btn_enroll">احجز الآن</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="curricula-cta-row">
+          <a href="/courses" class="secondary-button large">
+            <i class="ti ti-layout-grid"></i>
+            <span data-i18n="c_browse_all">تصفح كل الكورسات في سوق AIN</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- OPERATIONAL WORKFLOW HIGHLIGHTS -->
+    <section class="section testimonials-section" id="testimonials">
+      <div class="wrap">
+        <div class="section-badge-center">
+          <i class="ti ti-layout-grid"></i>
+          <span data-i18n="testi_badge">نماذج سير العمل والتشغيل</span>
+        </div>
+        <h2 class="section-title-center" data-i18n="testi_title">حلول عملية صُممت لتحديات السناتر والأكاديميات</h2>
+        <p class="section-desc-center" data-i18n="testi_desc">منظومة متكاملة تنقلك من عشوائية الرسائل والجروبات إلى دورة عمل منظمة للحضور، الأجهزة، والمالية.</p>
+
+        <div class="testimonials-grid">
+          <div class="testimonial-card">
+            <div class="testi-rating" style="display:flex;align-items:center;gap:6px;">
+              <i class="ti ti-shield-check" style="color:var(--primary);font-size:16px;"></i>
+              <span style="color:var(--primary);font-weight:600;font-size:13px;" data-i18n="testi_1_badge">حماية المحتوى والأجهزة</span>
+            </div>
+            <p class="testi-text" data-i18n="testi_1_quote">تظهر بيانات الطالب كعلامة مائية متحركة، وتعمل ضوابط الأجهزة والجلسات على الحد من تداول الحسابات وجعل أي تسريب قابلاً للتتبع.</p>
+            <div class="testi-author">
+              <div class="testi-icon-pill" style="width:38px;height:38px;border-radius:10px;background:rgba(37,99,235,0.08);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">
+                <i class="ti ti-shield-lock"></i>
+              </div>
+              <div>
+                <strong data-i18n="testi_1_author">حماية المحتوى والجلسات</strong>
+                <small data-i18n="testi_1_title">ضوابط وصول وعلامة مائية ديناميكية</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card">
+            <div class="testi-rating" style="display:flex;align-items:center;gap:6px;">
+              <i class="ti ti-qrcode" style="color:var(--primary);font-size:16px;"></i>
+              <span style="color:var(--primary);font-weight:600;font-size:13px;" data-i18n="testi_2_badge">سير عمل الحضور</span>
+            </div>
+            <p class="testi-text" data-i18n="testi_2_quote">يسجل رمز QR الحضور خلال ثوانٍ، ويحفظ سجلاً منظماً يمكن لفريق السنتر وولي الأمر مراجعته بدون كشوف ورقية متفرقة.</p>
+            <div class="testi-author">
+              <div class="testi-icon-pill" style="width:38px;height:38px;border-radius:10px;background:rgba(37,99,235,0.08);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">
+                <i class="ti ti-qrcode"></i>
+              </div>
+              <div>
+                <strong data-i18n="testi_2_author">إدارة الحضور والمجموعات</strong>
+                <small data-i18n="testi_2_title">سير عمل الحصص الحضورية والأونلاين</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card">
+            <div class="testi-rating" style="display:flex;align-items:center;gap:6px;">
+              <i class="ti ti-chart-arrows" style="color:var(--primary);font-size:16px;"></i>
+              <span style="color:var(--primary);font-weight:600;font-size:13px;" data-i18n="testi_3_badge">الرقابة المالية والتشغيل</span>
+            </div>
+            <p class="testi-text" data-i18n="testi_3_quote">تجمع لوحة التشغيل الحجوزات والمدفوعات والمستحقات المعلقة، وتوفر تقارير قابلة للتصدير لكل دفعة لاتخاذ قرار أسرع.</p>
+            <div class="testi-author">
+              <div class="testi-icon-pill" style="width:38px;height:38px;border-radius:10px;background:rgba(37,99,235,0.08);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">
+                <i class="ti ti-report-money"></i>
+              </div>
+              <div>
+                <strong data-i18n="testi_3_author">التقارير والعمليات المالية</strong>
+                <small data-i18n="testi_3_title">رؤية تشغيلية دقيقة لإدارة الأكاديمية</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="section how-section" id="how">
+      <div class="wrap">
+        <div class="section-badge-center">
+          <i class="ti ti-route"></i>
+          <span data-i18n="how_badge">خطوات الانطلاق</span>
+        </div>
+        <h2 class="section-title-center" data-i18n="how_title">ابدأ منصتك في 4 خطوات بسيطة وبدون تعقيد</h2>
+        <p class="section-desc-center" data-i18n="how_desc">لا تحتاج إلى خبرة تقنية؛ نساعدك في إعداد المساحة وأول دورة عمل حتى تبدأ بشكل منظم.</p>
+
+        <div class="steps-flow">
+          <div class="step-box">
+            <div class="step-badge">1</div>
+            <h3 data-i18n="s1_title">أنشئ مساحة الأكاديمية</h3>
+            <p data-i18n="s1_desc">سجّل اسم أكاديميتك وبياناتك واختر باقتك أو ابدأ بالشهر التجريبي المجاني فوراً.</p>
+          </div>
+
+          <div class="step-box">
+            <div class="step-badge">2</div>
+            <h3 data-i18n="s2_title">نظّم الكورسات والغرف</h3>
+            <p data-i18n="s2_desc">قسّم المواد التعليمية إلى غرف ودفعات وحدد أسعار الكورسات ومواعيد الجلسات.</p>
+          </div>
+
+          <div class="step-box">
+            <div class="step-badge">3</div>
+            <h3 data-i18n="s3_title">أضف الفيديوهات والملفات</h3>
+            <p data-i18n="s3_desc">اربط فيديوهات اليوتيوب غير المدرجة ومذكرات الـ PDF مع تفعيل العلامة المائية بضغطة زر.</p>
+          </div>
+
+          <div class="step-box">
+            <div class="step-badge">4</div>
+            <h3 data-i18n="s4_title">ادعُ الطلاب وراقب أرباحك</h3>
+            <p data-i18n="s4_desc">أرسل روابط الانضمام للطلاب، واعتمد الحجوزات، وتابع الحضور ونسب المشاهدة من لوحة واحدة.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRANSPARENT PRICING PLANS -->
+    <section class="section pricing-section" id="pricing">
+      <div class="wrap">
+        <div class="section-badge-center">
+          <i class="ti ti-cash"></i>
+          <span data-i18n="price_badge">خطط أسعار مرنة</span>
+        </div>
+        <h2 class="section-title-center" data-i18n="price_title">خطة واضحة تناسب حجم أكاديميتك</h2>
+        <p class="section-desc-center" data-i18n="price_desc">ابدأ بتجربة عملية على مجموعة صغيرة، ثم اختر السعة المناسبة لعدد الغرف والطلاب الفعلي.</p>
+
+        <!-- Monthly / Yearly Switcher -->
+        <div class="billing-switcher-wrap">
+          <div class="billing-switcher">
+            <button type="button" class="billing-btn active" id="btn-monthly" onclick="switchBilling('monthly')" data-i18n="btn_monthly">شهرياً</button>
+            <button type="button" class="billing-btn" id="btn-yearly" onclick="switchBilling('yearly')">
+              <span data-i18n="btn_yearly">سنوياً</span>
+              <span class="discount-pill" data-i18n="save_20">وفر 20%</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="pricing-cards-grid">
+          <!-- Card 1: Pilot Free Trial -->
+          <div class="price-card pilot-card">
+            <div class="price-head">
+              <span class="plan-tag" data-i18n="plan_pilot_tag">تجربة مجانية بالكامل</span>
+              <h3 data-i18n="plan_pilot_name">باقة التجربة (Pilot)</h3>
+              <p class="plan-desc" data-i18n="plan_pilot_desc">أفضل طريقة لتجربة المنصة مع مجموعة حقيقية من طلابك قبل أي التزام مالي.</p>
+              <div class="price-amount">
+                <span class="num">0</span>
+                <span class="currency" data-i18n="egp_currency">جنيه</span>
+                <span class="period" data-i18n="pilot_duration">/ 30 يوماً</span>
+              </div>
+            </div>
+            <ul class="price-features">
+              <li><i class="ti ti-check"></i> <span data-i18n="f_pilot_1">مساحة عمل كاملة باسم أكاديميتك</span></li>
+              <li><i class="ti ti-check"></i> <span data-i18n="f_pilot_2">غرفة تعليمية واحدة (Room)</span></li>
+              <li><i class="ti ti-check"></i> <span data-i18n="f_pilot_3">حتى 25 طالباً تجريبياً</span></li>
+              <li><i class="ti ti-check"></i> <span data-i18n="f_pilot_4">علامة مائية ديناميكية كاملة</span></li>
+              <li><i class="ti ti-check"></i> <span data-i18n="f_pilot_5">قفل الأجهزة وجلسة مشاهدة واحدة</span></li>
+              <li><i class="ti ti-check"></i> <span data-i18n="f_pilot_6">دعم مباشر عبر WhatsApp</span></li>
+            </ul>
+            <button class="price-btn secondary" type="button" onclick="openLeadModal('trial-modal')" data-i18n="btn_claim_pilot">ابدأ الشهر المجاني الآن</button>
+          </div>
+
+          <!-- Card 2: Starter -->
+          <div class="price-card">
+            <div class="price-head">
+              <span class="plan-tag" data-i18n="plan_starter_tag">للمدرسين المستقلين</span>
+              <h3 data-i18n="plan_starter_name">Starter</h3>
+              <p class="plan-desc" data-i18n="plan_starter_desc">للمدرس الذي يريد بداية قوية ومنظمة مع ضوابط وصول وعلامات مائية لمذكراته وفيديوهاته.</p>
+              <div class="price-amount">
+                <span class="num" id="starter-price">500</span>
+                <span class="currency" data-i18n="egp_currency">جنيه</span>
+                <span class="period" id="starter-period" data-i18n="per_month">/ شهرياً</span>
+              </div>
+            </div>
+            <ul class="price-features">
+              <li><i class="ti ti-check"></i> <span data-i18n="f_starter_1">كل مميزات باقة التجربة</span></li>
+              <li><i class="ti ti-check"></i> <span data-i18n="f_starter_2">حتى 3 غرف تعليمية مستقلة</span></li>
+              <li><i class="ti ti-check"></i> <span data-i18n="f_starter_3">حتى 100 طالب نشط</span></li>
+              <li><i class="ti ti-check"></i> <span data-i18n="f_starter_4">ربط فيديوهات (YouTube Unlisted) بدون تكلفة استضافة</span></li>
+              <li><i class="ti ti-check"></i> <span data-i18n="f_starter_5">تحضير الحضور بـ QR Code</span></li>
+              <li><i class="ti ti-check"></i> <span data-i18n="f_starter_6">تصدير تقارير الحضور والدرجات</span></li>
+            </ul>
+            <button class="price-btn secondary" type="button" onclick="openLeadModal('trial-modal')" data-i18n="btn_subscribe">اشترك في الباقة</button>
+          </div>
+
+          <!-- Card 3: Growth (Featured) -->
+          <div class="price-card featured-card">
+            <div class="featured-badge" data-i18n="featured_badge">الأكثر طلباً للأكاديميات</div>
+            <div class="price-head">
+              <span class="plan-tag primary" data-i18n="plan_growth_tag">للمراكز والأكاديميات</span>
+              <h3 data-i18n="plan_growth_name">Growth</h3>
+              <p class="plan-desc" data-i18n="plan_growth_desc">الخيار الأمثل للأكاديميات التي تدير عدة دفعات ومدرسين متعددي التخصصات.</p>
+              <div class="price-amount">
+                <span class="num" id="growth-price">1,200</span>
+                <span class="currency" data-i18n="egp_currency">جنيه</span>
+                <span class="period" id="growth-period" data-i18n="per_month">/ شهرياً</span>
+              </div>
+            </div>
+            <ul class="price-features">
+              <li><i class="ti ti-check"></i> <span data-i18n="f_growth_1">كل مميزات باقة Starter</span></li>
+              <li><i class="ti ti-check"></i> <span data-i18n="f_growth_2">حتى 15 غرفة وكورس تعليمي</span></li>
+              <li><i class="ti ti-check"></i> <span data-i18n="f_growth_3">حتى 500 طالب نشط</span></li>
+              <li><i class="ti ti-check"></i> <span data-i18n="f_growth_4">إدارة صلاحيات المدرسين والمساعدين</span></li>
+              <li><i class="ti ti-check"></i> <span data-i18n="f_growth_5">تقارير وتحليلات أداء الطلاب</span></li>
+              <li><i class="ti ti-check"></i> <span data-i18n="f_growth_6">سجلات أمنية متقدمة وتنبيهات فورية</span></li>
+            </ul>
+            <button class="price-btn primary" type="button" onclick="openLeadModal('trial-modal')" data-i18n="btn_choose_growth">ابدأ تجربة باقة Growth</button>
+          </div>
+
+          <!-- Card 4: Pro -->
+          <div class="price-card">
+            <div class="price-head">
+              <span class="plan-tag" data-i18n="plan_pro_tag">للمؤسسات الكبرى</span>
+              <h3 data-i18n="plan_pro_name">Pro</h3>
+              <p class="plan-desc" data-i18n="plan_pro_desc">للمنصات الضخمة ومراكز التدريب التي تحتاج لعلامة بيضاء ومواصفات خاصة.</p>
+              <div class="price-amount">
+                <span class="num" id="pro-price">2,500</span>
+                <span class="currency" data-i18n="egp_currency">جنيه</span>
+                <span class="period" id="pro-period" data-i18n="per_month">/ شهرياً</span>
+              </div>
+            </div>
+            <ul class="price-features">
+              <li><i class="ti ti-check"></i> <span data-i18n="f_pro_1">سعة متقدمة حتى 5,000 طالب وغرف متعددة</span></li>
+              <li><i class="ti ti-check"></i> <span data-i18n="f_pro_2">نطاق خاص للأكاديمية (Custom Domain)</span></li>
+              <li><i class="ti ti-check"></i> <span data-i18n="f_pro_3">تخصيص شعار واسم وألوان أكاديميتك</span></li>
+              <li><i class="ti ti-check"></i> <span data-i18n="f_pro_4">ربط بوابات دفع مخصصة وAPI</span></li>
+              <li><i class="ti ti-check"></i> <span data-i18n="f_pro_5">مدير حساب مخصص ودعم على مدار الساعة</span></li>
+            </ul>
+            <button class="price-btn secondary" type="button" onclick="openLeadModal('trial-modal')" data-i18n="btn_contact_pro">تواصل معنا للترقية</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ SECTION -->
+    <section class="section faq-section" id="faq">
+      <div class="wrap">
+        <div class="section-badge-center">
+          <i class="ti ti-help"></i>
+          <span data-i18n="faq_badge">إجابات شفافة ومباشرة</span>
+        </div>
+        <h2 class="section-title-center" data-i18n="faq_title">الأسئلة الأكثر شيوعاً حول المنصة وحماية الكورسات</h2>
+        <p class="section-desc-center" data-i18n="faq_desc">كل ما تحتاج لمعرفته حول المنصة، هندسة حماية الفيديوهات، قفل الأجهزة، والتجربة المجانية.</p>
+
+        <div class="faq-dual-grid">
+          <!-- COLUMN 1 -->
+          <div class="faq-col">
+            <!-- Card 1 -->
+            <div class="faq-card is-active" data-faq-id="faq-1">
+              <button type="button" class="faq-card-header" onclick="toggleFaqCard('faq-1')">
+                <div class="faq-card-title-group">
+                  <div class="faq-icon-box bg-blue">
+                    <i class="ti ti-shield-lock"></i>
+                  </div>
+                  <div class="faq-card-headings">
+                    <span class="faq-category-pill pill-security" data-i18n="tag_security">درع حماية الفيديوهات</span>
+                    <h3 class="faq-question-text" data-i18n="q1_title">كيف تمنع AIN تسريب الفيديوهات إذا كانت مرفوعة على YouTube؟</h3>
+                  </div>
+                </div>
+                <div class="faq-toggle-circle">
+                  <i class="ti ti-chevron-down"></i>
+                </div>
+              </button>
+              <div class="faq-card-collapse">
+                <div class="faq-card-inner">
+                  <div class="faq-card-content">
+                    <p data-i18n="q1_body">يمكن عرض فيديوهات YouTube Unlisted داخل مشغل المنصة مع التحقق من صلاحية حساب الطالب وربط الجهاز وإظهار علامة مائية متحركة قابلة للتتبع. هذه الضوابط تقلل المشاركة والتسريب لكنها لا تجعل محتوى يوتيوب غير قابل للاستخراج أو التسجيل بشكل مطلق.</p>
+                    <div class="faq-takeaway-box">
+                      <i class="ti ti-sparkles"></i>
+                      <div class="takeaway-text" data-i18n="takeaway_1">
+                        <strong>النتيجة العملية:</strong> علامة مائية قابلة للتتبع، مع عدم الحاجة إلى استضافة فيديو خاصة عند استخدام YouTube Unlisted.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="faq-card" data-faq-id="faq-2">
+              <button type="button" class="faq-card-header" onclick="toggleFaqCard('faq-2')">
+                <div class="faq-card-title-group">
+                  <div class="faq-icon-box bg-amber">
+                    <i class="ti ti-device-laptop"></i>
+                  </div>
+                  <div class="faq-card-headings">
+                    <span class="faq-category-pill pill-devices" data-i18n="tag_devices">قفل الأجهزة والبصمة</span>
+                    <h3 class="faq-question-text" data-i18n="q2_title">ماذا يحدث إذا حاول الطالب فتح حسابه من هاتف صديقه أو لابتوب آخر؟</h3>
+                  </div>
+                </div>
+                <div class="faq-toggle-circle">
+                  <i class="ti ti-chevron-down"></i>
+                </div>
+              </button>
+              <div class="faq-card-collapse">
+                <div class="faq-card-inner">
+                  <div class="faq-card-content">
+                    <p data-i18n="q2_body">تعتمد المنصة سياسة "جهاز واحد لكل طالب". بمجرد أن يسجل دخوله من جهازه الأول، يتم ربط الجلسة بالجهاز المعتمد وتأمينه. وإذا حاول الدخول من جهاز ثانٍ، تظهر له رسالة تفيد بأنه وصل للحد الأقصى للأجهزة، مع إمكانية إرسال طلب استبدال جهاز للمدرس لمراجعته واعتماده.</p>
+                    <div class="faq-takeaway-box">
+                      <i class="ti ti-lock"></i>
+                      <div class="takeaway-text" data-i18n="takeaway_2">
+                        <strong>النتيجة العملية:</strong> الحد من ظاهرة مشاركة الحساب الواحد بين عدة طلاب عبر حصر الجلسة على جهاز الطالب المعتمد.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="faq-card" data-faq-id="faq-3">
+              <button type="button" class="faq-card-header" onclick="toggleFaqCard('faq-3')">
+                <div class="faq-card-title-group">
+                  <div class="faq-icon-box bg-emerald">
+                    <i class="ti ti-gift"></i>
+                  </div>
+                  <div class="faq-card-headings">
+                    <span class="faq-category-pill pill-pricing" data-i18n="tag_pricing">التجربة المجانية</span>
+                    <h3 class="faq-question-text" data-i18n="q3_title">هل هناك أي التزام أو دفع مسبق لبدء الشهر المجاني (Pilot)؟</h3>
+                  </div>
+                </div>
+                <div class="faq-toggle-circle">
+                  <i class="ti ti-chevron-down"></i>
+                </div>
+              </button>
+              <div class="faq-card-collapse">
+                <div class="faq-card-inner">
+                  <div class="faq-card-content">
+                    <p data-i18n="q3_body">لا نطلب بطاقة ائتمان أو بيانات بنكية لبدء التجربة. تحصل على مساحة عمل تجريبية لمدة 30 يوماً لاختبار دورة العمل مع مجموعة صغيرة، ثم تقرر إن كانت الخطة المناسبة لك.</p>
+                    <div class="faq-takeaway-box">
+                      <i class="ti ti-check"></i>
+                      <div class="takeaway-text" data-i18n="takeaway_3">
+                        <strong>التجربة:</strong> 30 يوماً بدون بطاقة بنكية أو رسوم مسبقة، وفق حدود باقة الـ Pilot الموضحة.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- COLUMN 2 -->
+          <div class="faq-col">
+            <!-- Card 4 -->
+            <div class="faq-card" data-faq-id="faq-4">
+              <button type="button" class="faq-card-header" onclick="toggleFaqCard('faq-4')">
+                <div class="faq-card-title-group">
+                  <div class="faq-icon-box bg-blue">
+                    <i class="ti ti-cloud-upload"></i>
+                  </div>
+                  <div class="faq-card-headings">
+                    <span class="faq-category-pill pill-center" data-i18n="tag_center">سهولة الإعداد والنقل</span>
+                    <h3 class="faq-question-text" data-i18n="q4_title">هل يمكنني نقل طلابي ومحتواي الحالي بسهولة وبدون تعقيد؟</h3>
+                  </div>
+                </div>
+                <div class="faq-toggle-circle">
+                  <i class="ti ti-chevron-down"></i>
+                </div>
+              </button>
+              <div class="faq-card-collapse">
+                <div class="faq-card-inner">
+                  <div class="faq-card-content">
+                    <p data-i18n="q4_body">نعم بكل سهولة. يمكنك دعوة الطلاب بروابط مباشرة، ويقوم فريق الدعم بمساعدتك في تجهيز كشوف الطلاب ورفع المواد وإعداد أول كورس خطوة بخطوة مجاناً.</p>
+                    <div class="faq-takeaway-box">
+                      <i class="ti ti-rocket"></i>
+                      <div class="takeaway-text" data-i18n="takeaway_4">
+                        <strong>جاهزية التشغيل:</strong> إعداد فوري للأكاديمية والبدء في نشر الكورسات مباشرة عبر لوحة التحكم.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="faq-card" data-faq-id="faq-5">
+              <button type="button" class="faq-card-header" onclick="toggleFaqCard('faq-5')">
+                <div class="faq-card-title-group">
+                  <div class="faq-icon-box bg-emerald">
+                    <i class="ti ti-devices"></i>
+                  </div>
+                  <div class="faq-card-headings">
+                    <span class="faq-category-pill pill-devices" data-i18n="tag_devices">تجربة الطلاب والتطبيقات</span>
+                    <h3 class="faq-question-text" data-i18n="q5_title">هل يحتاج الطلاب لتحميل تطبيقات معقدة أم يعمل العارض مباشرة من المتصفح والموبايل؟</h3>
+                  </div>
+                </div>
+                <div class="faq-toggle-circle">
+                  <i class="ti ti-chevron-down"></i>
+                </div>
+              </button>
+              <div class="faq-card-collapse">
+                <div class="faq-card-inner">
+                  <div class="faq-card-content">
+                    <p data-i18n="q5_body">يعمل النظام بسلاسة تامة على جميع المتصفحات الحديثة (Chrome, Safari, Edge) على الحواسيب والهواتف دون الحاجة لأي تثبيت، بالإضافة إلى توفر تطبيق موبايل رسمي لنظامي Android وiOS بحجم فائق الخفة (22 ميجابايت) يوفر أقصى درجات الأمان وتجربة مستخدم مريحة للعين.</p>
+                    <div class="faq-takeaway-box">
+                      <i class="ti ti-device-mobile-check"></i>
+                      <div class="takeaway-text" data-i18n="takeaway_5">
+                        <strong>التوافقية:</strong> تطبيق خفيف + موقع ويب سريع بتوافق تام واستجابة سلسة.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 6 -->
+            <div class="faq-card" data-faq-id="faq-6">
+              <button type="button" class="faq-card-header" onclick="toggleFaqCard('faq-6')">
+                <div class="faq-card-title-group">
+                  <div class="faq-icon-box bg-amber">
+                    <i class="ti ti-qrcode"></i>
+                  </div>
+                  <div class="faq-card-headings">
+                    <span class="faq-category-pill pill-center" data-i18n="tag_center">إدارة السناتر والحضور</span>
+                    <h3 class="faq-question-text" data-i18n="q7_title">هل تدعم المنصة كشوف الحضور الذكية للسناتر والمجموعات الحضورية؟</h3>
+                  </div>
+                </div>
+                <div class="faq-toggle-circle">
+                  <i class="ti ti-chevron-down"></i>
+                </div>
+              </button>
+              <div class="faq-card-collapse">
+                <div class="faq-card-inner">
+                  <div class="faq-card-content">
+                    <p data-i18n="q7_body">تدعم المنصة تسجيل الحضور عبر QR Code، ومراجعة السجل وتصديره بصيغة مناسبة للطباعة. إشعارات أولياء الأمور الخارجية تعتمد على قنوات الإرسال التي يتم تهيئتها للأكاديمية.</p>
+                    <div class="faq-takeaway-box">
+                      <i class="ti ti-printer"></i>
+                      <div class="takeaway-text" data-i18n="takeaway_6">
+                        <strong>الدمج الهجين:</strong> تدير سنترك ومجموعاتك الحضورية والأونلاين من نفس لوحة التحكم المركزية.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Centered Bottom Concierge Banner -->
+        <div class="faq-bottom-banner">
+          <div class="faq-banner-info">
+            <div class="faq-live-pill">
+              <span class="pulse-dot"></span>
+              <span data-i18n="faq_live_status">فريق الاستشارات متواجد الآن</span>
+              <span class="badge-separator">•</span>
+              <span data-i18n="faq_response_time">دعم فني واستجابة سريعة ⚡</span>
+            </div>
+            <h3 class="faq-banner-title" data-i18n="faq_card_help_title">هل لديك سؤال محدد أو متطلبات خاصة لأكاديميتك؟</h3>
+            <p class="faq-banner-desc" data-i18n="faq_card_help_desc">فريقنا التقني جاهز لمساعدتك في فحص متطلبات أكاديميتك ومحاكاة درع الحماية لكورساتك مجاناً.</p>
+          </div>
+
+          <div class="faq-banner-actions">
+            <a href="https://wa.me/201025849793?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D9%84%D8%AF%D9%8A%20%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1%20%D8%AD%D9%88%D9%84%20%D9%85%D9%86%D8%B5%D8%A9%20AIN%20%D9%88%D8%AD%D9%85%D8%A7%D9%8A%D8%A9%20%D8%A7%D9%84%D9%83%D9%88%D8%B1%D8%B3%D8%A7%D8%AA" target="_blank" rel="noopener" class="faq-banner-btn whatsapp">
+              <i class="ti ti-brand-whatsapp"></i>
+              <span data-i18n="faq_btn_whatsapp">محادثة فورية على واتساب</span>
+            </a>
+            <button type="button" class="faq-banner-btn demo" onclick="openLeadModal('trial-modal')">
+              <i class="ti ti-calendar-event"></i>
+              <span data-i18n="faq_btn_call">طلب مكالمة ديمو تجريبية</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINAL CALL TO ACTION -->
+    <section class="section cta-banner-section">
+      <div class="wrap">
+        <div class="cta-banner-box">
+          <div class="cta-glow"></div>
+          <span class="cta-mini-tag" data-i18n="cta_tag">خطوة عملية قبل الاشتراك</span>
+          <h2 data-i18n="cta_title">شاهد AIN على دورة عمل حقيقية من أكاديميتك</h2>
+          <p data-i18n="cta_desc">احجز جلسة قصيرة نراجع فيها احتياجاتك، ونجهز مساحة تجريبية، ونحدد بوضوح ما يمكن تشغيله قبل أي التزام.</p>
+          
+          <div class="cta-btn-row">
+            <button class="primary-button large glow-btn" type="button" onclick="openLeadModal('trial-modal')">
+              <i class="ti ti-rocket"></i>
+              <span data-i18n="cta_btn_start">اطلب مساحة تجريبية</span>
+            </button>
+            <a class="secondary-button large" href="/choose">
+              <i class="ti ti-sparkles"></i>
+              <span data-i18n="cta_btn_preview">جرّب تجربة المدير والطالب</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="wrap footer-grid">
+      <div class="footer-brand-col">
+        <div class="footer-brand">
+          <img src="/images/ain-logo.png" alt="AIN">
+          <span>AIN<span class="brand-dot">.</span></span>
+        </div>
+        <p data-i18n="footer_about">المنصة الذكية لحماية ونشر المحتوى التعليمي للأكاديميات والمراكز التدريبية في الوطن العربي.</p>
+        <div class="footer-contact-pill">
+          <i class="ti ti-brand-whatsapp"></i>
+          <span>WhatsApp: +20 102 584 9793</span>
+        </div>
+      </div>
+
+      <div class="footer-links-col">
+        <h4 data-i18n="footer_col_platform">المنصة</h4>
+        <a href="#roles" data-i18n="nav_roles">استكشف الأدوار</a>
+        <a href="#protection" data-i18n="nav_protection">الحماية ضد التسريب</a>
+        <a href="#features" data-i18n="nav_features">المميزات</a>
+        <a href="#pricing" data-i18n="nav_pricing">الباقات والتسعير</a>
+        <a href="#faq" data-i18n="nav_faq">الأسئلة الشائعة</a>
+      </div>
+
+      <div class="footer-links-col">
+        <h4 data-i18n="footer_col_quick">روابط سريعة</h4>
+        <a href="/courses" data-i18n="nav_marketplace">سوق الكورسات</a>
+        <a href="/sell-courses" data-i18n="market_launch_sell">انشر كورسك</a>
+        <a href="/academies" data-i18n="footer_academies">دليل الأكاديميات</a>
+        <a href="/choose" data-i18n="footer_roles">تجربة الأدوار المباشرة</a>
+        <a href="/login" data-i18n="nav_login">تسجيل دخول الأعضاء</a>
+      </div>
+
+      <div class="footer-links-col">
+        <h4 data-i18n="footer_col_support">المساعدة والأمان</h4>
+        <a href="/privacy" data-i18n="footer_privacy">سياسة الخصوصية</a>
+        <a href="/terms" data-i18n="footer_terms">شروط الخدمة</a>
+        <a href="/support" data-i18n="footer_support">الدعم الفني</a>
+        <button type="button" class="footer-btn-link" onclick="openLeadModal('trial-modal')" data-i18n="footer_demo_request">اطلب مكالمة ديمو</button>
+      </div>
+    </div>
+
+    <div class="wrap footer-bottom-row">
+      <p data-i18n="footer_copyright">© 2026 AIN Platform. جميع الحقوق محفوظة.</p>
+      <div class="footer-social-row">
+        <span>Access controls &amp; traceable watermarking</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- STICKY FLOATING WHATSAPP ACTION BUTTON -->
+  <aside class="floating-contact-pill" id="floating-contact" aria-label="تواصل سريع">
+    <a href="https://wa.me/201025849793?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%B1%D9%8A%D8%AF%20%D8%A7%D9%84%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1%20%D8%B9%D9%86%20%D9%85%D9%86%D8%B5%D8%A9%20AIN%20%D9%88%D8%AA%D8%AC%D8%B1%D8%A8%D8%AA%D9%87%D8%A7%20%D9%84%D8%A3%D9%83%D8%A7%D8%AF%D9%8A%D9%85%D9%8A%D8%AA%D9%8A" target="_blank" rel="noopener noreferrer" class="whatsapp-float-btn" title="تحدث مع مستشار المنصة على WhatsApp">
+      <div class="pulse-ring"></div>
+      <i class="ti ti-brand-whatsapp"></i>
+      <span class="float-text" data-i18n="float_whatsapp">تحدث معنا عبر WhatsApp</span>
+    </a>
+  </aside>
+
+  <!-- TRIAL LEAD CAPTURE MODAL -->
+  <div class="overlay" id="trial-modal" role="dialog" aria-modal="true" aria-labelledby="trial-title">
+    <div class="modal-card">
+      <div class="modal-card-head">
+        <div>
+          <div class="modal-kicker">
+            <i class="ti ti-gift"></i>
+            <span data-i18n="modal_kicker">تجربة مجانية 30 يوم</span>
+          </div>
+          <h3 id="trial-title" data-i18n="modal_title">ابدأ تجربة أكاديميتك على AIN</h3>
+          <p data-i18n="modal_desc">سجّل بياناتك البسيطة، وسيتواصل معك خبير المنصة لتجهيز مساحتك مجاناً.</p>
+        </div>
+        <button class="icon-close-btn" type="button" onclick="closeLeadModal('trial-modal')" aria-label="إغلاق">
+          <i class="ti ti-x"></i>
+        </button>
+      </div>
+
+      <form class="lead-form" onsubmit="submitTrialForm(event)">
+        <div class="form-row two-col">
+          <label>
+            <span data-i18n="form_name">الاسم بالكامل</span>
+            <input name="name" required autocomplete="name" placeholder="مثال: د. محمد علي" data-i18n-placeholder="form_ph_name">
+          </label>
+          <label>
+            <span data-i18n="form_phone">رقم الهاتف / WhatsApp</span>
+            <input name="phone" required autocomplete="tel" dir="ltr" placeholder="+20 1xxxxxxxxx">
+          </label>
+        </div>
+
+        <div class="form-row two-col">
+          <label>
+            <span data-i18n="form_email">البريد الإلكتروني</span>
+            <input name="email" type="email" required autocomplete="email" dir="ltr" placeholder="name@example.com">
+          </label>
+          <label>
+            <span data-i18n="form_org">اسم الأكاديمية أو المركز</span>
+            <input name="organization" required autocomplete="organization" placeholder="مثال: أكاديمية النخبة" data-i18n-placeholder="form_ph_org">
+          </label>
+        </div>
+
+        <div class="form-row two-col">
+          <label>
+            <span data-i18n="form_type">نوع النشاط التعليمي</span>
+            <select name="type" required>
+              <option value="" data-i18n="form_opt_choose">اختر النوع</option>
+              <option data-i18n="form_opt_academy">أكاديمية تدريب</option>
+              <option data-i18n="form_opt_instructor">مدرس مستقل</option>
+              <option data-i18n="form_opt_languages">مركز لغات</option>
+              <option data-i18n="form_opt_school">مدرسة أو سنتر تعليمي</option>
+              <option data-i18n="form_opt_corporate">شركة تدريب موظفين</option>
+            </select>
+          </label>
+          <label>
+            <span data-i18n="form_students">عدد الطلاب المتوقع</span>
+            <select name="students" required>
+              <option value="" data-i18n="form_opt_choose">اختر العدد</option>
+              <option data-i18n="form_opt_lt25">أقل من 25 طالباً</option>
+              <option data-i18n="form_opt_25_100">25 - 100 طالب</option>
+              <option data-i18n="form_opt_100_300">100 - 300 طالب</option>
+              <option data-i18n="form_opt_gt300">أكثر من 300 طالب</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="form-row">
+          <label>
+            <span data-i18n="form_content">ما المحتوى الذي ترغب في حمايته؟</span>
+            <textarea name="content" required placeholder="مثال: كورس برمجة، مذكرات وشروحات ثانوية عامة، فيديوهات مراجعة..." data-i18n-placeholder="form_ph_content"></textarea>
+          </label>
+        </div>
+
+        <button class="primary-button full-width" type="submit">
+          <i class="ti ti-brand-whatsapp"></i>
+          <span data-i18n="form_submit">تأكيد وبدء المحادثة على WhatsApp</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/landing/script.js"></script>
+</body>
+</html>
