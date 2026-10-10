@@ -33,6 +33,6 @@ COPY . .
 
 RUN composer dump-autoload --optimize
 
-EXPOSE 8000
+ENV PORT=8000
 
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+CMD ["sh", "-c", "if [ \"$AIO_DEPLOYMENT_MODE\" = \"production\" ]; then php artisan aio:production-check; else php artisan aio:production-check || true; fi && (php artisan migrate --force || echo '[WARN] Migration skipped or failed') && php artisan optimize && exec php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"]
