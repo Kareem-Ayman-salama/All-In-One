@@ -25,7 +25,12 @@ mkdir -p storage/framework/sessions \
          bootstrap/cache
 chmod -R 775 storage bootstrap/cache
 
+# A brand-new database does not have Laravel's cache table until migrations run.
+# Clear bootstrap artifacts with a non-persistent cache store for the first boot.
+CONFIGURED_CACHE_STORE="${CACHE_STORE:-database}"
+export CACHE_STORE=array
 php artisan optimize:clear
+export CACHE_STORE="$CONFIGURED_CACHE_STORE"
 
 echo "==> Running database migrations..."
 php artisan migrate --force
