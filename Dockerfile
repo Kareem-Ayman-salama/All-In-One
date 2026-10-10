@@ -37,8 +37,12 @@ RUN composer dump-autoload --optimize
 RUN mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache storage/logs bootstrap/cache \
     && chmod -R 777 storage bootstrap/cache
 
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 8000
 
 ENV PORT=8000
 
-CMD ["sh", "-c", "mkdir -p database && touch database/database.sqlite && if [ -z \"$APP_KEY\" ]; then php artisan key:generate --force; fi && if [ \"$AIO_DEPLOYMENT_MODE\" = \"production\" ]; then php artisan aio:production-check; else php artisan aio:production-check || true; fi && (php artisan migrate --force || echo '[WARN] Migration skipped or failed') && php artisan config:clear && php artisan optimize && exec php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"]
+ENTRYPOINT ["/entrypoint.sh"]
