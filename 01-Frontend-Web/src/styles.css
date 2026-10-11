@@ -11755,3 +11755,102 @@ label,
     transition: none;
   }
 }
+
+/* Expanded compact-card system: content collections swipe horizontally on
+   phones, while forms, detail panels and data tables remain full-width. */
+@media (max-width: 760px) {
+  .market-course-grid,
+  .teacher-grid,
+  .workspace-selection-grid,
+  .workspace-picker-grid,
+  .plan-usage-grid,
+  .usage-grid,
+  .platform-org-grid,
+  .report-export-grid,
+  .stitch-pricing-grid,
+  .stitch-user-grid,
+  .stitch-meeting-grid,
+  .action-grid,
+  .seller-choice-grid,
+  .demo-account-grid,
+  .marketplace-categories,
+  .academy-profile-stats {
+    display: flex !important;
+    grid-template-columns: none !important;
+    width: auto !important;
+    max-width: none !important;
+    margin-inline: -10px !important;
+    padding: 2px 10px 14px !important;
+    gap: 10px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    overscroll-behavior-inline: contain;
+    scroll-padding-inline: 10px;
+    scroll-snap-type: inline mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .market-course-grid::-webkit-scrollbar,
+  .teacher-grid::-webkit-scrollbar,
+  .workspace-selection-grid::-webkit-scrollbar,
+  .workspace-picker-grid::-webkit-scrollbar,
+  .plan-usage-grid::-webkit-scrollbar,
+  .usage-grid::-webkit-scrollbar,
+  .platform-org-grid::-webkit-scrollbar,
+  .report-export-grid::-webkit-scrollbar,
+  .stitch-pricing-grid::-webkit-scrollbar,
+  .stitch-user-grid::-webkit-scrollbar,
+  .stitch-meeting-grid::-webkit-scrollbar,
+  .action-grid::-webkit-scrollbar,
+  .seller-choice-grid::-webkit-scrollbar,
+  .demo-account-grid::-webkit-scrollbar,
+  .marketplace-categories::-webkit-scrollbar,
+  .academy-profile-stats::-webkit-scrollbar {
+    display: none;
+  }
+
+  .market-course-grid > *,
+  .teacher-grid > *,
+  .workspace-selection-grid > *,
+  .workspace-picker-grid > *,
+  .platform-org-grid > *,
+  .report-export-grid > *,
+  .stitch-pricing-grid > *,
+  .stitch-user-grid > *,
+  .stitch-meeting-grid > *,
+  .action-grid > *,
+  .seller-choice-grid > * {
+    flex: 0 0 min(84vw, 340px) !important;
+    width: auto !important;
+    max-width: none !important;
+    scroll-snap-align: start;
+  }
+
+  .plan-usage-grid > *,
+  .usage-grid > *,
+  .demo-account-grid > * {
+    flex: 0 0 min(74vw, 290px) !important;
+    width: auto !important;
+    max-width: none !important;
+    scroll-snap-align: start;
+  }
+
+  .marketplace-categories > *,
+  .academy-profile-stats > * {
+    flex: 0 0 min(43vw, 170px) !important;
+    width: auto !important;
+    max-width: none !important;
+    scroll-snap-align: start;
+  }
+
+  .market-course-grid .market-empty {
+    flex-basis: calc(100vw - 40px) !important;
+  }
+
+  .academy-profile-stats span {
+    min-height: 70px;
+    align-items: center;
+    border: 1px solid #e1e7ef;
+  }
+}

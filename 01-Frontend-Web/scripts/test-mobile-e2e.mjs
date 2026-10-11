@@ -358,17 +358,29 @@ async function runE2ETests() {
     try {
       await pageCourses.route("**/api/**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ success: true, data: [] }) }));
       await pageCourses.goto(`${baseUrl}/courses`, { waitUntil: "domcontentloaded", timeout: 15000 });
-      await pageCourses.waitForTimeout(300);
+      await pageCourses.waitForSelector(".market-course-grid", { timeout: 5000 });
 
-      const overflow = await pageCourses.evaluate(() => ({
-        doc: document.documentElement.scrollWidth,
-        body: document.body.scrollWidth,
-        inner: window.innerWidth,
-      }));
+      const overflow = await pageCourses.evaluate(() => {
+        const courseGrid = document.querySelector(".market-course-grid");
+        return {
+          doc: document.documentElement.scrollWidth,
+          body: document.body.scrollWidth,
+          inner: window.innerWidth,
+          courseRail: Boolean(courseGrid && (() => {
+            const style = window.getComputedStyle(courseGrid);
+            const isConfigured = style.display === "flex" && ["auto", "scroll"].includes(style.overflowX);
+            const hasHorizontalRange = courseGrid.children.length <= 1 || courseGrid.scrollWidth > courseGrid.clientWidth;
+            return isConfigured && hasHorizontalRange;
+          })())
+        };
+      });
       assert(
         overflow.doc <= overflow.inner && overflow.body <= overflow.inner,
         `/courses fits viewport (${vp.width}px): doc=${overflow.doc}px, body=${overflow.body}px, win=${overflow.inner}px`
       );
+      if (vp.width < 760) {
+        assert(overflow.courseRail, `/courses cards use a horizontal swipe rail on ${vp.width}px`);
+      }
     } finally {
       await pageCourses.close();
     }
