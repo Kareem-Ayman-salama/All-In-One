@@ -91,6 +91,14 @@ export function LoginPage() {
 
   if (user) return <Navigate to={getSafeDestination(requestedDestination, user)} replace />;
 
+  const announceMfaChallenge = (debugCode) => {
+    if (debugCode) {
+      showToast(language === "ar" ? "استخدم رمز التجربة الظاهر داخل الصفحة" : "Use the demo code shown on this page");
+      return;
+    }
+    showToast(language === "ar" ? "تم إرسال رمز التحقق إلى بريدك الإلكتروني" : "A verification code was sent to your email");
+  };
+
   const submit = async (event) => {
     if (event) event.preventDefault();
     setTouched({ email: true, password: true });
@@ -103,7 +111,7 @@ export function LoginPage() {
         setMfaRequired(true);
         setMfaCode("");
         setDemoMfaCode(nextUser.debugCode || "");
-        showToast(language === "ar" ? "تم إرسال رمز التحقق إلى بريدك الإلكتروني" : "A verification code was sent to your email");
+        announceMfaChallenge(nextUser.debugCode);
         return;
       }
       showToast(t.auth.loginSuccess);
@@ -135,7 +143,7 @@ export function LoginPage() {
         setMfaRequired(true);
         setMfaCode("");
         setDemoMfaCode(nextUser.debugCode || "");
-        showToast(language === "ar" ? "تم إرسال رمز التحقق إلى بريدك الإلكتروني" : "A verification code was sent to your email");
+        announceMfaChallenge(nextUser.debugCode);
         return;
       }
       showToast(language === "ar" ? `تم تسجيل الدخول بنجاح كـ ${account.titleAr}` : `Signed in as ${account.titleEn}`);
