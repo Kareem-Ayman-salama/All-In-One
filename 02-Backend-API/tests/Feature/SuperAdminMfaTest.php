@@ -65,7 +65,7 @@ class SuperAdminMfaTest extends TestCase
         ])
             ->assertStatus(202)
             ->assertJsonPath('data.mfaRequired', true)
-            ->assertJsonMissingPath('data.debugCode');
+            ->assertJsonPath('data.debugCode', '123456');
 
         $this->postJson('/api/v1/auth/login', [
             'email' => 'super@ain.test',

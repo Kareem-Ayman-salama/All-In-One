@@ -74,6 +74,7 @@ export function LoginPage() {
   const [demoOpen, setDemoOpen] = useState(false);
   const [mfaRequired, setMfaRequired] = useState(false);
   const [mfaCode, setMfaCode] = useState("");
+  const [demoMfaCode, setDemoMfaCode] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
   const errors = {
     email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) ? "" : t.validation.email,
@@ -101,6 +102,7 @@ export function LoginPage() {
       if (nextUser?.mfaRequired) {
         setMfaRequired(true);
         setMfaCode("");
+        setDemoMfaCode(nextUser.debugCode || "");
         showToast(language === "ar" ? "تم إرسال رمز التحقق إلى بريدك الإلكتروني" : "A verification code was sent to your email");
         return;
       }
@@ -118,6 +120,7 @@ export function LoginPage() {
     setForm({ email: account.email, password: "12345678", remember: true });
     setTouched({});
     setStatusMessage("");
+    setDemoMfaCode("");
   };
 
   const quickSignIn = async (account) => {
@@ -131,6 +134,7 @@ export function LoginPage() {
       if (nextUser?.mfaRequired) {
         setMfaRequired(true);
         setMfaCode("");
+        setDemoMfaCode(nextUser.debugCode || "");
         showToast(language === "ar" ? "تم إرسال رمز التحقق إلى بريدك الإلكتروني" : "A verification code was sent to your email");
         return;
       }
@@ -193,6 +197,15 @@ export function LoginPage() {
                 />
               </div>
             </FormField>
+          )}
+
+          {mfaRequired && demoMfaCode && (
+            <AuthStatus
+              tone="success"
+              message={language === "ar"
+                ? `بيئة تجريبية — استخدم رمز التحقق: ${demoMfaCode}`
+                : `Demo environment — use verification code: ${demoMfaCode}`}
+            />
           )}
 
           <AuthStatus message={statusMessage} />

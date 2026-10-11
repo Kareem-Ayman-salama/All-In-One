@@ -21,6 +21,8 @@ export const API_ERROR_CATALOG = {
   DOWNLOAD_DISABLED: { category: "content", retryable: false, messageEn: "Downloading is disabled for this content.", messageAr: "تنزيل هذا المحتوى غير مسموح." },
   FILE_UPLOAD_FAILED: { category: "content", retryable: true, messageEn: "The file could not be uploaded.", messageAr: "تعذر رفع الملف." },
   DEVICE_LIMIT_REACHED: { category: "device", retryable: false, messageEn: "Too many active devices. Revoke a device session and try again.", messageAr: "عدد الأجهزة النشطة كبير جدًا. ألغِ جلسة جهاز وحاول مرة أخرى." },
+  DEVICE_APPROVAL_REQUIRED: { category: "device", retryable: true, messageEn: "This device is waiting for academy approval. Ask an academy admin to approve it from Security settings.", messageAr: "هذا الجهاز بانتظار موافقة إدارة الأكاديمية. اطلب من المدير اعتماده من إعدادات الأمان." },
+  DEVICE_BLOCKED: { category: "device", retryable: false, messageEn: "This device is blocked for this workspace. Contact the academy administrator.", messageAr: "هذا الجهاز محظور في مساحة العمل. تواصل مع إدارة الأكاديمية." },
   COURSE_NOT_BOOKABLE: { category: "booking", retryable: false, messageEn: "This course is not available for booking.", messageAr: "هذا الكورس غير متاح للحجز." },
   BATCH_NOT_BOOKABLE: { category: "booking", retryable: false, messageEn: "This batch is not open for booking.", messageAr: "هذه الدفعة غير متاحة للحجز." },
   ENROLLMENT_CLOSED: { category: "booking", retryable: false, messageEn: "Enrollment is closed for this batch.", messageAr: "تم إغلاق التسجيل في هذه الدفعة." },

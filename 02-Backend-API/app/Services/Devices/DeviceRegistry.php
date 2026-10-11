@@ -86,7 +86,10 @@ class DeviceRegistry
             );
         }
 
-        $status = $existing?->status ?? $this->initialStatus($user, $organizationId);
+        $status = $existing?->status;
+        if ($status === null || $status === 'pending') {
+            $status = $this->initialStatus($user, $organizationId);
+        }
         if ($status === 'pending') {
             $this->touchDevice(
                 $user,

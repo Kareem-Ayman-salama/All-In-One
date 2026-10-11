@@ -175,6 +175,48 @@ class DevicePolicyTest extends TestCase
             ->assertJsonPath('data.0.user.email', $student->email);
     }
 
+    public function test_pending_device_is_promoted_when_environment_capacity_increases(): void
+    {
+        $this->seed();
+        [$organization, $admin, $student] = $this->organizationWithStudent();
+        config(['device_policy.max_approved_devices_per_member' => 1]);
+
+        $this->postJson('/api/v1/auth/login', [
+            'email' => $student->email,
+            'password' => 'password',
+            'deviceName' => 'Primary laptop',
+            'installationId' => 'primary-installation',
+            'platform' => 'web',
+        ])->assertOk();
+
+        $this->postJson('/api/v1/auth/login', [
+            'email' => $student->email,
+            'password' => 'password',
+            'deviceName' => 'Reviewer laptop',
+            'installationId' => 'reviewer-installation',
+            'platform' => 'web',
+        ])
+            ->assertForbidden()
+            ->assertJsonPath('error.code', 'DEVICE_APPROVAL_REQUIRED');
+
+        config(['device_policy.max_approved_devices_per_member' => 8]);
+
+        $this->postJson('/api/v1/auth/login', [
+            'email' => $student->email,
+            'password' => 'password',
+            'deviceName' => 'Reviewer laptop',
+            'installationId' => 'reviewer-installation',
+            'platform' => 'web',
+        ])->assertOk();
+
+        $this->assertDatabaseHas('user_devices', [
+            'organization_id' => $organization->id,
+            'user_id' => $student->id,
+            'device_hash' => hash('sha256', 'reviewer-installation'),
+            'status' => 'approved',
+        ]);
+    }
+
     public function test_blocking_member_device_revokes_linked_sessions(): void
     {
         $this->seed();

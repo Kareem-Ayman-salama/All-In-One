@@ -122,7 +122,10 @@ class AuthService
                     return [
                         'user' => $user,
                         'mfaRequired' => true,
-                        'debugCode' => null,
+                        // Demo access is enabled only for non-production review
+                        // environments. Returning the scoped fixed code keeps the
+                        // public demo usable when no transactional mailer exists.
+                        'debugCode' => $demoMfaCode,
                     ];
                 }
                 if (! hash_equals($demoMfaCode, $mfaCode)) {
