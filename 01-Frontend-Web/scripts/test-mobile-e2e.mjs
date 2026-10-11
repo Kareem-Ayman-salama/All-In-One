@@ -440,6 +440,100 @@ async function runE2ETests() {
     }
   }
 
+  // --- SECTION 3: Authenticated workspace mobile navigation and swipe rails ---
+  console.log("\n==========================================");
+  console.log("SECTION 3: Authenticated Workspace Mobile UX");
+  console.log("==========================================");
+
+  for (const vp of spaViewports.filter(({ width }) => width < 760)) {
+    console.log(`\n--- Testing Workspace Viewport: ${vp.name} ---`);
+    const workspacePage = await context.newPage();
+    await workspacePage.setViewportSize({ width: vp.width, height: vp.height });
+
+    try {
+      await workspacePage.addInitScript(() => {
+        window.localStorage.setItem("aiofront_user", JSON.stringify({
+          id: "end-user",
+          name: "Mobile QA User",
+          email: "mobile.qa@ain.test",
+          role: "end-user",
+          roleLabel: "End User",
+          company: "TechCorp Egypt",
+          tenantId: "tenant_techcorp",
+          permissions: ["view_assigned_rooms", "view_files"]
+        }));
+        window.sessionStorage.setItem("aiofront_token", "mobile-qa-session");
+      });
+      await workspacePage.route("**/api/**", (route) => {
+        const data = route.request().url().includes("/workspaces")
+          ? [{
+              membershipId: "membership-mobile-qa",
+              role: "student",
+              permissions: ["view_courses", "view_files"],
+              organization: { id: "org-mobile-qa", name: "TechCorp Egypt", nameAr: "تيك كورب", color: "#16458f", logo: "TC" },
+              subscription: {
+                status: "active",
+                plan: {
+                  code: "growth",
+                  name: "Growth",
+                  modules: ["courses", "announcements", "tasks", "attendance"].map((module) => ({ module, enabled: true, limit: null }))
+                }
+              }
+            }]
+          : [];
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ success: true, data })
+        });
+      });
+      await workspacePage.goto(`${baseUrl}/end-user/home`, { waitUntil: "domcontentloaded", timeout: 15000 });
+      await workspacePage.waitForSelector(".stitch-mobile-menu", { timeout: 5000 });
+
+      const compactState = await workspacePage.evaluate(() => {
+        const menu = document.querySelector(".stitch-mobile-menu");
+        const stats = document.querySelector(".member-stat-grid");
+        const dashboard = document.querySelector(".member-dashboard-grid");
+        const statsStyle = stats ? window.getComputedStyle(stats) : null;
+        const dashboardStyle = dashboard ? window.getComputedStyle(dashboard) : null;
+        return {
+          fitsViewport: document.documentElement.scrollWidth <= window.innerWidth && document.body.scrollWidth <= window.innerWidth,
+          glyphBars: menu?.querySelectorAll(".mobile-menu-glyph i").length || 0,
+          statsSwipeable: Boolean(stats && statsStyle?.overflowX === "auto" && stats.scrollWidth > stats.clientWidth),
+          dashboardSwipeable: Boolean(dashboard && dashboardStyle?.overflowX === "auto" && dashboard.scrollWidth > dashboard.clientWidth)
+        };
+      });
+      assert(compactState.fitsViewport, `Workspace fits viewport (${vp.width}px)`);
+      assert(compactState.glyphBars === 3, "Workspace menu uses the professional three-line glyph");
+      assert(compactState.statsSwipeable, "Workspace statistics use a horizontal swipe rail");
+      assert(compactState.dashboardSwipeable, "Workspace dashboard cards use a horizontal swipe rail");
+
+      await workspacePage.click(".stitch-mobile-menu");
+      await workspacePage.waitForTimeout(150);
+      const openedState = await workspacePage.evaluate(() => ({
+        open: document.querySelector(".stitch-sidebar")?.classList.contains("mobile-open"),
+        overlay: Boolean(document.querySelector(".stitch-mobile-overlay")),
+        expanded: document.querySelector(".stitch-mobile-menu")?.getAttribute("aria-expanded"),
+        bodyLocked: document.body.style.overflow === "hidden"
+      }));
+      assert(openedState.open && openedState.overlay, "Workspace drawer and backdrop open from the menu button");
+      assert(openedState.expanded === "true" && openedState.bodyLocked, "Workspace drawer exposes state and locks background scrolling");
+
+      await workspacePage.keyboard.press("Escape");
+      await workspacePage.waitForTimeout(150);
+      const closedState = await workspacePage.evaluate(() => ({
+        open: document.querySelector(".stitch-sidebar")?.classList.contains("mobile-open"),
+        overlay: Boolean(document.querySelector(".stitch-mobile-overlay")),
+        expanded: document.querySelector(".stitch-mobile-menu")?.getAttribute("aria-expanded"),
+        bodyUnlocked: document.body.style.overflow !== "hidden"
+      }));
+      assert(!closedState.open && !closedState.overlay, "Workspace drawer closes with Escape");
+      assert(closedState.expanded === "false" && closedState.bodyUnlocked, "Workspace drawer restores its accessible and scroll state");
+    } finally {
+      await workspacePage.close();
+    }
+  }
+
   await browser.close();
   await new Promise((resolve, reject) => {
     server.close((error) => (error ? reject(error) : resolve()));

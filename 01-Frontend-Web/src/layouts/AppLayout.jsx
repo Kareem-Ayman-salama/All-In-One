@@ -20,7 +20,6 @@ import {
   LogOut,
   MessageCircle,
   Megaphone,
-  Menu,
   Moon,
   Search,
   Settings,
@@ -161,10 +160,27 @@ export function AppLayout({ appTitle, user, nav, children }) {
   const [collapsedGroups, setCollapsedGroups] = useState({});
   const toggleGroup = (key) => setCollapsedGroups((prev) => ({ ...prev, [key]: !prev[key] }));
 
+  useEffect(() => {
+    if (!mobileOpen) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setMobileOpen(false);
+    };
+
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", closeOnEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [mobileOpen]);
+
   return (
     <div className={`stitch-shell shell-${language}`} dir={direction}>
       {mobileOpen && <button className="stitch-mobile-overlay" type="button" onClick={() => setMobileOpen(false)} aria-label={`${t.shell.closeMenu} overlay`} />}
-      <aside className={`stitch-sidebar ${mobileOpen ? "mobile-open" : ""}`}>
+      <aside id="workspace-navigation" className={`stitch-sidebar ${mobileOpen ? "mobile-open" : ""}`} aria-label={`${appTitle} navigation`}>
         <div className="stitch-brand">
           <div className="stitch-brand-icon"><img src="/images/ain-logo.png" alt="AIN Platform" /></div>
           <div><strong>AIN Platform</strong><span>{workspaceName}</span></div>
@@ -233,7 +249,16 @@ export function AppLayout({ appTitle, user, nav, children }) {
 
       <main className="stitch-main">
         <header className="stitch-topbar">
-          <button className="stitch-mobile-menu" type="button" onClick={() => setMobileOpen(true)} aria-label={t.shell.menu}><Menu size={22} /></button>
+          <button
+            className="stitch-mobile-menu"
+            type="button"
+            onClick={() => setMobileOpen(true)}
+            aria-label={t.shell.menu}
+            aria-controls="workspace-navigation"
+            aria-expanded={mobileOpen}
+          >
+            <span className="mobile-menu-glyph" aria-hidden="true"><i /><i /><i /></span>
+          </button>
           {user.role === "end-user" && memberships.length > 1 && <div className="workspace-unified-badge" title={language === "ar" ? "كل الأكاديميات في عرض واحد" : "All academies in one view"}>
             <span className="workspace-unified-logos">{memberships.slice(0, 3).map((membership) => <i style={{ backgroundColor: membership.organization.color }} key={membership.organizationId}>{membership.organization.logo}</i>)}</span>
             <div><strong>{language === "ar" ? "كل الأكاديميات" : "All academies"}</strong><small>{memberships.length} {language === "ar" ? "مساحات مدمجة" : "unified workspaces"}</small></div>
