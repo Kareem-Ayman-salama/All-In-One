@@ -259,6 +259,55 @@ async function runE2ETests() {
           return !drawer?.classList.contains("is-open");
         });
         assert(drawerClosedBtn, "Mobile drawer closes on (X) close button click");
+
+        const cardRails = await page.evaluate(() => {
+          const selectors = [
+            ".banner-grid",
+            ".trust-foundation-grid",
+            ".comparison-grid",
+            ".features-grid",
+            ".testimonials-grid",
+            ".steps-flow",
+            ".pricing-cards-grid",
+            ".market-launch-options",
+          ];
+
+          return selectors.map((selector) => {
+            const element = document.querySelector(selector);
+            const style = element ? window.getComputedStyle(element) : null;
+            return {
+              selector,
+              exists: Boolean(element),
+              display: style?.display,
+              overflowX: style?.overflowX,
+              hasHorizontalContent: Boolean(element && element.scrollWidth > element.clientWidth),
+              clientWidth: element?.clientWidth,
+              scrollWidth: element?.scrollWidth,
+              childWidths: element
+                ? [...element.children].map((child) => Math.round(child.getBoundingClientRect().width))
+                : [],
+            };
+          });
+        });
+
+        const cardRailsAreValid = cardRails.every(({
+          exists,
+          display,
+          overflowX,
+          hasHorizontalContent,
+        }) => (
+          exists
+          && display === "flex"
+          && overflowX === "auto"
+          && (vp.width > 600 || hasHorizontalContent)
+        ));
+        if (!cardRailsAreValid) {
+          console.error(`  Landing rail diagnostics: ${JSON.stringify(cardRails)}`);
+        }
+        assert(
+          cardRailsAreValid,
+          `Landing card groups are compact horizontal swipe rails on ${vp.width}px`
+        );
       }
 
       // 4. Modal dialog interaction

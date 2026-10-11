@@ -3860,3 +3860,168 @@ body > main { padding-top: 74px; }
   body > main { padding-top: 68px; }
   .site-footer { padding-top: 38px; }
 }
+
+/* Mobile landing card rails: keep repeated content compact and swipeable. */
+@media (max-width: 768px) {
+  .hero-container,
+  .hero-floating-banner {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .hero-floating-banner {
+    width: calc(100vw - 36px);
+  }
+
+  .section {
+    padding-block: 48px;
+  }
+
+  .section-desc-center {
+    margin-bottom: 28px;
+  }
+
+  .faq-section {
+    padding-block: 48px;
+  }
+
+  .market-launch-section {
+    padding-block: 48px;
+  }
+
+  .banner-grid,
+  .hero-highlights-grid,
+  .comparison-grid,
+  .features-grid,
+  .courses-grid,
+  .testimonials-grid,
+  .steps-flow,
+  .pricing-cards-grid {
+    display: flex;
+    align-items: stretch;
+    gap: 14px;
+    width: auto;
+    margin-inline: -18px;
+    padding: 4px 18px 14px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-padding-inline: 18px;
+    scroll-snap-type: inline mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .banner-grid,
+  .hero-highlights-grid {
+    width: calc(100vw - 36px);
+  }
+
+  .banner-grid::-webkit-scrollbar,
+  .hero-highlights-grid::-webkit-scrollbar,
+  .trust-foundation-grid::-webkit-scrollbar,
+  .comparison-grid::-webkit-scrollbar,
+  .features-grid::-webkit-scrollbar,
+  .courses-grid::-webkit-scrollbar,
+  .testimonials-grid::-webkit-scrollbar,
+  .steps-flow::-webkit-scrollbar,
+  .pricing-cards-grid::-webkit-scrollbar,
+  .market-launch-options::-webkit-scrollbar {
+    display: none;
+  }
+
+  .banner-grid > *,
+  .hero-highlights-grid > *,
+  .comparison-grid > *,
+  .features-grid > *,
+  .courses-grid > *,
+  .testimonials-grid > *,
+  .steps-flow > *,
+  .pricing-cards-grid > * {
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+
+  .banner-grid > *,
+  .hero-highlights-grid > * {
+    flex: 0 0 min(74vw, 280px);
+  }
+
+  .comparison-grid > * {
+    flex: 0 0 min(80vw, 340px);
+  }
+
+  .features-grid > *,
+  .steps-flow > * {
+    flex: 0 0 min(76vw, 310px);
+  }
+
+  .courses-grid > *,
+  .testimonials-grid > * {
+    flex: 0 0 min(80vw, 330px);
+  }
+
+  .pricing-cards-grid > * {
+    flex: 0 0 min(80vw, 330px);
+  }
+
+  .price-card.featured-card,
+  .price-card.featured-card:hover {
+    transform: none;
+  }
+
+  .trust-foundation-grid {
+    display: flex;
+    align-items: stretch;
+    gap: 12px;
+    max-width: 100%;
+    padding: 14px 18px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-padding-inline: 18px;
+    scroll-snap-type: inline mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .trust-foundation-grid article,
+  .trust-foundation-grid article:nth-child(2) {
+    flex: 0 0 min(74vw, 280px);
+    min-height: 104px;
+    padding: 20px;
+    border: 1px solid #edf0f5;
+    border-radius: 14px;
+    scroll-snap-align: start;
+  }
+
+  .trust-foundation-grid article:last-child {
+    border: 1px solid #edf0f5;
+  }
+
+  .market-launch-options {
+    display: flex;
+    align-items: stretch;
+    gap: 12px;
+    margin-inline: -8px;
+    padding: 2px 8px 10px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-padding-inline: 8px;
+    scroll-snap-type: inline mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .market-launch-options article {
+    flex: 0 0 min(80%, 300px);
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+}
+
+@media (max-width: 520px) {
+  .hero-floating-banner,
+  .banner-grid,
+  .hero-highlights-grid {
+    width: calc(100vw - 28px);
+  }
+}
