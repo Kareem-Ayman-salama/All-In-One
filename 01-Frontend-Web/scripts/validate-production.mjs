@@ -23,6 +23,7 @@ const accountSettings = read("src/components/AccountSettings.jsx");
 const marketplaceOperations = read("src/components/MarketplaceAdminOperations.jsx");
 const organizationContext = read("src/contexts/OrganizationContext.jsx");
 const httpClient = read("src/services/httpClient.js");
+const apiErrors = read("src/services/apiErrors.js");
 const authService = read("src/services/authService.js");
 const viteConfig = read("vite.config.js");
 const server = read("server.js");
@@ -127,6 +128,14 @@ assertContains(httpClient, [
   "import.meta.env.PROD && MOCK_API_REQUESTED",
   "Production builds cannot enable VITE_USE_MOCK_API"
 ], "Production mock-data guard");
+assertContains(httpClient, [
+  'error.code = offline ? "OFFLINE" : "NETWORK_ERROR"'
+], "Network error normalization");
+assertContains(apiErrors, [
+  "OFFLINE:",
+  "NETWORK_ERROR:",
+  "تعذر الاتصال بالخادم"
+], "Network error UX");
 assertContains(viteConfig, [
   'command === "build"',
   'environment.VITE_USE_MOCK_API === "true"',

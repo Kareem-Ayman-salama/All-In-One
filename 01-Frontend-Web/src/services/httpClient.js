@@ -24,7 +24,7 @@ export async function downloadFile(path, fallbackName = "aio-export") {
 async function request(path, options, retried) {
   const token = readToken();
   const isFormData = options.body instanceof FormData;
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await fetchApi(path, {
     ...options,
     credentials: "include",
     headers: {
@@ -70,7 +70,7 @@ async function refreshAccessToken() {
 
 async function requestDownload(path, fallbackName, retried) {
   const token = readToken();
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await fetchApi(path, {
     credentials: "include",
     headers: {
       Accept: "application/vnd.ms-excel,text/csv,application/json",
@@ -100,6 +100,18 @@ async function requestDownload(path, fallbackName, retried) {
   anchor.remove();
   URL.revokeObjectURL(url);
   return filename;
+}
+
+async function fetchApi(path, options) {
+  try {
+    return await fetch(`${API_BASE_URL}${path}`, options);
+  } catch (cause) {
+    const offline = typeof navigator !== "undefined" && navigator.onLine === false;
+    const error = new Error(offline ? "The device is offline." : "The service could not be reached.", { cause });
+    error.code = offline ? "OFFLINE" : "NETWORK_ERROR";
+    error.details = { retryable: true };
+    throw error;
+  }
 }
 
 async function parseResponse(response) {

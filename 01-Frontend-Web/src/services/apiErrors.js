@@ -1,4 +1,6 @@
 export const API_ERROR_CATALOG = {
+  OFFLINE: { category: "network", retryable: true, messageEn: "You appear to be offline. Check your connection and try again.", messageAr: "يبدو أن الجهاز غير متصل بالإنترنت. تحقق من الاتصال وحاول مرة أخرى." },
+  NETWORK_ERROR: { category: "network", retryable: true, messageEn: "We could not reach the server. Please wait a moment and try again.", messageAr: "تعذر الاتصال بالخادم. انتظر لحظة ثم حاول مرة أخرى." },
   AUTHENTICATION_REQUIRED: { category: "auth", retryable: false, messageEn: "Sign in to continue.", messageAr: "سجل الدخول للمتابعة." },
   INVALID_CREDENTIALS: { category: "auth", retryable: false, messageEn: "Email or password is incorrect.", messageAr: "البريد الإلكتروني أو كلمة المرور غير صحيحة." },
   SESSION_EXPIRED: { category: "auth", retryable: false, messageEn: "Your session has expired. Sign in again.", messageAr: "انتهت جلستك. سجل الدخول مرة أخرى." },
