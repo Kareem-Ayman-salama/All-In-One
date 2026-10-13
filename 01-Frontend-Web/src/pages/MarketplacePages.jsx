@@ -27,11 +27,35 @@ function translateLevel(level, isArabic) {
   if (!isArabic) return level;
   const map = {
     Beginner: "مبتدئ",
+    beginner: "مبتدئ",
     Intermediate: "متوسط",
+    intermediate: "متوسط",
     Advanced: "متقدم",
+    advanced: "متقدم",
     All: "جميع المستويات"
   };
   return map[level] || level;
+}
+
+function formatBatchSchedule(schedule, isArabic) {
+  if (!Array.isArray(schedule)) return schedule || "";
+  return schedule.map((slot) => {
+    const time = slot.startTime && slot.endTime
+      ? `${slot.startTime}-${slot.endTime}`
+      : slot.time || slot.startTime || "";
+    return [slot.day, time].filter(Boolean).join(" ");
+  }).join(isArabic ? "، " : ", ");
+}
+
+function formatMarketDate(value, isArabic) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat(isArabic ? "ar-EG" : "en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric"
+  }).format(date);
 }
 
 function translateDelivery(deliveryType, isArabic) {
@@ -180,19 +204,48 @@ export function CourseSellerPage() {
 
 export function CourseDetailsPage() {
   const { courseSlug } = useParams();
-  const { courses, academies, instructors, batches, categories } = useMarketplace();
-  const course = courses.find((item) => item.slug === courseSlug && item.status === "published");
-  if (!course) return <Navigate to="/courses" replace />;
+  const { courses, academies, instructors, batches, categories, getPublicCourse, loading } = useMarketplace();
   const { isArabic, copy } = useMarketI18n();
+  const summaryCourse = courses.find((item) => item.slug === courseSlug && item.status === "published");
+  const [courseDetails, setCourseDetails] = useState(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    setCourseDetails(null);
+    if (!summaryCourse) return () => { active = false; };
+    setDetailsLoading(true);
+    getPublicCourse(summaryCourse.id)
+      .then((result) => {
+        if (active) setCourseDetails(result);
+      })
+      .catch(() => {
+        if (active) setCourseDetails(summaryCourse);
+      })
+      .finally(() => {
+        if (active) setDetailsLoading(false);
+      });
+    return () => { active = false; };
+  }, [getPublicCourse, summaryCourse?.id]);
+
+  const course = courseDetails || summaryCourse;
+  useMarketplaceSeo(
+    course ? `${nameOf(course, isArabic)} | AIN` : copy("الكورسات | AIN", "Courses | AIN"),
+    course ? (isArabic ? course.shortDescriptionAr : course.shortDescription) : ""
+  );
+  if (loading) return <MarketplaceShell><main className="course-detail-main"><div className="market-empty"><BookOpen /><h2>{copy("جارٍ تحميل الكورس...", "Loading course...")}</h2></div></main></MarketplaceShell>;
+  if (!summaryCourse) return <Navigate to="/courses" replace />;
   const academy = academies.find((item) => item.id === course.academyId);
   const instructor = instructors.find((item) => item.id === course.instructorId);
   const category = categories.find((item) => item.id === course.categoryId);
-  const courseBatches = batches.filter((item) => item.courseId === course.id && item.status === "open");
-  useMarketplaceSeo(`${nameOf(course, isArabic)} | AIN`, isArabic ? course.shortDescriptionAr : course.shortDescription);
+  const courseBatches = courseDetails?.batches?.length
+    ? courseDetails.batches.filter((item) => item.status === "open")
+    : batches.filter((item) => item.courseId === course.id && item.status === "open");
+  const learningOutcomes = Array.isArray(course.learningOutcomes) ? course.learningOutcomes : [];
   return <MarketplaceShell><main className="course-detail-main">
     <div className="market-breadcrumbs"><Link to="/courses">{copy("الكورسات", "Courses")}</Link><span>/</span><span>{nameOf(category, isArabic)}</span><span>/</span><strong>{nameOf(course, isArabic)}</strong></div>
     <section className="course-detail-hero"><div><Badge tone="primary">{nameOf(category, isArabic)}</Badge><h1>{nameOf(course, isArabic)}</h1><p>{isArabic ? course.shortDescriptionAr : course.shortDescription}</p><div className="course-detail-owner"><span style={{ background: academy?.color }}>{academy?.initials}</span><div><strong>{nameOf(academy, isArabic)} {academy?.verified && <BadgeCheck />}</strong><small>{copy("بواسطة", "By")} {nameOf(instructor, isArabic)}</small></div></div><div className="course-detail-facts"><span><Clock3 />{course.duration}</span><span><BookOpen />{course.sessions} {copy("حصة", "sessions")}</span><span><MonitorPlay />{translateDelivery(course.deliveryType, isArabic)}</span></div></div><div className="course-visual">{course.coverUrl ? <img src={course.coverUrl} alt="" /> : <GraduationCap />}</div></section>
-    <div className="course-detail-layout"><div className="course-detail-content"><section><h2>{copy("عن الكورس", "About this course")}</h2><p>{isArabic ? course.descriptionAr : course.description}</p></section><section><h2>{copy("ماذا ستتعلم؟", "What you will learn")}</h2><div className="outcomes-grid">{course.learningOutcomes.map((item) => <span key={item}><Check />{item}</span>)}</div></section><section><h2>{copy("المدرس", "Instructor")}</h2><div className="instructor-profile"><span>{instructor?.initials}</span><div><h3>{nameOf(instructor, isArabic)}</h3><strong>{instructor?.specialty}</strong><p>{instructor?.bio}</p></div></div></section><section><h2>{copy("الدفعات المتاحة", "Available batches")}</h2><div className="batch-public-list">{courseBatches.map((batch) => <article key={batch.id}><CalendarDays /><div><strong>{nameOf(batch, isArabic)}</strong><span>{batch.schedule} · {copy("يبدأ", "Starts")} {batch.startDate}</span><small><MapPin />{batch.location}</small></div><Badge tone="success">{batch.capacity - batch.confirmedSeats - batch.reservedSeats} {copy("مكان", "seats")}</Badge></article>)}</div></section></div>
+    <div className="course-detail-layout"><div className="course-detail-content"><section><h2>{copy("عن الكورس", "About this course")}</h2><p>{isArabic ? course.descriptionAr : course.description}</p></section>{(detailsLoading || learningOutcomes.length > 0) && <section><h2>{copy("ماذا ستتعلم؟", "What you will learn")}</h2>{detailsLoading ? <p>{copy("جارٍ تحميل تفاصيل الكورس...", "Loading course details...")}</p> : <div className="outcomes-grid">{learningOutcomes.map((item) => <span key={item}><Check />{item}</span>)}</div>}</section>}<section><h2>{copy("المدرس", "Instructor")}</h2><div className="instructor-profile"><span>{instructor?.initials}</span><div><h3>{nameOf(instructor, isArabic)}</h3><strong>{instructor?.specialty}</strong><p>{instructor?.bio}</p></div></div></section><section><h2>{copy("الدفعات المتاحة", "Available batches")}</h2><div className="batch-public-list">{courseBatches.map((batch) => <article key={batch.id}><CalendarDays /><div><strong>{nameOf(batch, isArabic)}</strong><span>{formatBatchSchedule(batch.schedule, isArabic)} · {copy("يبدأ", "Starts")} {formatMarketDate(batch.startDate, isArabic)}</span><small><MapPin />{batch.location}</small></div><Badge tone="success">{batch.remainingSeats ?? Math.max(0, Number(batch.capacity || 0) - Number(batch.confirmedSeats || 0) - Number(batch.reservedSeats || 0))} {copy("مكان", "seats")}</Badge></article>)}</div></section></div>
       <aside className="course-booking-card"><span>{copy("السعر يبدأ من", "Price starts at")}</span>{course.discountedPrice && <del>{course.price.toLocaleString()} {copy("ج.م", "EGP")}</del>}<strong>{(course.discountedPrice || course.price).toLocaleString()} {copy("ج.م", "EGP")}</strong><p>{copy("الحجز الآن والدفع لاحقًا بعد تأكيد الأكاديمية.", "Reserve now and pay after academy confirmation.")}</p><Button as={Link} to={`/booking/${course.id}`}>{copy("احجز مكانك الآن", "Reserve your seat")}</Button><div><ShieldCheck />{copy("لن يتم تحصيل أي مبلغ في هذه المرحلة.", "No payment is collected at this stage.")}</div></aside>
     </div>
   </main></MarketplaceShell>;

@@ -130,6 +130,13 @@ export function MarketplaceProvider({ children }) {
     }
   }, [commitMock, data, mock, reload]);
 
+  const getPublicCourse = useCallback(async (identifier) => {
+    if (mock) {
+      return data.courses.find((item) => item.id === identifier || item.slug === identifier) || null;
+    }
+    return marketplaceRepository.getPublicCourse(identifier);
+  }, [data.courses, mock]);
+
   const value = useMemo(() => ({
     ...data,
     loading,
@@ -137,11 +144,12 @@ export function MarketplaceProvider({ children }) {
     reload,
     add,
     update,
+    getPublicCourse,
     createBooking,
     confirmBooking: (id, payload) => bookingAction(id, "confirm", payload),
     rejectBooking: (id, payload) => bookingAction(id, "reject", payload),
     cancelBooking: (id, payload) => bookingAction(id, "cancel", payload)
-  }), [add, bookingAction, createBooking, data, error, loading, reload, update]);
+  }), [add, bookingAction, createBooking, data, error, getPublicCourse, loading, reload, update]);
 
   return <MarketplaceContext.Provider value={value}>{children}</MarketplaceContext.Provider>;
 }

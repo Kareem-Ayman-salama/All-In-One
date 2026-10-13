@@ -24,6 +24,25 @@ class BookingFlowTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_public_course_details_can_be_loaded_by_slug(): void
+    {
+        [, , $course] = $this->marketplace();
+        $course->update([
+            'learning_outcomes' => ['Solve exam problems confidently.'],
+            'sessions_count' => 12,
+        ]);
+
+        $this->getJson("/api/v1/public/courses/{$course->slug}")
+            ->assertOk()
+            ->assertJsonPath('data.id', $course->id)
+            ->assertJsonPath('data.description', 'Complete physics course.')
+            ->assertJsonPath(
+                'data.learningOutcomes.0',
+                'Solve exam problems confidently.',
+            )
+            ->assertJsonPath('data.sessionsCount', 12);
+    }
+
     public function test_last_seat_booking_is_idempotent_and_cannot_be_oversold(): void
     {
         [$organization, $owner, $course, $batch] = $this->marketplace();

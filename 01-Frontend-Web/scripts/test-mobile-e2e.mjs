@@ -9,6 +9,67 @@ const __dirname = path.dirname(__filename);
 const frontendRoot = path.resolve(__dirname, "..");
 const publicRoot = path.join(frontendRoot, "public");
 const distRoot = path.join(frontendRoot, "dist");
+const courseSummaryFixture = {
+  id: "course-regression-1",
+  organizationId: "organization-regression-1",
+  slug: "regression-course",
+  title: "Regression Course",
+  titleAr: "كورس اختبار التفاصيل",
+  shortDescription: "Course summary without detailed array fields.",
+  shortDescriptionAr: "ملخص كورس بدون حقول التفاصيل.",
+  educationLevel: "beginner",
+  deliveryType: "online",
+  priceMinor: 150000,
+  currency: "EGP",
+  status: "published",
+  academy: { id: "academy-regression-1", name: "AIN Academy", nameAr: "أكاديمية عين", verified: true },
+  instructor: { id: "instructor-regression-1", name: "Nour Samir", nameAr: "نور سمير" },
+  category: { id: "category-regression-1", name: "Technology", nameAr: "التكنولوجيا" },
+  batches: [{
+    id: "batch-regression-1",
+    title: "November Cohort",
+    titleAr: "دفعة نوفمبر",
+    startDate: "2026-11-01T00:00:00Z",
+    schedule: [{ day: "Monday", time: "19:00" }],
+    deliveryType: "online",
+    capacity: 20,
+    remainingSeats: 8,
+    location: "Online",
+    status: "open"
+  }]
+};
+
+function marketplaceFixtureFor(url) {
+  const pathName = new URL(url).pathname;
+  if (pathName.endsWith("/public/courses/course-regression-1")) {
+    return {
+      ...courseSummaryFixture,
+      description: "Detailed course description.",
+      descriptionAr: "وصف الكورس الكامل.",
+      learningOutcomes: ["Build a complete project"],
+      requirements: [],
+      duration: "4 weeks",
+      sessionsCount: 8
+    };
+  }
+  if (pathName.endsWith("/public/courses")) return [courseSummaryFixture];
+  if (pathName.endsWith("/public/academies")) {
+    return [{
+      id: "academy-regression-1",
+      organizationId: "organization-regression-1",
+      slug: "ain-academy",
+      publicName: "AIN Academy",
+      publicNameAr: "أكاديمية عين",
+      verificationStatus: "verified",
+      isPublic: true,
+      deliveryMethods: ["online"]
+    }];
+  }
+  if (pathName.endsWith("/public/categories")) {
+    return [{ id: "category-regression-1", name: "Technology", nameAr: "التكنولوجيا", active: true }];
+  }
+  return [];
+}
 
 function getMimeType(filePath) {
   const ext = path.extname(filePath).toLowerCase();
@@ -457,7 +518,42 @@ async function runE2ETests() {
       await pageCourses.close();
     }
 
-    // 4. Test the marketplace seller and provider registration entry points
+    // 4. Regress the public course detail crash caused by missing summary arrays.
+    const courseDetailsPage = await context.newPage();
+    await courseDetailsPage.setViewportSize({ width: vp.width, height: vp.height });
+    const coursePageErrors = [];
+    courseDetailsPage.on("pageerror", (error) => coursePageErrors.push(error.message));
+    try {
+      await courseDetailsPage.route("**/api/**", (route) => route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ success: true, data: marketplaceFixtureFor(route.request().url()) })
+      }));
+      await courseDetailsPage.goto(`${baseUrl}/courses/regression-course`, { waitUntil: "domcontentloaded", timeout: 15000 });
+      await courseDetailsPage.waitForSelector(".course-detail-main h1", { timeout: 5000 });
+      await courseDetailsPage.waitForSelector(".outcomes-grid", { timeout: 5000 });
+
+      const detailState = await courseDetailsPage.evaluate(() => ({
+        title: document.querySelector(".course-detail-main h1")?.textContent,
+        outcome: document.querySelector(".outcomes-grid")?.textContent,
+        hasErrorBoundary: Boolean(document.querySelector(".error-boundary")),
+        doc: document.documentElement.scrollWidth,
+        body: document.body.scrollWidth,
+        inner: window.innerWidth
+      }));
+      assert(
+        coursePageErrors.length === 0 && !detailState.hasErrorBoundary && detailState.outcome?.includes("Build a complete project"),
+        `/courses/:slug renders API details without a React runtime error`
+      );
+      assert(
+        detailState.doc <= detailState.inner && detailState.body <= detailState.inner,
+        `/courses/:slug fits viewport (${vp.width}px): doc=${detailState.doc}px, body=${detailState.body}px, win=${detailState.inner}px`
+      );
+    } finally {
+      await courseDetailsPage.close();
+    }
+
+    // 5. Test the marketplace seller and provider registration entry points
     for (const sellerRoute of ["/sell-courses", "/register-company?type=independent_instructor"]) {
       const sellerPage = await context.newPage();
       await sellerPage.setViewportSize({ width: vp.width, height: vp.height });

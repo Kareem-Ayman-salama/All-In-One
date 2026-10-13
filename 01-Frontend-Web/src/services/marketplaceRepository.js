@@ -24,9 +24,15 @@ function normalizeCourse(raw) {
     instructorId: course.instructorId || course.instructor?.id,
     categoryId: course.categoryId || course.category?.id,
     coverUrl: course.coverUrl || course.cover,
+    level: course.level || course.educationLevel || "All",
     price: money(course.priceMinor) ?? Number(course.price || 0),
     discountedPrice: money(course.discountedPriceMinor),
-    sessions: course.sessions ?? course.sessionsCount ?? 0,
+    description: course.description || course.shortDescription || "",
+    descriptionAr: course.descriptionAr || course.shortDescriptionAr || course.description || course.shortDescription || "",
+    learningOutcomes: Array.isArray(course.learningOutcomes) ? course.learningOutcomes : [],
+    requirements: Array.isArray(course.requirements) ? course.requirements : [],
+    duration: course.duration || "",
+    sessions: Number(course.sessions ?? course.sessionsCount ?? 0),
     batches: (course.batches || []).map(normalizeBatch)
   };
 }
@@ -64,11 +70,13 @@ function normalizeAcademy(raw) {
 
 function normalizeInstructor(raw) {
   const instructor = camelize(raw);
+  const name = instructor.name || "";
   return {
     ...instructor,
     nameAr: instructor.nameAr || instructor.name,
     active: instructor.status === "active",
-    specialty: instructor.specialty || instructor.specialties?.[0] || ""
+    specialty: instructor.specialty || instructor.specialties?.[0] || "",
+    initials: instructor.initials || name.split(/\s+/).filter(Boolean).map((part) => part[0]).join("").slice(0, 2).toUpperCase()
   };
 }
 
@@ -212,6 +220,10 @@ async function safeRequest(path) {
 }
 
 export const marketplaceRepository = {
+  async getPublicCourse(identifier) {
+    return normalizeCourse(await httpClient(`/public/courses/${encodeURIComponent(identifier)}`));
+  },
+
   async load({ organizationId, platformAdmin, authenticated }) {
     const [publicCourses, publicAcademies, categories] = await Promise.all([
       safeRequest("/public/courses?perPage=48"),

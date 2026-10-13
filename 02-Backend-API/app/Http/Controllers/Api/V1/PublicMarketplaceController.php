@@ -15,6 +15,7 @@ use App\Support\ApiResponse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class PublicMarketplaceController extends Controller
 {
@@ -146,9 +147,12 @@ class PublicMarketplaceController extends Controller
                     ->where('status', BatchStatus::Open->value)
                     ->orderBy('start_date'),
             ])
-            ->where(fn (Builder $query) => $query
-                ->where('id', $course)
-                ->orWhere('slug', $course))
+            ->where(function (Builder $query) use ($course): void {
+                $query->where('slug', $course);
+                if (Str::isUuid($course)) {
+                    $query->orWhere('id', $course);
+                }
+            })
             ->first();
         if (! $model) {
             throw new ApiException('RESOURCE_NOT_FOUND', 'Course not found.', 404);
