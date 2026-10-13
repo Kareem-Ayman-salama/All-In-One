@@ -396,6 +396,38 @@ async function runE2ETests() {
         return !modal?.classList.contains("on");
       });
       assert(modalClosed, "Lead generation modal closes cleanly on Escape");
+
+      await page.evaluate(() => {
+        window.__capturedWhatsAppUrl = "";
+        window.open = (url) => {
+          window.__capturedWhatsAppUrl = String(url);
+          return null;
+        };
+        window.openLeadModal("trial-modal");
+      });
+      await page.locator('#trial-modal input[name="name"]').fill("محمد فوزي");
+      await page.locator('#trial-modal input[name="phone"]').fill("01001942600");
+      await page.locator('#trial-modal input[name="email"]').fill("mohamed@example.com");
+      await page.locator('#trial-modal input[name="organization"]').fill("أكاديمية المركز");
+      await page.locator('#trial-modal select[name="type"]').selectOption({ index: 1 });
+      await page.locator('#trial-modal select[name="students"]').selectOption({ index: 1 });
+      await page.locator('#trial-modal textarea[name="content"]').fill("كورس برمجة ومذكرات");
+      await page.locator("#trial-modal form.lead-form").evaluate((form) => form.requestSubmit());
+      await page.waitForTimeout(250);
+
+      const whatsAppMessage = await page.evaluate(() => {
+        const url = new URL(window.__capturedWhatsAppUrl);
+        return url.searchParams.get("text") || "";
+      });
+      assert(
+        whatsAppMessage.includes("الاسم: محمد فوزي")
+          && whatsAppMessage.includes("اسم الأكاديمية / المركز: أكاديمية المركز"),
+        "WhatsApp trial message preserves Arabic fields"
+      );
+      assert(
+        !whatsAppMessage.includes("\uFFFD") && !/[\u{1F300}-\u{1FAFF}]/u.test(whatsAppMessage),
+        "WhatsApp trial message excludes corrupted emoji separators"
+      );
     } finally {
       await page.close();
     }

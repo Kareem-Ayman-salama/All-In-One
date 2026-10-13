@@ -1426,8 +1426,9 @@ function value(formData, key) {
 }
 
 function openWhatsApp(message) {
-  const url = `https://wa.me/${AIN_CONTACT.whatsapp}?text=${encodeURIComponent(message)}`;
-  window.open(url, "_blank", "noopener,noreferrer");
+  const url = new URL(`https://wa.me/${AIN_CONTACT.whatsapp}`);
+  url.searchParams.set("text", message.normalize("NFC"));
+  window.open(url.toString(), "_blank", "noopener,noreferrer");
 }
 
 async function captureTrialLead(data) {
@@ -1458,13 +1459,13 @@ async function submitTrialForm(event) {
   const message = isAr ? [
     "مرحبًا فريق AIN، أريد حجز تجربة شهر مجاني للمنصة.",
     "",
-    `👤 الاسم: ${value(data, "name")}`,
-    `📱 الهاتف / WhatsApp: ${value(data, "phone")}`,
-    `✉️ البريد الإلكتروني: ${value(data, "email")}`,
-    `🏛️ اسم الأكاديمية / المركز: ${value(data, "organization")}`,
-    `🎯 نوع النشاط: ${value(data, "type")}`,
-    `👥 عدد الطلاب المتوقع: ${value(data, "students")}`,
-    `🔒 المحتوى المطلوب حمايته: ${value(data, "content")}`,
+    `الاسم: ${value(data, "name")}`,
+    `الهاتف / WhatsApp: ${value(data, "phone")}`,
+    `البريد الإلكتروني: ${value(data, "email")}`,
+    `اسم الأكاديمية / المركز: ${value(data, "organization")}`,
+    `نوع النشاط: ${value(data, "type")}`,
+    `عدد الطلاب المتوقع: ${value(data, "students")}`,
+    `المحتوى المطلوب حمايته: ${value(data, "content")}`,
   ].join("\n") : [
     "Hello AIN team, I would like to activate a 30-day free trial for my academy.",
     "",
