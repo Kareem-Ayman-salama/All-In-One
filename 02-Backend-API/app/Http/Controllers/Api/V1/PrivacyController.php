@@ -15,6 +15,7 @@ use App\Models\LessonBooking;
 use App\Models\Notification;
 use App\Models\OrganizationMembership;
 use App\Models\Payment;
+use App\Models\ProviderApplication;
 use App\Models\QuizAttempt;
 use App\Models\SupportRequest;
 use App\Models\UserDevice;
@@ -127,6 +128,10 @@ class PrivacyController extends Controller
                 ->orWhere('email', $user->normalized_email)
                 ->get(),
             'notifications' => Notification::query()
+                ->where('user_id', $user->id)
+                ->get(),
+            'providerApplications' => ProviderApplication::query()
+                ->with('documents:id,provider_application_id,type,original_name,mime_type,size_bytes,scan_status,created_at')
                 ->where('user_id', $user->id)
                 ->get(),
             'contentAccessLogs' => ContentAccessLog::query()

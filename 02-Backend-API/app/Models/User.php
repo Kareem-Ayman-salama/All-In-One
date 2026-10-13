@@ -25,6 +25,11 @@ class User extends Authenticatable
         return $this->hasMany(OrganizationMembership::class);
     }
 
+    public function providerApplications(): HasMany
+    {
+        return $this->hasMany(ProviderApplication::class);
+    }
+
     public function organizationMemberships(): HasMany
     {
         return $this->hasMany(OrganizationMembership::class);

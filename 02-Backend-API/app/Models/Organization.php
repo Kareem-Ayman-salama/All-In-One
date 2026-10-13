@@ -61,6 +61,11 @@ class Organization extends Model
         return $this->hasMany(OrganizationSubscription::class);
     }
 
+    public function providerApplications(): HasMany
+    {
+        return $this->hasMany(ProviderApplication::class);
+    }
+
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);

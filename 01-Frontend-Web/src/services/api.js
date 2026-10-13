@@ -30,6 +30,71 @@ export const api = {
     method: "POST",
     body: JSON.stringify(payload)
   }).then(camelize),
+  getMyProviderApplication: () => endpoint("/provider-applications/mine", null).then(camelize),
+  submitProviderApplication: (payload) => shouldUseMockApi()
+    ? delay({
+      id: `provider-${Date.now()}`,
+      status: "pending_review",
+      providerType: "independent_instructor",
+      displayName: payload.get("displayName"),
+      phone: payload.get("phone"),
+      specialty: payload.get("specialty"),
+      yearsExperience: Number(payload.get("yearsExperience")),
+      bio: payload.get("bio"),
+      qualifications: payload.get("qualifications"),
+      portfolioUrl: payload.get("portfolioUrl"),
+      sampleCourseTitle: payload.get("sampleCourseTitle"),
+      sampleCourseDescription: payload.get("sampleCourseDescription"),
+      submittedAt: new Date().toISOString(),
+      documents: [{ id: "doc-demo-id", type: "identity", originalName: payload.get("identityDocument")?.name || "identity.pdf", sizeBytes: payload.get("identityDocument")?.size || 120000 }]
+    })
+    : httpClient("/provider-applications", {
+      method: "POST",
+      body: payload
+    }).then(camelize),
+  getProviderApplications: (status = "pending_review") => endpoint(
+    `/admin/provider-applications?perPage=100&status=${encodeURIComponent(status)}`,
+    [{
+      id: "provider-demo-1",
+      status: "pending_review",
+      displayName: "أحمد محمود",
+      phone: "01012345678",
+      specialty: "رياضيات ثانوية عامة",
+      yearsExperience: 7,
+      bio: "مدرس رياضيات بخبرة عملية في إعداد طلاب المرحلة الثانوية وبناء خطط تعلم واضحة.",
+      qualifications: "بكالوريوس علوم وتربية — قسم الرياضيات.",
+      portfolioUrl: "https://example.com",
+      sampleCourseTitle: "تأسيس الرياضيات للثانوية العامة",
+      sampleCourseDescription: "برنامج تأسيسي منظم مع واجبات واختبارات متابعة.",
+      submittedAt: new Date().toISOString(),
+      user: { email: "teacher@example.com" },
+      documents: [{ id: "doc-demo-id", type: "identity", originalName: "identity.pdf", sizeBytes: 120000 }]
+    }]
+  ).then(camelize),
+  approveProviderApplication: (id, note = "") => shouldUseMockApi()
+    ? delay({ id, note, status: "approved" })
+    : httpClient(
+      `/admin/provider-applications/${id}/approve`,
+      { method: "POST", body: JSON.stringify({ note }) }
+    ).then(camelize),
+  requestProviderApplicationChanges: (id, note) => shouldUseMockApi()
+    ? delay({ id, note, status: "needs_changes" })
+    : httpClient(
+      `/admin/provider-applications/${id}/request-changes`,
+      { method: "POST", body: JSON.stringify({ note }) }
+    ).then(camelize),
+  rejectProviderApplication: (id, note) => shouldUseMockApi()
+    ? delay({ id, note, status: "rejected" })
+    : httpClient(
+      `/admin/provider-applications/${id}/reject`,
+      { method: "POST", body: JSON.stringify({ note }) }
+    ).then(camelize),
+  downloadProviderApplicationDocument: (applicationId, document) => shouldUseMockApi()
+    ? delay(document.originalName || "provider-document")
+    : downloadFile(
+      `/admin/provider-applications/${applicationId}/documents/${document.id}`,
+      document.originalName || "provider-document"
+    ),
   getOtpOperationsStatus: () => endpoint("/admin/otp/status", {
     status: "ready",
     checks: {

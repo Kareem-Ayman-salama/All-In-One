@@ -16,6 +16,7 @@ import {
   AcademyApprovalsPage,
   CategoryManagementPage,
   CourseApprovalsPage,
+  ProviderApplicationApprovalsPage,
   PromotionsManagementPage
 } from "../components/MarketplaceAdminOperations";
 import { SupportLeadsHub } from "../components/SupportLeadsHub";
@@ -29,6 +30,7 @@ const NAV_KEYS = [
   { id: "dashboard",      labelAr: "لوحة التحكم",        labelEn: "Dashboard",          icon: "dashboard",     path: "/super-admin/dashboard" },
   { id: "tenants",        labelAr: "الشركات",             labelEn: "Tenants",            icon: "rooms",         path: "/super-admin/tenants" },
   { id: "academies",      labelAr: "موافقات الأكاديميات", labelEn: "Academy approvals",  icon: "members",       path: "/super-admin/academies" },
+  { id: "providerApplications", labelAr: "طلبات المدرسين", labelEn: "Instructor applications", icon: "courses", path: "/super-admin/providerApplications" },
   { id: "courseApprovals",labelAr: "موافقات الكورسات",    labelEn: "Course approvals",   icon: "courses",       path: "/super-admin/courseApprovals" },
   { id: "support",        labelAr: "طلبات التجربة والدعم", labelEn: "Leads & Support",   icon: "support",       path: "/super-admin/support" },
   { id: "promotions",     labelAr: "العروض والتخفيضات",  labelEn: "Promotions",         icon: "announcements", path: "/super-admin/promotions" },
@@ -58,6 +60,7 @@ export function SuperAdminApp({ data, user }) {
       {page === "dashboard" && <Dashboard data={data} />}
       {page === "tenants" && <PlatformOrganizationsPage />}
       {page === "academies" && <AcademyApprovalsPage />}
+      {page === "providerApplications" && <ProviderApplicationApprovalsPage />}
       {page === "courseApprovals" && <CourseApprovalsPage />}
       {page === "support" && <SupportLeadsHub />}
       {page === "promotions" && <PromotionsManagementPage platform />}

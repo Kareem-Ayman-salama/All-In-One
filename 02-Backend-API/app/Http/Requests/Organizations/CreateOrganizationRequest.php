@@ -33,7 +33,6 @@ class CreateOrganizationRequest extends FormRequest
                     'academy',
                     'training_center',
                     'company',
-                    'independent_instructor',
                 ]),
             ],
             'planCode' => [

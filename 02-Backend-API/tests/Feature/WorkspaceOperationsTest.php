@@ -73,7 +73,7 @@ class WorkspaceOperationsTest extends TestCase
         ]);
     }
 
-    public function test_verified_teacher_can_create_independent_instructor_workspace(): void
+    public function test_teacher_cannot_bypass_provider_approval_when_creating_workspace(): void
     {
         $this->seed();
         $owner = User::factory()->create();
@@ -84,16 +84,10 @@ class WorkspaceOperationsTest extends TestCase
             'type' => 'independent_instructor',
         ]);
 
-        $response
-            ->assertCreated()
-            ->assertJsonPath(
-                'data.organization.type',
-                'independent_instructor',
-            )
-            ->assertJsonPath(
-                'data.organization.subscriptions.0.plan.code',
-                'growth',
-            );
+        $response->assertUnprocessable();
+        $this->assertDatabaseMissing('organizations', [
+            'name' => 'Mona Science',
+        ]);
     }
 
     public function test_owner_can_manage_rooms_but_student_cannot_create_them(): void

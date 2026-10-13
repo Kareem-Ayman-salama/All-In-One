@@ -11,6 +11,7 @@ use App\Models\LessonBooking;
 use App\Models\Notification;
 use App\Models\NotificationPreference;
 use App\Models\Payment;
+use App\Models\ProviderApplication;
 use App\Models\SupportRequest;
 use App\Models\User;
 use App\Models\VerificationCode;
@@ -179,7 +180,34 @@ class ProcessScheduledAccountDeletions extends Command
                             $payment->save();
                         });
 
-                        // 16. Anonymize user profile credentials and PII
+                        // 16. Purge private provider verification documents and redact the application.
+                        ProviderApplication::query()
+                            ->with('documents')
+                            ->where('user_id', $user->id)
+                            ->get()
+                            ->each(function (ProviderApplication $application) use ($anonShort): void {
+                                foreach ($application->documents as $document) {
+                                    $path = $document->getRawOriginal('path');
+                                    if (Storage::disk($document->disk)->exists($path)) {
+                                        $deleted = Storage::disk($document->disk)->delete($path);
+                                        if (! $deleted) {
+                                            throw new \RuntimeException("Failed to delete provider document {$document->id}");
+                                        }
+                                    }
+                                    $document->delete();
+                                }
+                                $application->update([
+                                    'display_name' => "Deleted Provider ({$anonShort})",
+                                    'phone' => '+000000000000',
+                                    'bio' => '[Redacted following account deletion]',
+                                    'qualifications' => null,
+                                    'portfolio_url' => null,
+                                    'sample_course_description' => null,
+                                    'review_note' => null,
+                                ]);
+                            });
+
+                        // 17. Anonymize user profile credentials and PII
                         $user->name = "Deleted User ({$anonShort})";
                         $user->email = $anonEmail;
                         $user->normalized_email = $anonEmail;
@@ -188,12 +216,12 @@ class ProcessScheduledAccountDeletions extends Command
                         $user->avatar_path = null;
                         $user->save();
 
-                        // 17. Soft-delete user account
+                        // 18. Soft-delete user account
                         if (! $user->trashed()) {
                             $user->delete();
                         }
 
-                        // 18. Record immutable audit log
+                        // 19. Record immutable audit log
                         $recorder->record(
                             action: 'privacy.account.deleted',
                             entityType: 'user',
@@ -209,7 +237,7 @@ class ProcessScheduledAccountDeletions extends Command
                         );
                     }
 
-                    // 19. Mark deletion request as completed
+                    // 20. Mark deletion request as completed
                     $request->update([
                         'status' => 'completed',
                         'completed_at' => now(),

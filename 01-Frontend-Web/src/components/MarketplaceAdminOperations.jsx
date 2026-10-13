@@ -1,5 +1,5 @@
 import {
-  BadgeCheck, Ban, BookOpen, Building2, Check, Copy, GraduationCap, Image, LockKeyhole,
+  BadgeCheck, Ban, BookOpen, Building2, Check, Clock3, Copy, FileText, GraduationCap, Image, LockKeyhole,
   Mail, Megaphone, Pencil, Plus, RefreshCw, Search, Send, Settings2, ShieldCheck, Tag,
   Trash2, UserRound, Users, X
 } from "lucide-react";
@@ -936,6 +936,117 @@ export function PromotionsManagementPage({ platform = false }) {
           </div>
           <div className="learning-form-actions"><Button type="submit">{isArabic ? "إرسال للمراجعة" : "Submit for Review"}</Button></div>
         </form>
+      </Modal>
+    </>
+  );
+}
+
+export function ProviderApplicationApprovalsPage() {
+  const { language } = useLanguage();
+  const isArabic = language === "ar";
+  const { showToast } = useToast();
+  const [status, setStatus] = useState("pending_review");
+  const [applications, setApplications] = useState([]);
+  const [selected, setSelected] = useState(null);
+  const [note, setNote] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [acting, setActing] = useState(false);
+
+  const load = async (nextStatus = status) => {
+    setLoading(true);
+    try {
+      setApplications(await api.getProviderApplications(nextStatus));
+    } catch (error) {
+      showToast(error.message || (isArabic ? "تعذر تحميل الطلبات" : "Failed to load applications"), "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load(status);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
+
+  const review = async (action) => {
+    if (["changes", "reject"].includes(action) && !note.trim()) {
+      showToast(isArabic ? "اكتب ملاحظة واضحة للمدرس أولًا" : "Add a clear review note first", "error");
+      return;
+    }
+    setActing(true);
+    try {
+      if (action === "approve") await api.approveProviderApplication(selected.id, note.trim());
+      if (action === "changes") await api.requestProviderApplicationChanges(selected.id, note.trim());
+      if (action === "reject") await api.rejectProviderApplication(selected.id, note.trim());
+      showToast(isArabic ? "تم تحديث الطلب وإبلاغ المدرس" : "Application updated and instructor notified", "success");
+      setSelected(null);
+      setNote("");
+      await load(status);
+    } catch (error) {
+      showToast(error.message || (isArabic ? "تعذر تنفيذ قرار المراجعة" : "Review action failed"), "error");
+    } finally {
+      setActing(false);
+    }
+  };
+
+  const open = (application) => {
+    setSelected(application);
+    setNote(application.reviewNote || "");
+  };
+
+  return (
+    <>
+      <PageHead
+        title={isArabic ? "طلبات اعتماد المدرسين" : "Instructor Applications"}
+        description={isArabic ? "راجع الهوية والخبرة ونموذج الكورس قبل إنشاء مساحة المدرس وتفعيلها." : "Review identity, experience, and the course proposal before activating an instructor workspace."}
+        action={<Button variant="ghost" onClick={() => load(status)}><RefreshCw />{isArabic ? "تحديث" : "Refresh"}</Button>}
+      />
+      <div className="admin-filter-bar provider-review-filters">
+        <select value={status} onChange={(event) => setStatus(event.target.value)}>
+          <option value="pending_review">{isArabic ? "قيد المراجعة" : "Pending review"}</option>
+          <option value="needs_changes">{isArabic ? "مطلوب استكمال" : "Needs changes"}</option>
+          <option value="approved">{isArabic ? "مقبول" : "Approved"}</option>
+          <option value="rejected">{isArabic ? "مرفوض" : "Rejected"}</option>
+          <option value="all">{isArabic ? "كل الطلبات" : "All applications"}</option>
+        </select>
+      </div>
+      <section className="provider-review-list">
+        {loading && <div className="provider-review-empty"><Clock3 />{isArabic ? "جاري تحميل الطلبات..." : "Loading applications..."}</div>}
+        {!loading && applications.length === 0 && <div className="provider-review-empty"><BadgeCheck />{isArabic ? "لا توجد طلبات في هذه الحالة" : "No applications in this status"}</div>}
+        {!loading && applications.map((application) => (
+          <article key={application.id}>
+            <span className="provider-review-avatar">{application.displayName.slice(0, 2).toUpperCase()}</span>
+            <div className="provider-review-summary">
+              <div><h2>{application.displayName}</h2><Badge tone={statusTone(application.status)}>{application.status.replaceAll("_", " ")}</Badge></div>
+              <p>{application.specialty} · {application.yearsExperience} {isArabic ? "سنوات خبرة" : "years experience"}</p>
+              <small>{application.user?.email} · {application.phone}</small>
+            </div>
+            <div className="provider-review-course"><small>{isArabic ? "نموذج الكورس" : "Course proposal"}</small><strong>{application.sampleCourseTitle}</strong></div>
+            <Button variant="ghost" onClick={() => open(application)}>{isArabic ? "فتح الطلب" : "Review"}</Button>
+          </article>
+        ))}
+      </section>
+      <Modal title={isArabic ? "مراجعة طلب المدرس" : "Review Instructor Application"} open={Boolean(selected)} onClose={() => { setSelected(null); setNote(""); }}>
+        {selected && <div className="provider-review-detail">
+          <header><span className="provider-review-avatar">{selected.displayName.slice(0, 2).toUpperCase()}</span><div><h2>{selected.displayName}</h2><p>{selected.user?.email} · {selected.phone}</p></div><Badge tone={statusTone(selected.status)}>{selected.status.replaceAll("_", " ")}</Badge></header>
+          <dl>
+            <div><dt>{isArabic ? "التخصص" : "Specialty"}</dt><dd>{selected.specialty}</dd></div>
+            <div><dt>{isArabic ? "الخبرة" : "Experience"}</dt><dd>{selected.yearsExperience} {isArabic ? "سنوات" : "years"}</dd></div>
+            <div><dt>{isArabic ? "تاريخ الإرسال" : "Submitted"}</dt><dd>{new Intl.DateTimeFormat(isArabic ? "ar-EG" : "en", { dateStyle: "medium" }).format(new Date(selected.submittedAt))}</dd></div>
+            <div><dt>{isArabic ? "حالة المستندات" : "Documents"}</dt><dd>{selected.documents?.length || 0}</dd></div>
+          </dl>
+          <section><h3>{isArabic ? "النبذة المهنية" : "Professional bio"}</h3><p>{selected.bio}</p></section>
+          {selected.qualifications && <section><h3>{isArabic ? "المؤهلات" : "Qualifications"}</h3><p>{selected.qualifications}</p></section>}
+          <section><h3>{isArabic ? "نموذج الكورس" : "Course proposal"}</h3><strong>{selected.sampleCourseTitle}</strong><p>{selected.sampleCourseDescription || "—"}</p></section>
+          {selected.portfolioUrl && <a className="provider-portfolio-link" href={selected.portfolioUrl} target="_blank" rel="noreferrer">{isArabic ? "فتح معرض الأعمال" : "Open portfolio"}</a>}
+          <div className="provider-document-list">
+            {(selected.documents || []).map((document) => <button type="button" key={document.id} onClick={() => api.downloadProviderApplicationDocument(selected.id, document).catch((error) => showToast(error.message, "error"))}><FileText /><span><strong>{document.type === "identity" ? (isArabic ? "إثبات الهوية" : "Identity document") : (isArabic ? "المؤهل أو الشهادة" : "Qualification document")}</strong><small>{document.originalName} · {(document.sizeBytes / 1024).toFixed(0)} KB</small></span></button>)}
+          </div>
+          {selected.status === "pending_review" && <>
+            <FormField label={isArabic ? "ملاحظة المراجعة" : "Review note"}><textarea rows="3" value={note} onChange={(event) => setNote(event.target.value)} placeholder={isArabic ? "مطلوبة عند طلب تعديل أو الرفض" : "Required for changes or rejection"} /></FormField>
+            <footer><Button loading={acting} onClick={() => review("approve")}><Check />{isArabic ? "موافقة وتفعيل" : "Approve & Activate"}</Button><Button variant="ghost" disabled={acting} onClick={() => review("changes")}><Pencil />{isArabic ? "طلب استكمال" : "Request Changes"}</Button><Button variant="ghost" disabled={acting} onClick={() => review("reject")}><X />{isArabic ? "رفض" : "Reject"}</Button></footer>
+          </>}
+        </div>}
       </Modal>
     </>
   );

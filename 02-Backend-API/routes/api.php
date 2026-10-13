@@ -37,6 +37,7 @@ use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\PlanUsageController;
 use App\Http\Controllers\Api\V1\PrivacyController;
 use App\Http\Controllers\Api\V1\PromotionController;
+use App\Http\Controllers\Api\V1\ProviderApplicationController;
 use App\Http\Controllers\Api\V1\PublicMarketplaceController;
 use App\Http\Controllers\Api\V1\QuizController;
 use App\Http\Controllers\Api\V1\ReportExportController;
@@ -122,6 +123,9 @@ Route::prefix('v1')->group(function (): void {
     Route::middleware(['auth:sanctum', 'account.active'])->group(function (): void {
         Route::get('/workspaces', [WorkspaceController::class, 'index']);
         Route::post('/organizations', [OrganizationController::class, 'store']);
+        Route::get('/provider-applications/mine', [ProviderApplicationController::class, 'mine']);
+        Route::post('/provider-applications', [ProviderApplicationController::class, 'store'])
+            ->middleware('throttle:10,1');
         Route::post('/invitations/accept', [InvitationController::class, 'accept']);
         Route::post('/public/bookings', [BookingController::class, 'reserve'])
             ->middleware('throttle:public-booking');
@@ -421,6 +425,16 @@ Route::prefix('v1')->group(function (): void {
             ->middleware('platform.role:super_admin,platform_support,platform_moderator')
             ->group(function (): void {
                 Route::get('/organizations', [AdminModerationController::class, 'organizations']);
+                Route::get('/provider-applications', [ProviderApplicationController::class, 'index']);
+                Route::get(
+                    '/provider-applications/{providerApplication}/documents/{document}',
+                    [ProviderApplicationController::class, 'document'],
+                );
+                Route::middleware('platform.role:super_admin,platform_moderator')->group(function (): void {
+                    Route::post('/provider-applications/{providerApplication}/approve', [ProviderApplicationController::class, 'approve']);
+                    Route::post('/provider-applications/{providerApplication}/request-changes', [ProviderApplicationController::class, 'requestChanges']);
+                    Route::post('/provider-applications/{providerApplication}/reject', [ProviderApplicationController::class, 'reject']);
+                });
                 Route::get('/academies', [AdminModerationController::class, 'academies']);
                 Route::post('/academies/{academy}/verify', [AdminModerationController::class, 'verifyAcademy']);
                 Route::post('/academies/{academy}/reject', [AdminModerationController::class, 'rejectAcademy']);

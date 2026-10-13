@@ -3,6 +3,7 @@ import {
   Building2,
   Check,
   CheckCircle2,
+  Clock3,
   CloudUpload,
   Headphones,
   HelpCircle,
@@ -121,6 +122,8 @@ export function RegisterCompanyPage() {
   const type = ["independent_instructor", "academy", "training_center"].includes(requestedType) ? requestedType : "academy";
   const [form, setForm] = useState({ name: "", bio: "" });
   const [loading, setLoading] = useState(false);
+  const [application, setApplication] = useState(undefined);
+  const [applicationLoading, setApplicationLoading] = useState(false);
   const [error, setError] = useState("");
   const valid = form.name.trim().length >= 2;
   const isArabic = language === "ar";
@@ -130,6 +133,15 @@ export function RegisterCompanyPage() {
     training_center: { ar: "مركز تدريبي", en: "Training center", icon: <Sparkles size={20} /> }
   };
   const registrationPath = `/register-company?type=${type}`;
+
+  useEffect(() => {
+    if (!user || type !== "independent_instructor") return;
+    setApplicationLoading(true);
+    api.getMyProviderApplication()
+      .then(setApplication)
+      .catch((nextError) => setError(nextError.message))
+      .finally(() => setApplicationLoading(false));
+  }, [type, user]);
 
   const selectType = (nextType) => {
     const next = new URLSearchParams(searchParams);
@@ -147,18 +159,96 @@ export function RegisterCompanyPage() {
       showToast(isArabic ? "تم إنشاء مساحة العمل بنجاح" : "Workspace created successfully");
       window.location.assign("/workspaces");
     } catch (nextError) {
-      setError(nextError.message);
+      setError(isArabic ? (nextError.catalog?.messageAr || nextError.message) : (nextError.catalog?.messageEn || nextError.message));
     } finally {
       setLoading(false);
     }
   };
 
+  const submitInstructorApplication = async (event) => {
+    event.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      const payload = new FormData(event.currentTarget);
+      payload.set("providerType", "independent_instructor");
+      const result = await api.submitProviderApplication(payload);
+      setApplication(result);
+      showToast(isArabic ? "تم إرسال طلبك للمراجعة" : "Application submitted for review", "success");
+    } catch (nextError) {
+      setError(isArabic ? (nextError.catalog?.messageAr || nextError.message) : (nextError.catalog?.messageEn || nextError.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const applicationStatus = application?.status;
+  const applicationLocked = ["pending_review", "approved"].includes(applicationStatus);
+  const hasIdentityDocument = application?.documents?.some((document) => document.type === "identity");
+  const statusCopy = {
+    pending_review: {
+      title: isArabic ? "طلبك قيد المراجعة" : "Your application is under review",
+      body: isArabic ? "تم استلام بياناتك ومستنداتك. سيظهر قرار فريق المنصة هنا، وسيصلك بريد وإشعار داخلي." : "We received your details and documents. The review decision will appear here and will also be sent by email.",
+      tone: "pending"
+    },
+    approved: {
+      title: isArabic ? "تم قبول طلبك وتفعيل مساحة المدرس" : "Your instructor workspace is active",
+      body: isArabic ? "يمكنك الآن الدخول لمساحتك وتجهيز أول كورس لإرساله إلى مراجعة السوق." : "You can now enter your workspace and prepare your first course for marketplace review.",
+      tone: "approved"
+    },
+    needs_changes: {
+      title: isArabic ? "الطلب يحتاج استكمال بيانات" : "Your application needs changes",
+      body: isArabic ? "عدّل البيانات المطلوبة ثم أرسل الطلب مرة أخرى." : "Update the requested information, then resubmit the application.",
+      tone: "changes"
+    },
+    rejected: {
+      title: isArabic ? "تعذر قبول الطلب حاليًا" : "The application was not approved",
+      body: isArabic ? "راجع سبب القرار، ويمكنك تحديث بياناتك وإعادة التقديم عند جاهزيتها." : "Review the decision, update your information, and resubmit when ready.",
+      tone: "rejected"
+    }
+  }[applicationStatus];
+
   return (
     <AuthLayout>
-      <div className="auth-panel-card">
-        <AuthHeader icon={typeCopy[type].icon} title={isArabic ? "ابدأ بيع كورساتك على AIN" : "Start selling courses on AIN"} subtitle={isArabic ? "اختر نوع مقدم الكورس، ثم أنشئ مساحة العمل التي ستدير منها الكورسات والحجوزات." : "Choose your provider type, then create the workspace where you will manage courses and bookings."} />
+      <div className={`auth-panel-card ${type === "independent_instructor" && user ? "provider-application-card" : ""}`}>
+        <AuthHeader icon={typeCopy[type].icon} title={isArabic ? "ابدأ بيع كورساتك على AIN" : "Start selling courses on AIN"} subtitle={type === "independent_instructor" ? (isArabic ? "أرسل طلب اعتمادك كمدرس، وبعد المراجعة نفعّل لك مساحة إدارة الكورسات والحجوزات." : "Submit your instructor application. After review, we activate your course and booking workspace.") : (isArabic ? "اختر نوع مقدم الكورس، ثم أنشئ مساحة العمل التي ستدير منها الكورسات والحجوزات." : "Choose your provider type, then create the workspace where you will manage courses and bookings.")} />
         <div className="workspace-type-picker" role="group" aria-label={isArabic ? "نوع مقدم الكورس" : "Course provider type"}>{Object.entries(typeCopy).map(([value, item]) => <button type="button" className={type === value ? "selected" : ""} onClick={() => selectType(value)} key={value}>{item.icon}<span>{isArabic ? item.ar : item.en}</span></button>)}</div>
-        {!user ? <div className="seller-auth-gate"><p>{isArabic ? "تحتاج أولًا إلى حساب شخصي موثّق. بعد تأكيد البريد سنرجعك مباشرة لإنشاء صفحة الكورسات." : "First create a verified personal account. After email verification, we will bring you back to create your course storefront."}</p><Button as={Link} className="auth-submit" to={`/create-account?next=${encodeURIComponent(registrationPath)}`}>{isArabic ? "إنشاء حساب والمتابعة" : "Create account and continue"}</Button><span>{isArabic ? "لديك حساب بالفعل؟" : "Already have an account?"} <Link to={`/login?next=${encodeURIComponent(registrationPath)}`}>{isArabic ? "سجّل الدخول" : "Sign in"}</Link></span></div> : <form className="auth-form" onSubmit={submit}>
+        {!user ? <div className="seller-auth-gate"><p>{isArabic ? "تحتاج أولًا إلى حساب شخصي موثّق. بعد تأكيد البريد سنرجعك مباشرة لإنشاء صفحة الكورسات." : "First create a verified personal account. After email verification, we will bring you back to create your course storefront."}</p><Button as={Link} className="auth-submit" to={`/create-account?next=${encodeURIComponent(registrationPath)}`}>{isArabic ? "إنشاء حساب والمتابعة" : "Create account and continue"}</Button><span>{isArabic ? "لديك حساب بالفعل؟" : "Already have an account?"} <Link to={`/login?next=${encodeURIComponent(registrationPath)}`}>{isArabic ? "سجّل الدخول" : "Sign in"}</Link></span></div> : type === "independent_instructor" ? (
+          applicationLoading ? <div className="provider-application-loading"><Clock3 />{isArabic ? "جاري تحميل طلبك..." : "Loading your application..."}</div> : <>
+            {statusCopy && <section className={`provider-application-status ${statusCopy.tone}`}><span>{applicationStatus === "approved" ? <CheckCircle2 /> : applicationStatus === "pending_review" ? <Clock3 /> : <ShieldAlert />}</span><div><h2>{statusCopy.title}</h2><p>{statusCopy.body}</p>{application?.reviewNote && <blockquote><strong>{isArabic ? "ملاحظة فريق المراجعة" : "Review note"}</strong>{application.reviewNote}</blockquote>}</div></section>}
+            {applicationLocked ? (
+              <div className="provider-application-locked">
+                <div><strong>{isArabic ? "رقم الطلب" : "Application ID"}</strong><span>{application.id}</span></div>
+                <div><strong>{isArabic ? "آخر إرسال" : "Last submitted"}</strong><span>{new Intl.DateTimeFormat(isArabic ? "ar-EG" : "en", { dateStyle: "medium" }).format(new Date(application.submittedAt))}</span></div>
+                {applicationStatus === "approved" && <Button as={Link} className="auth-submit" to="/workspaces">{isArabic ? "الدخول إلى مساحة المدرس" : "Open instructor workspace"}</Button>}
+              </div>
+            ) : (
+              <form className="auth-form provider-application-form" onSubmit={submitInstructorApplication} key={`${application?.id || "new"}-${applicationStatus || "draft"}`}>
+                <div className="provider-form-section"><h2>{isArabic ? "بياناتك المهنية" : "Professional profile"}</h2><p>{isArabic ? "هذه البيانات يراجعها فريق المنصة قبل تفعيل صفحة المدرس." : "The platform team reviews these details before activating your instructor profile."}</p></div>
+                <div className="provider-form-grid">
+                  <FormField label={isArabic ? "اسمك كما سيظهر للطلاب" : "Public instructor name"}><input className="auth-plain-input" name="displayName" defaultValue={application?.displayName || user.name || ""} minLength="2" required /></FormField>
+                  <FormField label={isArabic ? "رقم الهاتف" : "Phone number"}><input className="auth-plain-input" name="phone" type="tel" defaultValue={application?.phone || ""} placeholder="01xxxxxxxxx" required /></FormField>
+                  <FormField label={isArabic ? "التخصص الأساسي" : "Primary specialty"}><input className="auth-plain-input" name="specialty" defaultValue={application?.specialty || ""} placeholder={isArabic ? "مثال: رياضيات ثانوية عامة" : "Example: Secondary mathematics"} required /></FormField>
+                  <FormField label={isArabic ? "سنوات الخبرة" : "Years of experience"}><input className="auth-plain-input" name="yearsExperience" type="number" min="0" max="80" defaultValue={application?.yearsExperience ?? 0} required /></FormField>
+                </div>
+                <FormField label={isArabic ? "نبذة مهنية" : "Professional bio"}><textarea className="workspace-textarea" name="bio" rows="4" minLength="40" defaultValue={application?.bio || ""} placeholder={isArabic ? "اكتب خبرتك وطريقتك في التدريس والفئات التي تدرّس لها..." : "Describe your experience, teaching approach, and student levels..."} required /></FormField>
+                <FormField label={isArabic ? "المؤهلات والشهادات" : "Qualifications and certifications"}><textarea className="workspace-textarea" name="qualifications" rows="3" defaultValue={application?.qualifications || ""} /></FormField>
+                <FormField label={isArabic ? "رابط أعمال سابقة (اختياري)" : "Portfolio link (optional)"}><input className="auth-plain-input" name="portfolioUrl" type="url" dir="ltr" defaultValue={application?.portfolioUrl || ""} placeholder="https://" /></FormField>
+                <div className="provider-form-section"><h2>{isArabic ? "نموذج الكورس" : "Course proposal"}</h2><p>{isArabic ? "اكتب فكرة أول كورس تنوي تقديمه؛ نشر الكورس نفسه سيحتاج مراجعة مستقلة لاحقًا." : "Describe your first planned course. The course itself will have a separate publishing review."}</p></div>
+                <FormField label={isArabic ? "عنوان الكورس المقترح" : "Proposed course title"}><input className="auth-plain-input" name="sampleCourseTitle" defaultValue={application?.sampleCourseTitle || ""} required /></FormField>
+                <FormField label={isArabic ? "وصف مختصر للكورس" : "Short course description"}><textarea className="workspace-textarea" name="sampleCourseDescription" rows="3" defaultValue={application?.sampleCourseDescription || ""} /></FormField>
+                <div className="provider-form-section"><h2>{isArabic ? "مستندات التحقق" : "Verification documents"}</h2><p>{isArabic ? "PDF أو JPG أو PNG بحد أقصى 5MB. الملفات خاصة ولا يطّلع عليها إلا فريق المراجعة." : "PDF, JPG, or PNG up to 5MB. Documents remain private to the review team."}</p></div>
+                <div className="provider-form-grid">
+                  <FormField label={isArabic ? "إثبات الهوية" : "Identity document"}><input className="auth-file-input" name="identityDocument" type="file" accept=".pdf,.jpg,.jpeg,.png" required={!hasIdentityDocument} /><small>{hasIdentityDocument ? (isArabic ? "مرفوع مسبقًا — اختر ملفًا فقط لاستبداله" : "Already uploaded — choose a file only to replace it") : ""}</small></FormField>
+                  <FormField label={isArabic ? "شهادة أو مؤهل (اختياري)" : "Certificate (optional)"}><input className="auth-file-input" name="qualificationDocument" type="file" accept=".pdf,.jpg,.jpeg,.png" /></FormField>
+                </div>
+                {error && <p className="auth-inline-error" role="alert">{error}</p>}
+                <Button className="auth-submit" type="submit" loading={loading}>{application ? (isArabic ? "تحديث الطلب وإعادة إرساله" : "Update and resubmit") : (isArabic ? "إرسال الطلب للمراجعة" : "Submit for review")}</Button>
+                <p className="seller-review-note"><ShieldCheck size={17} />{isArabic ? "لن تُنشأ مساحة مدرس أو تظهر كورساتك للعامة إلا بعد موافقة فريق المنصة." : "No instructor workspace or public course listing is created before platform approval."}</p>
+              </form>
+            )}
+          </>
+        ) : <form className="auth-form" onSubmit={submit}>
           <FormField label={type === "independent_instructor" ? (isArabic ? "اسمك كما سيظهر للطلاب" : "Public instructor name") : (isArabic ? "اسم الأكاديمية أو المركز" : "Academy or center name")}><input className="auth-plain-input" value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} required /></FormField>
           <FormField label={isArabic ? "نبذة مختصرة (اختياري)" : "Short bio (optional)"}><textarea className="workspace-textarea" value={form.bio} onChange={(event) => setForm((current) => ({ ...current, bio: event.target.value }))} placeholder={isArabic ? "عرّف الطلاب بخبرتك وما الذي تقدمه..." : "Tell students about your expertise and courses..."} /></FormField>
           {error && <p className="auth-inline-error" role="alert">{error}</p>}
@@ -218,6 +308,14 @@ export function NoWorkspacePage() {
   const copy = flowCopy[language];
   const navigate = useNavigate();
   const [code, setCode] = useState("");
+  const [providerApplication, setProviderApplication] = useState(null);
+
+  useEffect(() => {
+    if (!user) return;
+    api.getMyProviderApplication()
+      .then(setProviderApplication)
+      .catch(() => setProviderApplication(null));
+  }, [user]);
 
   const switchAccount = () => {
     logout();
@@ -228,6 +326,7 @@ export function NoWorkspacePage() {
     <AuthLayout compact>
       <div className="auth-panel-card no-workspace-card">
         <AuthHeader icon={<Search size={23} />} title={copy.noWorkspaceTitle} subtitle={<>{copy.noWorkspaceText} {user?.email && <strong dir="ltr">{user.email}</strong>}</>} />
+        {providerApplication && <div className="provider-pending-shortcut"><span>{providerApplication.status === "approved" ? <CheckCircle2 /> : <Clock3 />}</span><div><strong>{language === "ar" ? "طلب انضمام المدرس" : "Instructor application"}</strong><small>{providerApplication.status.replaceAll("_", " ")}</small></div><Button as={Link} to="/register-company?type=independent_instructor" variant="ghost">{language === "ar" ? "متابعة الطلب" : "View application"}</Button></div>}
         <div className="pending-workspace-status"><span><Mail size={20} /></span><div><strong>{copy.noInvites}</strong><small>{copy.noInvitesHint}</small></div></div>
         <form className="auth-form workspace-code-form" onSubmit={(event) => { event.preventDefault(); if (code.trim()) navigate(`/invite/${encodeURIComponent(code.trim())}`); }}>
           <FormField label={copy.inviteCode}><input className="auth-plain-input" dir="ltr" value={code} onChange={(event) => setCode(event.target.value.toUpperCase())} placeholder="TECHCORP-2026" /></FormField>
