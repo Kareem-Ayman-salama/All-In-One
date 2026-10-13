@@ -413,7 +413,7 @@ async function runE2ETests() {
       await page.locator('#trial-modal select[name="students"]').selectOption({ index: 1 });
       await page.locator('#trial-modal textarea[name="content"]').fill("كورس برمجة ومذكرات");
       await page.locator("#trial-modal form.lead-form").evaluate((form) => form.requestSubmit());
-      await page.waitForTimeout(250);
+      await page.waitForFunction(() => Boolean(window.__capturedWhatsAppUrl), null, { timeout: 5000 });
 
       const whatsAppMessage = await page.evaluate(() => {
         const url = new URL(window.__capturedWhatsAppUrl);
@@ -585,7 +585,46 @@ async function runE2ETests() {
       await courseDetailsPage.close();
     }
 
-    // 5. Test the marketplace seller and provider registration entry points
+    const bookingPage = await context.newPage();
+    await bookingPage.setViewportSize({ width: vp.width, height: vp.height });
+    const bookingPageErrors = [];
+    bookingPage.on("pageerror", (error) => bookingPageErrors.push(error.message));
+    try {
+      await bookingPage.route("**/api/**", (route) => route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ success: true, data: marketplaceFixtureFor(route.request().url()) })
+      }));
+      await bookingPage.goto(`${baseUrl}/booking/course-regression-1`, { waitUntil: "domcontentloaded", timeout: 15000 });
+      await bookingPage.waitForSelector(".booking-form", { timeout: 5000 });
+
+      const bookingState = await bookingPage.evaluate(() => {
+        const batchSelect = document.querySelector('.booking-form select');
+        return {
+          batchId: batchSelect?.value,
+          batchText: batchSelect?.selectedOptions?.[0]?.textContent || "",
+          hasErrorBoundary: Boolean(document.querySelector(".error-boundary")),
+          doc: document.documentElement.scrollWidth,
+          body: document.body.scrollWidth,
+          inner: window.innerWidth
+        };
+      });
+      assert(
+        bookingPageErrors.length === 0
+          && !bookingState.hasErrorBoundary
+          && bookingState.batchId === "batch-regression-1"
+          && bookingState.batchText.includes("Monday 19:00"),
+        "/booking/:courseId renders structured batch schedules without a React runtime error"
+      );
+      assert(
+        bookingState.doc <= bookingState.inner && bookingState.body <= bookingState.inner,
+        `/booking/:courseId fits viewport (${vp.width}px): doc=${bookingState.doc}px, body=${bookingState.body}px, win=${bookingState.inner}px`
+      );
+    } finally {
+      await bookingPage.close();
+    }
+
+    // 6. Test the marketplace seller and provider registration entry points
     for (const sellerRoute of ["/sell-courses", "/register-company?type=independent_instructor"]) {
       const sellerPage = await context.newPage();
       await sellerPage.setViewportSize({ width: vp.width, height: vp.height });

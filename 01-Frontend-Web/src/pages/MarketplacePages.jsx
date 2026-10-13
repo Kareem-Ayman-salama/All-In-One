@@ -274,21 +274,37 @@ export function AcademyProfilePage() {
 
 export function PublicBookingPage() {
   const { courseId } = useParams();
-  const { courses, batches, academies, createBooking } = useMarketplace();
+  const { courses, batches, academies, createBooking, loading } = useMarketplace();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { isArabic, copy } = useMarketI18n();
   const course = courses.find((item) => item.id === courseId && item.status === "published");
-  const available = batches.filter((item) => item.courseId === courseId && item.status === "open" && item.confirmedSeats + item.reservedSeats < item.capacity);
-  const [batchId, setBatchId] = useState(available[0]?.id || "");
+  const available = batches.filter((item) => {
+    const remainingSeats = item.remainingSeats
+      ?? Math.max(0, Number(item.capacity || 0) - Number(item.confirmedSeats || 0) - Number(item.reservedSeats || 0));
+    return item.courseId === courseId && item.status === "open" && remainingSeats > 0;
+  });
+  const [batchId, setBatchId] = useState("");
   const [paymentPreference, setPaymentPreference] = useState("paymob");
   const [accepted, setAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  useEffect(() => {
+    if (available.length > 0 && !available.some((item) => item.id === batchId)) {
+      setBatchId(available[0].id);
+    } else if (available.length === 0 && batchId) {
+      setBatchId("");
+    }
+  }, [available, batchId]);
+
+  useMarketplaceSeo(
+    copy("إتمام الحجز والدفع | AIN", "Complete Booking & Payment | AIN"),
+    copy("اختر الدفعة وطريقة الدفع لإتمام تسجيلك في الكورس.", "Select a batch and payment method to enroll in the course.")
+  );
+  if (loading) return <MarketplaceShell><main className="booking-page"><div className="market-empty"><CalendarDays /><h2>{copy("جارٍ تجهيز بيانات الحجز...", "Preparing booking details...")}</h2></div></main></MarketplaceShell>;
   if (!course) return <Navigate to="/courses" replace />;
-  const { isArabic, copy } = useMarketI18n();
   const academy = academies.find((item) => item.id === course.academyId);
-  useMarketplaceSeo(copy("إتمام الحجز والدفع | AIN", "Complete Booking & Payment | AIN"), copy("اختر الدفعة وطريقة الدفع لإتمام تسجيلك في الكورس.", "Select a batch and payment method to enroll in the course."));
 
   const submit = async (event) => {
     event.preventDefault();
@@ -334,9 +350,10 @@ export function PublicBookingPage() {
 
             <FormField label={copy("اختر الدفعة المناسبة", "Select batch")}>
               <select value={batchId} onChange={(e) => setBatchId(e.target.value)} required>
+                {available.length === 0 && <option value="">{copy("لا توجد دفعات متاحة حاليًا", "No batches are currently available")}</option>}
                 {available.map((batch) => (
                   <option value={batch.id} key={batch.id}>
-                    {nameOf(batch, isArabic)} - {batch.schedule}
+                    {nameOf(batch, isArabic)} - {formatBatchSchedule(batch.schedule, isArabic)}
                   </option>
                 ))}
               </select>
