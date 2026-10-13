@@ -66,6 +66,48 @@ class ContentSecurityTest extends TestCase
         ]);
     }
 
+    public function test_global_policy_blocks_downloads_even_when_client_requests_them(): void
+    {
+        Storage::fake('local');
+        config(['content_security.downloads_enabled' => false]);
+        [$organization, $owner, $room] = $this->workspace();
+        Sanctum::actingAs($owner);
+
+        $response = $this->post(
+            "/api/v1/organizations/{$organization->id}/content",
+            [
+                'roomId' => $room->id,
+                'title' => 'View only notes',
+                'type' => 'pdf',
+                'downloadAllowed' => true,
+                'file' => UploadedFile::fake()->createWithContent(
+                    'view-only.pdf',
+                    "%PDF-1.4\n1 0 obj\n<<>>\nendobj\n%%EOF",
+                ),
+            ],
+            ['Accept' => 'application/json'],
+        )->assertCreated();
+
+        $content = ContentItem::query()->findOrFail($response->json('data.id'));
+        $this->assertFalse($content->download_allowed);
+
+        // Protect legacy rows that may have enabled downloads before the
+        // deployment-wide policy was introduced.
+        $content->forceFill(['download_allowed' => true])->save();
+
+        $this->getJson(
+            "/api/v1/organizations/{$organization->id}/content/{$content->id}/view-session",
+        )
+            ->assertOk()
+            ->assertJsonPath('data.downloadAllowed', false);
+
+        $this->getJson(
+            "/api/v1/organizations/{$organization->id}/content/{$content->id}/download",
+        )
+            ->assertForbidden()
+            ->assertJsonPath('error.code', 'DOWNLOAD_DISABLED');
+    }
+
     public function test_infected_upload_is_quarantined_and_cannot_be_viewed(): void
     {
         Storage::fake('local');

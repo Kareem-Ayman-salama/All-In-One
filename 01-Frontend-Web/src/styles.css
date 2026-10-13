@@ -5978,7 +5978,8 @@ tr:last-child td { border-bottom: 0; }
   -webkit-user-drag: none;
 }
 
-.protected-viewer-shell iframe {
+.protected-viewer-shell iframe,
+.protected-viewer-shell video {
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -5986,6 +5987,11 @@ tr:last-child td { border-bottom: 0; }
   height: 100%;
   border: 0;
   background: #050505;
+}
+
+.protected-viewer-shell video {
+  object-fit: contain;
+  -webkit-user-drag: none;
 }
 
 .protected-viewer-blocker {

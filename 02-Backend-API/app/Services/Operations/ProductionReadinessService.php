@@ -82,6 +82,16 @@ class ProductionReadinessService
                 (string) config('filesystems.default'),
                 's3',
             ),
+            'offsite_backup_storage' => $this->check(
+                config('backup.disk') === 's3',
+                (string) config('backup.disk'),
+                's3',
+            ),
+            'course_downloads_disabled' => $this->check(
+                config('content_security.downloads_enabled') === false,
+                config('content_security.downloads_enabled') ? 'enabled' : 'disabled',
+                'disabled',
+            ),
             'malware_scanner' => $this->check(
                 config('malware_scanner.driver') === 'clamav',
                 (string) config('malware_scanner.driver'),

@@ -306,14 +306,36 @@ function ProtectedFilesSecure({ data, user }) {
         <iframe
           title={selectedFile.name}
           src={session.embedUrl}
-          allow={session.allowFullscreen ? "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" : "autoplay; encrypted-media"}
+          allow={session.allowFullscreen ? "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" : "autoplay; encrypted-media"}
           allowFullScreen={Boolean(session.allowFullscreen)}
+          referrerPolicy="strict-origin-when-cross-origin"
         />
       );
     }
 
     if (session?.playbackType === "file" && session.url) {
-      return <iframe title={selectedFile.name} src={session.url} />;
+      if (String(session.mimeType || "").startsWith("video/")) {
+        return (
+          <video
+            title={selectedFile.name}
+            src={session.url}
+            controls
+            controlsList="nodownload noremoteplayback"
+            disablePictureInPicture
+            disableRemotePlayback
+            onContextMenu={handleContextMenu}
+            playsInline
+          />
+        );
+      }
+
+      return (
+        <iframe
+          title={selectedFile.name}
+          src={`${session.url}#toolbar=0&navpanes=0`}
+          referrerPolicy="no-referrer"
+        />
+      );
     }
 
     return (

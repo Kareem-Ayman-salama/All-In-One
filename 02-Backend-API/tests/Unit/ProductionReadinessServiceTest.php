@@ -31,6 +31,8 @@ class ProductionReadinessServiceTest extends TestCase
             'queue.default' => 'redis',
             'session.driver' => 'redis',
             'filesystems.default' => 's3',
+            'backup.disk' => 's3',
+            'content_security.downloads_enabled' => false,
             'malware_scanner.driver' => 'clamav',
             'malware_scanner.action_on_threat' => 'quarantine',
             'mail.default' => 'smtp',

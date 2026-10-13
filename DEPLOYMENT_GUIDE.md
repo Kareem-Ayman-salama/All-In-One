@@ -116,6 +116,9 @@ php artisan migrate --force
 AWS_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
 AWS_BUCKET=ain-content-production
 AWS_URL=https://cdn.yourdomain.com
+FILESYSTEM_DISK=s3
+BACKUP_DISK=s3
+CONTENT_DOWNLOADS_ENABLED=false
 ```
 
 ---

@@ -153,6 +153,13 @@ async function runE2ETests() {
       await page.goto(`${baseUrl}/landing/index.html`, { waitUntil: "domcontentloaded", timeout: 15000 });
       await page.waitForTimeout(200);
 
+      const contextMenuBlocked = await page.evaluate(() => {
+        const event = new MouseEvent("contextmenu", { bubbles: true, cancelable: true });
+        document.body.dispatchEvent(event);
+        return event.defaultPrevented;
+      });
+      assert(contextMenuBlocked, `Landing context menu is blocked on ${vp.width}px`);
+
       // 1. Overflow check in RTL
       const rtlOverflow = await page.evaluate(() => {
         const doc = document.documentElement.scrollWidth;
@@ -371,6 +378,22 @@ async function runE2ETests() {
         return Boolean(emailInput || passInput);
       });
       assert(hasInputs, `/login renders interactive authentication form elements`);
+
+      const appContextMenuBlocked = await pageLogin.evaluate(() => {
+        const event = new MouseEvent("contextmenu", { bubbles: true, cancelable: true });
+        document.body.dispatchEvent(event);
+        return event.defaultPrevented;
+      });
+      assert(appContextMenuBlocked, `/login blocks the page context menu outside form fields`);
+
+      const formContextMenuAllowed = await pageLogin.evaluate(() => {
+        const input = document.querySelector("input");
+        if (!input) return false;
+        const event = new MouseEvent("contextmenu", { bubbles: true, cancelable: true });
+        input.dispatchEvent(event);
+        return !event.defaultPrevented;
+      });
+      assert(formContextMenuAllowed, `/login keeps context actions available inside form fields`);
     } finally {
       await pageLogin.close();
     }

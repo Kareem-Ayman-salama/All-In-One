@@ -25,19 +25,26 @@ should use `02-Backend-API` as the Root Directory.
 
 ### Queue Worker
 
-Override the start command:
+Clone the backend service, keep the same image and variables, then set:
 
 ```text
-php artisan queue:work redis --queue=notifications,outbox,default --sleep=2 --tries=5 --timeout=120 --max-time=3600
+AIO_PROCESS_ROLE=worker
 ```
+
+The entrypoint starts one foreground worker. Railway restarts the service if it
+exits unexpectedly. Do not run migrations from the worker service.
 
 ### Scheduler
 
-Override the start command:
+Clone the backend service again and set:
 
 ```text
-php artisan schedule:work
+AIO_PROCESS_ROLE=scheduler
 ```
+
+Set `AIO_PROCESS_ROLE=web` on the API service after both dedicated services are
+online. Until then, the backward-compatible `all` role supervises and restarts
+the embedded worker and scheduler automatically.
 
 ## Required Variables
 
@@ -72,6 +79,8 @@ PUSH_QUEUE=notifications
 CACHE_STORE=redis
 SESSION_DRIVER=redis
 FILESYSTEM_DISK=s3
+BACKUP_DISK=s3
+CONTENT_DOWNLOADS_ENABLED=false
 ```
 
 For a temporary staging deployment, set:
@@ -82,6 +91,8 @@ SESSION_DRIVER=database
 CACHE_STORE=database
 QUEUE_CONNECTION=sync
 FILESYSTEM_DISK=local
+BACKUP_DISK=local
+CONTENT_DOWNLOADS_ENABLED=false
 REDIS_REQUIRED=false
 AIO_SEED_DEMO=true
 ```
@@ -195,13 +206,14 @@ The deployment is healthy only when the preflight command succeeds and
 
 ## Backup and Restore
 
-1. Enable automated PostgreSQL snapshots with a documented retention period.
-2. Enable S3 versioning or provider snapshots for private content.
-3. Before a schema release, take a database snapshot and record the deployed
+1. Set `BACKUP_DISK=s3`; production preflight rejects container-local backups.
+2. Enable automated PostgreSQL snapshots with a documented retention period.
+3. Enable S3 versioning or provider snapshots for private content.
+4. Before a schema release, take a database snapshot and record the deployed
    commit and migration list.
-4. Restore into a separate staging database at least once before launch and
+5. Restore into a separate staging database at least once before launch and
    verify login, tenant isolation, booking confirmation, and protected files.
-5. Keep encryption keys and provider credentials in the platform secret store,
+6. Keep encryption keys and provider credentials in the platform secret store,
    separately from database snapshots.
 
 ## Rollback

@@ -8,6 +8,7 @@ import { OrganizationProvider } from "./contexts/OrganizationContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { ToastProvider } from "./contexts/ToastContext";
 import { MarketplaceProvider } from "./contexts/MarketplaceContext";
+import { GlobalInteractionGuard } from "./components/GlobalInteractionGuard";
 import "./styles.css";
 
 createRoot(document.getElementById("root")).render(
@@ -16,6 +17,7 @@ createRoot(document.getElementById("root")).render(
       <LanguageProvider>
         <ThemeProvider>
           <ToastProvider>
+            <GlobalInteractionGuard />
             <AuthProvider>
               <OrganizationProvider>
                 <MarketplaceProvider>

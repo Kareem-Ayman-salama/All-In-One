@@ -175,7 +175,8 @@ class ContentController extends Controller
                 'video_provider' => $videoProvider,
                 'external_video_id' => $externalVideoId,
                 'external_url_encrypted' => $encryptedExternalUrl,
-                'download_allowed' => $request->boolean('downloadAllowed'),
+                'download_allowed' => config('content_security.downloads_enabled')
+                    && $request->boolean('downloadAllowed'),
                 'watermark_enabled' => $request->has('watermarkEnabled')
                     ? $request->boolean('watermarkEnabled')
                     : true,
@@ -251,7 +252,10 @@ class ContentController extends Controller
             $item->room_id,
         );
 
-        if (! $item->download_allowed) {
+        if (
+            ! config('content_security.downloads_enabled')
+            || ! $item->download_allowed
+        ) {
             ContentAccessLog::query()->create([
                 'organization_id' => $item->organization_id,
                 'content_item_id' => $item->id,
@@ -323,14 +327,22 @@ class ContentController extends Controller
         $viewerSessionId = (string) Str::uuid();
         $watermark = $this->watermarkPayload($request, $item, $viewerSessionId);
         if ($item->type === 'youtube') {
+            $allowFullscreen = $item->allow_fullscreen;
+            $playerParameters = http_build_query([
+                'rel' => 0,
+                'modestbranding' => 1,
+                'disablekb' => 1,
+                'fs' => $allowFullscreen ? 1 : 0,
+            ]);
+
             return ApiResponse::success($request, [
                 'playbackType' => 'youtube',
                 'provider' => $item->video_provider,
                 'videoId' => $item->external_video_id,
-                'embedUrl' => "https://www.youtube-nocookie.com/embed/{$item->external_video_id}",
+                'embedUrl' => "https://www.youtube-nocookie.com/embed/{$item->external_video_id}?{$playerParameters}",
                 'expiresAt' => $expiresAt,
                 'viewerSessionId' => $viewerSessionId,
-                'allowFullscreen' => $item->allow_fullscreen,
+                'allowFullscreen' => $allowFullscreen,
                 'downloadAllowed' => false,
                 'status' => $item->status,
                 'watermark' => $watermark,
@@ -352,7 +364,8 @@ class ContentController extends Controller
             'viewerSessionId' => $viewerSessionId,
             'mimeType' => $item->fileAsset->mime_type,
             'sizeBytes' => $item->fileAsset->size_bytes,
-            'downloadAllowed' => $item->download_allowed,
+            'downloadAllowed' => config('content_security.downloads_enabled')
+                && $item->download_allowed,
             'status' => $item->fileAsset->status,
             'watermark' => $watermark,
         ]);

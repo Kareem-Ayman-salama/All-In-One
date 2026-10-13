@@ -1491,6 +1491,32 @@ async function submitTrialForm(event) {
 // --------------------------------------------------------------------------
 // INITIALIZATION ON DOM READY
 // --------------------------------------------------------------------------
+function showGlobalProtectionNotice() {
+  let notice = document.getElementById("global-protection-notice");
+  if (!notice) {
+    notice = document.createElement("div");
+    notice.id = "global-protection-notice";
+    notice.className = "global-protection-notice";
+    notice.setAttribute("role", "status");
+    notice.setAttribute("aria-live", "polite");
+    document.body.appendChild(notice);
+  }
+
+  notice.textContent = document.documentElement.lang === "en"
+    ? "This action is disabled to protect platform content."
+    : "تم تعطيل هذا الإجراء لحماية محتوى المنصة.";
+  notice.classList.add("show");
+  window.clearTimeout(window.__ainLandingProtectionTimer);
+  window.__ainLandingProtectionTimer = window.setTimeout(() => {
+    notice.classList.remove("show");
+  }, 2600);
+}
+
+function isEditableProtectionTarget(target) {
+  return target instanceof Element
+    && Boolean(target.closest("input, textarea, select, [contenteditable='true']"));
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   // Apply saved or default language
   applyLanguage(currentLang);
@@ -1516,7 +1542,32 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+document.addEventListener("contextmenu", (event) => {
+  if (isEditableProtectionTarget(event.target)) return;
+  event.preventDefault();
+  showGlobalProtectionNotice();
+}, true);
+
+document.addEventListener("dragstart", (event) => {
+  if (!(event.target instanceof Element) || !event.target.closest("img, video, iframe")) return;
+  event.preventDefault();
+}, true);
+
 document.addEventListener("keydown", (event) => {
+  const key = String(event.key || "").toLowerCase();
+  const commandKey = event.ctrlKey || event.metaKey;
+  const blockedShortcut = !isEditableProtectionTarget(event.target) && (
+    event.key === "F12"
+    || (commandKey && ["s", "u"].includes(key))
+    || (commandKey && event.shiftKey && ["i", "j", "c"].includes(key))
+  );
+
+  if (blockedShortcut) {
+    event.preventDefault();
+    showGlobalProtectionNotice();
+    return;
+  }
+
   if (event.key === "Escape") {
     document.querySelectorAll(".overlay.on").forEach((overlay) => {
       closeLeadModal(overlay.id);

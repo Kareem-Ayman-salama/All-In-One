@@ -375,7 +375,8 @@ assert.ok(
   "Backend Docker deployment must guard its mode and fail on migration errors"
 );
 assert.ok(
-  deployment.includes("--queue=notifications,outbox,default"),
+  backendEntrypoint.includes("AIO_QUEUE_NAMES:-notifications,outbox,default")
+    && deployment.includes("AIO_PROCESS_ROLE=worker"),
   "Backend worker must process notification push jobs"
 );
 assert.ok(

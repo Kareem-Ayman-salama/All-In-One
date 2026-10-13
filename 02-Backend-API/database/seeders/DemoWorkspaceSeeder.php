@@ -197,7 +197,7 @@ class DemoWorkspaceSeeder extends Seeder
             'description' => 'Default classroom for demo live courses.',
             'access_type' => 'course',
             'status' => 'active',
-            'settings' => ['allow_chat' => true, 'allow_downloads' => true],
+            'settings' => ['allow_chat' => true, 'allow_downloads' => false],
         ]);
 
         $this->course($academy, $profile, $instructor, $aiCategory, $creator, $room, [
