@@ -211,6 +211,11 @@ async function runE2ETests() {
     await page.setViewportSize({ width: vp.width, height: vp.height });
 
     try {
+      await page.route("**/public/trial-leads", (route) => route.fulfill({
+        status: 201,
+        contentType: "application/json",
+        body: JSON.stringify({ success: true })
+      }));
       await page.goto(`${baseUrl}/landing/index.html`, { waitUntil: "domcontentloaded", timeout: 15000 });
       await page.waitForTimeout(200);
 
@@ -590,11 +595,39 @@ async function runE2ETests() {
     const bookingPageErrors = [];
     bookingPage.on("pageerror", (error) => bookingPageErrors.push(error.message));
     try {
-      await bookingPage.route("**/api/**", (route) => route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({ success: true, data: marketplaceFixtureFor(route.request().url()) })
-      }));
+      await bookingPage.addInitScript(() => {
+        window.localStorage.setItem("aiofront_user", JSON.stringify({
+          id: "booking-regression-student",
+          name: "Booking Regression Student",
+          email: "booking.regression@ain.test",
+          role: "end-user",
+          roleLabel: "Student"
+        }));
+        window.sessionStorage.setItem("aiofront_token", "booking-regression-session");
+      });
+      await bookingPage.route("**/api/**", (route) => {
+        const requestUrl = route.request().url();
+        const data = requestUrl.includes("/workspaces")
+          ? [{
+              membershipId: "membership-booking-regression",
+              role: "student",
+              permissions: ["organization.view", "courses.view", "subscriptions.view"],
+              organization: { id: "organization-regression-1", name: "AIN Academy", nameAr: "أكاديمية عين" },
+              subscription: { status: "active", plan: { code: "growth", name: "Growth", modules: [] } }
+            }]
+          : requestUrl.includes("/payments/pay-return-regression/status")
+          ? {
+              payment: { id: "pay-return-regression", status: "paid", amountMinor: 150000, currency: "EGP" },
+              booking: { id: "booking-return-regression", status: "confirmed", courseId: "course-regression-1" },
+              isConfirmed: true
+            }
+          : marketplaceFixtureFor(requestUrl);
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ success: true, data })
+        });
+      });
       await bookingPage.goto(`${baseUrl}/booking/course-regression-1`, { waitUntil: "domcontentloaded", timeout: 15000 });
       await bookingPage.waitForSelector(".booking-form", { timeout: 5000 });
 
@@ -620,7 +653,19 @@ async function runE2ETests() {
         bookingState.doc <= bookingState.inner && bookingState.body <= bookingState.inner,
         `/booking/:courseId fits viewport (${vp.width}px): doc=${bookingState.doc}px, body=${bookingState.body}px, win=${bookingState.inner}px`
       );
+
+      await bookingPage.goto(`${baseUrl}/payment/return?payment_id=pay-return-regression`, { waitUntil: "domcontentloaded", timeout: 15000 });
+      await bookingPage.waitForSelector(".payment-return-page", { timeout: 5000 });
+      const paymentReturnText = await bookingPage.locator(".payment-return-page").innerText();
+      assert(
+        paymentReturnText.includes("Payment and enrollment confirmed") || paymentReturnText.includes("تم تأكيد الدفع والاشتراك"),
+        `/payment/return verifies a paid transaction and shows the confirmed state`
+      );
     } finally {
+      await bookingPage.evaluate(() => {
+        window.localStorage.removeItem("aiofront_user");
+        window.sessionStorage.removeItem("aiofront_token");
+      }).catch(() => {});
       await bookingPage.close();
     }
 

@@ -1,10 +1,8 @@
 import {
   ArrowLeft,
   Building2,
-  Check,
   CheckCircle2,
   Clock3,
-  CloudUpload,
   Headphones,
   HelpCircle,
   KeyRound,
@@ -39,12 +37,7 @@ const flowCopy = {
     companyName: "اسم الشركة",
     yourName: "اسمك الكامل",
     createCompany: "إنشاء مساحة الشركة",
-    onboardingTitle: "جهّز هوية مساحة العمل",
-    onboardingSubtitle: "أضف الشعار والبيانات الأساسية لتظهر التجربة باسم شركتك.",
-    logo: "رفع شعار الشركة",
-    logoHint: "PNG أو JPG أو SVG، ويفضل مقاس 400×400",
     bio: "نبذة عن الشركة",
-    finish: "حفظ وفتح لوحة التحكم",
     joinTitle: "الانضمام إلى مساحة عمل",
     joinSubtitle: "أدخل رمز الدعوة الذي أرسله مسؤول شركتك. سيتم ربط الحساب بعد التحقق.",
     inviteCode: "رمز الدعوة",
@@ -78,12 +71,7 @@ const flowCopy = {
     companyName: "Company name",
     yourName: "Your full name",
     createCompany: "Create company workspace",
-    onboardingTitle: "Set up your workspace identity",
-    onboardingSubtitle: "Add your logo and company details so the experience feels like your own.",
-    logo: "Upload company logo",
-    logoHint: "PNG, JPG, or SVG. 400×400 recommended",
     bio: "Company bio",
-    finish: "Save and open dashboard",
     joinTitle: "Join a workspace",
     joinSubtitle: "Enter the invitation code sent by your company admin. We will link your account after validation.",
     inviteCode: "Invitation code",
@@ -260,28 +248,6 @@ export function RegisterCompanyPage() {
   );
 }
 
-export function CompanyOnboardingPage() {
-  const { language, t } = useLanguage();
-  const copy = flowCopy[language];
-  const navigate = useNavigate();
-  const [color, setColor] = useState("#4f46e5");
-
-  return (
-    <AuthLayout>
-      <div className="auth-panel-card">
-        <AuthHeader icon={<CloudUpload size={23} />} title={copy.onboardingTitle} subtitle={copy.onboardingSubtitle} />
-        <div className="auth-form">
-          <label className="workspace-upload"><CloudUpload size={28} /><strong>{copy.logo}</strong><span>{copy.logoHint}</span><input type="file" accept="image/png,image/jpeg,image/svg+xml" /></label>
-          <FormField label={copy.companyName}><input className="auth-plain-input" defaultValue="TechCorp Egypt" /></FormField>
-          <FormField label={copy.bio}><textarea className="workspace-textarea" defaultValue={language === "ar" ? "شركة متخصصة في حلول البرمجيات والتدريب." : "A company specializing in software and training solutions."} /></FormField>
-          <div className="workspace-colors">{["#4f46e5", "#16458f", "#0e7490", "#047857", "#be123c"].map((item) => <button type="button" style={{ background: item }} className={color === item ? "selected" : ""} onClick={() => setColor(item)} key={item}>{color === item && <Check size={16} />}</button>)}</div>
-          <Button className="auth-submit" onClick={() => navigate("/login?role=tenant-admin")}>{copy.finish}</Button>
-        </div>
-      </div>
-    </AuthLayout>
-  );
-}
-
 export function JoinWorkspacePage() {
   const { language } = useLanguage();
   const copy = flowCopy[language];
@@ -381,7 +347,7 @@ export function InviteAcceptPage() {
     try {
       await acceptInvitation({ token });
       showToast(copy.accepted);
-      navigate("/end-user/home", { replace: true });
+      navigate("/workspaces?auto=1", { replace: true });
     } catch (error) {
       showToast(getAuthErrorMessage(error, t), "danger");
     } finally {
@@ -408,7 +374,7 @@ export function InviteAcceptPage() {
           <div><span>{copy.inviter}</span><strong>{invitation.inviter?.name || "—"}</strong></div>
         </div>
         <div className="workspace-secondary-actions">
-          {canAccept && (user ? <Button type="button" onClick={accept} disabled={loading}>{loading ? copy.accepting : copy.accept}</Button> : <Button as={Link} to="/login" state={{ from: location.pathname }}>{copy.signInAccept}</Button>)}
+          {canAccept && (user ? <Button type="button" onClick={accept} disabled={loading}>{loading ? copy.accepting : copy.accept}</Button> : <><Button as={Link} to={`/login?next=${encodeURIComponent(location.pathname)}`}>{copy.signInAccept}</Button><Button as={Link} variant="ghost" to={`/create-account?next=${encodeURIComponent(location.pathname)}`}>{language === "ar" ? "إنشاء حساب وقبول الدعوة" : "Create account and accept"}</Button></>)}
           <Button as={Link} to={user ? "/no-workspace" : "/"} variant="ghost">{copy.decline}</Button>
         </div>
       </div>

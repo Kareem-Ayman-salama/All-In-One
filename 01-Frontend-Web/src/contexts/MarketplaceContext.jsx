@@ -107,7 +107,13 @@ export function MarketplaceProvider({ children }) {
     }
     try {
       const result = await marketplaceRepository.reserve(payload);
-      await reload();
+      const refreshed = await reload();
+      if (!refreshed?.bookings?.some((item) => item.id === result.booking.id)) {
+        setData((current) => ({
+          ...current,
+          bookings: [result.booking, ...current.bookings.filter((item) => item.id !== result.booking.id)]
+        }));
+      }
       return { ok: true, booking: result.booking, next: result.next };
     } catch (nextError) {
       return { ok: false, reason: nextError.code?.toLowerCase(), error: nextError };

@@ -112,3 +112,13 @@ export function roleDestination(role) {
   if (["organization_owner", "organization_admin", "staff", "instructor"].includes(role)) return "/tenant-admin/dashboard";
   return "/end-user/home";
 }
+
+export function applicationRoleForMembership(role) {
+  return ["organization_owner", "organization_admin", "staff", "instructor"].includes(role)
+    ? "tenant-admin"
+    : "end-user";
+}
+
+export function isLearningMembership(role) {
+  return ["student", "guardian", "member"].includes(role);
+}

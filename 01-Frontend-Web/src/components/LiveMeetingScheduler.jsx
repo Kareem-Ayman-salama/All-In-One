@@ -52,7 +52,7 @@ export function LiveMeetingScheduler({ isInstructor = false, organizationId, bat
   useEffect(() => {
     let mounted = true;
     setLoading(true);
-    apiService.getUpcomingMeetings()
+    apiService.getUpcomingMeetings(organizationId)
       .then((data) => {
         if (mounted) setMeetings(Array.isArray(data) ? data : data?.data || []);
       })
@@ -63,7 +63,7 @@ export function LiveMeetingScheduler({ isInstructor = false, organizationId, bat
         if (mounted) setLoading(false);
       });
     return () => { mounted = false; };
-  }, []);
+  }, [organizationId]);
 
   const grouped = useMemo(() => ({
     active: meetings

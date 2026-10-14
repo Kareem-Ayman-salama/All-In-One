@@ -20,6 +20,7 @@ class InvoiceController extends Controller
         $query = Invoice::query()->with([
             'organization:id,name,logo_path',
             'user:id,name,email,phone',
+            'payment:id,booking_id,status',
         ]);
 
         if ($isOrgAdmin) {
@@ -46,6 +47,9 @@ class InvoiceController extends Controller
             ->findOrFail($id);
 
         $isOrgAdmin = $request->attributes->has('active_organization');
+        if ($isOrgAdmin && $invoice->organization_id !== $this->organization($request)->id) {
+            throw new ApiException('RESOURCE_NOT_FOUND', 'Invoice not found.', 404);
+        }
         if (! $isOrgAdmin && $invoice->user_id !== $user->id) {
             throw new ApiException('UNAUTHORIZED', 'You cannot view this invoice.', 403);
         }

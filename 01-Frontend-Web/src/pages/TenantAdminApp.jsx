@@ -124,15 +124,54 @@ const nav = [
   { id: "settings", label: "Settings", icon: "settings", path: "/tenant-admin/settings", group: "reports_settings" }
 ];
 
+const pagePermissions = {
+  courses: "courses.view",
+  batches: "batches.view",
+  assignments: "courses.update",
+  quizzes: "courses.update",
+  certificates: "courses.update",
+  files: "content.view",
+  instructors: "members.update",
+  members: "members.view",
+  guardians: "guardians.view",
+  invitations: "members.invite",
+  bookingRequests: "bookings.view",
+  invoices: "subscriptions.view",
+  crm: "bookings.view",
+  subscription: "subscriptions.view",
+  promotions: "promotions.view",
+  rooms: "rooms.view",
+  attendance: "attendance.view",
+  calendar: "events.view",
+  meetings: "events.view",
+  messages: "rooms.view",
+  announcements: "announcements.view",
+  tasks: "events.view",
+  reports: "reports.export",
+  analytics: "analytics.view",
+  security: "audit.view",
+  activity: "audit.view",
+  academyProfile: "organization.manage_branding",
+  settings: "organization.view"
+};
+
+const membershipRoleLabels = {
+  organization_owner: ["مالك المؤسسة", "Organization Owner"],
+  organization_admin: ["مدير المؤسسة", "Organization Admin"],
+  instructor: ["مدرس", "Instructor"],
+  staff: ["موظف إداري", "Staff"]
+};
+
 export function TenantAdminApp({ data, user }) {
   const { page = "dashboard" } = useParams();
   const tx = useBilingualText();
-  const { isModuleEnabled, can, activeOrganization } = useOrganization();
-  const appUser = { ...user, roleLabel: tx("مدير الشركة", "Tenant Admin") };
+  const { isModuleEnabled, can, activeOrganization, activeMembership } = useOrganization();
+  const roleLabel = membershipRoleLabels[activeMembership?.role] || ["عضو فريق", "Team member"];
+  const appUser = { ...user, roleLabel: tx(roleLabel[0], roleLabel[1]) };
   const workspace = useWorkspace();
   const appData = { ...data, rooms: workspace.rooms, files: workspace.files, members: workspace.members, notifications: workspace.notifications };
-  const visibleNav = nav;
-  const currentItem = nav.find((item) => item.id === page);
+  const visibleNav = nav.filter((item) => !pagePermissions[item.id] || can(pagePermissions[item.id]));
+  const currentItem = visibleNav.find((item) => item.id === page);
   const moduleLocked = currentItem?.module && !isModuleEnabled(currentItem.module);
 
   if (!visibleNav.some((item) => item.id === page)) {
@@ -160,7 +199,7 @@ export function TenantAdminApp({ data, user }) {
       {!moduleLocked && page === "quizzes" && <QuizzesManagementPage />}
       {!moduleLocked && page === "crm" && <OrganizationCrmPipeline />}
       {!moduleLocked && page === "certificates" && <CertificatesHub />}
-      {!moduleLocked && page === "invoices" && <InvoicesOperations />}
+      {!moduleLocked && page === "invoices" && <InvoicesOperations organizationId={activeOrganization?.id} managementMode />}
       {!moduleLocked && page === "announcements" && <AnnouncementsPage canCreate={can(PERMISSIONS.announcementsCreate)} />}
       {!moduleLocked && page === "meetings" && <LiveMeetingScheduler isInstructor organizationId={activeOrganization?.id} />}
       {page === "messages" && <InternalChatHub isInstructor />}

@@ -9,6 +9,8 @@ use App\Models\AcademyProfile;
 use App\Models\Booking;
 use App\Models\Course;
 use App\Models\CourseBatch;
+use App\Models\Invoice;
+use App\Models\Notification;
 use App\Models\Organization;
 use App\Models\OrganizationMembership;
 use App\Models\OrganizationSubscription;
@@ -25,6 +27,51 @@ use Tests\TestCase;
 class PaymentOperationsTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_guest_cannot_initiate_payment_checkout(): void
+    {
+        $this->postJson('/api/v1/payments/checkout', [
+            'booking_id' => '00000000-0000-0000-0000-000000000000',
+            'payment_method' => 'paymob',
+        ])->assertUnauthorized();
+    }
+
+    public function test_student_cannot_pay_for_another_students_booking(): void
+    {
+        [$organization, $owner, $course, $batch] = $this->marketplace();
+        $bookingOwner = User::factory()->create(['email' => 'booking.owner@example.com']);
+        $otherStudent = User::factory()->create(['email' => 'other.student@example.com']);
+
+        $booking = Booking::query()->create([
+            'organization_id' => $organization->id,
+            'course_id' => $course->id,
+            'batch_id' => $batch->id,
+            'student_id' => $bookingOwner->id,
+            'student_name' => 'Booking Owner',
+            'email' => 'booking.owner@example.com',
+            'normalized_email' => 'booking.owner@example.com',
+            'phone' => '+201012345678',
+            'terms_accepted' => true,
+            'status' => 'pending_confirmation',
+            'payment_status' => 'pending',
+            'amount_minor' => 100000,
+            'currency' => 'EGP',
+            'idempotency_key' => 'booking-owner-security-001',
+        ]);
+
+        Sanctum::actingAs($otherStudent);
+
+        $this->postJson('/api/v1/payments/checkout', [
+            'booking_id' => $booking->id,
+            'payment_method' => 'paymob',
+        ])
+            ->assertForbidden()
+            ->assertJsonPath('error.code', 'FORBIDDEN');
+
+        $this->assertDatabaseMissing('payments', [
+            'booking_id' => $booking->id,
+        ]);
+    }
 
     public function test_can_initiate_payment_checkout_for_booking(): void
     {
@@ -72,6 +119,29 @@ class PaymentOperationsTest extends TestCase
             'status' => 'pending',
             'amount_minor' => 100000,
         ]);
+
+        $this->assertDatabaseHas('invoices', [
+            'organization_id' => $organization->id,
+            'user_id' => $student->id,
+            'status' => 'pending',
+            'total_minor' => 100000,
+        ]);
+        $invoice = Invoice::query()->where('user_id', $student->id)->firstOrFail();
+        $this->assertNotNull($invoice->payment_id);
+        $this->assertNotNull($invoice->due_at);
+
+        $this->artisan('aio:maintenance')->assertSuccessful();
+        $this->assertTrue(Notification::query()
+            ->where('target_type', 'invoice')
+            ->where('target_id', $invoice->id)
+            ->where('type', 'invoice_payment_due')
+            ->exists());
+
+        Sanctum::actingAs($owner);
+        $this->getJson("/api/v1/organizations/{$organization->id}/invoices")
+            ->assertOk()
+            ->assertJsonPath('data.0.id', $invoice->id)
+            ->assertJsonPath('data.0.payment.booking_id', $booking->id);
     }
 
     public function test_simulated_payment_success_auto_confirms_booking_and_enrolls_student(): void
@@ -126,6 +196,11 @@ class PaymentOperationsTest extends TestCase
             'booking_id' => $booking->id,
             'student_id' => $student->id,
             'status' => 'active',
+        ]);
+
+        $this->assertDatabaseHas('invoices', [
+            'payment_id' => $paymentId,
+            'status' => 'paid',
         ]);
 
         $this->assertDatabaseHas('outbox_events', [

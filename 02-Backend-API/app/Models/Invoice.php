@@ -21,6 +21,9 @@ class Invoice extends Model
         'currency',
         'status',
         'issued_at',
+        'due_at',
+        'paid_at',
+        'renewal_at',
         'items_breakdown',
     ];
 
@@ -31,6 +34,9 @@ class Invoice extends Model
             'tax_minor' => 'integer',
             'total_minor' => 'integer',
             'issued_at' => 'datetime',
+            'due_at' => 'datetime',
+            'paid_at' => 'datetime',
+            'renewal_at' => 'datetime',
             'items_breakdown' => 'array',
         ];
     }

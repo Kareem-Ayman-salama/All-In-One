@@ -292,8 +292,8 @@ export const marketplaceRepository = {
     };
   },
 
-  reserve(payload) {
-    return httpClient("/public/bookings", {
+  async reserve(payload) {
+    const result = await httpClient("/public/bookings", {
       method: "POST",
       body: JSON.stringify({
         courseId: payload.courseId,
@@ -301,9 +301,15 @@ export const marketplaceRepository = {
         studentName: payload.studentName,
         email: payload.email,
         phone: payload.phone,
-        note: payload.note || null
+        note: payload.note || null,
+        termsAccepted: true,
+        idempotencyKey: payload.idempotencyKey || null
       })
     });
+    return {
+      ...camelize(result),
+      booking: normalizeBooking(result.booking)
+    };
   },
 
   create(organizationId, key, payload, platformAdmin = false) {

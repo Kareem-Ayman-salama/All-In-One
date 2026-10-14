@@ -8,6 +8,7 @@ use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\PaymentRefund;
 use App\Models\User;
+use App\Services\Billing\InvoiceService;
 use App\Services\Bookings\BookingService;
 use App\Services\Operations\OperationRecorder;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +20,7 @@ class PaymobGatewayService implements PaymentProvider
 {
     public function __construct(
         protected OperationRecorder $recorder,
+        protected InvoiceService $invoiceService,
     ) {}
 
     public function name(): string
@@ -188,7 +190,7 @@ class PaymobGatewayService implements PaymentProvider
     ): Payment {
         $idempotencyKey = $idempotencyKey ?: 'book_pay_'.$booking->id;
 
-        return Payment::query()->firstOrCreate(
+        $payment = Payment::query()->firstOrCreate(
             ['idempotency_key' => $idempotencyKey],
             [
                 'organization_id' => $booking->organization_id,
@@ -208,6 +210,10 @@ class PaymobGatewayService implements PaymentProvider
                 ],
             ]
         );
+
+        $this->invoiceService->issuePending($payment, $booking);
+
+        return $payment;
     }
 
     /**
@@ -425,6 +431,8 @@ class PaymobGatewayService implements PaymentProvider
                     );
                 }
             }
+
+            $this->invoiceService->markPaid($lockedPayment);
 
             // Record outbox event and audit log
             $this->recorder->record(

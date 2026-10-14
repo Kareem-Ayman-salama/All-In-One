@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useOrganization } from "./OrganizationContext";
 import { useAuth } from "./AuthContext";
+import { isLearningMembership } from "../domain/organization";
 import { learningRepository } from "../services/learningRepository";
 
 const LearningContext = createContext(null);
@@ -32,8 +33,11 @@ export function LearningProvider({ children }) {
     let current = true;
     if (!activeOrganization) { setData(EMPTY); setLoading(false); return () => { current = false; }; }
     setLoading(true);
-    const organizationMemberships = user?.role === "end-user" && memberships.length > 1
-      ? memberships
+    const learningMemberships = memberships.filter((item) => isLearningMembership(item.role));
+    const organizationMemberships = isLearningMembership(
+      memberships.find((item) => item.organizationId === activeOrganization.id)?.role
+    ) && learningMemberships.length > 1
+      ? learningMemberships
       : memberships.filter((item) => item.organizationId === activeOrganization.id);
     Promise.all(organizationMemberships.map(async (membership) => {
       const result = await learningRepository.loadWorkspace(membership.organizationId);
@@ -67,8 +71,10 @@ export function LearningProvider({ children }) {
   const commit = useCallback((next) => {
     setData(next);
     if (activeOrganization) {
-      const organizationIds = user?.role === "end-user" && memberships.length > 1
-        ? memberships.map((item) => item.organizationId)
+      const learningMemberships = memberships.filter((item) => isLearningMembership(item.role));
+      const activeRole = memberships.find((item) => item.organizationId === activeOrganization.id)?.role;
+      const organizationIds = isLearningMembership(activeRole) && learningMemberships.length > 1
+        ? learningMemberships.map((item) => item.organizationId)
         : [activeOrganization.id];
       organizationIds.forEach((organizationId) => {
         const scoped = Object.fromEntries(Object.keys(EMPTY).map((key) => [

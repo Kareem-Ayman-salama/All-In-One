@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useBilingualText, useLanguage } from "../contexts/LanguageContext";
+import { useToast } from "../contexts/ToastContext";
 import { apiService } from "../services/api";
 import { Badge } from "./Badge";
 import { Button } from "./Button";
@@ -20,17 +21,19 @@ import { Modal } from "./Modal";
 /**
  * Displays billing history, due dates, renewal notices, and printable invoices.
  */
-export function InvoicesOperations() {
+export function InvoicesOperations({ organizationId = null, managementMode = false }) {
   const { language, direction } = useLanguage();
   const tx = useBilingualText();
+  const { showToast } = useToast();
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [payingInvoiceId, setPayingInvoiceId] = useState(null);
   const locale = language === "ar" ? "ar-EG" : "en-US";
 
   useEffect(() => {
     let mounted = true;
-    apiService.getInvoices()
+    apiService.getInvoices(organizationId)
       .then((data) => {
         if (mounted) setInvoices(Array.isArray(data) ? data : data?.data || []);
       })
@@ -38,7 +41,37 @@ export function InvoicesOperations() {
         if (mounted) setLoading(false);
       });
     return () => { mounted = false; };
-  }, []);
+  }, [organizationId]);
+
+  const payInvoice = async (invoice) => {
+    const bookingId = invoice.payment?.bookingId;
+    if (!bookingId) {
+      showToast(tx("هذه الفاتورة لا تحتوي على حجز إلكتروني قابل للدفع. تواصل مع الأكاديمية.", "This invoice is not linked to an online-payable booking. Contact the academy."), "warning");
+      return;
+    }
+    setPayingInvoiceId(invoice.id);
+    try {
+      const intent = await apiService.checkoutPayment({ booking_id: bookingId, payment_method: "paymob" });
+      if (!intent.checkoutUrl) throw new Error(tx("رابط الدفع غير متاح", "Checkout URL is unavailable"));
+      window.sessionStorage.setItem("ain-pending-payment-id", intent.paymentId);
+      window.sessionStorage.setItem("ain-pending-invoice-id", invoice.id);
+      const target = new URL(intent.checkoutUrl, window.location.origin);
+      const localSandbox = target.origin === window.location.origin && target.pathname === "/checkout/paymob";
+      if (localSandbox) {
+        await apiService.simulatePaymentSuccess(intent.paymentId);
+        setInvoices((current) => current.map((item) => item.id === invoice.id
+          ? { ...item, status: "paid", paidAt: new Date().toISOString() }
+          : item));
+        showToast(tx("تم تأكيد الدفع التجريبي", "Sandbox payment confirmed"), "success");
+        setPayingInvoiceId(null);
+        return;
+      }
+      window.location.assign(target.href);
+    } catch (error) {
+      showToast(error.message || tx("تعذر بدء عملية الدفع", "Could not start payment"), "error");
+      setPayingInvoiceId(null);
+    }
+  };
 
   const money = (minor = 0, currency = "EGP") => `${new Intl.NumberFormat(locale, {
     minimumFractionDigits: 2,
@@ -81,7 +114,7 @@ export function InvoicesOperations() {
               <div className="invoice-amount"><strong>{money(invoice.totalMinor, invoice.currency)}</strong><span>{invoice.itemsBreakdown?.[0]?.description || tx("اشتراك تعليمي", "Education subscription")}</span></div>
               <dl><div><dt>{tx("تاريخ الإصدار", "Issued")}</dt><dd>{date(invoice.issuedAt)}</dd></div><div><dt>{pending ? tx("آخر موعد للسداد", "Payment due") : tx("تاريخ السداد", "Paid on")}</dt><dd>{date(pending ? invoice.dueAt : invoice.paidAt || invoice.issuedAt)}</dd></div></dl>
               {pending && <div className={`invoice-reminder ${remaining != null && remaining <= 3 ? "urgent" : ""}`}><CalendarClock size={17} /><span>{remaining >= 0 ? tx(`متبقي ${remaining} يوم على موعد السداد، وسيصلك تذكير قبل التجديد.`, `${remaining} days until payment. A renewal reminder is scheduled.`) : tx("فات موعد السداد. راجع الأكاديمية لتجنب توقف الوصول.", "Payment is overdue. Contact the academy to avoid access interruption.")}</span></div>}
-              <footer><Button variant="ghost" onClick={() => setSelectedInvoice(invoice)}><Eye size={16} />{tx("عرض الفاتورة", "View invoice")}</Button>{pending ? <Button><CreditCard size={16} />{tx("إتمام الدفع", "Pay now")}</Button> : <Button variant="ghost" onClick={() => { setSelectedInvoice(invoice); window.setTimeout(printInvoice, 80); }}><Printer size={16} />{tx("طباعة", "Print")}</Button>}</footer>
+              <footer><Button variant="ghost" onClick={() => setSelectedInvoice(invoice)}><Eye size={16} />{tx("عرض الفاتورة", "View invoice")}</Button>{pending && !managementMode ? <Button onClick={() => payInvoice(invoice)} disabled={payingInvoiceId === invoice.id}><CreditCard size={16} />{payingInvoiceId === invoice.id ? tx("جاري فتح الدفع...", "Opening checkout...") : tx("إتمام الدفع", "Pay now")}</Button> : <Button variant="ghost" onClick={() => { setSelectedInvoice(invoice); window.setTimeout(printInvoice, 80); }}><Printer size={16} />{tx("طباعة", "Print")}</Button>}</footer>
             </article>;
           })}</div>
         </section>
