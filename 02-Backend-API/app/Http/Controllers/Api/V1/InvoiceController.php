@@ -19,7 +19,7 @@ class InvoiceController extends Controller
 
         $query = Invoice::query()->with([
             'organization:id,name,logo_path',
-            'user:id,name,email,phone',
+            'user:id,name,email',
             'payment:id,booking_id,status',
         ]);
 
