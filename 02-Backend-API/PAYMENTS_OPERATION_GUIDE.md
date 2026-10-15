@@ -78,7 +78,8 @@ PAYMOB_FEE_FIXED_MINOR=300            # Fixed fee per transaction in minor units
    - Set URL: `https://api.yourdomain.com/api/v1/payments/webhook/paymob`
    - Method: `POST`
 5. Under **Transaction Response Callback** (Redirect):
-   - Set URL: `https://yourdomain.com/checkout/callback`
+   - Set URL: `https://yourdomain.com/payment/return`
+   - Keep this on the same frontend origin so the authenticated browser session can verify the payment status.
 6. Under **Account Settings -> Security**:
    - Copy your **HMAC Secret** and assign it to `PAYMOB_HMAC_SECRET`.
 
@@ -144,6 +145,11 @@ php artisan payments:reconcile --json
 
 ### Automated Schedule:
 The command is scheduled to run every night at 03:00 AM via Laravel Scheduler (`routes/console.php`).
+
+Pending checkout invoices are created automatically with a due date. The regular
+`aio:maintenance` schedule creates one in-app/push reminder during the final 24
+hours before payment is due. Keep the Railway scheduler and queue worker running
+for these reminders to be delivered.
 
 ---
 

@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\PaymentWebhookEvent;
-use App\Models\User;
 use App\Services\Bookings\BookingService;
 use App\Services\Guardians\GuardianConsentService;
 use App\Services\Payments\FinancialReconciliationService;
@@ -36,16 +35,20 @@ class PaymentController extends Controller
         ]);
 
         $booking = Booking::query()->findOrFail($validated['booking_id']);
+        $user = $request->user();
+        if (! $user) {
+            throw new ApiException('AUTHENTICATION_REQUIRED', 'Authentication is required to start checkout.', 401);
+        }
+
+        $ownsBooking = $booking->student_id === $user->id;
+        $canManageBooking = $user->hasRole('super_admin')
+            || $this->canManageOrganizationPayments($user, $booking->organization_id);
+        if (! $ownsBooking && ! $canManageBooking) {
+            throw new ApiException('FORBIDDEN', 'You are not authorized to pay for this booking.', 403);
+        }
 
         $consentService = app(GuardianConsentService::class);
-        if ($user = $request->user()) {
-            $consentService->assertActionAllowed($user, 'execute purchases', $booking->organization_id);
-        } elseif ($booking->student_id) {
-            $student = User::query()->find($booking->student_id);
-            if ($student) {
-                $consentService->assertActionAllowed($student, 'execute purchases', $booking->organization_id);
-            }
-        }
+        $consentService->assertActionAllowed($user, 'execute purchases', $booking->organization_id);
 
         if ($booking->status->value === 'confirmed') {
             return ApiResponse::success($request, [
@@ -57,7 +60,7 @@ class PaymentController extends Controller
 
         $payment = $this->paymobService->createPaymentForBooking(
             booking: $booking,
-            user: $request->user(),
+            user: $user,
         );
 
         $intent = $this->paymobService->createIntent($payment, [

@@ -237,7 +237,7 @@ export function LoginPage() {
             <ArrowRight className={language === "ar" ? "icon-flip" : ""} size={18} />
           </Button>
 
-          <div className="auth-switch"><span>{t.auth.noAccount}</span><Link to="/create-account">{t.auth.createAccount}</Link></div>
+          <div className="auth-switch"><span>{t.auth.noAccount}</span><Link to={requestedDestination ? `/create-account?next=${encodeURIComponent(requestedDestination)}` : "/create-account"}>{t.auth.createAccount}</Link></div>
         </form>
 
         {showDemoAccounts && <div className="demo-access">
@@ -315,9 +315,14 @@ export function getRoleHome(role) {
 }
 
 function getSafeDestination(requestedPath, user) {
+  const defaultDestination = user.role === "end-user" && user.tenantId === null
+    ? "/no-workspace"
+    : getRoleHome(user.role);
+  if (!requestedPath || !requestedPath.startsWith("/") || requestedPath.startsWith("//")) return defaultDestination;
   if (requestedPath?.startsWith("/invite/")) return requestedPath;
   if (requestedPath?.startsWith("/register-company")) return requestedPath;
-  if (user.role === "end-user" && user.tenantId === null) return "/no-workspace";
+  if (requestedPath?.startsWith("/booking/")) return requestedPath;
+  if (requestedPath?.startsWith("/payment/return")) return requestedPath;
   const rolePrefix = `/${user.role}`;
-  return requestedPath?.startsWith(rolePrefix) ? requestedPath : getRoleHome(user.role);
+  return requestedPath?.startsWith(rolePrefix) ? requestedPath : defaultDestination;
 }

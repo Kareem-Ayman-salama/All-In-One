@@ -14,6 +14,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { RolePicker } from "./pages/RolePicker";
 import { WorkspaceSelectionPage } from "./pages/WorkspaceSelectionPage";
 import { api } from "./services/api";
+import { isLearningMembership } from "./domain/organization";
 
 const EndUserApp = lazy(() => import("./pages/EndUserApp").then((m) => ({ default: m.EndUserApp })));
 const SuperAdminApp = lazy(() => import("./pages/SuperAdminApp").then((m) => ({ default: m.SuperAdminApp })));
@@ -27,7 +28,6 @@ const AcademyProfilePage = lazy(() => import("./pages/MarketplacePages").then((m
 const PublicBookingPage = lazy(() => import("./pages/MarketplacePages").then((m) => ({ default: m.PublicBookingPage })));
 const BookingSuccessPage = lazy(() => import("./pages/MarketplacePages").then((m) => ({ default: m.BookingSuccessPage })));
 
-const CompanyOnboardingPage = lazy(() => import("./pages/WorkspaceFlowPages").then((m) => ({ default: m.CompanyOnboardingPage })));
 const InviteAcceptPage = lazy(() => import("./pages/WorkspaceFlowPages").then((m) => ({ default: m.InviteAcceptPage })));
 const JoinWorkspacePage = lazy(() => import("./pages/WorkspaceFlowPages").then((m) => ({ default: m.JoinWorkspacePage })));
 const LegalPage = lazy(() => import("./pages/WorkspaceFlowPages").then((m) => ({ default: m.LegalPage })));
@@ -35,6 +35,7 @@ const NoWorkspacePage = lazy(() => import("./pages/WorkspaceFlowPages").then((m)
 const NotFoundPage = lazy(() => import("./pages/WorkspaceFlowPages").then((m) => ({ default: m.NotFoundPage })));
 const RegisterCompanyPage = lazy(() => import("./pages/WorkspaceFlowPages").then((m) => ({ default: m.RegisterCompanyPage })));
 const AttendanceCheckInPage = lazy(() => import("./components/AttendanceOperations").then((m) => ({ default: m.AttendanceCheckInPage })));
+const PaymentReturnPage = lazy(() => import("./pages/MarketplacePages").then((m) => ({ default: m.PaymentReturnPage })));
 
 export function App() {
   return (
@@ -51,7 +52,7 @@ export function App() {
           <Route path="/choose" element={<LandingRedirect />} />
           <Route path="/" element={<MarketingLandingRedirect />} />
           <Route path="/register-company" element={<RegisterCompanyPage />} />
-          <Route path="/company-onboarding" element={<CompanyOnboardingPage />} />
+          <Route path="/company-onboarding" element={<Navigate to="/register-company" replace />} />
           <Route path="/join" element={<JoinWorkspacePage />} />
           <Route path="/no-workspace" element={<NoWorkspacePage />} />
           <Route path="/invite/:token" element={<InviteAcceptPage />} />
@@ -68,6 +69,7 @@ export function App() {
           <Route path="/403" element={<ForbiddenPage />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/workspaces" element={<WorkspaceSelectionPage />} />
+            <Route path="/payment/return" element={<PaymentReturnPage />} />
           </Route>
           <Route element={<ProtectedRoute allowedRoles={["end-user"]} />}>
             <Route path="/attendance/check-in" element={<AttendanceCheckInPage />} />
@@ -140,9 +142,10 @@ function DataGate({ app }) {
           return;
         }
 
-        if (app === "endUser" && memberships.length > 1) {
+        const learningMemberships = memberships.filter((membership) => isLearningMembership(membership.role));
+        if (app === "endUser" && learningMemberships.length > 1) {
           const [workspaces, personalReminders] = await Promise.all([
-            Promise.all(memberships.map(async (membership) => {
+            Promise.all(learningMemberships.map(async (membership) => {
             const organizationId = membership.organizationId;
             const [rooms, files, notifications, events] = await Promise.all([
               api.getRooms(organizationId),
@@ -166,7 +169,7 @@ function DataGate({ app }) {
             api.getPersonalReminders()
           ]);
           const uniqueById = (items) => Array.from(new Map(items.map((item) => [item.id, item])).values());
-          const organizationNames = new Map(memberships.map((membership) => [
+          const organizationNames = new Map(learningMemberships.map((membership) => [
             membership.organizationId,
             membership.organization?.nameAr || membership.organization?.name
           ]));

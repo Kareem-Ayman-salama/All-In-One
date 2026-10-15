@@ -36,7 +36,7 @@ export function CreateAccountPage() {
   };
   const isValid = Object.values(errors).every((error) => !error);
 
-  if (user) return <Navigate to={user.tenantId ? getRoleHome(user.role) : "/no-workspace"} replace />;
+  if (user) return <Navigate to={next || (user.tenantId ? getRoleHome(user.role) : "/no-workspace")} replace />;
 
   const submit = async (event) => {
     event.preventDefault();
@@ -84,7 +84,7 @@ export function CreateAccountPage() {
           {touched.terms && errors.terms && <small className="auth-inline-error">{errors.terms}</small>}
           <AuthStatus message={statusMessage} />
           <Button className="auth-submit" type="submit" loading={loading} loadingLabel={t.auth.creating}>{t.auth.createAccount}</Button>
-          <div className="auth-switch"><span>{t.auth.haveAccount}</span><Link to="/login">{t.auth.signIn}</Link></div>
+          <div className="auth-switch"><span>{t.auth.haveAccount}</span><Link to={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}>{t.auth.signIn}</Link></div>
         </form>
       </div>
     </AuthLayout>
@@ -115,7 +115,7 @@ export function VerifyEmailPage() {
     return () => window.clearInterval(timer);
   }, [seconds]);
 
-  if (user) return <Navigate to={user.tenantId ? getRoleHome(user.role) : "/no-workspace"} replace />;
+  if (user) return <Navigate to={next || (user.tenantId ? getRoleHome(user.role) : "/no-workspace")} replace />;
   if (!email) return <Navigate to="/create-account" replace />;
 
   const submit = async (event) => {
@@ -170,7 +170,10 @@ export function VerifyEmailPage() {
 }
 
 function safeRegistrationDestination(value) {
-  return value?.startsWith("/register-company") ? value : "";
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return "";
+  return ["/register-company", "/booking/", "/invite/"].some((prefix) => value.startsWith(prefix))
+    ? value
+    : "";
 }
 
 export function ForgotPasswordPage() {

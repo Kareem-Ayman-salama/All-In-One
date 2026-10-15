@@ -277,6 +277,7 @@ export function PublicBookingPage() {
   const { courses, batches, academies, createBooking, loading } = useMarketplace();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { showToast } = useToast();
   const { isArabic, copy } = useMarketI18n();
   const course = courses.find((item) => item.id === courseId && item.status === "published");
@@ -305,6 +306,24 @@ export function PublicBookingPage() {
   if (loading) return <MarketplaceShell><main className="booking-page"><div className="market-empty"><CalendarDays /><h2>{copy("جارٍ تجهيز بيانات الحجز...", "Preparing booking details...")}</h2></div></main></MarketplaceShell>;
   if (!course) return <Navigate to="/courses" replace />;
   const academy = academies.find((item) => item.id === course.academyId);
+  if (!user) {
+    const next = `${location.pathname}${location.search}`;
+    return (
+      <MarketplaceShell>
+        <main className="booking-page">
+          <section className="market-empty booking-auth-gate">
+            <ShieldCheck />
+            <h1>{copy("سجّل الدخول لإتمام الحجز", "Sign in to complete booking")}</h1>
+            <p>{copy("نحتاج حسابًا موثّقًا لربط الحجز والدفع والكورس بك، ثم سنرجعك لنفس الصفحة.", "A verified account keeps your booking, payment, and course access linked. We will return you to this page.")}</p>
+            <div>
+              <Button as={Link} to={`/login?next=${encodeURIComponent(next)}`}>{copy("تسجيل الدخول والمتابعة", "Sign in and continue")}</Button>
+              <Button as={Link} variant="ghost" to={`/create-account?next=${encodeURIComponent(next)}`}>{copy("إنشاء حساب جديد", "Create an account")}</Button>
+            </div>
+          </section>
+        </main>
+      </MarketplaceShell>
+    );
+  }
 
   const submit = async (event) => {
     event.preventDefault();
@@ -322,9 +341,16 @@ export function PublicBookingPage() {
         phone: form.get("phone"),
         amount: course.discountedPrice || course.price,
         note: form.get("note"),
+        idempotencyKey: globalThis.crypto?.randomUUID?.() || `booking-${Date.now()}`,
       });
       if (!result.ok) {
-        showToast(result.reason === "duplicate" ? copy("لديك طلب حجز قائم لهذا الكورس", "You already have an active booking") : copy("اكتملت سعة الدفعة", "This batch is full"), "error");
+        const messages = {
+          booking_already_exists: copy("لديك طلب حجز قائم لهذه الدفعة", "You already have an active booking for this batch"),
+          duplicate: copy("لديك طلب حجز قائم لهذه الدفعة", "You already have an active booking for this batch"),
+          capacity_full: copy("اكتملت سعة الدفعة", "This batch is full"),
+          booking_email_mismatch: copy("استخدم البريد المرتبط بحسابك", "Use the email associated with your account")
+        };
+        showToast(messages[result.reason] || result.error?.message || copy("تعذر إتمام الحجز", "Could not complete booking"), "error");
         return;
       }
       navigate(`/booking/success?booking=${result.booking.id}&pay=${paymentPreference}`);
@@ -461,7 +487,6 @@ export function BookingSuccessPage() {
   const { bookings, courses, batches, reload } = useMarketplace();
   const { showToast } = useToast();
   const bookingId = params.get("booking");
-  const shouldPayNow = params.get("pay") === "paymob";
   const booking = bookings.find((item) => item.id === bookingId);
 
   const [isPaid, setIsPaid] = useState(booking?.paymentStatus === "paid" || booking?.status === "confirmed");
@@ -488,7 +513,17 @@ export function BookingSuccessPage() {
         payment_method: "paymob",
       });
       setPayIntent(intent);
-      setPayModalOpen(true);
+      const checkoutUrl = intent.checkoutUrl;
+      if (!checkoutUrl) throw new Error("Checkout URL is unavailable");
+      const target = new URL(checkoutUrl, window.location.origin);
+      const localSandbox = target.origin === window.location.origin && target.pathname === "/checkout/paymob";
+      if (localSandbox) {
+        setPayModalOpen(true);
+      } else {
+        window.sessionStorage.setItem("ain-pending-payment-id", intent.paymentId);
+        window.sessionStorage.setItem("ain-pending-booking-id", booking.id);
+        window.location.assign(target.href);
+      }
     } catch (err) {
       showToast(copy("تعذر بدء جلسة الدفع، حاول مجدداً", "Failed to initiate payment session"), "error");
     } finally {
@@ -626,6 +661,71 @@ export function BookingSuccessPage() {
             </div>
           </Modal>
         )}
+      </main>
+    </MarketplaceShell>
+  );
+}
+
+export function PaymentReturnPage() {
+  const [params] = useSearchParams();
+  const { isArabic, copy } = useMarketI18n();
+  const paymentId = params.get("payment_id")
+    || window.sessionStorage.getItem("ain-pending-payment-id");
+  const fallbackBookingId = window.sessionStorage.getItem("ain-pending-booking-id");
+  const [state, setState] = useState({ loading: Boolean(paymentId), result: null, error: "" });
+
+  useEffect(() => {
+    if (!paymentId) {
+      setState({ loading: false, result: null, error: isArabic ? "لم نجد رقم عملية الدفع." : "Payment reference was not found." });
+      return undefined;
+    }
+
+    let active = true;
+    let timer;
+    let attempts = 0;
+    const check = async () => {
+      attempts += 1;
+      try {
+        const result = await api.getPaymentStatus(paymentId);
+        if (!active) return;
+        const status = result.payment?.status;
+        setState({ loading: false, result, error: "" });
+        if (["pending", "processing"].includes(status) && attempts < 10) {
+          timer = window.setTimeout(check, 2000);
+        } else if (["paid", "succeeded"].includes(status) || result.isConfirmed) {
+          window.sessionStorage.removeItem("ain-pending-payment-id");
+          window.sessionStorage.removeItem("ain-pending-booking-id");
+          window.sessionStorage.removeItem("ain-pending-invoice-id");
+        }
+      } catch (error) {
+        if (active) setState({ loading: false, result: null, error: error.message || (isArabic ? "تعذر التحقق من الدفع." : "Could not verify payment.") });
+      }
+    };
+    check();
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [isArabic, paymentId]);
+
+  const status = state.result?.payment?.status;
+  const confirmed = state.result?.isConfirmed || ["paid", "succeeded"].includes(status);
+  const bookingId = state.result?.booking?.id || fallbackBookingId;
+
+  return (
+    <MarketplaceShell>
+      <main className="booking-success payment-return-page">
+        <span>{confirmed ? <CheckCircle2 size={36} /> : state.error ? <X size={36} /> : <Clock3 size={36} />}</span>
+        <Badge tone={confirmed ? "success" : state.error ? "danger" : "warning"}>
+          {confirmed ? copy("تم الدفع", "Payment confirmed") : state.error ? copy("تعذر التحقق", "Verification failed") : copy("جاري التحقق", "Verifying payment")}
+        </Badge>
+        <h1>{confirmed ? copy("تم تأكيد الدفع والاشتراك", "Payment and enrollment confirmed") : copy("نراجع نتيجة عملية الدفع", "Checking your payment result")}</h1>
+        <p>{state.loading ? copy("قد يستغرق وصول تأكيد بوابة الدفع عدة ثوانٍ.", "The payment confirmation may take a few seconds.") : state.error || copy("لم يصل التأكيد النهائي بعد. يمكنك إعادة فتح هذه الصفحة بعد قليل.", "Final confirmation has not arrived yet. You can check again shortly.")}</p>
+        <nav>
+          {confirmed && <Button as={Link} to="/end-user/courses">{copy("الانتقال إلى كورساتي", "Go to My Courses")}</Button>}
+          {!confirmed && bookingId && <Button as={Link} to={`/booking/success?booking=${bookingId}`}>{copy("العودة إلى تفاصيل الحجز", "Return to booking")}</Button>}
+          <Button as={Link} variant="ghost" to="/courses">{copy("سوق الكورسات", "Course marketplace")}</Button>
+        </nav>
       </main>
     </MarketplaceShell>
   );

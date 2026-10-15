@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useAuth } from "./AuthContext";
 import { organizationRepository } from "../services/organizationRepository";
+import { isLearningMembership } from "../domain/organization";
 
 const OrganizationContext = createContext(null);
 
@@ -28,15 +29,16 @@ export function OrganizationProvider({ children }) {
       setMemberships(items);
       const saved = window.localStorage.getItem(selectionKey(user));
       const validSaved = items.some((item) => item.organizationId === saved);
+      const firstLearningMembership = items.find((item) => isLearningMembership(item.role));
       // End users get a unified learning view across every active membership.
       // We still keep a primary organization for scoped API actions, but we do
       // not force students through an organization picker on every sign-in.
-      const shouldUseUnifiedView = user.role === "end-user";
+      const shouldUseUnifiedView = items.some((item) => isLearningMembership(item.role));
       setActiveOrganizationId(
         validSaved
           ? saved
           : (items.length === 1 || shouldUseUnifiedView)
-            ? items[0]?.organizationId || null
+            ? firstLearningMembership?.organizationId || items[0]?.organizationId || null
             : null
       );
       setLoading(false);

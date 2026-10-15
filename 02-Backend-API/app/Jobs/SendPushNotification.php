@@ -131,7 +131,8 @@ class SendPushNotification implements ShouldBeUnique, ShouldQueue
             'booking_cancelled' => $preference->booking_updates,
             'announcement' => $preference->announcements,
             'subscription_expiring',
-            'subscription_expired' => $preference->subscription_reminders,
+            'subscription_expired',
+            'invoice_payment_due' => $preference->subscription_reminders,
             default => true,
         };
     }
@@ -163,6 +164,7 @@ class SendPushNotification implements ShouldBeUnique, ShouldQueue
         return match ($notification->type) {
             'announcement' => 'New announcement',
             'subscription_expiring' => 'Subscription expires soon',
+            'invoice_payment_due' => 'Payment due soon',
             'booking_confirmed' => 'Booking confirmed',
             default => $notification->title,
         };
@@ -173,6 +175,7 @@ class SendPushNotification implements ShouldBeUnique, ShouldQueue
         return match ($notification->type) {
             'announcement' => 'Open AIN to read the latest announcement.',
             'subscription_expiring' => 'Open AIN to review your course access.',
+            'invoice_payment_due' => 'Open AIN to review and pay your invoice.',
             default => $notification->body,
         };
     }
@@ -187,6 +190,7 @@ class SendPushNotification implements ShouldBeUnique, ShouldQueue
             'announcement' => 'student.notifications',
             'subscription_expiring',
             'subscription_expired' => 'student.content',
+            'invoice_payment_due' => 'student.invoices',
             default => null,
         };
     }

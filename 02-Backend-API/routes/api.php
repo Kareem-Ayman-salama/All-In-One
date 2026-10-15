@@ -78,8 +78,6 @@ Route::prefix('v1')->group(function (): void {
     Route::post('/support', [SupportController::class, 'store'])
         ->middleware('throttle:support');
 
-    Route::post('/payments/checkout', [PaymentController::class, 'checkout'])
-        ->middleware('throttle:30,1');
     Route::get('/payments/reconciliation', [PaymentController::class, 'reconciliation'])
         ->middleware(['auth:sanctum', 'throttle:30,1']);
     Route::get('/payments/{id}/status', [PaymentController::class, 'status']);
@@ -127,6 +125,8 @@ Route::prefix('v1')->group(function (): void {
         Route::post('/provider-applications', [ProviderApplicationController::class, 'store'])
             ->middleware('throttle:10,1');
         Route::post('/invitations/accept', [InvitationController::class, 'accept']);
+        Route::post('/payments/checkout', [PaymentController::class, 'checkout'])
+            ->middleware('throttle:30,1');
         Route::post('/public/bookings', [BookingController::class, 'reserve'])
             ->middleware('throttle:public-booking');
         Route::get('/student/bookings', [StudentController::class, 'bookings']);
@@ -419,6 +419,10 @@ Route::prefix('v1')->group(function (): void {
                 Route::post('/meetings/schedule', [LiveMeetingController::class, 'schedule'])
                     ->middleware('permission:events.manage');
                 Route::get('/meetings/upcoming', [LiveMeetingController::class, 'upcoming']);
+                Route::get('/invoices', [InvoiceController::class, 'index'])
+                    ->middleware('permission:subscriptions.view');
+                Route::get('/invoices/{id}', [InvoiceController::class, 'show'])
+                    ->middleware('permission:subscriptions.view');
             });
 
         Route::prefix('/admin')

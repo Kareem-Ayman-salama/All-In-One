@@ -172,7 +172,8 @@ function ProtectedFilesSecure({ data, user }) {
   const watermarkText = session?.watermark?.text || `${user.email} / AIN`;
 
   useEffect(() => {
-    if (!activeOrganization?.id || !selectedFile?.id) {
+    const organizationId = selectedFile?.organizationId || activeOrganization?.id;
+    if (!organizationId || !selectedFile?.id) {
       return undefined;
     }
 
@@ -180,7 +181,7 @@ function ProtectedFilesSecure({ data, user }) {
     setIsLoading(true);
     setViewerError("");
 
-    api.getContentViewSession(activeOrganization.id, selectedFile.id)
+    api.getContentViewSession(organizationId, selectedFile.id)
       .then((response) => {
         if (!isMounted) {
           return;
@@ -188,7 +189,7 @@ function ProtectedFilesSecure({ data, user }) {
 
         setSession(response);
         api.recordContentViewerAudit(
-          activeOrganization.id,
+          organizationId,
           selectedFile.id,
           viewerAuditPayload(CONTENT_VIEWER_EVENTS.opened, {
             viewerSessionId: response.viewerSessionId,
@@ -196,7 +197,7 @@ function ProtectedFilesSecure({ data, user }) {
           })
         ).catch(() => {});
         api.recordContentViewerAudit(
-          activeOrganization.id,
+          organizationId,
           selectedFile.id,
           viewerAuditPayload(CONTENT_VIEWER_EVENTS.watermarkRendered, {
             viewerSessionId: response.viewerSessionId,
@@ -219,7 +220,7 @@ function ProtectedFilesSecure({ data, user }) {
     return () => {
       isMounted = false;
     };
-  }, [activeOrganization?.id, selectedFile?.id]);
+  }, [activeOrganization?.id, selectedFile?.id, selectedFile?.organizationId]);
 
   useEffect(() => {
     if (!session?.watermark?.enabled) {
@@ -237,12 +238,13 @@ function ProtectedFilesSecure({ data, user }) {
   const auditBlockedAction = (event, message) => {
     showToast(tx("تم منع الإجراء لحماية المحتوى.", "Action blocked to protect the content."), "warning");
 
-    if (!activeOrganization?.id || !selectedFile?.id) {
+    const organizationId = selectedFile?.organizationId || activeOrganization?.id;
+    if (!organizationId || !selectedFile?.id) {
       return;
     }
 
     api.recordContentViewerAudit(
-      activeOrganization.id,
+      organizationId,
       selectedFile.id,
       viewerAuditPayload(event, {
         viewerSessionId: session?.viewerSessionId,

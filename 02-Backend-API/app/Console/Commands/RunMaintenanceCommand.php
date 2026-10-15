@@ -8,12 +8,15 @@ use App\Models\Booking;
 use App\Models\CourseBatch;
 use App\Models\CourseEnrollment;
 use App\Models\Event;
+use App\Models\Invoice;
 use App\Models\Notification;
 use App\Models\NotificationPreference;
 use App\Models\OrganizationSubscription;
+use App\Models\Payment;
 use App\Models\Promotion;
 use App\Models\RoomMembership;
 use App\Models\StudentSubscription;
+use App\Services\Billing\InvoiceService;
 use App\Services\Operations\OperationRecorder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -24,7 +27,7 @@ class RunMaintenanceCommand extends Command
 
     protected $description = 'Expire stale access and advance scheduled AIO states';
 
-    public function handle(OperationRecorder $recorder): int
+    public function handle(OperationRecorder $recorder, InvoiceService $invoiceService): int
     {
         $stats = [
             'bookingsExpired' => $this->expireBookings($recorder),
@@ -32,6 +35,8 @@ class RunMaintenanceCommand extends Command
             'organizationSubscriptionsUpdated' => $this->advanceOrganizationSubscriptions(),
             'promotionsUpdated' => $this->advancePromotions(),
             'remindersCreated' => $this->createSubscriptionReminders($recorder),
+            'paymentInvoicesSynced' => $this->syncPaymentInvoices($invoiceService),
+            'invoiceRemindersCreated' => $this->createInvoiceReminders(),
             'personalRemindersSent' => $this->sendPersonalReminders(),
         ];
 
@@ -284,6 +289,71 @@ class RunMaintenanceCommand extends Command
                     $event->update(['start_notified_at' => now()]);
                     $count++;
                 }
+            });
+
+        return $count;
+    }
+
+    private function createInvoiceReminders(): int
+    {
+        $count = 0;
+        Invoice::query()
+            ->whereIn('status', ['pending', 'unpaid'])
+            ->whereNotNull('due_at')
+            ->whereBetween('due_at', [now(), now()->addDay()])
+            ->get()
+            ->each(function (Invoice $invoice) use (&$count): void {
+                $exists = Notification::query()
+                    ->where('user_id', $invoice->user_id)
+                    ->where('target_type', 'invoice')
+                    ->where('target_id', $invoice->id)
+                    ->where('type', 'invoice_payment_due')
+                    ->exists();
+                if ($exists) {
+                    return;
+                }
+
+                Notification::query()->create([
+                    'user_id' => $invoice->user_id,
+                    'organization_id' => $invoice->organization_id,
+                    'type' => 'invoice_payment_due',
+                    'priority' => 'high',
+                    'title' => 'Payment due soon',
+                    'body' => 'Your invoice is due within 24 hours.',
+                    'target_type' => 'invoice',
+                    'target_id' => $invoice->id,
+                    'data' => [
+                        'route' => '/end-user/invoices',
+                        'dueAt' => $invoice->due_at?->toIso8601String(),
+                    ],
+                    'status' => 'unread',
+                ]);
+                $count++;
+            });
+
+        return $count;
+    }
+
+    private function syncPaymentInvoices(InvoiceService $invoiceService): int
+    {
+        $count = 0;
+        Payment::query()
+            ->whereNotNull('booking_id')
+            ->whereNotNull('user_id')
+            ->whereIn('status', ['pending', 'paid'])
+            ->whereDoesntHave('invoice')
+            ->oldest()
+            ->limit(100)
+            ->get()
+            ->each(function (Payment $payment) use ($invoiceService, &$count): void {
+                $booking = Booking::query()->find($payment->booking_id);
+                if (! $booking || ! $invoiceService->issuePending($payment, $booking)) {
+                    return;
+                }
+                if ($payment->status === 'paid') {
+                    $invoiceService->markPaid($payment);
+                }
+                $count++;
             });
 
         return $count;

@@ -662,7 +662,7 @@ export const api = {
         })
       : httpClient(url, { method: "POST", body: JSON.stringify(payload) }).then(camelize);
   },
-  getUpcomingMeetings: () => endpoint("/meetings/upcoming?scope=all", [
+  getUpcomingMeetings: (organizationId = null) => endpoint(organizationId ? `/organizations/${organizationId}/meetings/upcoming?scope=all` : "/meetings/upcoming?scope=all", [
     {
       id: "sess-meet-1",
       title: "جلسة المراجعة الشاملة المباشرة (Zoom)",
@@ -709,7 +709,7 @@ export const api = {
     }
   ]).then(camelize),
 
-  getInvoices: () => endpoint("/invoices", [
+  getInvoices: (organizationId = null) => endpoint(organizationId ? `/organizations/${organizationId}/invoices` : "/invoices", [
     {
       id: "inv-101",
       invoiceNumber: "INV-2026-0812",
@@ -744,7 +744,7 @@ export const api = {
       organization: { name: "AIN Language Center", nameAr: "مركز عين للغات" }
     }
   ]).then(camelize),
-  getInvoice: (id) => endpoint(`/invoices/${id}`, {
+  getInvoice: (id, organizationId = null) => endpoint(organizationId ? `/organizations/${organizationId}/invoices/${id}` : `/invoices/${id}`, {
     id,
     invoiceNumber: "INV-2026-0812",
     totalMinor: 150000,
