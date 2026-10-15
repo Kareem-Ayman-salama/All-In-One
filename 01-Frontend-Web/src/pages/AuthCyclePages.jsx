@@ -14,7 +14,7 @@ import { getRoleHome } from "./LoginPage";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const strongPasswordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{10,}$/;
-const showDemoCodes = import.meta.env.VITE_SHOW_DEMO_ACCOUNTS === "true";
+const showDemoCodes = import.meta.env.DEV && import.meta.env.VITE_SHOW_DEMO_ACCOUNTS === "true";
 
 export function CreateAccountPage() {
   const { user, createPersonalAccount } = useAuth();

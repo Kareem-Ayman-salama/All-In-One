@@ -347,7 +347,7 @@ function Pricing() {
       <div className="stitch-pricing-grid">
         {Object.entries(prices).map(([name, price]) => (
           <article className={name === "Growth" ? "stitch-plan-card featured" : "stitch-plan-card"} key={name}>
-            {name === "Growth" && <Badge tone="primary">{tx("الأكثر مبيعاً", "Most popular")}</Badge>}
+            {name === "Growth" && <Badge tone="primary">{tx("الخطة الموصى بها", "Recommended plan")}</Badge>}
             <h2>{name}</h2>
             <strong>{price[period]} {tx("جنيه", "EGP")} / {period === "monthly" ? tx("شهر", "month") : tx("سنة", "year")}</strong>
             <p>{name === "Starter" ? tx("غرفة واحدة / 100 مستخدم", "1 room / 100 users") : name === "Growth" ? tx("10 غرف / 500 مستخدم / تحليلات", "10 rooms / 500 users / Analytics") : tx("غير محدود / علامة بيضاء / مدفوعات", "Unlimited / White label / Payments")}</p>

@@ -57,7 +57,7 @@ const demoAccounts = [
     descEn: "Watch watermarked course sessions, scan QR attendance, and download certificates"
   }
 ];
-const showDemoAccounts = import.meta.env.VITE_SHOW_DEMO_ACCOUNTS === "true";
+const showDemoAccounts = import.meta.env.DEV && import.meta.env.VITE_SHOW_DEMO_ACCOUNTS === "true";
 
 export function LoginPage() {
   const { user, login } = useAuth();

@@ -28,7 +28,7 @@ import { useToast } from "../contexts/ToastContext";
 import { getAuthErrorMessage } from "../services/authErrors";
 import { api } from "../services/api";
 
-const showDemoAccounts = import.meta.env.VITE_SHOW_DEMO_ACCOUNTS === "true";
+const showDemoAccounts = import.meta.env.DEV && import.meta.env.VITE_SHOW_DEMO_ACCOUNTS === "true";
 
 const flowCopy = {
   ar: {
@@ -450,7 +450,7 @@ export function LegalPage({ type }) {
                 {isArabic ? "للمساعدة العاجلة والمباشرة عبر واتساب" : "Need immediate assistance via WhatsApp?"}
               </strong>
               <small style={{ color: "var(--text-muted, #666)" }}>
-                {isArabic ? "تواصل مباشرة مع فريق خدمة العملاء (24/7)" : "Direct line to our support & sales team"}
+                {isArabic ? "تواصل مباشرة مع فريق خدمة العملاء" : "Direct line to our support and sales team"}
               </small>
             </div>
             <Button
