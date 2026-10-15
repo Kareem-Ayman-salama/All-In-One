@@ -277,7 +277,7 @@ export function AppLayout({ appTitle, user, nav, children }) {
           </div>}
           <button className="stitch-search" type="button" onClick={() => setSearchOpen(true)} aria-label={t.shell.searchLabel}><Search size={22} /><span>{t.shell.search}</span><kbd>Ctrl K</kbd></button>
           <div className="stitch-top-actions">
-            {import.meta.env.VITE_SHOW_DEMO_ACCOUNTS === "true" && <QuickRoleSwitcher />}
+            {import.meta.env.DEV && import.meta.env.VITE_SHOW_DEMO_ACCOUNTS === "true" && <QuickRoleSwitcher />}
             <button className="stitch-lang-toggle" onClick={toggleLanguage} type="button" aria-label={t.common.language}>{language === "ar" ? "English" : "العربية"}<Globe2 size={18} /></button>
             <button className="stitch-icon-button" onClick={toggleTheme} type="button" aria-label={t.shell.appearance}><Moon size={22} /></button>
             <button className={`stitch-icon-button stitch-topbar-notifications ${unreadCount ? "has-dot" : ""}`} type="button" onClick={() => setNotificationsOpen(true)} aria-label={t.shell.notifications}><Bell size={22} />{unreadCount > 0 && <small>{Math.min(unreadCount, 9)}</small>}</button>

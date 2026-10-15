@@ -29,6 +29,11 @@ const viteConfig = read("vite.config.js");
 const server = read("server.js");
 const styles = read("src/styles.css");
 const landingTranslations = read("public/landing/script.js");
+const landingMarkup = read("public/landing/index.html");
+const loginPage = read("src/pages/LoginPage.jsx");
+const authCyclePages = read("src/pages/AuthCyclePages.jsx");
+const workspaceFlowPages = read("src/pages/WorkspaceFlowPages.jsx");
+const appLayout = read("src/layouts/AppLayout.jsx");
 const responsiveE2E = read("scripts/test-mobile-e2e.mjs");
 const sourceFiles = fs
   .readdirSync(path.join(root, "src"), { recursive: true })
@@ -83,12 +88,35 @@ for (const forbiddenClaim of [
   "حظر أدوات المطورين (F12)",
   "DevTools (F12) blocked",
   "Screenshots are disabled",
-  "بأمان تام"
+  "بأمان تام",
+  "حماية 100%",
+  "يمنع التسريب",
+  "leak-proof",
+  "zero leak",
+  "24/7 SLA",
+  "تطبيق موبايل رسمي لنظامي Android وiOS",
+  "يقلل مشاركة الحسابات بنسبة تتجاوز 90%",
+  "الأكثر مبيعاً",
+  "Most popular"
 ]) {
   assert.equal(
-    sourceFiles.includes(forbiddenClaim) || landingTranslations.includes(forbiddenClaim),
+    sourceFiles.includes(forbiddenClaim)
+      || landingTranslations.includes(forbiddenClaim)
+      || landingMarkup.includes(forbiddenClaim),
     false,
     `Unsupported security claim found: ${forbiddenClaim}`
+  );
+}
+
+for (const [label, source] of [
+  ["Login page", loginPage],
+  ["Authentication cycle", authCyclePages],
+  ["Workspace flow", workspaceFlowPages],
+  ["Application layout", appLayout]
+]) {
+  assert.ok(
+    source.includes("import.meta.env.DEV && import.meta.env.VITE_SHOW_DEMO_ACCOUNTS"),
+    `${label} must restrict demo controls to development builds`
   );
 }
 
@@ -174,5 +202,5 @@ for (const unsafePattern of [
 }
 
 console.log(
-  "Production validation passed: routes, roles, tenant scoping, account UX, responsive behavior, token storage, and server headers."
+  "Production validation passed: routes, roles, tenant scoping, account UX, truthful claims, demo controls, responsive behavior, token storage, and server headers."
 );
