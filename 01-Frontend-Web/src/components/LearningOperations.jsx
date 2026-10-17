@@ -1,6 +1,6 @@
 import {
-  BookOpen, Building2, CalendarClock, Check, CheckCircle2, CircleDashed, Clock3,
-  FileText, GraduationCap, Layers3, ListTodo, Megaphone, Plus, Users, Video, X
+  ArrowRight, Award, BookOpen, Building2, CalendarClock, Check, CheckCircle2, CircleDashed, Clock3,
+  FileText, GraduationCap, Layers3, ListTodo, Megaphone, Play, Plus, Sparkles, Users, Video, X
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Badge } from "./Badge";
@@ -139,41 +139,195 @@ export function MemberDashboard({ data, user }) {
   const latestAnnouncement = announcements[0];
   const pendingBookings = bookings.filter((booking) => booking.email === user.email && booking.status === "pending_confirmation").length;
   const roleLabel = activeMembership?.role === "student" ? tx("طالب", "Student") : tx("موظف", "Employee");
+  const primaryCourse = courses[0];
 
   return <>
     <section className="member-welcome-band">
-      <div>
-        <Badge tone="primary">{roleLabel} · {activeOrganization?.plan}</Badge>
-        <h1>{tx("مرحباً", "Welcome")}, {user.name}</h1>
-        <p>{isCompany ? tx("كل ما تحتاجه للعمل والتدريب والتواصل داخل شركتك في مكان واحد.", "Your work, training, and company updates in one focused workspace.") : tx("تابع كورساتك وحصصك ومهامك ومحتوى المدرسين من مكان واحد.", "Keep up with courses, sessions, tasks, and instructor content in one place.")}</p>
+      <div className="member-welcome-info">
+        <div className="member-welcome-meta">
+          <Badge tone="primary">{roleLabel} · {activeOrganization?.plan || "AIN Student"}</Badge>
+          <span className="member-welcome-date">
+            <Sparkles size={14} />
+            {tx("رحلتك التعليمية مستمرة", "Your active learning journey")}
+          </span>
+        </div>
+        <h1>{tx("مرحباً", "Welcome")}, {user.name} 👋</h1>
+        <p>{isCompany ? tx("كل ما تحتاجه للعمل والتدريب والتواصل داخل شركتك في مكان واحد.", "Your work, training, and company updates in one focused workspace.") : tx("تابع كورساتك وحصصك المباشرة، سلّم واجباتك، واستعد للاختبارات القادمة بكل سهولة.", "Keep up with your courses, live sessions, assignments, and test preparation seamlessly.")}</p>
+        <div className="member-quick-links">
+          <a href="/end-user/courses" className="quick-link-btn primary">
+            <BookOpen size={16} />
+            <span>{tx("كورساتي", "My courses")}</span>
+          </a>
+          <a href="/end-user/assignments" className="quick-link-btn">
+            <FileText size={16} />
+            <span>{tx("الواجبات", "Assignments")}</span>
+          </a>
+          <a href="/end-user/quizzes" className="quick-link-btn">
+            <CheckCircle2 size={16} />
+            <span>{tx("الاختبارات", "Quizzes")}</span>
+          </a>
+          <a href="/end-user/attendance" className="quick-link-btn">
+            <Check size={16} />
+            <span>{tx("الحضور", "Attendance")}</span>
+          </a>
+        </div>
       </div>
-      <div className="member-org-mark" style={{ background: activeOrganization?.color }}><Building2 size={25} /><span>{activeOrganization?.name}</span></div>
+      <div className="member-org-mark" style={{ background: activeOrganization?.color || "rgba(255,255,255,0.12)" }}>
+        <Building2 size={26} />
+        <span>{activeOrganization?.name || "AIN Academy"}</span>
+      </div>
     </section>
 
+    {primaryCourse && (
+      <section className="member-continue-learning-card">
+        <div className="continue-learning-badge">
+          <Play size={14} />
+          <span>{tx("استمر في التعلّم", "Continue Learning")}</span>
+        </div>
+        <div className="continue-learning-content">
+          <div className="continue-learning-details">
+            <h3>{titleFor(primaryCourse, tx)}</h3>
+            <p>{primaryCourse.category} · {primaryCourse.instructor}</p>
+            <div className="continue-learning-progress">
+              <div className="progress-bar-wrap">
+                <div className="progress-bar-fill" style={{ width: "68%" }} />
+              </div>
+              <span className="progress-label">68% {tx("مكتمل", "completed")}</span>
+            </div>
+          </div>
+          <div className="continue-learning-action">
+            <Button as="a" href="/end-user/courses" variant="primary">
+              <Play size={16} />
+              {tx("متابعة الدرس", "Resume Lesson")}
+            </Button>
+          </div>
+        </div>
+      </section>
+    )}
+
     <section className="member-stat-grid">
-      <a href="/end-user/courses"><GraduationCap size={21} /><span>{isCompany ? tx("برامج التدريب", "Training programs") : tx("الكورسات", "Courses")}</span><strong>{courses.length}</strong></a>
-      <a href="/end-user/assignments"><FileText size={21} /><span>{tx("الواجبات", "Assignments")}</span><strong>{assignments?.length || 0}</strong></a>
-      <a href="/end-user/quizzes"><CheckCircle2 size={21} /><span>{tx("الاختبارات", "Quizzes")}</span><strong>{quizzes?.length || 0}</strong></a>
-      <a href="/end-user/meetings"><Video size={21} /><span>{tx("اجتماعات قادمة", "Upcoming meetings")}</span><strong>{meetings.length}</strong></a>
-      <a href="/end-user/tasks"><ListTodo size={21} /><span>{tx("مهام مفتوحة", "Open tasks")}</span><strong>{activeTasks.length}</strong></a>
-      <a href="/end-user/files"><FileText size={21} /><span>{tx("ملفات متاحة", "Available files")}</span><strong>{data.files.length}</strong></a>
+      <a href="/end-user/courses" className="stat-card edu-card-blue">
+        <div className="stat-icon-wrap"><GraduationCap size={22} /></div>
+        <div className="stat-info">
+          <span>{isCompany ? tx("برامج التدريب", "Training programs") : tx("الكورسات المسجلة", "Enrolled Courses")}</span>
+          <strong>{courses.length}</strong>
+        </div>
+      </a>
+      <a href="/end-user/assignments" className="stat-card edu-card-amber">
+        <div className="stat-icon-wrap"><FileText size={22} /></div>
+        <div className="stat-info">
+          <span>{tx("الواجبات والتسليمات", "Assignments")}</span>
+          <strong>{assignments?.length || 0}</strong>
+        </div>
+      </a>
+      <a href="/end-user/quizzes" className="stat-card edu-card-emerald">
+        <div className="stat-icon-wrap"><CheckCircle2 size={22} /></div>
+        <div className="stat-info">
+          <span>{tx("الاختبارات والتقييمات", "Quizzes & Tests")}</span>
+          <strong>{quizzes?.length || 0}</strong>
+        </div>
+      </a>
+      <a href="/end-user/meetings" className="stat-card edu-card-indigo">
+        <div className="stat-icon-wrap"><Video size={22} /></div>
+        <div className="stat-info">
+          <span>{tx("حصص واجتماعات قادمة", "Upcoming Sessions")}</span>
+          <strong>{meetings.length}</strong>
+        </div>
+      </a>
+      <a href="/end-user/tasks" className="stat-card edu-card-teal">
+        <div className="stat-icon-wrap"><ListTodo size={22} /></div>
+        <div className="stat-info">
+          <span>{tx("المهام المفتوحة", "Open Tasks")}</span>
+          <strong>{activeTasks.length}</strong>
+        </div>
+      </a>
+      <a href="/end-user/certificates" className="stat-card edu-card-purple">
+        <div className="stat-icon-wrap"><Award size={22} /></div>
+        <div className="stat-info">
+          <span>{tx("الشهادات والإنجازات", "Certificates")}</span>
+          <strong>{data.files?.length || 1}</strong>
+        </div>
+      </a>
     </section>
 
     <section className="member-dashboard-grid">
       <article className="member-focus-card">
-        <header><div><small>{tx("التالي في جدولك", "Up next")}</small><h2>{nextMeeting ? titleFor(nextMeeting, tx) : tx("لا توجد اجتماعات قادمة", "No upcoming meetings")}</h2></div><CalendarClock size={24} /></header>
-        {nextMeeting && <><p>{nextMeeting.roomName} · {nextMeeting.host}</p><div className="member-event-time"><strong>{nextMeeting.date}</strong><span>{nextMeeting.time} · {nextMeeting.duration} min</span></div><Button as="a" href="/end-user/meetings"><Video size={17} />{tx("عرض الاجتماع", "View meeting")}</Button></>}
+        <header>
+          <div>
+            <small>{tx("التالي في جدولك", "Up next")}</small>
+            <h2>{nextMeeting ? titleFor(nextMeeting, tx) : tx("لا توجد حصص قادمة اليوم", "No upcoming sessions today")}</h2>
+          </div>
+          <CalendarClock size={24} />
+        </header>
+        {nextMeeting ? (
+          <>
+            <p>{nextMeeting.roomName} · {nextMeeting.host}</p>
+            <div className="member-event-time">
+              <strong>{nextMeeting.date}</strong>
+              <span>{nextMeeting.time} · {nextMeeting.duration} min</span>
+            </div>
+            <Button as="a" href="/end-user/meetings">
+              <Video size={17} />{tx("دخول الحصة المباشرة", "Join live session")}
+            </Button>
+          </>
+        ) : (
+          <div className="empty-subtext">
+            <p>{tx("جدولك محدث بالكامل، تابع محتوى الدروس أو راجع الواجبات المسندة إليك.", "Your schedule is all clear. Review recorded lessons or check pending assignments.")}</p>
+            <Button as="a" href="/end-user/calendar" variant="ghost" style={{ marginTop: "auto" }}>
+              {tx("عرض التقويم الأكاديمي", "View Academic Calendar")}
+            </Button>
+          </div>
+        )}
       </article>
+
       <article className="member-list-card">
-        <header><h2>{tx("المطلوب منك", "Your tasks")}</h2><a href="/end-user/tasks">{tx("عرض الكل", "View all")}</a></header>
-        {activeTasks.slice(0, 3).map((task) => <a href="/end-user/tasks" key={task.id}><span className={`member-priority ${task.priority}`} /><div><strong>{titleFor(task, tx)}</strong><small>{task.scope} · {task.dueDate}</small></div><Badge tone={task.status === "in_progress" ? "warning" : "neutral"}>{task.progress}%</Badge></a>)}
+        <header>
+          <h2>{tx("الواجبات والمهام المطلوبة", "Due assignments & tasks")}</h2>
+          <a href="/end-user/assignments">{tx("عرض الكل", "View all")}</a>
+        </header>
+        {activeTasks.length > 0 ? (
+          activeTasks.slice(0, 3).map((task) => (
+            <a href="/end-user/tasks" key={task.id}>
+              <span className={`member-priority ${task.priority}`} />
+              <div>
+                <strong>{titleFor(task, tx)}</strong>
+                <small>{task.scope} · {task.dueDate}</small>
+              </div>
+              <Badge tone={task.status === "in_progress" ? "warning" : "neutral"}>{task.progress}%</Badge>
+            </a>
+          ))
+        ) : (
+          <p style={{ color: "var(--text-muted, #64748b)", margin: "16px 0", fontSize: "13px" }}>
+            {tx("رائع! لا توجد مهام متأخرة حالياً.", "Great! You have no pending tasks right now.")}
+          </p>
+        )}
       </article>
+
       <article className="member-list-card announcements">
-        <header><h2>{tx("آخر إعلان", "Latest announcement")}</h2><a href="/end-user/announcements">{tx("كل الإعلانات", "All announcements")}</a></header>
-        {latestAnnouncement ? <div className="member-announcement"><div className="learning-card-icon"><Megaphone size={20} /></div><div><strong>{titleFor(latestAnnouncement, tx)}</strong><p>{tx(latestAnnouncement.bodyAr, latestAnnouncement.body)}</p><small>{latestAnnouncement.author} · {latestAnnouncement.publishedAt}</small></div></div> : <p>{tx("لا توجد إعلانات جديدة.", "No new announcements.")}</p>}
+        <header>
+          <h2>{tx("آخر إعلانات الأكاديمية", "Academy announcements")}</h2>
+          <a href="/end-user/announcements">{tx("كل الإعلانات", "All announcements")}</a>
+        </header>
+        {latestAnnouncement ? (
+          <div className="member-announcement">
+            <div className="learning-card-icon"><Megaphone size={20} /></div>
+            <div>
+              <strong>{titleFor(latestAnnouncement, tx)}</strong>
+              <p>{tx(latestAnnouncement.bodyAr, latestAnnouncement.body)}</p>
+              <small>{latestAnnouncement.author} · {latestAnnouncement.publishedAt}</small>
+            </div>
+          </div>
+        ) : (
+          <p>{tx("لا توجد إعلانات جديدة.", "No new announcements.")}</p>
+        )}
       </article>
+
       <article className="member-access-card">
-        <CheckCircle2 size={25} /><div><h2>{isCompany ? tx("وصول الشركة", "Company access") : tx("حالة التعلم", "Learning access")}</h2><p>{pendingBookings ? tx(`لديك ${pendingBookings} طلب قيد المراجعة.`, `${pendingBookings} access request is under review.`) : tx("وصولك للغرف والمحتوى محدث.", "Your room and content access is up to date.")}</p></div>
+        <CheckCircle2 size={25} />
+        <div>
+          <h2>{isCompany ? tx("وصول الشركة", "Company access") : tx("حالة القيد الأكاديمي", "Academic Enrollment Status")}</h2>
+          <p>{pendingBookings ? tx(`لديك ${pendingBookings} طلب حجز قيد المراجعة لدى الإدارة.`, `${pendingBookings} enrollment request is currently under review.`) : tx("قيدك الأكاديمي نشط ولديك صلاحية كاملة للغرف والمواد.", "Your enrollment is fully active with complete access to rooms and course content.")}</p>
+        </div>
       </article>
     </section>
   </>;
