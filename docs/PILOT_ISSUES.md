@@ -92,8 +92,53 @@
 
 ---
 
+### Issue #005: Student Verification When Transactional Mailer Operates in Log Mode
+- **Severity:** **P1 (Operational Workflow Blocker)**
+- **Component:** `AdminPilotAcademyController` / Student Onboarding
+- **Discovery Date:** 2026-10-18T18:32:00Z (Live Pilot Student Provisioning)
+- **Symptom:**
+  When students self-register in production, their email verification code is written to the Railway log rather than dispatched to an external inbox. Students were left in `status: pending_verification` and unable to reserve bookings.
+- **Root Cause Analysis:**
+  Production email delivery requires verified third-party SMTP API credentials. In log mode, student accounts could not complete the email handshake autonomously.
+- **Remediation Implemented:**
+  Added `POST /api/v1/admin/pilot-academies/{organization}/students` allowing Super Admin to provision and pre-verify pilot student accounts directly with passwords and immediate active status.
+- **Status:** **RESOLVED & VERIFIED IN PRODUCTION (Commit `81f77b1`)**
+
+---
+
+### Issue #006: Academy Onboarding Wizard Payment Step Not Recognizing Mode B Payments
+- **Severity:** **P2 (Usability & Progress Tracking)**
+- **Component:** `AcademyOnboardingController::wizard`
+- **Discovery Date:** 2026-10-18T18:35:00Z
+- **Symptom:**
+  Even after an academy owner confirmed student bookings with audited manual InstaPay payments (`markAsPaid: true`), the Onboarding Wizard stalled at 87% because the `payment` step only evaluated `organization->payments()->where('status', 'paid')` or live Paymob credentials.
+- **Root Cause Analysis:**
+  Manual booking confirmations did not create records in the `payments` table, and the wizard check did not inspect `bookings.payment_status = 'paid'`.
+- **Remediation Implemented:**
+  1. Updated `BookingService::confirm` to generate an audited manual `Payment` record with `provider: 'manual'`, `amount_minor`, and `status: 'paid'` when `markAsPaid` is true.
+  2. Updated `AcademyOnboardingController::wizard` to check `$organization->bookings()->where('payment_status', 'paid')->exists()`.
+  3. Wizard reached 100% completion in live production.
+- **Status:** **RESOLVED & VERIFIED IN PRODUCTION (Commit `81f77b1`)**
+
+---
+
+### Issue #007: Course Completion Evaluation Lacked HTTP API Entrypoint
+- **Severity:** **P2 (Feature Gap / Integration)**
+- **Component:** `CourseController` / `StudentController` / `routes/api.php`
+- **Discovery Date:** 2026-10-18T18:40:00Z
+- **Symptom:**
+  `CourseCompletionService::evaluate` existed as an internal service, but neither students nor academy owners had an HTTP route to trigger progress evaluation and authoritative enrollment completion.
+- **Remediation Implemented:**
+  1. Added `POST /api/v1/student/enrollments/{enrollment}/evaluate` in `StudentController`.
+  2. Added `POST /api/v1/organizations/{organization}/enrollments/{enrollment}/evaluate` in `CourseController`.
+  3. Verified both endpoints evaluate milestones and authoritatively transition enrollments to `completed`.
+- **Status:** **RESOLVED & VERIFIED IN PRODUCTION (Commit `81f77b1`)**
+
+---
+
 ## 3. Summary Scorecard
 
 | Total Issues Logged | P0 Critical | P1 Blocker | P2 Usability | P3 Cosmetic | Resolved | Active Workarounds |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **4** | 0 | 2 | 2 | 0 | **2** | **2** |
+| **7** | 0 | 3 | 4 | 0 | **5** | **2** |
+
