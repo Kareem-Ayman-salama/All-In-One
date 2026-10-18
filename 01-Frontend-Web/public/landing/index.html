@@ -109,24 +109,29 @@
           </div>
 
           <h1 class="hero-title" data-i18n="hero_title">
-            منصة واحدة تجمع <span class="gradient-text">التعليم والإدارة</span> في تجربة أذكى
+            شغّل أكاديميتك باحتراف، <span class="gradient-text">وامنح طلابك تجربة أفضل</span>
           </h1>
 
           <p class="hero-description" data-i18n="hero_desc">
-            اكتشف الكورسات، نظّم العملية التعليمية، وتابع رحلة التعلّم من مكان واحد. سواء كنت طالبًا أو مدرسًا أو تدير أكاديمية متكاملة.
+            اكتشف الكورسات، نظّم العملية التعليمية، تابع الحضور بالـ QR، وتدرّب بالاختبارات والواجبات في مساحة عمل واحدة ذكية تجمع الطالب والمعلم وإدارة السنتر.
           </p>
 
           <div class="hero-cta-group">
-            <a class="primary-button large glow-btn" href="/courses">
-              <i class="ti ti-search"></i>
-              <span data-i18n="hero_cta_primary">استكشف الكورسات</span>
+            <button class="primary-button large glow-btn" type="button" onclick="openLeadModal('trial-modal')">
+              <i class="ti ti-rocket"></i>
+              <span data-i18n="hero_cta_primary">ابدأ مجاناً</span>
               <i class="ti ti-arrow-left arrow-icon"></i>
-            </a>
-
-            <button class="secondary-button large" type="button" onclick="openLeadModal('trial-modal')">
-              <i class="ti ti-school"></i>
-              <span data-i18n="hero_cta_secondary">ابدأ أكاديميتك</span>
             </button>
+
+            <button class="secondary-button large" type="button" onclick="scrollToId('platform-preview')">
+              <i class="ti ti-device-laptop"></i>
+              <span data-i18n="hero_cta_secondary">استكشف المنصة</span>
+            </button>
+
+            <a class="ghost-button large" href="/courses">
+              <i class="ti ti-books"></i>
+              <span data-i18n="hero_cta_courses">تصفح الكورسات</span>
+            </a>
           </div>
 
           <div class="hero-trust-bar">
@@ -149,67 +154,79 @@
           </div>
         </div>
 
-        <!-- EDUCATIONAL STUDIO PREVIEW -->
+        <!-- REALISTIC EDUCATIONAL LEARNING PREVIEW -->
         <div class="hero-product-preview" aria-label="معاينة بيئة التعلّم في AIN">
           <div class="preview-glow"></div>
           <div class="preview-window">
             <div class="preview-window-bar">
               <div class="preview-dots"><span></span><span></span><span></span></div>
               <span class="preview-domain">learn.ainplatform.com</span>
-              <span class="preview-secure"><i class="ti ti-lock"></i> فصل دراسي نشط</span>
+              <span class="preview-secure"><i class="ti ti-book-2"></i> مساحة التعلّم التفاعلية</span>
             </div>
             <div class="preview-app">
               <aside class="preview-sidebar">
                 <div class="preview-logo"><img src="/images/ain-logo.png" alt=""><strong>AIN</strong></div>
-                <span class="active" title="الدروس"><i class="ti ti-book-2"></i></span>
-                <span title="الكورسات"><i class="ti ti-school"></i></span>
+                <span class="active" title="الدروس"><i class="ti ti-player-play"></i></span>
+                <span title="الكورسات"><i class="ti ti-books"></i></span>
                 <span title="الواجبات"><i class="ti ti-clipboard-check"></i></span>
                 <span title="الجدول"><i class="ti ti-calendar"></i></span>
                 <span title="الشهادات"><i class="ti ti-certificate"></i></span>
               </aside>
               <div class="preview-main">
                 <header class="preview-header-edu">
-                  <div>
-                    <small data-i18n="preview_lesson_kicker">الفيزياء المتقدمة — المحاضرة 04</small>
-                    <strong data-i18n="preview_lesson_title">الديناميكا الحرارية وتطبيقاتها</strong>
+                  <div class="preview-course-info">
+                    <span class="preview-course-badge" data-i18n="hero_preview_course">كورس: برمجة بايثون (Python Programming)</span>
+                    <strong data-i18n="hero_preview_lesson">الدرس 04: مقدمة إلى الدوال (Introduction to Functions)</strong>
+                    <small data-i18n="hero_preview_instructor">المحاضر: م. أحمد حسن (Ahmed Hassan)</small>
                   </div>
-                  <span class="preview-live-badge"><i class="ti ti-player-play-filled"></i> <span data-i18n="preview_live_badge">جلسة تعلّم نشطة</span></span>
+                  <span class="preview-attendance-badge"><i class="ti ti-circle-check-filled"></i> <span data-i18n="hero_preview_attendance">الحضور: حاضر ✓</span></span>
                 </header>
                 
-                <!-- Video stage simulation -->
+                <!-- Video lesson player preview -->
                 <div class="preview-player-stage">
                   <div class="preview-player-video">
                     <div class="preview-play-icon"><i class="ti ti-player-play-filled"></i></div>
                     <div class="preview-student-tag">
-                      <i class="ti ti-user-check"></i>
-                      <span>أحمد الشناوي • طالب مسجل</span>
+                      <i class="ti ti-code"></i>
+                      <span>def calculate_grade(score): return 'A'</span>
+                    </div>
+                    <div class="preview-live-indicator">
+                      <span class="live-dot-pulse"></span>
+                      <span>HD 1080p</span>
                     </div>
                   </div>
                   <div class="preview-player-bar">
-                    <div class="preview-bar-track"><div class="preview-bar-fill" style="width: 68%;"></div></div>
+                    <div class="preview-bar-track"><div class="preview-bar-fill" style="width: 78%;"></div></div>
                     <div class="preview-bar-meta">
                       <span>24:15 / 45:00</span>
-                      <span>1080p HD</span>
+                      <strong class="progress-highlight">78% مكتمل</strong>
                     </div>
                   </div>
                 </div>
 
-                <div class="preview-metrics preview-metrics-edu">
-                  <article>
-                    <span data-i18n="preview_metric_progress">نسبة الإنجاز</span>
-                    <strong>78% <small>مكتمل</small></strong>
-                    <em><i class="ti ti-trending-up"></i> متفوق</em>
-                  </article>
-                  <article>
-                    <span data-i18n="preview_metric_attendance">الحضور التراكمي</span>
-                    <strong>96%</strong>
-                    <em>منتظم</em>
-                  </article>
-                  <article>
-                    <span data-i18n="preview_metric_quiz">الواجب القادم</span>
-                    <strong>9.5 / 10</strong>
-                    <em>تم التسليم</em>
-                  </article>
+                <!-- Educational Action Cards: Next Lesson, Upcoming Session, Assignment -->
+                <div class="preview-edu-cards-grid">
+                  <div class="preview-edu-card">
+                    <div class="p-card-icon blue"><i class="ti ti-player-track-next"></i></div>
+                    <div class="p-card-body">
+                      <small data-i18n="hero_p_next_lesson_label">الدرس القادم</small>
+                      <strong data-i18n="hero_p_next_lesson">البرمجة الكائنية (OOP)</strong>
+                    </div>
+                  </div>
+                  <div class="preview-edu-card">
+                    <div class="p-card-icon amber"><i class="ti ti-calendar-event"></i></div>
+                    <div class="p-card-body">
+                      <small data-i18n="hero_p_session_label">الحصة القادمة المباشرة</small>
+                      <strong data-i18n="hero_p_session">الثلاثاء — 7:00 مساءً</strong>
+                    </div>
+                  </div>
+                  <div class="preview-edu-card">
+                    <div class="p-card-icon green"><i class="ti ti-clipboard-check"></i></div>
+                    <div class="p-card-body">
+                      <small data-i18n="hero_p_assignment_label">الواجب: تمارين الدوال</small>
+                      <strong data-i18n="hero_p_due">التسليم: غداً</strong>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -218,22 +235,331 @@
           <div class="preview-floating-card top-float">
             <i class="ti ti-qrcode"></i>
             <div>
-              <strong>42 طالباً</strong>
-              <span data-i18n="preview_qr_status">تم تسجيل حضورهم بالـ QR اليوم</span>
+              <strong>حضور الحصة اليوم</strong>
+              <span data-i18n="preview_qr_status">تم تسجيل حضورك بنجاح بالـ QR Code</span>
             </div>
           </div>
           <div class="preview-floating-card bottom-float">
             <i class="ti ti-certificate"></i>
             <div>
-              <strong>شهادة إتمام</strong>
-              <span data-i18n="preview_cert_status">جاهزة للتحميل عند إكمال المنهج</span>
+              <strong>شهادة إتمام معتمدة</strong>
+              <span data-i18n="preview_cert_status">جاهزة للتحميل فور إكمال متطلبات الكورس</span>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- AUDIENCE-BASED PATHWAYS -->
+    <!-- SECTION 2: REALISTIC LEARNING PLATFORM PREVIEW WITH TABS -->
+    <section class="section platform-preview-section" id="platform-preview">
+      <div class="wrap">
+        <div class="section-badge-center">
+          <i class="ti ti-device-laptop"></i>
+          <span data-i18n="tabs_badge">تجربة المنصة الواقعية</span>
+        </div>
+        <h2 class="section-title-center" data-i18n="tabs_title">بيئة تعليمية مخصصة لكل دور في منظومتك</h2>
+        <p class="section-desc-center" data-i18n="tabs_desc">استكشف الواجهة الفعلية للطالب والمعلم ومدير الأكاديمية كما تظهر داخل المنصة، دون شاشات مالية معقدة.</p>
+
+        <!-- Role Switcher Tabs -->
+        <div class="platform-role-tabs" role="tablist" aria-label="أدوار المنصة">
+          <button type="button" class="role-tab-btn active" id="tab-btn-student" role="tab" aria-selected="true" onclick="switchPlatformPreview('student')">
+            <i class="ti ti-school"></i>
+            <span data-i18n="tab_student">طالب (Student)</span>
+            <span class="tab-default-tag" data-i18n="tab_default_tag">الافتراضي</span>
+          </button>
+          <button type="button" class="role-tab-btn" id="tab-btn-teacher" role="tab" aria-selected="false" onclick="switchPlatformPreview('teacher')">
+            <i class="ti ti-chalkboard"></i>
+            <span data-i18n="tab_teacher">مدرس (Teacher)</span>
+          </button>
+          <button type="button" class="role-tab-btn" id="tab-btn-academy" role="tab" aria-selected="false" onclick="switchPlatformPreview('academy')">
+            <i class="ti ti-building-community"></i>
+            <span data-i18n="tab_academy">إدارة الأكاديمية (Academy Admin)</span>
+          </button>
+        </div>
+
+        <!-- TAB 1: STUDENT VIEW (DEFAULT) -->
+        <div class="platform-tab-content active" id="tab-content-student" role="tabpanel" aria-labelledby="tab-btn-student">
+          <div class="tab-showcase-window">
+            <div class="tab-window-bar">
+              <span class="window-dot red"></span>
+              <span class="window-dot amber"></span>
+              <span class="window-dot green"></span>
+              <span class="window-title"><i class="ti ti-school"></i> learn.ainplatform.com/student/dashboard</span>
+            </div>
+            <div class="tab-showcase-body">
+              <div class="tab-subhead">
+                <div class="tab-user-welcome">
+                  <img src="/images/avatars/inst1.jpg" alt="" class="user-avatar-sm">
+                  <div>
+                    <h3 data-i18n="stu_welcome">مرحباً يا عمر 👋 (طالب مسجل)</h3>
+                    <small data-i18n="stu_sub">لديك 4 كورسـات نشطة، وحصة مباشرة غداً الساعة 7:00 مساءً.</small>
+                  </div>
+                </div>
+                <div class="tab-status-chip">
+                  <i class="ti ti-circle-check-filled"></i>
+                  <span data-i18n="stu_status">قيدك الأكاديمي نشط</span>
+                </div>
+              </div>
+
+              <!-- Continue Learning Banner -->
+              <div class="tab-continue-card">
+                <div class="continue-left">
+                  <div class="continue-badge"><i class="ti ti-player-play-filled"></i> <span data-i18n="stu_cont_badge">استمر في التعلّم</span></div>
+                  <h4 data-i18n="stu_cont_title">برمجة بايثون الشاملة (Python Programming)</h4>
+                  <p data-i18n="stu_cont_lesson">الدرس 04: الدوال والمتغيرات البرمجية • المحاضر: م. أحمد حسن</p>
+                  <div class="continue-progress-row">
+                    <div class="progress-track"><div class="progress-fill" style="width: 78%;"></div></div>
+                    <span>78% مكتمل</span>
+                  </div>
+                </div>
+                <div class="continue-action">
+                  <a href="/courses" class="primary-button small">
+                    <i class="ti ti-player-play"></i>
+                    <span data-i18n="stu_resume_btn">متابعة الدرس</span>
+                  </a>
+                </div>
+              </div>
+
+              <!-- Student 4-Metric Grid -->
+              <div class="tab-metrics-grid">
+                <div class="tab-metric-box blue">
+                  <div class="m-icon"><i class="ti ti-books"></i></div>
+                  <div class="m-data">
+                    <small data-i18n="stu_m_courses_label">الكورسات المسجلة</small>
+                    <strong data-i18n="stu_m_courses">4 كورسات</strong>
+                  </div>
+                </div>
+                <div class="tab-metric-box amber">
+                  <div class="m-icon"><i class="ti ti-clipboard-check"></i></div>
+                  <div class="m-data">
+                    <small data-i18n="stu_m_assignment_label">الواجبات والتسليمات</small>
+                    <strong data-i18n="stu_m_assignment">واجب واحد (غداً)</strong>
+                  </div>
+                </div>
+                <div class="tab-metric-box emerald">
+                  <div class="m-icon"><i class="ti ti-calendar-event"></i></div>
+                  <div class="m-data">
+                    <small data-i18n="stu_m_session_label">الحصة المباشرة القادمة</small>
+                    <strong data-i18n="stu_m_session">الثلاثاء — 7:00 م</strong>
+                  </div>
+                </div>
+                <div class="tab-metric-box purple">
+                  <div class="m-icon"><i class="ti ti-qrcode"></i></div>
+                  <div class="m-data">
+                    <small data-i18n="stu_m_att_label">نسبة الحضور بـ QR</small>
+                    <strong data-i18n="stu_m_att">96% (منتظم)</strong>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Student Classroom Files & Quizzes -->
+              <div class="tab-items-list">
+                <div class="tab-list-item">
+                  <div class="item-icon blue"><i class="ti ti-video"></i></div>
+                  <div class="item-info">
+                    <strong>الدرس 04: مقدمة إلى الدوال (فيديو مسجل 45 دقيقة)</strong>
+                    <small>مشغل تفاعلي مع مذكرات الشرح وتحديد التقدم</small>
+                  </div>
+                  <span class="item-tag done"><i class="ti ti-check"></i> تم المشاهدة (78%)</span>
+                </div>
+                <div class="tab-list-item">
+                  <div class="item-icon amber"><i class="ti ti-file-text"></i></div>
+                  <div class="item-info">
+                    <strong>مذكرة الدوال البرمجية والتطبيقات العملية (PDF - 1.8 MB)</strong>
+                    <small>محمية بعلامة مائية رقمية باسمك ورقم قيدك</small>
+                  </div>
+                  <span class="item-tag action"><i class="ti ti-eye"></i> قراءة المذكرة</span>
+                </div>
+                <div class="tab-list-item">
+                  <div class="item-icon green"><i class="ti ti-certificate"></i></div>
+                  <div class="item-info">
+                    <strong>كويز تقييمي: تطبيقات الدوال والشروط</strong>
+                    <small>10 أسئلة تفاعلية مع تصحيح فوري للدرجات</small>
+                  </div>
+                  <span class="item-tag new">متاح للحل الآن</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: TEACHER VIEW -->
+        <div class="platform-tab-content" id="tab-content-teacher" role="tabpanel" aria-labelledby="tab-btn-teacher" style="display: none;">
+          <div class="tab-showcase-window">
+            <div class="tab-window-bar">
+              <span class="window-dot red"></span>
+              <span class="window-dot amber"></span>
+              <span class="window-dot green"></span>
+              <span class="window-title"><i class="ti ti-chalkboard"></i> learn.ainplatform.com/teacher/workspace</span>
+            </div>
+            <div class="tab-showcase-body">
+              <div class="tab-subhead">
+                <div class="tab-user-welcome">
+                  <img src="/images/avatars/inst3.jpg" alt="" class="user-avatar-sm">
+                  <div>
+                    <h3 data-i18n="tch_welcome">مرحباً د. هاني 👋 (معلم معتمد)</h3>
+                    <small data-i18n="tch_sub">إليك ملخص حصص اليوم والواجبات التي تنتظر رصد الدرجات لطلابك.</small>
+                  </div>
+                </div>
+                <div class="tab-status-chip teacher">
+                  <i class="ti ti-certificate"></i>
+                  <span data-i18n="tch_status">لوحة المعلم المستقل</span>
+                </div>
+              </div>
+
+              <!-- Teacher 4-Metric Grid (Strictly Educational - No Academy Finance) -->
+              <div class="tab-metrics-grid">
+                <div class="tab-metric-box blue">
+                  <div class="m-icon"><i class="ti ti-calendar-time"></i></div>
+                  <div class="m-data">
+                    <small data-i18n="tch_m_today_label">حصص اليوم المجدولة</small>
+                    <strong data-i18n="tch_m_today">حصتان (5:00 م)</strong>
+                  </div>
+                </div>
+                <div class="tab-metric-box amber">
+                  <div class="m-icon"><i class="ti ti-clipboard-list"></i></div>
+                  <div class="m-data">
+                    <small data-i18n="tch_m_subs_label">تسليمات بانتظار الرصد</small>
+                    <strong data-i18n="tch_m_subs">18 تسليماً</strong>
+                  </div>
+                </div>
+                <div class="tab-metric-box emerald">
+                  <div class="m-icon"><i class="ti ti-checklist"></i></div>
+                  <div class="m-data">
+                    <small data-i18n="tch_m_quizzes_label">الاختبارات النشطة</small>
+                    <strong data-i18n="tch_m_quizzes">4 اختبارات</strong>
+                  </div>
+                </div>
+                <div class="tab-metric-box purple">
+                  <div class="m-icon"><i class="ti ti-users"></i></div>
+                  <div class="m-data">
+                    <small data-i18n="tch_m_students_label">الطلاب في مجموعاتك</small>
+                    <strong data-i18n="tch_m_students">148 طالباً</strong>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Teacher Workflow Items -->
+              <div class="tab-items-list">
+                <div class="tab-list-item">
+                  <div class="item-icon green"><i class="ti ti-qrcode"></i></div>
+                  <div class="item-info">
+                    <strong>تحضير حضور حصة الفيزياء (المجموعة أ - سنتر النور)</strong>
+                    <small>رمز QR ديناميكي مع إشعار فوري لولي الأمر فور تسجيل الحضور</small>
+                  </div>
+                  <span class="item-tag action"><i class="ti ti-player-play"></i> بدء التحضير</span>
+                </div>
+                <div class="tab-list-item">
+                  <div class="item-icon amber"><i class="ti ti-clipboard-check"></i></div>
+                  <div class="item-info">
+                    <strong>رصد درجات واجب الكيمياء الحرارية (18 طالباً بانتظار التصحيح)</strong>
+                    <small>تصحيح الحلول المرفوعة وإرسال الملاحظات الفردية لكل طالب</small>
+                  </div>
+                  <span class="item-tag action"><i class="ti ti-edit"></i> رصد وتصحيح</span>
+                </div>
+                <div class="tab-list-item">
+                  <div class="item-icon blue"><i class="ti ti-upload"></i></div>
+                  <div class="item-info">
+                    <strong>رفع المحاضرة 05 ومذكرة المراجعة النهائية</strong>
+                    <small>ربط الفيديو عبر YouTube Unlisted مع تفعيل العلامة المائية الآمنة</small>
+                  </div>
+                  <span class="item-tag new">رفع محتوى جديد</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: ACADEMY ADMIN VIEW -->
+        <div class="platform-tab-content" id="tab-content-academy" role="tabpanel" aria-labelledby="tab-btn-academy" style="display: none;">
+          <div class="tab-showcase-window">
+            <div class="tab-window-bar">
+              <span class="window-dot red"></span>
+              <span class="window-dot amber"></span>
+              <span class="window-dot green"></span>
+              <span class="window-title"><i class="ti ti-building-community"></i> learn.ainplatform.com/academy/operations</span>
+            </div>
+            <div class="tab-showcase-body">
+              <div class="tab-subhead">
+                <div class="tab-user-welcome">
+                  <div class="user-avatar-sm academy-mark"><i class="ti ti-building-community"></i></div>
+                  <div>
+                    <h3 data-i18n="acd_welcome">لوحة تشغيل السنتر والأكاديمية التعليمية</h3>
+                    <small data-i18n="acd_sub">إدارة القاعات الصفية، حضور السناتر، تنظيم المدرسين، والشهادات الأكاديمية.</small>
+                  </div>
+                </div>
+                <div class="tab-status-chip academy">
+                  <i class="ti ti-building"></i>
+                  <span data-i18n="acd_status">مساحة عمل مؤسسية</span>
+                </div>
+              </div>
+
+              <!-- Academy Operational Metrics (Educational SaaS - Clean) -->
+              <div class="tab-metrics-grid">
+                <div class="tab-metric-box blue">
+                  <div class="m-icon"><i class="ti ti-users-group"></i></div>
+                  <div class="m-data">
+                    <small data-i18n="acd_m_cohorts_label">الدفعات والمجموعات النشطة</small>
+                    <strong data-i18n="acd_m_cohorts">18 دفعة</strong>
+                  </div>
+                </div>
+                <div class="tab-metric-box emerald">
+                  <div class="m-icon"><i class="ti ti-qrcode"></i></div>
+                  <div class="m-data">
+                    <small data-i18n="acd_m_att_label">متوسط الحضور بالسناتر</small>
+                    <strong data-i18n="acd_m_att">96% بـ QR</strong>
+                  </div>
+                </div>
+                <div class="tab-metric-box amber">
+                  <div class="m-icon"><i class="ti ti-chalkboard"></i></div>
+                  <div class="m-data">
+                    <small data-i18n="acd_m_teachers_label">المعلمون والمساعدون</small>
+                    <strong data-i18n="acd_m_teachers">12 معلماً</strong>
+                  </div>
+                </div>
+                <div class="tab-metric-box purple">
+                  <div class="m-icon"><i class="ti ti-door"></i></div>
+                  <div class="m-data">
+                    <small data-i18n="acd_m_rooms_label">الغرف والقاعات الصفية</small>
+                    <strong data-i18n="acd_m_rooms">8 قاعات</strong>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Academy Operational Activity List -->
+              <div class="tab-items-list">
+                <div class="tab-list-item">
+                  <div class="item-icon green"><i class="ti ti-qrcode"></i></div>
+                  <div class="item-info">
+                    <strong>تحضير دفعة الثانوية العامة (القاعة الرئيسية - السنتر)</strong>
+                    <small>تم تسجيل حضور 42 طالباً عبر ماسح الـ QR بدون طوابير ورقية</small>
+                  </div>
+                  <span class="item-tag done">منذ 5 دقائق</span>
+                </div>
+                <div class="tab-list-item">
+                  <div class="item-icon blue"><i class="ti ti-certificate"></i></div>
+                  <div class="item-info">
+                    <strong>إصدار شهادات إتمام معسكر الويب والبرمجة</strong>
+                    <small>اعتماد وتصدير شهادات 24 طالباً أتموا متطلبات المشروع النهائي</small>
+                  </div>
+                  <span class="item-tag done">اليوم</span>
+                </div>
+                <div class="tab-list-item">
+                  <div class="item-icon purple"><i class="ti ti-user-plus"></i></div>
+                  <div class="item-info">
+                    <strong>طلبات حجز دفعات جديدة بانتظار التأكيد</strong>
+                    <small>6 طلبات التحاق لكورس الفيزياء المتقدمة بانتظار مراجعة الإدارة</small>
+                  </div>
+                  <span class="item-tag action"><i class="ti ti-eye"></i> مراجعة الطلبات</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: AUDIENCE-BASED PATHWAYS -->
     <section class="section pathways-section" id="pathways">
       <div class="wrap">
         <div class="section-badge-center">
@@ -539,50 +865,50 @@
       </div>
     </section>
 
-    <!-- HOW AIN SUPPORTS LEARNING (EDUCATIONAL WORKFLOW) -->
-    <section class="section how-section" id="how-it-works">
+    <!-- SECTION 5: STUDENT LEARNING JOURNEY -->
+    <section class="section how-section" id="learning-journey">
       <div class="wrap">
         <div class="section-badge-center">
           <i class="ti ti-route"></i>
-          <span data-i18n="work_badge">رحلة التعلّم والنجاح</span>
+          <span data-i18n="work_badge">رحلتك التعليمية مع AIN</span>
         </div>
-        <h2 class="section-title-center" data-i18n="work_title">كيف تدعم AIN رحلة الطالب والمعلم خطوة بخطوة</h2>
-        <p class="section-desc-center" data-i18n="work_desc">دورة عمل تعليمية متكاملة تضمن تجربة ممتعة ومنظمة من أول البحث عن الكورس وحتى إتقان المنهج.</p>
+        <h2 class="section-title-center" data-i18n="work_title">رحلتك التعليمية في 5 خطوات واضحة</h2>
+        <p class="section-desc-center" data-i18n="work_desc">دورة عمل تعليمية متكاملة تضمن تجربة ممتعة ومنظمة من أول البحث عن الكورس وحتى إتقان المنهج واستلام الشهادة.</p>
 
         <div class="edu-steps-flow">
           <div class="edu-step-card">
             <div class="edu-step-num">1</div>
             <div class="edu-step-icon"><i class="ti ti-search"></i></div>
-            <h3 data-i18n="step1_title">اكتشف الكورس المناسب</h3>
-            <p data-i18n="step1_desc">ابحث وتصفح المناهج وتعرف على المحاضرين ومواعيد الدفعات المناسبة لك بمرونة.</p>
+            <h3 data-i18n="step1_title">1. اكتشف كورسك</h3>
+            <p data-i18n="step1_desc">تصفح مكتبة الكورسات والمناهج، وتعرف على المحاضرين وخطط الدراسة ومواعيد الدفعات المناسبة لك.</p>
           </div>
 
           <div class="edu-step-card">
             <div class="edu-step-num">2</div>
             <div class="edu-step-icon"><i class="ti ti-ticket"></i></div>
-            <h3 data-i18n="step2_title">احجز وسجّل مقعدك</h3>
-            <p data-i18n="step2_desc">تأكيد فوري للحجز مع خيارات حضور أونلاين أو داخل السنتر دون تعقيد إداري.</p>
+            <h3 data-i18n="step2_title">2. احجز مكانك</h3>
+            <p data-i18n="step2_desc">سجّل في الدفعة أو المجموعة المناسبة لك بخيارات حضور مرنة أونلاين أو داخل السنتر.</p>
           </div>
 
           <div class="edu-step-card">
             <div class="edu-step-num">3</div>
             <div class="edu-step-icon"><i class="ti ti-player-play"></i></div>
-            <h3 data-i18n="step3_title">تعلّم وشاهد المحاضرات</h3>
-            <p data-i18n="step3_desc">مشغل فيديو مدمج مدعوم بـ YouTube Unlisted مع مذكرات دراسية منظمة لكل حصة.</p>
+            <h3 data-i18n="step3_title">3. ابدأ التعلّم</h3>
+            <p data-i18n="step3_desc">شاهد الدروس بجودة عالية مع مشغل محمي ومذكرات PDF منظمة ومساحة تواصل لكل حصة.</p>
           </div>
 
           <div class="edu-step-card">
             <div class="edu-step-num">4</div>
             <div class="edu-step-icon"><i class="ti ti-clipboard-check"></i></div>
-            <h3 data-i18n="step4_title">تدرب بالاختبارات والواجبات</h3>
-            <p data-i18n="step4_desc">بنك أسئلة واختبارات دورية مع تصحيح فوري وتقييم مستمر لمستوى الفهم.</p>
+            <h3 data-i18n="step4_title">4. طبّق وتابع تقدمك</h3>
+            <p data-i18n="step4_desc">حل الواجبات والاختبارات التفاعلية مع تصحيح فوري، وسجّل حضورك الذكي برمز QR.</p>
           </div>
 
           <div class="edu-step-card">
             <div class="edu-step-num">5</div>
             <div class="edu-step-icon"><i class="ti ti-certificate"></i></div>
-            <h3 data-i18n="step5_title">تابع التقدم واحصل على الشهادة</h3>
-            <p data-i18n="step5_desc">تحضير ذكي برمز QR وتقارير درجات دورية وشهادات إتمام معتمدة عند إنهاء المسار.</p>
+            <h3 data-i18n="step5_title">5. أكمل المسار واحصل على شهادتك</h3>
+            <p data-i18n="step5_desc">احصل على شهادة إتمام معتمدة مع سجل درجات وتفوق موثق يشارك مع ولي الأمر والأكاديمية.</p>
           </div>
         </div>
       </div>
@@ -732,10 +1058,10 @@
       <div class="wrap">
         <div class="section-badge-center">
           <i class="ti ti-shield-lock"></i>
-          <span data-i18n="prot_badge">حماية المحتوى والأجهزة</span>
+          <span data-i18n="prot_badge">بيئة تعلّم آمنة ومسؤولة</span>
         </div>
-        <h2 class="section-title-center" data-i18n="prot_title">حماية متقدمة ومسؤولة لدروسك ومذكراتك</h2>
-        <p class="section-desc-center" data-i18n="prot_desc">ضوابط عملية تشمل قفل الأجهزة وعلامة مائية متحركة وجلسات مشاهدة مؤقتة تساعد على ردع التسريب وتتبع الحسابات.</p>
+        <h2 class="section-title-center" data-i18n="prot_title">محتواك التعليمي في بيئة أكثر أماناً</h2>
+        <p class="section-desc-center" data-i18n="prot_desc">ضوابط ذكية وعملية لحماية جهد المعلم وحقوقه دون وعود مستحيلة لمنع التصوير، مع علامة مائية متحركة وربط موثوق للأجهزة وسجلات حضور دقيقة.</p>
 
         <div class="comparison-grid">
           <!-- Traditional / Risky Setup -->

@@ -29,15 +29,71 @@ const I18N = {
     nav_login: "تسجيل الدخول",
     nav_start_trial: "ابدأ مجاناً",
 
-    hero_badge: "منصة تعليمية متكاملة للطلاب والمعلمين والأكاديميات",
-    hero_title: "منصة واحدة تجمع <span class=\"gradient-text\">التعليم والإدارة</span> في تجربة أذكى",
-    hero_desc: "اكتشف الكورسات، نظّم العملية التعليمية، وتابع رحلة التعلّم من مكان واحد. سواء كنت طالبًا أو مدرسًا أو تدير أكاديمية متكاملة.",
-    hero_cta_primary: "استكشف الكورسات",
-    hero_cta_secondary: "ابدأ أكاديميتك",
+    hero_badge: "المنصة التعليمية المتكاملة للأكاديميات والمعلمين والطلاب",
+    hero_title: "شغّل أكاديميتك باحتراف، وامنح طلابك <span class=\"gradient-text\">تجربة تعلّم أفضل</span>",
+    hero_desc: "منصة متكاملة تجمع الفصول التفاعلية، تنظيم الكورسات والمجموعات، تحضير الحضور الذكي بـ QR، ومتابعة الواجبات والاختبارات في بيئة محميّة ومحفزة.",
+    hero_cta_primary: "ابدأ مجاناً",
+    hero_cta_secondary: "استكشف المنصة",
+    hero_cta_courses: "تصفح الكورسات",
     perk_no_card: "بدون بطاقة بنكية",
     perk_qr: "حضور ذكي بـ QR",
     perk_workspace: "مساحة مستقلة بهويتك",
     perk_protection: "حماية المحتوى والأجهزة",
+
+    hero_preview_course: "كورس: برمجة بايثون (Python Programming)",
+    hero_preview_lesson: "الدرس 04: مقدمة إلى الدوال (Introduction to Functions)",
+    hero_preview_instructor: "المحاضر: م. أحمد حسن (Ahmed Hassan)",
+    hero_preview_attendance: "الحضور: حاضر ✓",
+    hero_p_next_lesson_label: "الدرس القادم",
+    hero_p_next_lesson: "البرمجة الكائنية (OOP)",
+    hero_p_session_label: "الحصة القادمة المباشرة",
+    hero_p_session: "الثلاثاء — 7:00 مساءً",
+    hero_p_assignment_label: "الواجب: تمارين الدوال",
+    hero_p_due: "التسليم: غداً",
+
+    platform_preview_badge: "معاينة المنصة التفاعلية",
+    platform_preview_title: "بيئة عمل متخصصة لكل مستخدم في المنظومة التعليمية",
+    platform_preview_desc: "بدلاً من لوحات التحكم المعقدة، صممنا AIN لتمنح الطالب والمعلم والأكاديمية واجهات سهلة وواضحة تركز على التعلّم أولاً.",
+    tab_student: "تجربة الطالب (Student)",
+    tab_teacher: "تجربة المعلم (Teacher)",
+    tab_academy: "إدارة الأكاديمية (Academy)",
+    stu_welcome: "مرحباً عمر 👋 (طالب ثانوي)",
+    stu_sub: "لديك درس فيديو جديد وواجب بانتظار الحل قبل موعد حصة الغد.",
+    stu_status: "قيدك الأكاديمي نشط",
+    stu_cont_badge: "استمر في التعلّم",
+    stu_cont_title: "برمجة بايثون الشاملة (Python Programming)",
+    stu_cont_lesson: "الدرس 04: الدوال والمتغيرات البرمجية • المحاضر: م. أحمد حسن",
+    stu_resume_btn: "متابعة الدرس",
+    stu_m_courses_label: "الكورسات المسجلة",
+    stu_m_courses: "4 كورسات",
+    stu_m_assignment_label: "الواجبات والتسليمات",
+    stu_m_assignment: "واجب واحد (غداً)",
+    stu_m_session_label: "الحصة المباشرة القادمة",
+    stu_m_session: "الثلاثاء — 7:00 م",
+    stu_m_att_label: "نسبة الحضور بـ QR",
+    stu_m_att: "96% (منتظم)",
+    tch_welcome: "مرحباً د. هاني 👋 (معلم معتمد)",
+    tch_sub: "إليك ملخص حصص اليوم والواجبات التي تنتظر رصد الدرجات لطلابك.",
+    tch_status: "لوحة المعلم المستقل",
+    tch_m_today_label: "حصص اليوم المجدولة",
+    tch_m_today: "حصتان (5:00 م)",
+    tch_m_subs_label: "تسليمات بانتظار الرصد",
+    tch_m_subs: "18 تسليماً",
+    tch_m_quizzes_label: "الاختبارات النشطة",
+    tch_m_quizzes: "4 اختبارات",
+    tch_m_students_label: "الطلاب في مجموعاتك",
+    tch_m_students: "148 طالباً",
+    acad_welcome: "أكاديمية المستقبل التعليمية",
+    acad_sub: "نظرة عامة على انتظام الحضور، تسليمات الطلاب، وإدارة المجموعات التعليمية.",
+    acad_status: "بيئة تعليمية مفعّلة",
+    acad_m_students_label: "إجمالي الطلاب المقيدين",
+    acad_m_students: "482 طالباً",
+    acad_m_att_label: "متوسط نسبة الحضور",
+    acad_m_att: "96.4% (مرتفع)",
+    acad_m_cohorts_label: "الدفعات النشطة",
+    acad_m_cohorts: "18 دفعة",
+    acad_m_devices_label: "محاولات دخول جديدة",
+    acad_m_devices: "14 بانتظار المراجعة",
 
     path_badge: "اختر مسارك التعليمي",
     path_title: "منظومة مصممة لتخدم جميع أطراف العملية التعليمية",
@@ -465,15 +521,71 @@ const I18N = {
     nav_login: "Sign In",
     nav_start_trial: "Start Free",
 
-    hero_badge: "All-in-One EdTech Platform for Students, Teachers & Academies",
-    hero_title: "One Platform Uniting <span class=\"gradient-text\">Learning & Management</span> in a Smarter Experience",
-    hero_desc: "Discover courses, organize teaching, and track student growth from one place—whether you are a student, teacher, or running a full academy.",
-    hero_cta_primary: "Explore Courses",
-    hero_cta_secondary: "Start Your Academy",
+    hero_badge: "The All-in-One Educational Platform for Academies, Teachers & Students",
+    hero_title: "Run Your Academy Professionally, Give Your Students <span class=\"gradient-text\">A Better Learning Experience</span>",
+    hero_desc: "An integrated educational platform combining interactive classrooms, course and cohort management, smart QR attendance, and assignments & quizzes tracking in a protected environment.",
+    hero_cta_primary: "Start Free",
+    hero_cta_secondary: "Explore Platform",
+    hero_cta_courses: "Browse Courses",
     perk_no_card: "No credit card required",
     perk_qr: "Dynamic QR Attendance",
     perk_workspace: "Dedicated Branded Workspace",
     perk_protection: "Protected Content & Sessions",
+
+    hero_preview_course: "Course: Python Programming",
+    hero_preview_lesson: "Lesson 04: Introduction to Functions",
+    hero_preview_instructor: "Instructor: Eng. Ahmed Hassan",
+    hero_preview_attendance: "Attendance: Present ✓",
+    hero_p_next_lesson_label: "Next Lesson",
+    hero_p_next_lesson: "Object-Oriented Programming (OOP)",
+    hero_p_session_label: "Upcoming Live Session",
+    hero_p_session: "Tuesday — 7:00 PM",
+    hero_p_assignment_label: "Assignment: Python Functions Exercise",
+    hero_p_due: "Due: Tomorrow",
+
+    platform_preview_badge: "Interactive Platform Preview",
+    platform_preview_title: "Dedicated Workspaces for Every Role in Education",
+    platform_preview_desc: "Instead of complex ERP dashboards, AIN gives students, teachers, and academies intuitive, learning-focused interfaces.",
+    tab_student: "Student Experience",
+    tab_teacher: "Teacher Experience",
+    tab_academy: "Academy Management",
+    stu_welcome: "Welcome Omar 👋 (High School Student)",
+    stu_sub: "You have a new video lesson and an assignment due before tomorrow's class.",
+    stu_status: "Academic Enrollment Active",
+    stu_cont_badge: "Continue Learning",
+    stu_cont_title: "Comprehensive Python Programming",
+    stu_cont_lesson: "Lesson 04: Functions & Variables • Instructor: Eng. Ahmed Hassan",
+    stu_resume_btn: "Resume Lesson",
+    stu_m_courses_label: "Enrolled Courses",
+    stu_m_courses: "4 Courses",
+    stu_m_assignment_label: "Assignments & Submissions",
+    stu_m_assignment: "1 Assignment (Due Tomorrow)",
+    stu_m_session_label: "Upcoming Live Session",
+    stu_m_session: "Tuesday — 7:00 PM",
+    stu_m_att_label: "QR Attendance Rate",
+    stu_m_att: "96% (Regular)",
+    tch_welcome: "Welcome Dr. Hany 👋 (Certified Instructor)",
+    tch_sub: "Here is your class summary for today and student submissions awaiting grading.",
+    tch_status: "Independent Educator Portal",
+    tch_m_today_label: "Scheduled Sessions Today",
+    tch_m_today: "2 Sessions (5:00 PM)",
+    tch_m_subs_label: "Submissions to Grade",
+    tch_m_subs: "18 Submissions",
+    tch_m_quizzes_label: "Active Assessments",
+    tch_m_quizzes: "4 Quizzes",
+    tch_m_students_label: "Students in Your Groups",
+    tch_m_students: "148 Students",
+    acad_welcome: "Future Educational Academy",
+    acad_sub: "Comprehensive overview of student attendance, submissions, and cohort management.",
+    acad_status: "Active Educational Workspace",
+    acad_m_students_label: "Total Enrolled Students",
+    acad_m_students: "482 Students",
+    acad_m_att_label: "Average Attendance Rate",
+    acad_m_att: "96.4% (High)",
+    acad_m_cohorts_label: "Active Cohorts",
+    acad_m_cohorts: "18 Cohorts",
+    acad_m_devices_label: "New Sign-in Attempts",
+    acad_m_devices: "14 Pending Review",
 
     path_badge: "Choose Your Pathway",
     path_title: "Tailored for Every Stage of the Educational Journey",
@@ -971,7 +1083,7 @@ const ROLE_DATA = {
     mockTitleEn: 'Academy Director Dashboard - Illustrative Data',
     metrics: [
       { label: 'الطلاب النشطون', labelEn: 'Active Students', value: '482 طالب', valueEn: '482 Students', color: '' },
-      { label: 'إيراد الشهر', labelEn: 'Monthly Revenue', value: '96,400 ج.م', valueEn: '96,400 EGP', color: 'green' },
+      { label: 'متوسط نسبة الحضور', labelEn: 'Avg Attendance Rate', value: '96.4%', valueEn: '96.4%', color: 'green' },
       { label: 'محاولات دخول للمراجعة', labelEn: 'Sign-ins to Review', value: '14 محاولة', valueEn: '14 Attempts', color: 'red' }
     ],
     items: [
@@ -1577,6 +1689,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize role showcase
   switchRoleShowcase("admin");
 
+  // Initialize platform preview (default: student)
+  switchPlatformPreview("student");
+
   // Initialize ROI calculator
   calculateRoi();
 
@@ -1680,10 +1795,31 @@ function filterFaqCategory(category, buttonEl) {
   });
 }
 
+function switchPlatformPreview(role) {
+  const tabs = ["student", "teacher", "academy"];
+  tabs.forEach((t) => {
+    const btn = document.getElementById(`tab-btn-${t}`);
+    const content = document.getElementById(`tab-content-${t}`);
+    if (btn) {
+      if (t === role) {
+        btn.classList.add("active");
+        btn.setAttribute("aria-selected", "true");
+      } else {
+        btn.classList.remove("active");
+        btn.setAttribute("aria-selected", "false");
+      }
+    }
+    if (content) {
+      content.style.display = (t === role) ? "block" : "none";
+    }
+  });
+}
+
 // Expose global methods for inline HTML event handlers
 window.toggleMobileMenu = toggleMobileMenu;
 window.toggleLanguage = toggleLanguage;
 window.switchRoleShowcase = switchRoleShowcase;
+window.switchPlatformPreview = switchPlatformPreview;
 window.calculateRoi = calculateRoi;
 window.filterCourses = filterCourses;
 window.switchBilling = switchBilling;
@@ -1699,4 +1835,5 @@ window.closeLeadModal = closeLeadModal;
 window.submitTrialForm = submitTrialForm;
 window.toggleFaqCard = toggleFaqCard;
 window.filterFaqCategory = filterFaqCategory;
+
 

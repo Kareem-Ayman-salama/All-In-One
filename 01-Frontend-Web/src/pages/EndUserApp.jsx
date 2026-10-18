@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, FileText, Maximize2, Minimize2, PictureInPicture2, Play, Shield, Video } from "lucide-react";
-import { Navigate, useParams } from "react-router-dom";
+import { AlertTriangle, BookOpen, FileText, Maximize2, Minimize2, PictureInPicture2, Play, Shield, Users, Video } from "lucide-react";
+import { Link, Navigate, useParams } from "react-router-dom";
 import { AccountSettings } from "../components/AccountSettings";
 import { Button } from "../components/Button";
 import {
@@ -31,6 +31,7 @@ import { CONTENT_VIEWER_EVENTS, viewerAuditPayload } from "../services/contentVi
 const nav = [
   { id: "home", label: "Dashboard", icon: "dashboard", path: "/end-user/home", primary: true },
   { id: "courses", label: "My learning", icon: "courses", path: "/end-user/courses", module: "courses", primary: true },
+  { id: "rooms", label: "Rooms & Classes", icon: "rooms", path: "/end-user/rooms", module: "courses", primary: true },
   { id: "assignments", label: "Assignments", icon: "tasks", path: "/end-user/assignments", module: "courses", primary: true },
   { id: "quizzes", label: "Quizzes", icon: "courses", path: "/end-user/quizzes", module: "courses", primary: true },
   { id: "attendance", label: "My attendance", icon: "attendance", path: "/end-user/attendance", module: "attendance", roles: ["student"], primary: true },
@@ -83,6 +84,7 @@ export function EndUserApp({ data, user }) {
       {page === "home" && <MemberDashboard data={appData} user={user} />}
       {page === "bookings" && <StudentBookingPage user={user} />}
       {page === "courses" && <StudentMarketplaceCourses user={user} />}
+      {page === "rooms" && <StudentRoomsWorkspaceTab rooms={appData.rooms} />}
       {page === "assignments" && <section style={{ padding: "24px" }}><header className="stitch-page-head"><div><h1>{tx("واجباتي الدراسية", "My Assignments")}</h1><p>{tx("قم برفع الحلول ومتابعة تقييم المدرس والدرجات.", "Submit work and check instructor feedback.")}</p></div></header><StudentAssignmentsWorkspaceTab /></section>}
       {page === "quizzes" && <section style={{ padding: "24px" }}><header className="stitch-page-head"><div><h1>{tx("الاختبارات والتقييمات", "Quizzes & Assessments")}</h1><p>{tx("اختبر معلوماتك مع التصحيح الفوري.", "Test your knowledge with auto-grading.")}</p></div></header><StudentQuizzesWorkspaceTab /></section>}
       {page === "certificates" && <section style={{ padding: "24px" }}><CertificatesHub /></section>}
@@ -99,6 +101,141 @@ export function EndUserApp({ data, user }) {
       {page === "notifications" && <NotificationCenterPage user={user} />}
       {page === "settings" && <AccountSettings user={user} workspaceLabel="End User workspace" />}
     </AppLayout>
+  );
+}
+
+export function StudentRoomsWorkspaceTab({ rooms = [] }) {
+  const tx = useBilingualText();
+
+  return (
+    <section style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}>
+      <header className="stitch-page-head" style={{ marginBottom: "24px" }}>
+        <div>
+          <h1>{tx("غرفي التعليمية والمجموعات", "My Learning Rooms & Batches")}</h1>
+          <p>{tx("الفصول الدراسية والمجموعات التفاعلية المنضم إليها لمتابعة المحاضرات والملفات والتحديثات.", "Your active classrooms, cohorts, and study spaces for lectures and protected content.")}</p>
+        </div>
+      </header>
+
+      {(!rooms || rooms.length === 0) ? (
+        <div style={{
+          textAlign: "center",
+          padding: "4rem 1.5rem",
+          background: "#ffffff",
+          borderRadius: "16px",
+          border: "1px solid #e2e8f0",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.05)"
+        }}>
+          <div style={{
+            width: "64px",
+            height: "64px",
+            borderRadius: "50%",
+            background: "#eff6ff",
+            color: "#2563eb",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0 auto 16px"
+          }}>
+            <BookOpen size={32} />
+          </div>
+          <h3 style={{ fontSize: "18px", fontWeight: 800, color: "#0f172a", marginBottom: "8px" }}>
+            {tx("لم تنضم إلى غرف تعليمية بعد", "No Enrolled Classrooms Yet")}
+          </h3>
+          <p style={{ fontSize: "14px", color: "#64748b", maxWidth: "460px", margin: "0 auto 24px", lineHeight: 1.6 }}>
+            {tx("عند حجزك لأي كورس أو تفعيل اشتراكك في مجموعة دراسية، ستظهر الغرفة هنا فوراً لمتابعة المحاضرات والمذكرات.", "When you enroll in a course or join an academic cohort, your dedicated classroom will appear here.")}
+          </p>
+          <Link to="/end-user/courses" style={{ textDecoration: "none" }}>
+            <Button>
+              <BookOpen size={16} />
+              {tx("استكشف الكورسات المتاحة", "Explore Available Courses")}
+            </Button>
+          </Link>
+        </div>
+      ) : (
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+          gap: "20px"
+        }}>
+          {rooms.map((room, idx) => (
+            <article
+              key={room.id || idx}
+              style={{
+                background: "#ffffff",
+                border: "1px solid #e2e8f0",
+                borderRadius: "16px",
+                padding: "20px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.04)",
+                transition: "transform 0.2s ease, box-shadow 0.2s ease"
+              }}
+            >
+              <div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+                  <span style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    padding: "3px 10px",
+                    borderRadius: "999px",
+                    background: "#ecfdf5",
+                    color: "#059669"
+                  }}>
+                    <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#10b981" }}></span>
+                    {tx("غرفة دراسية نشطة", "Active Classroom")}
+                  </span>
+                  <span style={{ fontSize: "12px", color: "#94a3b8" }}>
+                    {room.type || tx("دفعة دراسية", "Study Cohort")}
+                  </span>
+                </div>
+                <h3 style={{ fontSize: "17px", fontWeight: 800, color: "#0f172a", marginBottom: "6px" }}>
+                  {room.name}
+                </h3>
+                <p style={{ fontSize: "13px", color: "#64748b", lineHeight: 1.5, marginBottom: "16px" }}>
+                  {room.description || tx("مساحة مخصصة للدروس والمذكرات التفاعلية والتواصل مع المحاضر.", "Dedicated space for lectures, interactive notes, and teacher updates.")}
+                </p>
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "16px",
+                  fontSize: "12px",
+                  color: "#64748b",
+                  padding: "10px 12px",
+                  background: "#f8fafc",
+                  borderRadius: "10px",
+                  marginBottom: "16px"
+                }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                    <Users size={14} />
+                    <strong>{room.members || 24}</strong> {tx("طالباً", "students")}
+                  </span>
+                  <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                    <FileText size={14} />
+                    <strong>{room.files || 8}</strong> {tx("ملفات ومذكرات", "files")}
+                  </span>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: "10px" }}>
+                <Link to="/end-user/messages" style={{ flex: 1, textDecoration: "none" }}>
+                  <Button variant="outline" style={{ width: "100%", justifyContent: "center", fontSize: "13px" }}>
+                    {tx("محادثة الغرفة", "Room Chat")}
+                  </Button>
+                </Link>
+                <Link to="/end-user/files" style={{ flex: 1, textDecoration: "none" }}>
+                  <Button style={{ width: "100%", justifyContent: "center", fontSize: "13px" }}>
+                    {tx("عرض المواد", "View Materials")}
+                  </Button>
+                </Link>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
 
