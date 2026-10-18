@@ -6,6 +6,7 @@ use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Models\Certificate;
 use App\Models\Course;
+use App\Models\CourseEnrollment;
 use App\Models\Organization;
 use App\Models\User;
 use App\Services\Operations\OperationRecorder;
@@ -98,6 +99,14 @@ class CertificateController extends Controller
         $recorder->record('certificate.issued', 'certificate', $certificate->id, $org->id, $request->user()->id, [], [
             'verificationCode' => $verificationCode,
         ], $request);
+
+        // Authoritatively synchronize course enrollment completion in database
+        CourseEnrollment::query()
+            ->where('organization_id', $org->id)
+            ->where('course_id', $course->id)
+            ->where('student_id', $student->id)
+            ->where('status', '!=', 'completed')
+            ->update(['status' => 'completed']);
 
         return ApiResponse::success($request, $certificate->load(['course', 'student', 'organization']), status: 201);
     }
