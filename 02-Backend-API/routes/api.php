@@ -478,6 +478,7 @@ Route::prefix('v1')->group(function (): void {
                         ->middleware('throttle:otp-operations');
                     Route::get('/pilot-academies', [AdminPilotAcademyController::class, 'index']);
                     Route::post('/pilot-academies', [AdminPilotAcademyController::class, 'store']);
+                    Route::post('/pilot-academies/{organization}/owner-password', [AdminPilotAcademyController::class, 'setOwnerPassword']);
                     Route::get('/pilot-plans', [AdminPilotAcademyController::class, 'plans']);
                     Route::patch('/pilot-plans/{plan}', [AdminPilotAcademyController::class, 'updatePlan']);
                 });

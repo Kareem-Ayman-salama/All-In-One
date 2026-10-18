@@ -51,6 +51,7 @@ class AdminPilotAcademyController extends Controller
             'academyName' => ['required', 'string', 'min:3', 'max:150'],
             'ownerName' => ['required', 'string', 'min:3', 'max:100'],
             'ownerEmail' => ['required', 'email'],
+            'ownerPassword' => ['nullable', 'string', 'min:8'],
             'planCode' => ['nullable', 'string', 'exists:plans,code'],
             'trialDays' => ['nullable', 'integer', 'min:1', 'max:365'],
             'studentLimit' => ['nullable', 'integer', 'min:1', 'max:10000'],
@@ -108,16 +109,23 @@ class AdminPilotAcademyController extends Controller
 
             // 4. Find or Create Owner User
             $owner = User::query()->where('email', strtolower($validated['ownerEmail']))->first();
+            $plainPassword = $validated['ownerPassword'] ?? 'Pilot@2026!';
             $isNewUser = false;
             if (! $owner) {
                 $isNewUser = true;
                 $owner = User::query()->create([
                     'name' => $validated['ownerName'],
                     'email' => strtolower($validated['ownerEmail']),
-                    'password' => Hash::make(Str::random(32)),
+                    'password' => Hash::make($plainPassword),
                     'status' => 'active',
                     'email_verified_at' => now(),
                 ]);
+            } else {
+                if (! empty($validated['ownerPassword'])) {
+                    $owner->update([
+                        'password' => Hash::make($plainPassword),
+                    ]);
+                }
             }
 
             // 5. Assign Owner Role Membership
@@ -253,5 +261,30 @@ class AdminPilotAcademyController extends Controller
         }
 
         return ApiResponse::success($request, $plan->fresh()->load('modules'));
+    }
+
+    /**
+     * Direct operational tool for Super Admin to set or reset a Pilot Academy Owner's password.
+     */
+    public function setOwnerPassword(Request $request, string $organization): JsonResponse
+    {
+        $validated = $request->validate([
+            'password' => ['required', 'string', 'min:8'],
+        ]);
+
+        $org = Organization::query()->findOrFail($organization);
+        $ownerMembership = $org->memberships()
+            ->whereHas('role', fn ($r) => $r->where('name', OrganizationRole::Owner->value))
+            ->firstOrFail();
+
+        $owner = $ownerMembership->user;
+        $owner->update([
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        return ApiResponse::success($request, [
+            'ownerEmail' => $owner->email,
+            'passwordUpdated' => true,
+        ]);
     }
 }
