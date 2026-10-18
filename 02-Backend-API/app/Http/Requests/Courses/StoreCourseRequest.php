@@ -61,6 +61,16 @@ class StoreCourseRequest extends FormRequest
             'requirements.*' => ['string', 'max:500'],
             'duration' => ['nullable', 'string', 'max:100'],
             'sessionsCount' => ['nullable', 'integer', 'min:1', 'max:1000'],
+            'completionPolicy' => ['nullable', 'array'],
+            'completionPolicy.require_lessons_completion' => ['nullable', 'boolean'],
+            'completionPolicy.minimum_lesson_completion_percentage' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'completionPolicy.require_assignments' => ['nullable', 'boolean'],
+            'completionPolicy.require_all_required_assignments' => ['nullable', 'boolean'],
+            'completionPolicy.require_quizzes' => ['nullable', 'boolean'],
+            'completionPolicy.minimum_quiz_score' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'completionPolicy.require_attendance' => ['nullable', 'boolean'],
+            'completionPolicy.minimum_attendance_percentage' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'completionPolicy.certificate_enabled' => ['nullable', 'boolean'],
         ];
     }
 }

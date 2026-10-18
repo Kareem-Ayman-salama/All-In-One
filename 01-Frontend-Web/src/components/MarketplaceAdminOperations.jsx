@@ -317,10 +317,21 @@ export function CourseWizardPage() {
   const { showToast } = useToast();
   const [step, setStep] = useState(0);
   const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState({ title: "", titleAr: "", shortDescriptionAr: "", descriptionAr: "", categoryId: categories[0]?.id || "", level: "", subject: "", instructorId: "", deliveryType: "online", price: 0, discountedPrice: "", duration: "", sessions: 8, learningOutcomes: "", requirements: "", roomId: "", status: "draft" });
+  const defaultPolicy = {
+    require_lessons_completion: true,
+    minimum_lesson_completion_percentage: 85,
+    require_assignments: true,
+    require_all_required_assignments: true,
+    require_quizzes: true,
+    minimum_quiz_score: 60,
+    require_attendance: true,
+    minimum_attendance_percentage: 70,
+    certificate_enabled: true,
+  };
+  const [form, setForm] = useState({ title: "", titleAr: "", shortDescriptionAr: "", descriptionAr: "", categoryId: categories[0]?.id || "", level: "", subject: "", instructorId: "", deliveryType: "online", price: 0, discountedPrice: "", duration: "", sessions: 8, learningOutcomes: "", requirements: "", roomId: "", status: "draft", completionPolicy: defaultPolicy });
   const courseSteps = isArabic
-    ? ["المعلومات", "طريقة التقديم", "السعر", "تفاصيل المحتوى", "الوصول", "المراجعة"]
-    : ["Information", "Delivery", "Pricing", "Content", "Access", "Review"];
+    ? ["المعلومات", "طريقة التقديم", "السعر", "تفاصيل المحتوى", "سياسة الإكمال والشهادة", "الوصول", "المراجعة"]
+    : ["Information", "Delivery", "Pricing", "Content", "Completion & Certificate", "Access", "Review"];
   const orgCourses = courses.filter((item) => item.organizationId === activeOrganization?.id);
   const orgInstructors = instructors.filter((item) => item.organizationId === activeOrganization?.id && item.active);
   const draftKey = `ain-course-draft:${activeOrganization?.id || "none"}`;
@@ -334,21 +345,28 @@ export function CourseWizardPage() {
   }, [draftKey, editing, form, step]);
 
   const change = (key, value) => setForm((current) => ({ ...current, [key]: value }));
+  const changePolicy = (key, value) => setForm((current) => ({
+    ...current,
+    completionPolicy: {
+      ...(current.completionPolicy || defaultPolicy),
+      [key]: value
+    }
+  }));
   const reset = () => {
     const saved = window.sessionStorage.getItem(draftKey);
     if (saved) {
       const draft = JSON.parse(saved);
-      setForm(draft.form);
+      setForm({ ...draft.form, completionPolicy: draft.form.completionPolicy || defaultPolicy });
       setStep(draft.step || 0);
     } else {
       setStep(0);
-      setForm({ title: "", titleAr: "", shortDescriptionAr: "", descriptionAr: "", categoryId: categories[0]?.id || "", level: "", subject: "", instructorId: orgInstructors[0]?.id || "", deliveryType: "online", price: 0, discountedPrice: "", duration: "", sessions: 8, learningOutcomes: "", requirements: "", roomId: "", status: "draft" });
+      setForm({ title: "", titleAr: "", shortDescriptionAr: "", descriptionAr: "", categoryId: categories[0]?.id || "", level: "", subject: "", instructorId: orgInstructors[0]?.id || "", deliveryType: "online", price: 0, discountedPrice: "", duration: "", sessions: 8, learningOutcomes: "", requirements: "", roomId: "", status: "draft", completionPolicy: defaultPolicy });
     }
     setEditing("new");
   };
 
   const save = async (status) => {
-    const payload = { ...form, organizationId: activeOrganization.id, academyId: academies.find((item) => item.organizationId === activeOrganization.id)?.id || null, slug: form.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""), shortDescription: form.shortDescriptionAr, description: form.descriptionAr, price: Number(form.price), discountedPrice: form.discountedPrice ? Number(form.discountedPrice) : null, sessions: Number(form.sessions), learningOutcomes: form.learningOutcomes.split("\n").filter(Boolean), requirements: form.requirements.split("\n").filter(Boolean), status, featured: false, sponsored: false };
+    const payload = { ...form, organizationId: activeOrganization.id, academyId: academies.find((item) => item.organizationId === activeOrganization.id)?.id || null, slug: form.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""), shortDescription: form.shortDescriptionAr, description: form.descriptionAr, price: Number(form.price), discountedPrice: form.discountedPrice ? Number(form.discountedPrice) : null, sessions: Number(form.sessions), learningOutcomes: form.learningOutcomes.split("\n").filter(Boolean), requirements: form.requirements.split("\n").filter(Boolean), completionPolicy: form.completionPolicy, status, featured: false, sponsored: false };
     try {
       const saved = editing && editing !== "new"
         ? await update("courses", editing, payload)
@@ -434,12 +452,130 @@ export function CourseWizardPage() {
             )}
             {step === 4 && (
               <>
+                <h2>{isArabic ? "سياسة الإكمال والشهادة" : "Completion & Certificate Policy"}</h2>
+                <p className="wizard-note">
+                  <ShieldCheck />
+                  {isArabic
+                    ? "حدد الشروط الأكاديمية المطلوبة لاعتبار الطالب مكملاً للكورس وأهليته للحصول على شهادة معتمدة."
+                    : "Configure the academic requirements required for a student to complete the course and earn a certificate."}
+                </p>
+
+                <div className="learning-form-grid">
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px", background: "var(--panel-soft)", padding: "16px", borderRadius: "8px" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontWeight: "600" }}>
+                      <input
+                        type="checkbox"
+                        checked={form.completionPolicy?.require_lessons_completion ?? true}
+                        onChange={(e) => changePolicy("require_lessons_completion", e.target.checked)}
+                      />
+                      <span>{isArabic ? "إلزامية مشاهدة الدروس والفيديوهات" : "Require Lesson & Video Watching"}</span>
+                    </label>
+                    <small style={{ color: "var(--muted)" }}>
+                      {isArabic ? "يجب على الطالب مشاهدة الفيديوهات المسجلة بنسبة محددة." : "Student must watch lessons up to the defined percentage."}
+                    </small>
+                    {(form.completionPolicy?.require_lessons_completion ?? true) && (
+                      <FormField label={isArabic ? "الحد الأدنى للمشاهدة (%)" : "Minimum Watch %"}>
+                        <input
+                          type="number"
+                          min="10"
+                          max="100"
+                          value={form.completionPolicy?.minimum_lesson_completion_percentage ?? 85}
+                          onChange={(e) => changePolicy("minimum_lesson_completion_percentage", Number(e.target.value))}
+                        />
+                      </FormField>
+                    )}
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px", background: "var(--panel-soft)", padding: "16px", borderRadius: "8px" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontWeight: "600" }}>
+                      <input
+                        type="checkbox"
+                        checked={form.completionPolicy?.require_attendance ?? true}
+                        onChange={(e) => changePolicy("require_attendance", e.target.checked)}
+                      />
+                      <span>{isArabic ? "إلزامية نسبة الحضور" : "Require Session Attendance"}</span>
+                    </label>
+                    <small style={{ color: "var(--muted)" }}>
+                      {isArabic ? "حساب نسبة الحضور الفعلية للحصص المباشرة عبر رمز الاستجابة السريع QR." : "Attendance calculated from live session QR-scans."}
+                    </small>
+                    {(form.completionPolicy?.require_attendance ?? true) && (
+                      <FormField label={isArabic ? "الحد الأدنى لنسبة الحضور (%)" : "Minimum Attendance %"}>
+                        <input
+                          type="number"
+                          min="10"
+                          max="100"
+                          value={form.completionPolicy?.minimum_attendance_percentage ?? 70}
+                          onChange={(e) => changePolicy("minimum_attendance_percentage", Number(e.target.value))}
+                        />
+                      </FormField>
+                    )}
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px", background: "var(--panel-soft)", padding: "16px", borderRadius: "8px" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontWeight: "600" }}>
+                      <input
+                        type="checkbox"
+                        checked={form.completionPolicy?.require_quizzes ?? true}
+                        onChange={(e) => changePolicy("require_quizzes", e.target.checked)}
+                      />
+                      <span>{isArabic ? "إلزامية اجتياز الاختبارات القصيرة" : "Require Passing Quizzes"}</span>
+                    </label>
+                    <small style={{ color: "var(--muted)" }}>
+                      {isArabic ? "يشترط تحقيق درجة النجاح في جميع الاختبارات المنشورة." : "Requires passing score on all published quizzes."}
+                    </small>
+                    {(form.completionPolicy?.require_quizzes ?? true) && (
+                      <FormField label={isArabic ? "درجة النجاح الدنيا في الاختبار (%)" : "Minimum Quiz Pass Score (%)"}>
+                        <input
+                          type="number"
+                          min="10"
+                          max="100"
+                          value={form.completionPolicy?.minimum_quiz_score ?? 60}
+                          onChange={(e) => changePolicy("minimum_quiz_score", Number(e.target.value))}
+                        />
+                      </FormField>
+                    )}
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px", background: "var(--panel-soft)", padding: "16px", borderRadius: "8px" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontWeight: "600" }}>
+                      <input
+                        type="checkbox"
+                        checked={form.completionPolicy?.require_assignments ?? true}
+                        onChange={(e) => changePolicy("require_assignments", e.target.checked)}
+                      />
+                      <span>{isArabic ? "إلزامية تسليم الواجبات" : "Require Assignment Submissions"}</span>
+                    </label>
+                    <small style={{ color: "var(--muted)" }}>
+                      {isArabic ? "يجب تسليم جميع التكليفات والواجبات المطلوبة للمعلم." : "All required assignments must be submitted."}
+                    </small>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: "16px", padding: "16px", background: "var(--panel-soft)", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "6px" }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontWeight: "700" }}>
+                    <input
+                      type="checkbox"
+                      checked={form.completionPolicy?.certificate_enabled ?? true}
+                      onChange={(e) => changePolicy("certificate_enabled", e.target.checked)}
+                    />
+                    <span>{isArabic ? "إصدار شهادة إتمام عند استيفاء الشروط" : "Issue Digital Certificate on Completion"}</span>
+                  </label>
+                  <small style={{ color: "var(--muted)" }}>
+                    {isArabic
+                      ? "عند استيفاء جميع المتطلبات، يصبح الطالب مؤهلاً لإصدار شهادة موثقة برمز QR للتحقق العام."
+                      : "Once all criteria are met, the student becomes eligible for a verified QR-enabled digital certificate."}
+                  </small>
+                </div>
+              </>
+            )}
+            {step === 5 && (
+              <>
                 <h2>{isArabic ? "الوصول والروم" : "Room & Access"}</h2>
                 <FormField label={isArabic ? "رقم أو اسم الروم المرتبطة" : "Associated Room ID/Name"}><input value={form.roomId} onChange={(e) => change("roomId", e.target.value)} placeholder={isArabic ? "سيتم إنشاء روم عند إضافة الدفعة إذا تركته فارغًا" : "Leave blank to auto-create room when batch is created"} /></FormField>
                 <div className="wizard-note"><LockKeyhole />{isArabic ? "بعد تأكيد الحجز سيُنشأ Enrollment واشتراك وعضوية في روم الدفعة تلقائيًا." : "After booking confirmation, enrollment, subscription, and room membership are provisioned automatically."}</div>
               </>
             )}
-            {step === 5 && (
+            {step === 6 && (
               <>
                 <h2>{isArabic ? "المراجعة والنشر" : "Review & Publish"}</h2>
                 <div className="wizard-review">

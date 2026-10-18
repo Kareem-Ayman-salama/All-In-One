@@ -154,10 +154,16 @@ class AdvancedPlatformFeaturesTest extends TestCase
                 'valid' => true,
                 'certificate' => [
                     'verificationCode' => $verificationCode,
-                    'gradeScore' => 98,
                     'studentName' => 'Tarek Student',
                 ],
             ]);
+        $this->assertArrayNotHasKey('gradeScore', $verifyRes->json('certificate'));
+
+        // When academy enables public grade display in settings:
+        $org->update(['settings' => ['public_certificate_show_grade' => true]]);
+        $this->getJson("/api/v1/public/certificates/verify/{$verificationCode}")
+            ->assertOk()
+            ->assertJsonPath('certificate.gradeScore', 98);
 
         // 3. Invalid code returns 404
         $this->getJson('/api/v1/public/certificates/verify/INVALID-CODE-999')

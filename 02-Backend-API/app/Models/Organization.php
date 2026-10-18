@@ -75,4 +75,14 @@ class Organization extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
+    public function instructors(): HasMany
+    {
+        return $this->hasMany(Instructor::class);
+    }
+
+    public function courseEnrollments(): HasMany
+    {
+        return $this->hasMany(CourseEnrollment::class);
+    }
 }

@@ -91,6 +91,7 @@ class CoursePresenter
                 'sessionsCount' => $course->sessions_count,
                 'discountEndsAt' => $course->discount_ends_at,
                 'moderationNote' => $course->moderation_note,
+                'completionPolicy' => $course->completion_policy,
             ];
         }
 

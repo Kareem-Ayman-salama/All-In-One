@@ -140,17 +140,60 @@ class CertificateController extends Controller
         return ApiResponse::success($request, $cert);
     }
 
+    public function revoke(
+        Request $request,
+        string $organization,
+        string $certificate,
+        OperationRecorder $recorder,
+    ): JsonResponse {
+        $org = $this->organization($request);
+        $user = $request->user();
+
+        $cert = Certificate::query()
+            ->where('organization_id', $org->id)
+            ->where(fn ($q) => $q->where('id', $certificate)->orWhere('verification_code', $certificate))
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'reason' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $metadata = $cert->metadata ?? [];
+        $metadata['revoked_at'] = now()->toIso8601String();
+        $metadata['revoked_by'] = $user->id;
+        $metadata['revocation_reason'] = $validated['reason'] ?? 'Revoked by academy administrator.';
+
+        $cert->update([
+            'status' => 'revoked',
+            'metadata' => $metadata,
+        ]);
+
+        $recorder->record(
+            'certificate.revoked',
+            'certificate',
+            $cert->id,
+            $org->id,
+            $user->id,
+            ['reason' => $validated['reason'] ?? null],
+            ['certificateId' => $cert->id, 'verificationCode' => $cert->verification_code],
+            $request,
+        );
+
+        return ApiResponse::success($request, $cert->fresh()->load(['course', 'student']));
+    }
+
     /**
      * Public verification endpoint without authentication.
-     * Anyone scanning the QR code or visiting this link can verify authenticity.
+     * Exposes only necessary public information, honoring public_certificate_show_grade setting.
      */
     public function publicVerify(Request $request, string $code): JsonResponse
     {
         $cert = Certificate::query()
             ->with([
-                'course:id,title,title_ar',
+                'course:id,title,title_ar,instructor_id',
+                'course.instructor:id,name,name_ar',
                 'student:id,name',
-                'organization:id,name,logo_path',
+                'organization:id,name,logo_path,settings',
             ])
             ->where('verification_code', strtoupper(trim($code)))
             ->first();
@@ -158,25 +201,56 @@ class CertificateController extends Controller
         if (! $cert) {
             return response()->json([
                 'valid' => false,
+                'status' => 'not_found',
                 'message' => 'الشهادة غير موجودة أو غير مسجلة في النظام.',
             ], 404);
         }
 
-        return response()->json([
+        // Handle Revoked Certificates
+        if ($cert->status === 'revoked') {
+            $showRevocationReason = (bool) ($cert->organization?->settings['public_certificate_show_revocation_reason'] ?? true);
+            $reason = $showRevocationReason ? ($cert->metadata['revocation_reason'] ?? null) : null;
+
+            return response()->json([
+                'valid' => false,
+                'status' => 'revoked',
+                'message' => 'هذه الشهادة تم إلغاؤها / Certificate Revoked.',
+                'certificate' => [
+                    'verificationCode' => $cert->verification_code,
+                    'status' => 'revoked',
+                    'studentName' => $cert->student?->name,
+                    'courseTitle' => $cert->course?->title_ar ?: $cert->course?->title,
+                    'organizationName' => $cert->organization?->name,
+                    'revokedAt' => $cert->metadata['revoked_at'] ?? null,
+                    'revocationReason' => $reason,
+                ],
+            ], 200);
+        }
+
+        // Privacy controls: Grade is NOT public by default unless explicitly allowed by academy setting
+        $showGrade = (bool) ($cert->organization?->settings['public_certificate_show_grade'] ?? false);
+
+        $payload = [
             'valid' => true,
+            'status' => $cert->status,
             'certificate' => [
-                'id' => $cert->id,
-                'certificateNumber' => $cert->certificate_number,
                 'verificationCode' => $cert->verification_code,
-                'issueDate' => $cert->issue_date->toDateString(),
-                'gradeScore' => $cert->grade_score,
-                'status' => $cert->status,
                 'studentName' => $cert->student?->name,
                 'courseTitle' => $cert->course?->title_ar ?: $cert->course?->title,
                 'organizationName' => $cert->organization?->name,
                 'organizationLogo' => $cert->organization?->logo_path,
+                'issueDate' => $cert->issue_date->toDateString(),
+                'completionDate' => $cert->metadata['completionDate'] ?? $cert->issue_date->toDateString(),
+                'instructor' => $cert->course?->instructor?->name_ar ?: $cert->course?->instructor?->name,
+                'status' => $cert->status,
             ],
-        ]);
+        ];
+
+        if ($showGrade) {
+            $payload['certificate']['gradeScore'] = $cert->grade_score;
+        }
+
+        return response()->json($payload);
     }
 
     private function organization(Request $request): Organization

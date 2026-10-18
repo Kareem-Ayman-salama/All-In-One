@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\AcademyOnboardingController;
 use App\Http\Controllers\Api\V1\AcademyProfileController;
 use App\Http\Controllers\Api\V1\AdminCategoryController;
 use App\Http\Controllers\Api\V1\AdminModerationController;
+use App\Http\Controllers\Api\V1\AdminPilotAcademyController;
 use App\Http\Controllers\Api\V1\AdminSubscriptionController;
 use App\Http\Controllers\Api\V1\AnalyticsController;
 use App\Http\Controllers\Api\V1\AnnouncementController;
@@ -53,6 +54,7 @@ use App\Http\Controllers\Api\V1\WorkspaceController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
+    Route::get('/health', [HealthController::class, 'index']);
     Route::get('/health/live', [HealthController::class, 'live']);
     Route::get('/health/ready', [HealthController::class, 'ready']);
     Route::get('/health/otp', [HealthController::class, 'otp']);
@@ -89,6 +91,8 @@ Route::prefix('v1')->group(function (): void {
     }
     Route::post('/payments/webhook/paymob', [PaymentController::class, 'paymobWebhook']);
     Route::get('/onboarding/wizard', [AcademyOnboardingController::class, 'wizard'])
+        ->middleware(['auth:sanctum', 'throttle:60,1']);
+    Route::get('/academy-onboarding/wizard', [AcademyOnboardingController::class, 'wizard'])
         ->middleware(['auth:sanctum', 'throttle:60,1']);
 
     Route::prefix('auth')->group(function (): void {
@@ -296,6 +300,10 @@ Route::prefix('v1')->group(function (): void {
                         ->middleware('permission:courses.view');
                     Route::put('/courses/{course}', [CourseController::class, 'update'])
                         ->middleware('permission:courses.update');
+                    Route::get('/courses/{course}/completion-policy', [CourseController::class, 'getCompletionPolicy'])
+                        ->middleware('permission:courses.view');
+                    Route::put('/courses/{course}/completion-policy', [CourseController::class, 'updateCompletionPolicy'])
+                        ->middleware('permission:courses.update');
                     Route::post('/courses/{course}/submit-review', [CourseController::class, 'submitForReview'])
                         ->middleware('permission:courses.publish');
 
@@ -414,6 +422,8 @@ Route::prefix('v1')->group(function (): void {
 
                 Route::post('/certificates', [CertificateController::class, 'generate'])
                     ->middleware('permission:courses.update');
+                Route::post('/certificates/{certificate}/revoke', [CertificateController::class, 'revoke'])
+                    ->middleware('permission:courses.update');
                 Route::get('/certificates', [CertificateController::class, 'index'])
                     ->middleware('permission:courses.view');
                 Route::post('/meetings/schedule', [LiveMeetingController::class, 'schedule'])
@@ -466,6 +476,10 @@ Route::prefix('v1')->group(function (): void {
                     Route::get('/otp/status', [OtpOperationsController::class, 'status']);
                     Route::post('/otp/test', [OtpOperationsController::class, 'sendTest'])
                         ->middleware('throttle:otp-operations');
+                    Route::get('/pilot-academies', [AdminPilotAcademyController::class, 'index']);
+                    Route::post('/pilot-academies', [AdminPilotAcademyController::class, 'store']);
+                    Route::get('/pilot-plans', [AdminPilotAcademyController::class, 'plans']);
+                    Route::patch('/pilot-plans/{plan}', [AdminPilotAcademyController::class, 'updatePlan']);
                 });
             });
     });

@@ -95,6 +95,30 @@ class PlanSeeder extends Seeder
                     'ai_assistant' => null,
                 ],
             ],
+            'pilot' => [
+                'name' => 'Pilot Academy Plan',
+                'monthly_price_minor' => 0,
+                'yearly_price_minor' => 0,
+                'modules' => [
+                    'rooms' => 15,
+                    'members' => 300,
+                    'admins' => 10,
+                    'storage_bytes' => 10737418240, // 10 GB
+                    'content' => 500,
+                    'announcements' => null,
+                    'calendar' => null,
+                    'subscriptions' => null,
+                    'courses' => 50,
+                    'batches' => null,
+                    'bookings' => 2000,
+                    'attendance' => null,
+                    'analytics' => null,
+                    'promotions' => null,
+                    'certificates' => null,
+                    'quizzes' => null,
+                    'assignments' => null,
+                ],
+            ],
         ];
 
         foreach ($plans as $code => $definition) {

@@ -352,6 +352,7 @@ class GoldenEndToEndWorkflowTest extends TestCase
         // =========================================================================
         // STEP 22: Public Certificate Verification (QR-scan scenario)
         // =========================================================================
+        $academyA->update(['settings' => ['public_certificate_show_grade' => true]]);
         $this->app['auth']->forgetGuards();
         $verifyRes = $this->getJson("/api/v1/public/certificates/verify/{$verificationCode}")
             ->assertOk()

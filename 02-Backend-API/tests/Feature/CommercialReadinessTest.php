@@ -126,7 +126,7 @@ class CommercialReadinessTest extends TestCase
         $updatedResponse = $this->getJson("/api/v1/onboarding/wizard?organization_id={$org->id}")
             ->assertOk()
             ->assertJsonPath('data.completed_steps', 1)
-            ->assertJsonPath('data.progress_percent', 20)
-            ->assertJsonPath('data.next_step.id', 'course');
+            ->assertJsonPath('data.progress_percent', 13)
+            ->assertJsonPath('data.next_step.id', 'instructor');
     }
 }

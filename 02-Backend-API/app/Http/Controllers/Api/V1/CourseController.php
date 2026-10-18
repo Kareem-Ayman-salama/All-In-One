@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Courses\StoreCourseRequest;
 use App\Models\Course;
 use App\Models\Organization;
+use App\Services\Courses\CourseCompletionService;
 use App\Services\Marketplace\CoursePresenter;
 use App\Services\Operations\OperationRecorder;
 use App\Services\Plans\EntitlementService;
@@ -240,7 +241,63 @@ class CourseController extends Controller
             'requirements' => $request->validated('requirements', []),
             'duration' => $request->validated('duration'),
             'sessions_count' => $request->validated('sessionsCount'),
+            'completion_policy' => $request->validated('completionPolicy'),
         ];
+    }
+
+    public function getCompletionPolicy(
+        Request $request,
+        string $organization,
+        string $course,
+        CourseCompletionService $service,
+    ): JsonResponse {
+        $model = $this->course($request, $course);
+        $resolved = $service->resolvePolicy($model);
+
+        return ApiResponse::success($request, [
+            'coursePolicy' => $model->completion_policy,
+            'resolvedPolicy' => $resolved,
+        ]);
+    }
+
+    public function updateCompletionPolicy(
+        Request $request,
+        string $organization,
+        string $course,
+        CourseCompletionService $service,
+        OperationRecorder $recorder,
+    ): JsonResponse {
+        $model = $this->course($request, $course);
+        $validated = $request->validate([
+            'require_lessons_completion' => ['nullable', 'boolean'],
+            'minimum_lesson_completion_percentage' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'require_assignments' => ['nullable', 'boolean'],
+            'require_all_required_assignments' => ['nullable', 'boolean'],
+            'require_quizzes' => ['nullable', 'boolean'],
+            'minimum_quiz_score' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'require_attendance' => ['nullable', 'boolean'],
+            'minimum_attendance_percentage' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'certificate_enabled' => ['nullable', 'boolean'],
+        ]);
+
+        $policy = array_merge($model->completion_policy ?? [], array_filter($validated, fn ($v) => $v !== null));
+        $model->update(['completion_policy' => $policy]);
+
+        $recorder->record(
+            'course.completion_policy.updated',
+            'course',
+            $model->id,
+            $model->organization_id,
+            $request->user()->id,
+            ['policy' => $policy],
+            ['courseId' => $model->id],
+            $request,
+        );
+
+        return ApiResponse::success($request, [
+            'coursePolicy' => $model->fresh()->completion_policy,
+            'resolvedPolicy' => $service->resolvePolicy($model->fresh()),
+        ]);
     }
 
     private function organization(Request $request): Organization

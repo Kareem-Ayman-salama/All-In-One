@@ -43,6 +43,7 @@ class Course extends Model
         'moderation_note',
         'moderated_by',
         'published_at',
+        'completion_policy',
     ];
 
     protected function casts(): array
@@ -52,6 +53,7 @@ class Course extends Model
             'discount_ends_at' => 'datetime',
             'learning_outcomes' => 'array',
             'requirements' => 'array',
+            'completion_policy' => 'array',
             'published_at' => 'datetime',
         ];
     }
