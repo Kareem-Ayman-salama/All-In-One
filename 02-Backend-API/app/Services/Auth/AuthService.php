@@ -420,7 +420,24 @@ class AuthService
             ->whereNull('revoked_at')
             ->count();
 
-        if ($activeSessions >= (int) config('device_policy.max_active_sessions_per_user')) {
+        $maxSessions = (int) config('device_policy.max_active_sessions_per_user', 8);
+
+        if ($user->platform_role === 'super_admin') {
+            if ($activeSessions >= $maxSessions) {
+                $sessionsToRevoke = UserSession::query()
+                    ->where('user_id', $user->id)
+                    ->whereNull('revoked_at')
+                    ->orderBy('created_at')
+                    ->limit($activeSessions - $maxSessions + 1)
+                    ->pluck('id');
+
+                UserSession::query()->whereIn('id', $sessionsToRevoke)->update(['revoked_at' => now()]);
+            }
+
+            return;
+        }
+
+        if ($activeSessions >= $maxSessions) {
             throw new ApiException(
                 'DEVICE_LIMIT_REACHED',
                 'Too many active devices. Revoke a device session and try again.',
