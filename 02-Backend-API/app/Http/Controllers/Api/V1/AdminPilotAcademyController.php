@@ -290,4 +290,43 @@ class AdminPilotAcademyController extends Controller
             'passwordUpdated' => true,
         ]);
     }
+
+    /**
+     * Operational tool for Super Admin to provision and verify pilot student accounts.
+     */
+    public function provisionStudent(Request $request, string $organization): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'min:2', 'max:100'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string', 'min:8'],
+            'phone' => ['nullable', 'string', 'max:30'],
+        ]);
+
+        $org = Organization::query()->findOrFail($organization);
+        $user = User::query()->where('normalized_email', strtolower($validated['email']))->first();
+        if (! $user) {
+            $user = new User([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+            ]);
+        } else {
+            $user->name = $validated['name'];
+            $user->password = Hash::make($validated['password']);
+        }
+        $user->forceFill([
+            'email_verified_at' => now(),
+            'status' => 'active',
+        ])->save();
+
+        return ApiResponse::success($request, [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'status' => $user->status,
+            'emailVerified' => true,
+        ], status: 201);
+    }
 }
+

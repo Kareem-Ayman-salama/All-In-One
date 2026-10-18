@@ -50,6 +50,7 @@ class AcademyOnboardingController extends Controller
         $hasRoom = $organization->rooms()->exists();
         $hasStudent = $organization->bookings()->exists() || $organization->courseEnrollments()->exists();
         $hasPayment = $organization->payments()->where('status', 'paid')->exists()
+            || $organization->bookings()->where('payment_status', 'paid')->exists()
             || ! empty(config('services.paymob.api_key'));
 
         $checklist = [

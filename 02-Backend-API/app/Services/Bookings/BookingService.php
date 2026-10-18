@@ -14,6 +14,7 @@ use App\Models\CourseEnrollment;
 use App\Models\Notification;
 use App\Models\NotificationPreference;
 use App\Models\OrganizationMembership;
+use App\Models\Payment;
 use App\Models\Role;
 use App\Models\RoomMembership;
 use App\Models\StudentSubscription;
@@ -22,6 +23,7 @@ use App\Services\Operations\OperationRecorder;
 use App\Services\Plans\EntitlementService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class BookingService
 {
@@ -306,6 +308,27 @@ class BookingService
                 'confirmed_by' => $actor?->id,
                 'confirmed_at' => now(),
             ]);
+
+            if ($markAsPaid) {
+                Payment::query()->firstOrCreate([
+                    'idempotency_key' => 'MANUAL-PAYMENT-' . $locked->id,
+                ], [
+                    'organization_id' => $locked->organization_id,
+                    'booking_id' => $locked->id,
+                    'user_id' => $student->id,
+                    'provider' => 'manual',
+                    'provider_reference' => 'INSTA-' . strtoupper(Str::random(10)),
+                    'amount_minor' => $locked->amount_minor,
+                    'currency' => $locked->currency,
+                    'status' => 'paid',
+                    'metadata' => [
+                        'method' => 'instapay',
+                        'note' => $internalNote,
+                        'confirmed_by' => $actor?->id,
+                    ],
+                    'paid_at' => now(),
+                ]);
+            }
             $preference = NotificationPreference::query()
                 ->where('user_id', $student->id)
                 ->where(function ($query) use ($locked): void {

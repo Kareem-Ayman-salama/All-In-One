@@ -7,6 +7,7 @@ use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Courses\StoreCourseRequest;
 use App\Models\Course;
+use App\Models\CourseEnrollment;
 use App\Models\Organization;
 use App\Services\Courses\CourseCompletionService;
 use App\Services\Marketplace\CoursePresenter;
@@ -298,6 +299,22 @@ class CourseController extends Controller
             'coursePolicy' => $model->fresh()->completion_policy,
             'resolvedPolicy' => $service->resolvePolicy($model->fresh()),
         ]);
+    }
+
+    public function evaluateEnrollment(
+        Request $request,
+        string $organization,
+        string $enrollment,
+        CourseCompletionService $service,
+    ): JsonResponse {
+        $org = $this->organization($request);
+        $model = CourseEnrollment::query()
+            ->where('organization_id', $org->id)
+            ->findOrFail($enrollment);
+
+        $result = $service->evaluate($model, $request);
+
+        return ApiResponse::success($request, $result);
     }
 
     private function organization(Request $request): Organization

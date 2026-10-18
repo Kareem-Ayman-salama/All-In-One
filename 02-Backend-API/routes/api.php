@@ -136,6 +136,7 @@ Route::prefix('v1')->group(function (): void {
         Route::get('/student/bookings', [StudentController::class, 'bookings']);
         Route::get('/student/enrollments', [StudentController::class, 'enrollments']);
         Route::get('/student/enrollments/{enrollment}', [StudentController::class, 'enrollment']);
+        Route::post('/student/enrollments/{enrollment}/evaluate', [StudentController::class, 'evaluateEnrollment']);
         Route::get('/student/lesson-bookings', [LessonBookingController::class, 'mine']);
         Route::post('/student/lesson-bookings', [LessonBookingController::class, 'reserve'])
             ->middleware('throttle:20,1');
@@ -306,6 +307,8 @@ Route::prefix('v1')->group(function (): void {
                         ->middleware('permission:courses.update');
                     Route::post('/courses/{course}/submit-review', [CourseController::class, 'submitForReview'])
                         ->middleware('permission:courses.publish');
+                    Route::post('/enrollments/{enrollment}/evaluate', [CourseController::class, 'evaluateEnrollment'])
+                        ->middleware('permission:courses.view');
 
                     Route::get('/batches', [CourseBatchController::class, 'index'])
                         ->middleware('permission:batches.view');
@@ -479,6 +482,7 @@ Route::prefix('v1')->group(function (): void {
                     Route::get('/pilot-academies', [AdminPilotAcademyController::class, 'index']);
                     Route::post('/pilot-academies', [AdminPilotAcademyController::class, 'store']);
                     Route::post('/pilot-academies/{organization}/owner-password', [AdminPilotAcademyController::class, 'setOwnerPassword']);
+                    Route::post('/pilot-academies/{organization}/students', [AdminPilotAcademyController::class, 'provisionStudent']);
                     Route::get('/pilot-plans', [AdminPilotAcademyController::class, 'plans']);
                     Route::patch('/pilot-plans/{plan}', [AdminPilotAcademyController::class, 'updatePlan']);
                 });

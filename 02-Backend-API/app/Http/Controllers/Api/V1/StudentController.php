@@ -8,6 +8,7 @@ use App\Models\Booking;
 use App\Models\CourseEnrollment;
 use App\Models\SupportRequest as SupportTicket;
 use App\Models\UserDevice;
+use App\Services\Courses\CourseCompletionService;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -85,6 +86,20 @@ class StudentController extends Controller
                 'renewalRequired' => ! $active,
             ],
         ]);
+    }
+
+    public function evaluateEnrollment(
+        Request $request,
+        string $enrollment,
+        CourseCompletionService $service,
+    ): JsonResponse {
+        $model = CourseEnrollment::query()
+            ->where('student_id', $request->user()->id)
+            ->findOrFail($enrollment);
+
+        $result = $service->evaluate($model, $request);
+
+        return ApiResponse::success($request, $result);
     }
 
     public function devices(Request $request): JsonResponse
