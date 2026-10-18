@@ -113,19 +113,20 @@ class AdminPilotAcademyController extends Controller
             $isNewUser = false;
             if (! $owner) {
                 $isNewUser = true;
-                $owner = User::query()->create([
+                $owner = new User();
+                $owner->forceFill([
                     'name' => $validated['ownerName'],
                     'email' => strtolower($validated['ownerEmail']),
                     'password' => Hash::make($plainPassword),
                     'status' => 'active',
                     'email_verified_at' => now(),
-                ]);
+                ])->save();
             } else {
-                if (! empty($validated['ownerPassword'])) {
-                    $owner->update([
-                        'password' => Hash::make($plainPassword),
-                    ]);
-                }
+                $owner->forceFill([
+                    'password' => Hash::make($plainPassword),
+                    'status' => 'active',
+                    'email_verified_at' => now(),
+                ])->save();
             }
 
             // 5. Assign Owner Role Membership
@@ -278,9 +279,11 @@ class AdminPilotAcademyController extends Controller
             ->firstOrFail();
 
         $owner = $ownerMembership->user;
-        $owner->update([
+        $owner->forceFill([
             'password' => Hash::make($validated['password']),
-        ]);
+            'status' => 'active',
+            'email_verified_at' => now(),
+        ])->save();
 
         return ApiResponse::success($request, [
             'ownerEmail' => $owner->email,
