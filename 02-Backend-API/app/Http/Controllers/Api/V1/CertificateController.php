@@ -64,6 +64,21 @@ class CertificateController extends Controller
         $course = Course::query()->where('organization_id', $org->id)->findOrFail($validated['courseId']);
         $student = User::query()->findOrFail($validated['studentId']);
 
+        // Check authoritative enrollment status: must be already completed
+        $enrollment = CourseEnrollment::query()
+            ->where('organization_id', $org->id)
+            ->where('course_id', $course->id)
+            ->where('student_id', $student->id)
+            ->first();
+
+        if (! $enrollment) {
+            throw new ApiException('ENROLLMENT_NOT_FOUND', 'Cannot issue certificate: Student has no enrollment record in this course.', 422);
+        }
+
+        if ($enrollment->status !== 'completed') {
+            throw new ApiException('COURSE_NOT_COMPLETED', 'Cannot issue certificate: Course enrollment is not completed. The student must fulfill all completion requirements before receiving a certificate.', 422);
+        }
+
         // Check if certificate already exists
         $existing = Certificate::query()
             ->where('course_id', $course->id)
@@ -99,14 +114,6 @@ class CertificateController extends Controller
         $recorder->record('certificate.issued', 'certificate', $certificate->id, $org->id, $request->user()->id, [], [
             'verificationCode' => $verificationCode,
         ], $request);
-
-        // Authoritatively synchronize course enrollment completion in database
-        CourseEnrollment::query()
-            ->where('organization_id', $org->id)
-            ->where('course_id', $course->id)
-            ->where('student_id', $student->id)
-            ->where('status', '!=', 'completed')
-            ->update(['status' => 'completed']);
 
         return ApiResponse::success($request, $certificate->load(['course', 'student', 'organization']), status: 201);
     }

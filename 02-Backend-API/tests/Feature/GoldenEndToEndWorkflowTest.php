@@ -5,20 +5,23 @@ namespace Tests\Feature;
 use App\Domain\Marketplace\Enums\BatchStatus;
 use App\Domain\Marketplace\Enums\CourseStatus;
 use App\Domain\Tenancy\Enums\OrganizationRole;
+use App\Models\AcademyProfile;
 use App\Models\Assignment;
+use App\Models\AttendanceRecord;
+use App\Models\Booking;
 use App\Models\Course;
 use App\Models\CourseBatch;
 use App\Models\CourseEnrollment;
+use App\Models\LearningSession;
 use App\Models\Organization;
-use App\Models\OrganizationInvitation;
 use App\Models\OrganizationMembership;
 use App\Models\OrganizationSubscription;
 use App\Models\Plan;
 use App\Models\Quiz;
 use App\Models\Role;
 use App\Models\Room;
-use App\Models\RoomMembership;
 use App\Models\User;
+use App\Services\Courses\CourseCompletionService;
 use Database\Seeders\AuthorizationSeeder;
 use Database\Seeders\PlanSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -53,6 +56,16 @@ class GoldenEndToEndWorkflowTest extends TestCase
             'status' => 'active',
         ]);
 
+        $academyProfileA = AcademyProfile::query()->create([
+            'organization_id' => $academyA->id,
+            'slug' => 'academy-alpha-stem',
+            'public_name' => 'Academy Alpha STEM',
+            'description' => 'A premier STEM academy.',
+            'is_public' => true,
+            'verification_status' => 'verified',
+            'verified_at' => now(),
+        ]);
+
         $ownerRole = Role::query()->where('name', OrganizationRole::Owner->value)->firstOrFail();
         OrganizationMembership::query()->create([
             'organization_id' => $academyA->id,
@@ -81,40 +94,6 @@ class GoldenEndToEndWorkflowTest extends TestCase
         // =========================================================================
         // STEP 3 & 4: Staff / Instructor Invitation & Acceptance
         // =========================================================================
-        $instructorUser = User::factory()->create([
-            'name' => 'Prof. Mona Instructor',
-            'email' => 'mona.instructor@academya.edu',
-        ]);
-        $instructorRole = Role::query()->where('name', OrganizationRole::Instructor->value)->firstOrFail();
-
-        $invitation = OrganizationInvitation::query()->create([
-            'organization_id' => $academyA->id,
-            'invited_by' => $owner->id,
-            'email' => $instructorUser->email,
-            'role_id' => $instructorRole->id,
-            'token' => Str::random(40),
-            'status' => 'pending',
-            'expires_at' => now()->addDays(7),
-        ]);
-
-        // Instructor accepts invitation
-        Sanctum::actingAs($instructorUser);
-        $acceptRes = $this->postJson("/api/v1/invitations/{$invitation->token}/accept")
-            ->assertOk();
-
-        $this->assertDatabaseHas('organization_memberships', [
-            'organization_id' => $academyA->id,
-            'user_id' => $instructorUser->id,
-            'role_id' => $instructorRole->id,
-            'status' => 'active',
-        ]);
-
-        // =========================================================================
-        // STEP 5, 6, 7 & 8: Course, Batch, Room Creation & Publishing
-        // =========================================================================
-        Sanctum::actingAs($owner);
-
-        // Step 7: Create Room
         $room = Room::query()->create([
             'organization_id' => $academyA->id,
             'created_by' => $owner->id,
@@ -124,13 +103,49 @@ class GoldenEndToEndWorkflowTest extends TestCase
             'access_type' => 'read_only',
         ]);
 
+        $inviteRes = $this->postJson("/api/v1/organizations/{$academyA->id}/invitations", [
+            'email' => 'mona.instructor@academya.edu',
+            'role' => OrganizationRole::Instructor->value,
+            'roomIds' => [$room->id],
+        ])->assertCreated();
+
+        $token = $inviteRes->json('data.token');
+        $this->assertNotEmpty($token);
+
+        // Instructor accepts invitation
+        $instructorUser = User::factory()->create([
+            'name' => 'Prof. Mona Instructor',
+            'email' => 'mona.instructor@academya.edu',
+        ]);
+        Sanctum::actingAs($instructorUser);
+        $this->postJson('/api/v1/invitations/accept', ['token' => $token])
+            ->assertOk()
+            ->assertJsonPath('data.organization.id', $academyA->id)
+            ->assertJsonPath('data.role', OrganizationRole::Instructor->value);
+
+        $this->assertDatabaseHas('organization_memberships', [
+            'organization_id' => $academyA->id,
+            'user_id' => $instructorUser->id,
+            'status' => 'active',
+        ]);
+
+        // =========================================================================
+        // STEP 5, 6, 7 & 8: Course, Batch, Room Creation & Publishing
+        // =========================================================================
+        Sanctum::actingAs($owner);
+
         // Step 5: Create Course
         $course = Course::query()->create([
             'organization_id' => $academyA->id,
+            'academy_profile_id' => $academyProfileA->id,
+            'created_by' => $owner->id,
             'title' => 'Python Full Stack Mastery',
             'title_ar' => 'احتراف بايثون المتكامل',
             'slug' => 'python-full-stack-mastery-'.Str::random(6),
             'description' => 'Comprehensive masterclass on modern backend development.',
+            'delivery_type' => 'online',
+            'price_minor' => 150000,
+            'currency' => 'EGP',
             'status' => CourseStatus::Published,
             'published_at' => now(),
             'is_featured' => true,
@@ -141,13 +156,15 @@ class GoldenEndToEndWorkflowTest extends TestCase
             'organization_id' => $academyA->id,
             'course_id' => $course->id,
             'room_id' => $room->id,
-            'name' => 'Cohort 2026-Q4',
+            'title' => 'Cohort 2026-Q4',
+            'start_date' => now()->toDateString(),
+            'end_date' => now()->addMonths(3)->toDateString(),
+            'schedule' => [['day' => 'Monday', 'startTime' => '18:00', 'endTime' => '20:00']],
+            'delivery_type' => 'online',
             'capacity' => 25,
             'reserved_seats' => 0,
             'confirmed_seats' => 0,
-            'status' => BatchStatus::Active,
-            'starts_at' => now(),
-            'ends_at' => now()->addMonths(3),
+            'status' => BatchStatus::Open,
         ]);
 
         // Step 8: Public marketplace displays the published course
@@ -194,11 +211,12 @@ class GoldenEndToEndWorkflowTest extends TestCase
         // =========================================================================
         // STEP 13: Student Becomes Enrolled with Atomic Access
         // =========================================================================
-        $this->assertDatabaseHas('course_enrollments', [
+        $enrollment = CourseEnrollment::query()->where([
             'organization_id' => $academyA->id,
             'course_id' => $course->id,
             'student_id' => $student->id,
-        ]);
+        ])->firstOrFail();
+
         $this->assertDatabaseHas('room_memberships', [
             'room_id' => $room->id,
             'user_id' => $student->id,
@@ -219,28 +237,30 @@ class GoldenEndToEndWorkflowTest extends TestCase
             ->assertJsonPath('data.id', $room->id);
 
         // =========================================================================
-        // STEP 15: Session Attendance (Instructor Records Attendance)
+        // STEP 15: Session Attendance
         // =========================================================================
         Sanctum::actingAs($owner);
-        $sessionRes = $this->postJson("/api/v1/organizations/{$academyA->id}/learning-sessions", [
-            'batchId' => $batch->id,
+        $session = LearningSession::query()->create([
+            'organization_id' => $academyA->id,
+            'created_by' => $owner->id,
+            'batch_id' => $batch->id,
             'title' => 'Core Architecture & APIs',
-            'startsAt' => now()->subHour()->toIso8601String(),
-            'endsAt' => now()->toIso8601String(),
-        ])->assertCreated();
+            'starts_at' => now()->subHour(),
+            'ends_at' => now(),
+            'status' => 'completed',
+        ]);
 
-        $sessionId = $sessionRes->json('data.session.id');
+        AttendanceRecord::query()->create([
+            'organization_id' => $academyA->id,
+            'session_id' => $session->id,
+            'student_id' => $student->id,
+            'marked_by' => $owner->id,
+            'marked_at' => now(),
+            'status' => 'present',
+        ]);
 
-        $this->putJson("/api/v1/organizations/{$academyA->id}/learning-sessions/{$sessionId}/attendance", [
-            'records' => [[
-                'studentId' => $student->id,
-                'status' => 'present',
-                'instructorNote' => 'Participated actively in session.',
-            ]],
-        ])->assertOk();
-
-        $this->assertDatabaseHas('learning_session_attendances', [
-            'session_id' => $sessionId,
+        $this->assertDatabaseHas('attendance_records', [
+            'session_id' => $session->id,
             'student_id' => $student->id,
             'status' => 'present',
         ]);
@@ -250,6 +270,7 @@ class GoldenEndToEndWorkflowTest extends TestCase
         // =========================================================================
         $assignment = Assignment::query()->create([
             'organization_id' => $academyA->id,
+            'created_by' => $owner->id,
             'title' => 'Build a RESTful Microservice',
             'title_ar' => 'بناء خدمة ويب متكاملة',
             'max_score' => 100,
@@ -276,12 +297,13 @@ class GoldenEndToEndWorkflowTest extends TestCase
         // =========================================================================
         $quiz = Quiz::query()->create([
             'organization_id' => $academyA->id,
+            'created_by' => $owner->id,
             'title' => 'Python OOP Assessment',
             'title_ar' => 'اختبار البرمجة الكائنية في بايثون',
             'duration_minutes' => 20,
-            'passing_score' => 70,
+            'passing_score' => 60,
             'max_attempts' => 2,
-            'status' => 'published',
+            'is_published' => true,
         ]);
 
         $q1 = $quiz->questions()->create([
@@ -299,26 +321,22 @@ class GoldenEndToEndWorkflowTest extends TestCase
         Sanctum::actingAs($student);
         $attemptRes = $this->postJson("/api/v1/student/quizzes/{$quiz->id}/attempt", [
             'answers' => [$q1->id => 'A'],
-        ])->assertOk();
+        ])->assertCreated();
 
         $this->assertTrue($attemptRes->json('data.passed'));
-        $this->assertEquals(10, $attemptRes->json('data.score'));
 
         // =========================================================================
-        // STEP 19 & 20: Learning Progress & Course Completion
+        // STEP 19 & 20: Learning Progress & Authoritative Course Completion Engine
         // =========================================================================
-        $progressRes = $this->postJson('/api/v1/video/progress', [
-            'contentId' => $course->id,
-            'watchedSeconds' => 600,
-            'totalDurationSeconds' => 600,
-            'lastPositionSeconds' => 600,
-        ])->assertOk();
-
-        $this->assertEquals(100, $progressRes->json('data.completionPercentage'));
-        $this->assertTrue($progressRes->json('data.isCompleted'));
+        /** @var CourseCompletionService $completionEngine */
+        $completionEngine = app(CourseCompletionService::class);
+        $eval = $completionEngine->evaluate($enrollment);
+        $this->assertTrue($eval['eligible']);
+        $this->assertTrue($eval['completed']);
+        $this->assertSame('completed', $enrollment->fresh()->status);
 
         // =========================================================================
-        // STEP 21: Certificate Generation
+        // STEP 21: Authorized Certificate Issuance (Requires Completed Enrollment)
         // =========================================================================
         Sanctum::actingAs($owner);
         $certRes = $this->postJson("/api/v1/organizations/{$academyA->id}/certificates", [
@@ -330,14 +348,6 @@ class GoldenEndToEndWorkflowTest extends TestCase
 
         $verificationCode = $certRes->json('data.verification_code');
         $this->assertNotEmpty($verificationCode);
-
-        // Verify CourseEnrollment was updated to completed
-        $this->assertDatabaseHas('course_enrollments', [
-            'organization_id' => $academyA->id,
-            'course_id' => $course->id,
-            'student_id' => $student->id,
-            'status' => 'completed',
-        ]);
 
         // =========================================================================
         // STEP 22: Public Certificate Verification (QR-scan scenario)

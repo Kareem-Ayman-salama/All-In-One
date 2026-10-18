@@ -3,10 +3,12 @@
 namespace Tests\Feature;
 
 use App\Domain\Tenancy\Enums\OrganizationRole;
+use App\Models\Booking;
 use App\Models\Certificate;
 use App\Models\ContentItem;
 use App\Models\Course;
 use App\Models\CourseBatch;
+use App\Models\CourseEnrollment;
 use App\Models\Event;
 use App\Models\LearningSession;
 use App\Models\Notification;
@@ -19,6 +21,7 @@ use App\Models\Room;
 use App\Models\RoomMembership;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -82,7 +85,52 @@ class AdvancedPlatformFeaturesTest extends TestCase
         [$org, $admin] = $this->workspace('Cairo Tech Academy');
 
         $course = Course::factory()->create(['organization_id' => $org->id, 'title' => 'Flutter Full Stack', 'title_ar' => 'فلاتر متكامل']);
+        $room = Room::query()->create([
+            'organization_id' => $org->id,
+            'created_by' => $admin->id,
+            'name' => 'Room 1',
+            'slug' => 'room-1-'.Str::random(6),
+            'status' => 'active',
+        ]);
+        $batch = CourseBatch::query()->create([
+            'organization_id' => $org->id,
+            'course_id' => $course->id,
+            'room_id' => $room->id,
+            'title' => 'Batch 1',
+            'start_date' => now()->toDateString(),
+            'end_date' => now()->addMonths(2)->toDateString(),
+            'schedule' => [['day' => 'Sunday', 'startTime' => '18:00', 'endTime' => '20:00']],
+            'delivery_type' => 'online',
+            'status' => 'open',
+            'capacity' => 20,
+        ]);
         $student = User::factory()->create(['name' => 'Tarek Student']);
+
+        $booking = Booking::query()->create([
+            'organization_id' => $org->id,
+            'course_id' => $course->id,
+            'batch_id' => $batch->id,
+            'student_id' => $student->id,
+            'student_name' => $student->name,
+            'email' => $student->email,
+            'phone' => '+201000000000',
+            'terms_accepted' => true,
+            'amount_minor' => 10000,
+            'currency' => 'EGP',
+            'status' => 'confirmed',
+            'payment_status' => 'paid',
+        ]);
+
+        CourseEnrollment::query()->create([
+            'organization_id' => $org->id,
+            'course_id' => $course->id,
+            'batch_id' => $batch->id,
+            'booking_id' => $booking->id,
+            'student_id' => $student->id,
+            'status' => 'completed',
+            'access_starts_at' => now(),
+            'access_ends_at' => now()->addMonths(2),
+        ]);
 
         Sanctum::actingAs($admin);
 
