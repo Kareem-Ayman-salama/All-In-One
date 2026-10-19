@@ -460,12 +460,15 @@ const translations = {
 const LanguageContext = createContext(null);
 
 export function LanguageProvider({ children }) {
-  const [language, setLanguageState] = useState(() => window.localStorage.getItem("ain-language") || "ar");
+  const [language, setLanguageState] = useState(() => {
+    return window.localStorage.getItem("ain-language") || window.localStorage.getItem("ain-landing-lang") || "ar";
+  });
 
   useEffect(() => {
     document.documentElement.lang = language;
     document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
     window.localStorage.setItem("ain-language", language);
+    window.localStorage.setItem("ain-landing-lang", language);
   }, [language]);
 
   const value = useMemo(() => ({

@@ -1002,12 +1002,13 @@ const I18N = {
 // --------------------------------------------------------------------------
 // LANGUAGE SWITCHER ENGINE
 // --------------------------------------------------------------------------
-let currentLang = window.localStorage.getItem("ain-landing-lang") || "ar";
+let currentLang = window.localStorage.getItem("ain-landing-lang") || window.localStorage.getItem("ain-language") || "ar";
 let currentActiveRole = "admin";
 
 function applyLanguage(lang) {
   currentLang = lang;
   window.localStorage.setItem("ain-landing-lang", lang);
+  window.localStorage.setItem("ain-language", lang);
 
   document.documentElement.lang = lang;
   document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";

@@ -7,15 +7,24 @@ import { useMarketplace } from "../contexts/MarketplaceContext";
 import { useOrganization } from "../contexts/OrganizationContext";
 import { useToast } from "../contexts/ToastContext";
 import { useWorkspace } from "../contexts/WorkspaceContext";
+import { useBilingualText, useLanguage } from "../contexts/LanguageContext";
 import { api } from "../services/api";
 
 const TYPES = [
-  ["written", "شرح مكتوب"], ["video", "فيديو"], ["pdf", "PDF"],
-  ["examples", "أمثلة"], ["exercise", "تدريب"], ["quiz", "اختبار"],
-  ["homework", "واجب"], ["external_link", "رابط خارجي"]
+  { value: "written", ar: "شرح وملاحظات مكتوبة", en: "Written notes" },
+  { value: "video", ar: "فيديو مسجل", en: "Recorded video" },
+  { value: "pdf", ar: "ملف PDF ومذكرات", en: "PDF document / notes" },
+  { value: "examples", ar: "أمثلة وتمارين", en: "Examples & Exercises" },
+  { value: "exercise", ar: "تدريب تطبيقي", en: "Hands-on Practice" },
+  { value: "quiz", ar: "اختبار وتقييم", en: "Quiz & Assessment" },
+  { value: "homework", ar: "واجب منزلي", en: "Homework" },
+  { value: "external_link", ar: "رابط ومصدر خارجي", en: "External link / resource" }
 ];
 
 export function CourseCurriculumPage() {
+  const { direction, language } = useLanguage();
+  const tx = useBilingualText();
+  const isArabic = language === "ar";
   const { activeOrganization } = useOrganization();
   const { courses } = useMarketplace();
   const { rooms } = useWorkspace();
@@ -42,7 +51,7 @@ export function CourseCurriculumPage() {
     try {
       setCurriculum(await api.getCourseCurriculum(organizationId, courseId));
     } catch (error) {
-      showToast(error.message || "تعذر تحميل محتوى الكورس", "error");
+      showToast(error.message || tx("تعذر تحميل محتوى الكورس", "Failed to load course curriculum"), "error");
     } finally {
       setLoading(false);
     }
@@ -63,7 +72,7 @@ export function CourseCurriculumPage() {
       let contentItemId = null;
       const roomId = rooms[0]?.id;
       if (["video", "pdf"].includes(form.type)) {
-        if (!form.file || !roomId) throw new Error("اختاري الملف وتأكدي من وجود غرفة للكورس.");
+        if (!form.file || !roomId) throw new Error(tx("اختر الملف وتأكد من وجود غرفة للكورس.", "Please select a file and ensure the course has an active room."));
         const content = await api.uploadContent(organizationId, {
           roomId,
           title: form.title.trim(),
@@ -75,7 +84,7 @@ export function CourseCurriculumPage() {
         });
         contentItemId = content.id;
       } else if (form.type === "external_link") {
-        if (!form.externalUrl || !roomId) throw new Error("أدخلي الرابط وتأكدي من وجود غرفة للكورس.");
+        if (!form.externalUrl || !roomId) throw new Error(tx("أدخل الرابط وتأكد من وجود غرفة للكورس.", "Please enter the link and ensure the course has an active room."));
         const content = await api.uploadContent(organizationId, {
           roomId,
           title: form.title.trim(),
@@ -95,11 +104,11 @@ export function CourseCurriculumPage() {
         contentItemId,
         templateSections: curriculum?.lessonTemplate?.sections || []
       });
-      showToast("تم حفظ الدرس كمسودة");
+      showToast(tx("تم حفظ الدرس كمسودة بنجاح", "Lesson saved as draft successfully"), "success");
       setModalOpen(false);
       await load();
     } catch (error) {
-      showToast(error.message || "تعذر حفظ الدرس", "error");
+      showToast(error.message || tx("تعذر حفظ الدرس", "Failed to save lesson"), "error");
     } finally {
       setSaving(false);
     }
@@ -108,52 +117,130 @@ export function CourseCurriculumPage() {
   const publishLesson = async (lesson) => {
     try {
       await api.updateCourseLesson(organizationId, courseId, lesson.id, { status: "published" });
-      showToast("تم نشر الدرس داخل الأكاديمية");
+      showToast(tx("تم نشر الدرس داخل الأكاديمية بنجاح 🚀", "Lesson published to academy successfully 🚀"), "success");
       await load();
     } catch (error) {
-      showToast(error.message || "تعذر نشر الدرس", "error");
+      showToast(error.message || tx("تعذر نشر الدرس", "Failed to publish lesson"), "error");
     }
   };
 
+  const getTypeLabel = (typeKey) => {
+    const item = TYPES.find((t) => t.value === typeKey);
+    if (!item) return typeKey;
+    return isArabic ? item.ar : item.en;
+  };
+
   return (
-    <div className="curriculum-page" dir="rtl">
+    <div className="curriculum-page" dir={direction}>
       <div className="stitch-page-head">
-        <div><h1>محتوى الكورس</h1><p>أضيفي الدروس والملفات واحفظيها كمسودة حتى تصبح جاهزة للنشر.</p></div>
-        <FormField label="الكورس">
+        <div>
+          <h1>{tx("محتوى ومناهج الكورس", "Course Curriculum & Modules")}</h1>
+          <p>{tx("أضف الدروس والملفات والواجبات واحفظها كمسودة حتى تصبح جاهزة للنشر للطلاب.", "Add lessons, attach materials, and publish when ready for enrolled students.")}</p>
+        </div>
+        <FormField label={tx("الكورس", "Course")}>
           <select value={courseId} onChange={(event) => setCourseId(event.target.value)}>
-            {academyCourses.map((course) => <option key={course.id} value={course.id}>{course.titleAr || course.title}</option>)}
+            {academyCourses.map((course) => (
+              <option key={course.id} value={course.id}>
+                {isArabic ? (course.titleAr || course.title) : (course.title || course.titleAr)}
+              </option>
+            ))}
           </select>
         </FormField>
       </div>
 
-      {loading && <div className="empty-state">جارٍ تحميل الوحدات…</div>}
-      {!loading && !academyCourses.length && <div className="empty-state">أنشئي الكورس أولاً لبدء إضافة المحتوى.</div>}
+      {loading && <div className="empty-state">{tx("جارٍ تحميل الوحدات الدراسية…", "Loading modules…")}</div>}
+      {!loading && !academyCourses.length && (
+        <div className="empty-state">{tx("أنشئ الكورس أولاً لبدء إضافة المحتوى والدروس.", "Create a course first to start organizing lessons.")}</div>
+      )}
       {!loading && curriculum?.modules?.map((module, index) => (
         <section className="curriculum-module" key={module.id}>
           <header>
-            <div><small>الوحدة {index + 1}</small><h2>{module.titleAr || module.title}</h2></div>
-            <Button onClick={() => openLesson(module.id)}><Plus size={17} /> إضافة درس</Button>
+            <div>
+              <small>{tx(`الوحدة ${index + 1}`, `Module ${index + 1}`)}</small>
+              <h2>{isArabic ? (module.titleAr || module.title) : (module.title || module.titleAr)}</h2>
+            </div>
+            <Button onClick={() => openLesson(module.id)}>
+              <Plus size={17} /> {tx("إضافة درس", "Add Lesson")}
+            </Button>
           </header>
           <div className="curriculum-lessons">
             {module.lessons?.map((lesson) => (
               <article className="curriculum-lesson" key={lesson.id}>
-                <span className="curriculum-lesson-icon">{lesson.type === "video" ? <Video /> : lesson.type === "pdf" ? <FileUp /> : lesson.type === "external_link" ? <Link2 /> : <BookOpen />}</span>
-                <div><strong>{lesson.titleAr || lesson.title}</strong><small>{lesson.type === "placeholder" ? "مكان جاهز لإضافة المحتوى" : TYPES.find(([key]) => key === lesson.type)?.[1] || lesson.type}</small></div>
-                <span className={`status-pill ${lesson.status}`}>{lesson.status === "published" ? "منشور" : "مسودة"}</span>
-                {lesson.status !== "published" && lesson.type !== "placeholder" && <Button variant="ghost" onClick={() => publishLesson(lesson)}>نشر</Button>}
+                <span className="curriculum-lesson-icon">
+                  {lesson.type === "video" ? <Video /> : lesson.type === "pdf" ? <FileUp /> : lesson.type === "external_link" ? <Link2 /> : <BookOpen />}
+                </span>
+                <div>
+                  <strong>{isArabic ? (lesson.titleAr || lesson.title) : (lesson.title || lesson.titleAr)}</strong>
+                  <small>
+                    {lesson.type === "placeholder" ? tx("مكان جاهز لإضافة المحتوى", "Placeholder ready for content") : getTypeLabel(lesson.type)}
+                  </small>
+                </div>
+                <span className={`status-pill ${lesson.status}`}>
+                  {lesson.status === "published" ? tx("منشور", "Published") : tx("مسودة", "Draft")}
+                </span>
+                {lesson.status !== "published" && lesson.type !== "placeholder" && (
+                  <Button variant="ghost" onClick={() => publishLesson(lesson)}>
+                    {tx("نشر", "Publish")}
+                  </Button>
+                )}
               </article>
             ))}
           </div>
         </section>
       ))}
 
-      <Modal title="إضافة درس جديد" open={modalOpen} onClose={() => setModalOpen(false)}>
+      <Modal title={tx("إضافة درس جديد", "Add New Lesson")} open={modalOpen} onClose={() => setModalOpen(false)}>
         <form className="form-stack" onSubmit={saveLesson}>
-          <FormField label="عنوان الدرس"><input required value={form.title} onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))} /></FormField>
-          <FormField label="نوع الدرس"><select value={form.type} onChange={(event) => setForm((current) => ({ ...current, type: event.target.value, file: null, externalUrl: "" }))}>{TYPES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></FormField>
-          {["video", "pdf"].includes(form.type) && <FormField label={form.type === "video" ? "ملف الفيديو" : "ملف PDF"}><input type="file" required accept={form.type === "video" ? "video/*" : "application/pdf"} onChange={(event) => setForm((current) => ({ ...current, file: event.target.files?.[0] || null }))} /></FormField>}
-          {form.type === "external_link" && <FormField label="رابط الفيديو أو المصدر"><input type="url" required dir="ltr" value={form.externalUrl} onChange={(event) => setForm((current) => ({ ...current, externalUrl: event.target.value }))} /></FormField>}
-          <div className="form-actions"><Button variant="ghost" type="button" onClick={() => setModalOpen(false)}>إلغاء</Button><Button type="submit" loading={saving}><Upload size={17} /> حفظ كمسودة</Button></div>
+          <FormField label={tx("عنوان الدرس", "Lesson Title")}>
+            <input
+              required
+              value={form.title}
+              onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
+              placeholder={tx("مثال: مقدمة في قواعد النحو والصرف", "e.g. Introduction to Syntax")}
+            />
+          </FormField>
+          <FormField label={tx("نوع الدرس", "Lesson Type")}>
+            <select
+              value={form.type}
+              onChange={(event) => setForm((current) => ({ ...current, type: event.target.value, file: null, externalUrl: "" }))}
+            >
+              {TYPES.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {isArabic ? t.ar : t.en}
+                </option>
+              ))}
+            </select>
+          </FormField>
+          {["video", "pdf"].includes(form.type) && (
+            <FormField label={form.type === "video" ? tx("ملف الفيديو المرفوع", "Video file") : tx("ملف PDF المرفوع", "PDF document")}>
+              <input
+                type="file"
+                required
+                accept={form.type === "video" ? "video/*" : "application/pdf"}
+                onChange={(event) => setForm((current) => ({ ...current, file: event.target.files?.[0] || null }))}
+              />
+            </FormField>
+          )}
+          {form.type === "external_link" && (
+            <FormField label={tx("رابط الفيديو أو المصدر الخارجي", "Resource / Video URL")}>
+              <input
+                type="url"
+                required
+                dir="ltr"
+                value={form.externalUrl}
+                onChange={(event) => setForm((current) => ({ ...current, externalUrl: event.target.value }))}
+                placeholder="https://..."
+              />
+            </FormField>
+          )}
+          <div className="form-actions">
+            <Button variant="ghost" type="button" onClick={() => setModalOpen(false)}>
+              {tx("إلغاء", "Cancel")}
+            </Button>
+            <Button type="submit" loading={saving}>
+              <Upload size={17} /> {tx("حفظ كمسودة", "Save as Draft")}
+            </Button>
+          </div>
         </form>
       </Modal>
     </div>

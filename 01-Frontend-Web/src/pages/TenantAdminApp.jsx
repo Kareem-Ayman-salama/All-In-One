@@ -601,7 +601,7 @@ function RoomsPage({ rooms }) {
               <span>{tx("آخر نشاط", "Last activity")}<br /><strong>{index === 0 ? tx("منذ دقيقتين", "2 minutes ago") : tx("أمس، 11:45 م", "Yesterday, 11:45 PM")}</strong></span>
               <div>
                 <button type="button" title={tx("حماية الغرفة", "Room security")}><Lock size={20} /></button>
-                <button type="button" onClick={() => setSelectedRoom(room)} title={tx("فتح الغرفة", "Open room")}>Open</button>
+                <button type="button" onClick={() => setSelectedRoom(room)} title={tx("فتح الغرفة", "Open room")}>{tx("فتح", "Open")}</button>
                 <button type="button">↪</button>
               </div>
             </div>
