@@ -3,6 +3,7 @@ import {
   FileText, GraduationCap, Layers3, ListTodo, Megaphone, Play, Plus, Sparkles, Users, Video, X
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Badge } from "./Badge";
 import { Button } from "./Button";
 import { FormField } from "./FormField";
@@ -154,22 +155,22 @@ export function MemberDashboard({ data, user }) {
         <h1>{tx("مرحباً", "Welcome")}, {user.name} 👋</h1>
         <p>{isCompany ? tx("كل ما تحتاجه للعمل والتدريب والتواصل داخل شركتك في مكان واحد.", "Your work, training, and company updates in one focused workspace.") : tx("تابع كورساتك وحصصك المباشرة، سلّم واجباتك، واستعد للاختبارات القادمة بكل سهولة.", "Keep up with your courses, live sessions, assignments, and test preparation seamlessly.")}</p>
         <div className="member-quick-links">
-          <a href="/end-user/courses" className="quick-link-btn primary">
+          <Link to="/end-user/courses" className="quick-link-btn primary">
             <BookOpen size={16} />
             <span>{tx("كورساتي", "My courses")}</span>
-          </a>
-          <a href="/end-user/assignments" className="quick-link-btn">
+          </Link>
+          <Link to="/end-user/assignments" className="quick-link-btn">
             <FileText size={16} />
             <span>{tx("الواجبات", "Assignments")}</span>
-          </a>
-          <a href="/end-user/quizzes" className="quick-link-btn">
+          </Link>
+          <Link to="/end-user/quizzes" className="quick-link-btn">
             <CheckCircle2 size={16} />
             <span>{tx("الاختبارات", "Quizzes")}</span>
-          </a>
-          <a href="/end-user/attendance" className="quick-link-btn">
+          </Link>
+          <Link to="/end-user/attendance" className="quick-link-btn">
             <Check size={16} />
             <span>{tx("الحضور", "Attendance")}</span>
-          </a>
+          </Link>
         </div>
       </div>
       <div className="member-org-mark" style={{ background: activeOrganization?.color || "rgba(255,255,255,0.12)" }}>
@@ -196,7 +197,7 @@ export function MemberDashboard({ data, user }) {
             </div>
           </div>
           <div className="continue-learning-action">
-            <Button as="a" href="/end-user/courses" variant="primary">
+            <Button as={Link} to="/end-user/courses" variant="primary">
               <Play size={16} />
               {tx("متابعة الدرس", "Resume Lesson")}
             </Button>
@@ -206,48 +207,48 @@ export function MemberDashboard({ data, user }) {
     )}
 
     <section className="member-stat-grid">
-      <a href="/end-user/courses" className="stat-card edu-card-blue">
+      <Link to="/end-user/courses" className="stat-card edu-card-blue">
         <div className="stat-icon-wrap"><GraduationCap size={22} /></div>
         <div className="stat-info">
           <span>{isCompany ? tx("برامج التدريب", "Training programs") : tx("الكورسات المسجلة", "Enrolled Courses")}</span>
           <strong>{courses.length}</strong>
         </div>
-      </a>
-      <a href="/end-user/assignments" className="stat-card edu-card-amber">
+      </Link>
+      <Link to="/end-user/assignments" className="stat-card edu-card-amber">
         <div className="stat-icon-wrap"><FileText size={22} /></div>
         <div className="stat-info">
           <span>{tx("الواجبات والتسليمات", "Assignments")}</span>
           <strong>{assignments?.length || 0}</strong>
         </div>
-      </a>
-      <a href="/end-user/quizzes" className="stat-card edu-card-emerald">
+      </Link>
+      <Link to="/end-user/quizzes" className="stat-card edu-card-emerald">
         <div className="stat-icon-wrap"><CheckCircle2 size={22} /></div>
         <div className="stat-info">
           <span>{tx("الاختبارات والتقييمات", "Quizzes & Tests")}</span>
           <strong>{quizzes?.length || 0}</strong>
         </div>
-      </a>
-      <a href="/end-user/meetings" className="stat-card edu-card-indigo">
+      </Link>
+      <Link to="/end-user/meetings" className="stat-card edu-card-indigo">
         <div className="stat-icon-wrap"><Video size={22} /></div>
         <div className="stat-info">
           <span>{tx("حصص واجتماعات قادمة", "Upcoming Sessions")}</span>
           <strong>{meetings.length}</strong>
         </div>
-      </a>
-      <a href="/end-user/tasks" className="stat-card edu-card-teal">
+      </Link>
+      <Link to="/end-user/tasks" className="stat-card edu-card-teal">
         <div className="stat-icon-wrap"><ListTodo size={22} /></div>
         <div className="stat-info">
           <span>{tx("المهام المفتوحة", "Open Tasks")}</span>
           <strong>{activeTasks.length}</strong>
         </div>
-      </a>
-      <a href="/end-user/certificates" className="stat-card edu-card-purple">
+      </Link>
+      <Link to="/end-user/certificates" className="stat-card edu-card-purple">
         <div className="stat-icon-wrap"><Award size={22} /></div>
         <div className="stat-info">
           <span>{tx("الشهادات والإنجازات", "Certificates")}</span>
           <strong>{data.files?.length || 1}</strong>
         </div>
-      </a>
+      </Link>
     </section>
 
     {/* STUDENT GAMIFICATION, XP & LEADERBOARD SHOWCASE */}
