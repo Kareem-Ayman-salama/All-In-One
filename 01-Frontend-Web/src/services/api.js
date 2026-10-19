@@ -261,33 +261,49 @@ export const api = {
     body: JSON.stringify(payload)
   }).then(camelize),
   uploadContent: (organizationId, payload) => {
-    if (payload.type === "youtube") {
+    if (["youtube", "link"].includes(payload.type)) {
       return httpClient(organizationPath(organizationId, "content"), {
         method: "POST",
         body: JSON.stringify({
           roomId: payload.roomId,
           title: payload.title,
-          type: "youtube",
+          type: payload.type,
           externalUrl: payload.externalUrl,
           downloadAllowed: false,
           watermarkEnabled: payload.watermarkEnabled !== false,
           allowFullscreen: payload.allowFullscreen !== false,
           displayOrder: payload.displayOrder || 0,
-          status: "published"
+          status: payload.status || "draft"
         })
       }).then(camelize);
     }
 
     const body = new FormData();
     body.set("roomId", payload.roomId);
-    body.set("title", payload.file.name);
+    body.set("title", payload.title || payload.file.name);
+    if (payload.description) body.set("description", payload.description);
     body.set("type", payload.type);
     body.set("file", payload.file);
     body.set("downloadAllowed", payload.downloadAllowed ? "1" : "0");
     body.set("watermarkEnabled", payload.watermarkEnabled === false ? "0" : "1");
-    body.set("status", "published");
+    body.set("status", payload.status || "draft");
     return httpClient(organizationPath(organizationId, "content"), { method: "POST", body }).then(camelize);
   },
+  getCourseCurriculum: (organizationId, courseId) => httpClient(
+    `${organizationPath(organizationId, "courses")}/${courseId}/curriculum`
+  ).then(camelize),
+  createCourseModule: (organizationId, courseId, payload) => httpClient(
+    `${organizationPath(organizationId, "courses")}/${courseId}/modules`,
+    { method: "POST", body: JSON.stringify(payload) }
+  ).then(camelize),
+  createCourseLesson: (organizationId, courseId, payload) => httpClient(
+    `${organizationPath(organizationId, "courses")}/${courseId}/lessons`,
+    { method: "POST", body: JSON.stringify(payload) }
+  ).then(camelize),
+  updateCourseLesson: (organizationId, courseId, lessonId, payload) => httpClient(
+    `${organizationPath(organizationId, "courses")}/${courseId}/lessons/${lessonId}`,
+    { method: "PATCH", body: JSON.stringify(payload) }
+  ).then(camelize),
   getContentViewSession: (organizationId, contentId) => httpClient(
     `${organizationPath(organizationId, "content")}/${contentId}/view-session`
   ).then(camelize),

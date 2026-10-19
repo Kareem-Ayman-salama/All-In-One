@@ -694,8 +694,8 @@ export function MarketplaceBatchesPage() {
         {visible.map((batch) => {
           const course = courses.find((item) => item.id === batch.courseId);
           const used = batch.confirmedSeats + batch.reservedSeats;
-          const percent = Math.min(100, Math.round((used / batch.capacity) * 100));
-          const schedule = Array.isArray(batch.schedule) ? batch.schedule.map((item) => `${item.day} ${item.startTime}-${item.endTime}`).join(isArabic ? "، " : ", ") : batch.schedule;
+          const percent = batch.capacity ? Math.min(100, Math.round((used / batch.capacity) * 100)) : 0;
+          const schedule = Array.isArray(batch.schedule) && batch.schedule.length ? batch.schedule.map((item) => `${item.day} ${item.startTime}-${item.endTime}`).join(isArabic ? "، " : ", ") : (isArabic ? "لم يُحدد الموعد بعد" : "Schedule not set");
           return (
             <article className="learning-batch-row" key={batch.id}>
               <div className="learning-card-icon"><Users /></div>
@@ -703,11 +703,11 @@ export function MarketplaceBatchesPage() {
                 <Badge tone={batch.status === "open" ? "success" : "neutral"}>{batch.status}</Badge>
                 <h2>{label(batch, isArabic)}</h2>
                 <p>{label(course, isArabic)} · {schedule} · {batch.location}</p>
-                <small>{batch.startDate} → {batch.endDate} · Room: {batch.room?.name || batch.roomName || "-"}</small>
+                <small>{batch.startDate || (isArabic ? "تاريخ البداية غير محدد" : "Start date not set")} → {batch.endDate || (isArabic ? "تاريخ النهاية غير محدد" : "End date not set")} · {isArabic ? "الغرفة" : "Room"}: {batch.room?.name || batch.roomName || "-"}</small>
               </div>
               <div className="learning-capacity">
-                <div><span>{used}/{batch.capacity} {isArabic ? "مقعد" : "seats"}</span><small>{percent}%</small></div>
-                <progress max="100" value={percent} />
+                <div><span>{batch.capacity ? `${used}/${batch.capacity}` : (isArabic ? "السعة غير محددة" : "Capacity not set")} {batch.capacity ? (isArabic ? "مقعد" : "seats") : ""}</span><small>{batch.capacity ? `${percent}%` : "—"}</small></div>
+                {batch.capacity ? <progress max="100" value={percent} /> : null}
               </div>
             </article>
           );
@@ -774,6 +774,11 @@ export function MarketplaceBookingsPage() {
   const [status, setStatus] = useState("all");
   const [selected, setSelected] = useState(null);
   const [internalNote, setInternalNote] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("instapay");
+  const [paymentReference, setPaymentReference] = useState("");
+  const [paymentDate, setPaymentDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [paymentAmount, setPaymentAmount] = useState("");
+
   const visible = bookings.filter((item) => item.organizationId === activeOrganization?.id).filter((item) => status === "all" || item.status === status).filter((item) => item.studentName.toLowerCase().includes(query.toLowerCase()));
 
   const act = async (id, action, payload = {}) => {
@@ -786,9 +791,24 @@ export function MarketplaceBookingsPage() {
     return result;
   };
 
-  const openDetails = (item) => { setSelected(item); setInternalNote(item.internalNote || ""); };
+  const openDetails = (item) => {
+    setSelected(item);
+    setInternalNote(item.internalNote || "");
+    setPaymentMethod("instapay");
+    setPaymentReference("");
+    setPaymentDate(new Date().toISOString().split("T")[0]);
+    setPaymentAmount(item.amount != null ? String(item.amount) : "");
+  };
+
   const finishFromModal = async (action, payload = {}) => {
-    const result = await act(selected.id, action, { internalNote, ...payload });
+    const result = await act(selected.id, action, {
+      internalNote,
+      paymentMethod,
+      paymentReference,
+      paymentDate,
+      paymentAmount: paymentAmount ? Number(paymentAmount) : undefined,
+      ...payload,
+    });
     if (result.ok) setSelected(null);
   };
 
@@ -855,22 +875,55 @@ export function MarketplaceBookingsPage() {
       <Modal title={isArabic ? "تفاصيل طلب الحجز" : "Booking Request Details"} open={Boolean(selected)} onClose={() => setSelected(null)}>
         {selected && (
           <div className="booking-detail-modal">
-            <div>
-              <span>{isArabic ? "الطالب" : "Student"}<strong>{selected.studentName}</strong></span>
-              <span>{isArabic ? "البريد" : "Email"}<strong>{selected.email}</strong></span>
-              <span>{isArabic ? "الهاتف" : "Phone"}<strong>{selected.phone}</strong></span>
-              <span>{isArabic ? "المبلغ" : "Amount"}<strong>{selected.amount?.toLocaleString()} {isArabic ? "ج.م" : "EGP"}</strong></span>
+            <div className="booking-summary-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "16px" }}>
+              <div><span>{isArabic ? "الطالب" : "Student"}: </span><strong>{selected.studentName}</strong></div>
+              <div><span>{isArabic ? "المبلغ" : "Amount"}: </span><strong>{selected.amount?.toLocaleString()} {isArabic ? "ج.م" : "EGP"}</strong></div>
+              <div><span>{isArabic ? "البريد" : "Email"}: </span><strong>{selected.email}</strong></div>
+              <div><span>{isArabic ? "الهاتف" : "Phone"}: </span><strong>{selected.phone || "—"}</strong></div>
             </div>
-            <FormField label={isArabic ? "ملاحظة داخلية" : "Internal Note"}><textarea value={internalNote} onChange={(event) => setInternalNote(event.target.value)} /></FormField>
-            <footer>
+
+            {selected.status === "pending_confirmation" && (
+              <div className="offline-payment-panel" style={{ border: "1px solid #e2e8f0", borderRadius: "8px", padding: "14px", marginBottom: "16px", background: "#f8fafc" }}>
+                <h4 style={{ margin: "0 0 10px 0", fontSize: "14px", fontWeight: "600", color: "#1e293b" }}>
+                  {isArabic ? "بيانات الدفع اليدوي (Mode B)" : "Offline Payment Details (Mode B)"}
+                </h4>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                  <FormField label={isArabic ? "طريقة الدفع" : "Payment Method"}>
+                    <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1" }}>
+                      <option value="instapay">{isArabic ? "إنستاباي (InstaPay)" : "InstaPay"}</option>
+                      <option value="cash">{isArabic ? "نقدي (Cash)" : "Cash"}</option>
+                      <option value="bank_transfer">{isArabic ? "تحويل بنكي (Bank Transfer)" : "Bank Transfer"}</option>
+                      <option value="scholarship">{isArabic ? "منحة دراسية (Scholarship)" : "Scholarship"}</option>
+                      <option value="free">{isArabic ? "مجاني (Free)" : "Free"}</option>
+                      <option value="other">{isArabic ? "أخرى (Other)" : "Other"}</option>
+                    </select>
+                  </FormField>
+                  <FormField label={isArabic ? "الرقم المرجعي / الإيصال" : "Reference / Receipt #"}>
+                    <input type="text" placeholder={isArabic ? "مثال: INSTA-12345" : "e.g. INSTA-12345"} value={paymentReference} onChange={(e) => setPaymentReference(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1" }} />
+                  </FormField>
+                  <FormField label={isArabic ? "تاريخ الدفع" : "Payment Date"}>
+                    <input type="date" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1" }} />
+                  </FormField>
+                  <FormField label={isArabic ? "المبلغ المسدد (ج.م)" : "Amount Paid (EGP)"}>
+                    <input type="number" step="0.01" value={paymentAmount} onChange={(e) => setPaymentAmount(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1" }} />
+                  </FormField>
+                </div>
+              </div>
+            )}
+
+            <FormField label={isArabic ? "ملاحظة تدقيق داخلية" : "Internal Audit Note"}>
+              <textarea value={internalNote} onChange={(event) => setInternalNote(event.target.value)} placeholder={isArabic ? "أدخل أية تفاصيل تدقيقية إضافية..." : "Enter additional audit notes..."} rows={3} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1" }} />
+            </FormField>
+
+            <footer style={{ display: "flex", gap: "8px", justifyContent: "flex-end", marginTop: "16px" }}>
               {selected.status === "pending_confirmation" && (
                 <>
-                  <Button variant="ghost" onClick={() => finishFromModal("confirm", { markAsPaid: true })}>{isArabic ? "تأكيد كمدفوع" : "Confirm as Paid"}</Button>
-                  <Button onClick={() => finishFromModal("confirm")}>{isArabic ? "تأكيد الحجز" : "Confirm Booking"}</Button>
-                  <Button variant="ghost" onClick={() => finishFromModal("reject")}>{isArabic ? "رفض" : "Reject"}</Button>
+                  <Button variant="ghost" onClick={() => finishFromModal("reject")}><X />{isArabic ? "رفض الطلب" : "Reject"}</Button>
+                  <Button variant="outline" onClick={() => finishFromModal("confirm", { markAsPaid: false })}>{isArabic ? "تأكيد بدون دفع" : "Confirm (Unpaid)"}</Button>
+                  <Button onClick={() => finishFromModal("confirm", { markAsPaid: true })}><Check />{isArabic ? "تأكيد وتسجيل الدفع اليدوي" : "Confirm & Record Offline Payment"}</Button>
                 </>
               )}
-              {selected.status === "confirmed" && <Button variant="ghost" onClick={() => finishFromModal("cancel")}>{isArabic ? "إلغاء الحجز" : "Cancel Booking"}</Button>}
+              {selected.status === "confirmed" && <Button variant="ghost" onClick={() => finishFromModal("cancel")}>{isArabic ? "إلغاء الحجز والوصول" : "Cancel Booking & Access"}</Button>}
             </footer>
           </div>
         )}

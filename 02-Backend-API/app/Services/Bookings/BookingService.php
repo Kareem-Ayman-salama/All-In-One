@@ -22,6 +22,7 @@ use App\Models\User;
 use App\Services\Operations\OperationRecorder;
 use App\Services\Plans\EntitlementService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -310,23 +311,42 @@ class BookingService
             ]);
 
             if ($markAsPaid) {
+                $method = (string) ($request?->input('paymentMethod') ?: 'instapay');
+                $prefix = match ($method) {
+                    'cash' => 'CASH-',
+                    'bank_transfer' => 'BANK-',
+                    'scholarship' => 'SCHOLAR-',
+                    'free' => 'FREE-',
+                    'instapay' => 'INSTA-',
+                    default => 'MANUAL-',
+                };
+                $reference = (string) ($request?->input('paymentReference') ?: ($prefix.strtoupper(Str::random(10))));
+                $amountMinor = $request?->filled('paymentAmount')
+                    ? (int) round(((float) $request->input('paymentAmount')) * 100)
+                    : $locked->amount_minor;
+                $paidAt = $request?->filled('paymentDate')
+                    ? Carbon::parse($request->input('paymentDate'))
+                    : now();
+
                 Payment::query()->firstOrCreate([
-                    'idempotency_key' => 'MANUAL-PAYMENT-' . $locked->id,
+                    'idempotency_key' => 'MANUAL-PAYMENT-'.$locked->id,
                 ], [
                     'organization_id' => $locked->organization_id,
                     'booking_id' => $locked->id,
                     'user_id' => $student->id,
                     'provider' => 'manual',
-                    'provider_reference' => 'INSTA-' . strtoupper(Str::random(10)),
-                    'amount_minor' => $locked->amount_minor,
+                    'provider_reference' => $reference,
+                    'amount_minor' => $amountMinor,
                     'currency' => $locked->currency,
                     'status' => 'paid',
                     'metadata' => [
-                        'method' => 'instapay',
-                        'note' => $internalNote,
+                        'method' => $method,
+                        'reference' => $reference,
+                        'note' => $internalNote ?? $request?->input('notes'),
                         'confirmed_by' => $actor?->id,
+                        'paid_at' => $paidAt->toIso8601String(),
                     ],
-                    'paid_at' => now(),
+                    'paid_at' => $paidAt,
                 ]);
             }
             $preference = NotificationPreference::query()

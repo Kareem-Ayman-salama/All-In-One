@@ -68,6 +68,11 @@ class Course extends Model
         return $this->hasMany(CourseBatch::class);
     }
 
+    public function modules(): HasMany
+    {
+        return $this->hasMany(CourseModule::class)->orderBy('sort_order');
+    }
+
     public function academyProfile(): BelongsTo
     {
         return $this->belongsTo(AcademyProfile::class);

@@ -113,7 +113,7 @@ class AdminPilotAcademyController extends Controller
             $isNewUser = false;
             if (! $owner) {
                 $isNewUser = true;
-                $owner = new User();
+                $owner = new User;
                 $owner->forceFill([
                     'name' => $validated['ownerName'],
                     'email' => strtolower($validated['ownerEmail']),
@@ -329,4 +329,3 @@ class AdminPilotAcademyController extends Controller
         ], status: 201);
     }
 }
-

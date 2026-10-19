@@ -33,7 +33,11 @@ class WorkspaceController extends Controller
                     'slug' => $membership->organization->slug,
                     'type' => $membership->organization->type,
                     'logo' => $membership->organization->logo_path,
+                    'brandColor' => $membership->organization->brand_color,
                     'status' => $membership->organization->status,
+                    'locale' => $membership->organization->locale,
+                    'timezone' => $membership->organization->timezone,
+                    'settings' => $membership->organization->settings ?? [],
                 ],
                 'role' => $membership->role->name,
                 'permissions' => $membership->role->permissions

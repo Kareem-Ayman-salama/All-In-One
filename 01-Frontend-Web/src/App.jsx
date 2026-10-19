@@ -11,6 +11,7 @@ import { useOrganization } from "./contexts/OrganizationContext";
 import { LearningProvider } from "./contexts/LearningContext";
 import { CreateAccountPage, ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from "./pages/AuthCyclePages";
 import { LoginPage } from "./pages/LoginPage";
+import { ForcePasswordChangePage } from "./pages/ForcePasswordChangePage";
 import { RolePicker } from "./pages/RolePicker";
 import { WorkspaceSelectionPage } from "./pages/WorkspaceSelectionPage";
 import { api } from "./services/api";
@@ -68,6 +69,7 @@ export function App() {
           <Route path="/booking/success" element={<BookingSuccessPage />} />
           <Route path="/403" element={<ForbiddenPage />} />
           <Route element={<ProtectedRoute />}>
+            <Route path="/change-password" element={<ForcePasswordChangePage />} />
             <Route path="/workspaces" element={<WorkspaceSelectionPage />} />
             <Route path="/payment/return" element={<PaymentReturnPage />} />
           </Route>

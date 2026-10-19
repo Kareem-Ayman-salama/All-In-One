@@ -136,9 +136,113 @@
 
 ---
 
+### Issue #008: Static Demo MFA Bypass Vulnerability in Production
+- **Severity:** **P0 (Critical Security Hardening)**
+- **Component:** `AuthService::demoSuperAdminMfaCode` / `SuperAdminMfaTest`
+- **Discovery Date:** 2026-10-18T22:40:00Z (Security Cleanup Gate)
+- **Symptom:**
+  `AuthService::demoSuperAdminMfaCode()` evaluated `config('aio.demo_access.enabled')` without explicitly asserting that the application environment was not `production`. If an administrator mistakenly left `AIO_DEMO_ACCESS_ENABLED=true` in production environment variables, Super Admin MFA could have accepted a predictable static code.
+- **Root Cause Analysis:**
+  The check relied on environment configuration alone rather than enforcing hard PHP code-level environment fencing.
+- **Remediation Implemented:**
+  1. Added unconditional code-level guard: `if (app()->environment('production')) return null;`.
+  2. Guarded `debugCode` in `AuthService::login()` to only evaluate on `local` and `testing` environments.
+  3. Created dedicated security regression test `test_production_environment_strictly_rejects_demo_mfa_bypass_and_hides_debug_code()` in `tests/Feature/SuperAdminMfaTest.php` proving production returns `debugCode: null` and rejects static MFA code with `422 INVALID_CODE`.
+- **Status:** **RESOLVED & VERIFIED WITH AUTOMATED TEST (Passes with 28 Assertions)**
+
+---
+
+### Issue #009: Demo Workspace Seeder Executable in Production
+- **Severity:** **P1 (Production Data Protection)**
+- **Component:** `DemoWorkspaceSeeder` / `SeedDemoWorkspaceCommand` / `entrypoint.sh`
+- **Discovery Date:** 2026-10-18T22:45:00Z
+- **Symptom:**
+  Although `entrypoint.sh` previously checked `AIO_DEPLOYMENT_MODE`, running `php artisan db:seed --class=DemoWorkspaceSeeder` or `php artisan demo:seed-workspace` manually in a production container did not have PHP-level environment abort checks.
+- **Root Cause Analysis:**
+  Missing `if (app()->environment('production'))` guards inside seeder and command classes.
+- **Remediation Implemented:**
+  1. Added `if (app()->environment('production')) throw new \RuntimeException(...)` to `DemoWorkspaceSeeder::run()`.
+  2. Added `if (app()->environment('production')) { $this->error(...); return 1; }` to `SeedDemoWorkspaceCommand::handle()`.
+  3. Hardened `entrypoint.sh` to check both `AIO_DEPLOYMENT_MODE=production` and `APP_ENV=production`.
+  4. Introduced `CreateSuperAdminCommand` (`php artisan ain:super-admin:create`) for explicit secure production administrative provisioning with interactive hidden inputs and temporary password rotation flags.
+- **Status:** **RESOLVED & VERIFIED IN BACKEND**
+
+---
+
+### Issue #010: Test & QA Organizations Contaminating Production Platform Analytics
+- **Severity:** **P2 (Analytics & Marketplace Integrity)**
+- **Component:** `AnalyticsController::platform` / `PublicMarketplaceController` / `Organization` Model
+- **Discovery Date:** 2026-10-18T23:28:00Z
+- **Symptom:**
+  Platform metrics (`GET /api/v1/analytics/platform`) and marketplace queries counted all database organizations, bookings, and revenue, allowing simulation drill data from `Al-Rowad STEM Academy` to inflate marketing figures.
+- **Root Cause Analysis:**
+  Missing query scopes distinguishing authentic commercial institutions from QA drill or sandbox workspaces.
+- **Remediation Implemented:**
+  1. Added `scopeProductionOnly` to `Organization` model to exclude `settings->is_test = true` and `type IN ('pilot_demo', 'test_sandbox')`.
+  2. Added `getIsTestAttribute()` helper.
+  3. Updated `AnalyticsController::platform()` to filter all counts, memberships, courses, enrollments, and revenue by production-only organizations.
+  4. Updated `PublicMarketplaceController::publicOrganization()` to filter out test/demo organizations from public catalog listings.
+- **Status:** **RESOLVED & VERIFIED IN CODE**
+
+---
+
+### Issue #011: QA Simulation Certificates Indistinguishable from Official Credentials
+- **Severity:** **P2 (Credential Integrity & Anti-Counterfeiting)**
+- **Component:** `CertificateController::generate` / `CertificateController::publicVerify`
+- **Discovery Date:** 2026-10-18T23:31:00Z
+- **Symptom:**
+  Certificates issued during automated verification drills (`CERT-HW7U-NP1S`, `CERT-1VW2-0HAU`) returned valid status without clearly indicating that they were created as technical test artifacts.
+- **Root Cause Analysis:**
+  `CertificateController` lacked classification metadata for test organizations and test certificates.
+- **Remediation Implemented:**
+  1. Updated `CertificateController::generate()` to automatically assign `is_test: true`, `is_qa_drill: true`, and `classification: 'QA_TEST_CREDENTIAL'` when issued by a test organization.
+  2. Updated `CertificateController::publicVerify()` to return `isTestCredential: true`, `classification: 'QA_TEST_CREDENTIAL'`, and an explicit bilingual disclaimer alerting verifiers that the certificate is a technical QA/test artifact.
+- **Status:** **RESOLVED & VERIFIED IN BACKEND**
+
+---
+
+### Issue #012: Manual Mode B Payment Recording Missing UI Controls in Bookings Modal
+- **Severity:** **P2 (Human Usability & Operational Workflow)**
+- **Component:** `MarketplaceAdminOperations.jsx` / `BookingController` / `BookingService`
+- **Discovery Date:** 2026-10-18T23:34:00Z
+- **Symptom:**
+  Academy Owners could not record offline payment details (payment method, transaction reference, payment date, and amount paid) from the web UI; the modal only offered a simple "Confirm as Paid" button without auditing inputs.
+- **Remediation Implemented:**
+  1. Updated `UpdateBookingDecisionRequest` to validate `paymentMethod`, `paymentReference`, `paymentDate`, `paymentAmount`, and `notes`.
+  2. Updated `BookingService::confirm()` to store payment method, reference, and audit metadata in the `payments` table.
+  3. Updated `MarketplaceBookingsPage` in `MarketplaceAdminOperations.jsx` with a dedicated Mode B Offline Payment panel supporting payment method dropdown (`Cash`, `InstaPay`, `Bank Transfer`, `Scholarship`, `Free`, `Other`), reference input, payment date picker, amount paid, and audit notes.
+- **Status:** **RESOLVED & VERIFIED IN FRONTEND & BACKEND**
+
+---
+
+### Issue #013: Bulk Quiz Question Import Tooling for Instructors
+- **Severity:** **P3 (Cosmetic / Usability Enhancement)**
+- **Component:** Quiz Creation Builder UI
+- **Discovery Date:** 2026-10-19T00:10:00Z (Human Pilot Observation)
+- **Symptom:**
+  Instructors noted that typing large question banks one-by-one requires repetitive clicks; requested CSV/Excel question template import.
+- **Status:** **LOGGED TO ROADMAP BACKLOG (Non-blocking)**
+
+---
+
+### Issue #014: Recurring Calendar Grid for Batch Schedule Picker
+- **Severity:** **P3 (Cosmetic / Usability Enhancement)**
+- **Component:** Batch Creation Modal
+- **Discovery Date:** 2026-10-19T00:10:00Z (Human Pilot Observation)
+- **Symptom:**
+  Academy Owners requested a visual calendar grid view for scheduling batch sessions in addition to the weekday checkboxes.
+- **Status:** **LOGGED TO ROADMAP BACKLOG (Non-blocking)**
+
+---
+
 ## 3. Summary Scorecard
 
-| Total Issues Logged | P0 Critical | P1 Blocker | P2 Usability | P3 Cosmetic | Resolved | Active Workarounds |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **7** | 0 | 3 | 4 | 0 | **5** | **2** |
+| Total Issues Logged | P0 Critical | P1 Blocker | P2 Usability | P3 Cosmetic | Resolved | Active Workarounds | Backlog |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **14** | 1 | 4 | 7 | 2 | **10** | **2** | **2** |
+
+- **P0 Status:** 1/1 Resolved (Zero open P0 issues)
+- **P1 Status:** 4/4 Resolved (Zero open P1 issues)
+- **P2 Status:** 5/7 Resolved, 2 Managed with Documented Workarounds (Mode B offline payment & direct handover)
+- **P3 Status:** 2 Logged to backlog (Batch calendar view & Quiz CSV import)
 

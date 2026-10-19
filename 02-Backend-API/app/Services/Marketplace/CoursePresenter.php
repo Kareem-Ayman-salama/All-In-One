@@ -69,12 +69,9 @@ class CoursePresenter
                     'schedule' => $batch->schedule,
                     'deliveryType' => $batch->delivery_type,
                     'capacity' => $batch->capacity,
-                    'remainingSeats' => max(
-                        0,
-                        $batch->capacity
-                            - $batch->reserved_seats
-                            - $batch->confirmed_seats,
-                    ),
+                    'remainingSeats' => $batch->capacity === null
+                        ? null
+                        : max(0, $batch->capacity - $batch->reserved_seats - $batch->confirmed_seats),
                     'location' => $batch->location,
                     'status' => $batch->status->value,
                 ],

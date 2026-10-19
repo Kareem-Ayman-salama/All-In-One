@@ -73,31 +73,42 @@ class AnalyticsController extends Controller
 
     public function platform(Request $request): JsonResponse
     {
+        $prodOrgs = Organization::query()->productionOnly();
+        $prodOrgIds = (clone $prodOrgs)->pluck('id');
+
         return ApiResponse::success($request, [
             'metrics' => [
-                'organizations' => Organization::query()->count(),
-                'activeOrganizations' => Organization::query()
+                'organizations' => (clone $prodOrgs)->count(),
+                'activeOrganizations' => (clone $prodOrgs)
                     ->where('status', 'active')
                     ->count(),
                 'memberships' => OrganizationMembership::query()
+                    ->whereIn('organization_id', $prodOrgIds)
                     ->where('status', 'active')
                     ->count(),
                 'publishedCourses' => Course::query()
+                    ->whereIn('organization_id', $prodOrgIds)
                     ->where('status', 'published')
                     ->count(),
-                'bookings' => Booking::query()->count(),
+                'bookings' => Booking::query()
+                    ->whereIn('organization_id', $prodOrgIds)
+                    ->count(),
                 'confirmedBookings' => Booking::query()
+                    ->whereIn('organization_id', $prodOrgIds)
                     ->where('status', 'confirmed')
                     ->count(),
                 'confirmedRevenueMinor' => (int) Booking::query()
+                    ->whereIn('organization_id', $prodOrgIds)
                     ->where('status', 'confirmed')
                     ->where('payment_status', 'paid')
                     ->sum('amount_minor'),
                 'expiringOrganizationSubscriptions' => OrganizationSubscription::query()
+                    ->whereIn('organization_id', $prodOrgIds)
                     ->whereIn('status', ['active', 'trial'])
                     ->whereBetween('current_period_ends_at', [now(), now()->addDays(7)])
                     ->count(),
                 'activeEnrollments' => CourseEnrollment::query()
+                    ->whereIn('organization_id', $prodOrgIds)
                     ->where('status', 'active')
                     ->count(),
             ],

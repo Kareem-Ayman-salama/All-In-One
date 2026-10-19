@@ -92,7 +92,7 @@ class AuthSessionSecurityTest extends TestCase
 
     public function test_password_change_revokes_every_session_and_access_token(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['must_change_password' => true]);
         $token = $user->createToken('browser');
         $this->createSessionRecord(
             $user,
@@ -110,6 +110,10 @@ class AuthSessionSecurityTest extends TestCase
             ->assertJsonPath('data.reauthenticationRequired', true);
 
         $this->assertDatabaseCount('personal_access_tokens', 0);
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'must_change_password' => false,
+        ]);
         $this->assertDatabaseMissing('user_sessions', [
             'user_id' => $user->id,
             'revoked_at' => null,

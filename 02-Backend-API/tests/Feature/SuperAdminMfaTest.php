@@ -105,4 +105,43 @@ class SuperAdminMfaTest extends TestCase
             ->assertJsonPath('data.mfaRequired', true)
             ->assertJsonStructure(['data' => ['debugCode']]);
     }
+
+    public function test_production_environment_strictly_rejects_demo_mfa_bypass_and_hides_debug_code(): void
+    {
+        $originalEnv = app()->environment();
+        app()['env'] = 'production';
+        config()->set('app.env', 'production');
+        config()->set('aio.demo_access.enabled', true);
+        config()->set('aio.demo_access.super_admin_email', 'super@ain.test');
+        config()->set('aio.demo_access.super_admin_mfa_code', '123456');
+
+        try {
+            $admin = User::factory()->create([
+                'email' => 'super@ain.test',
+                'password' => 'StrongPassword123!',
+            ]);
+            $admin->forceFill(['platform_role' => 'super_admin'])->save();
+
+            $challenge = $this->postJson('/api/v1/auth/login', [
+                'email' => 'super@ain.test',
+                'password' => 'StrongPassword123!',
+            ]);
+
+            $challenge
+                ->assertStatus(202)
+                ->assertJsonPath('data.mfaRequired', true)
+                ->assertJsonPath('data.debugCode', null);
+
+            $this->postJson('/api/v1/auth/login', [
+                'email' => 'super@ain.test',
+                'password' => 'StrongPassword123!',
+                'mfaCode' => '123456',
+            ])
+                ->assertUnprocessable()
+                ->assertJsonPath('error.code', 'INVALID_CODE');
+        } finally {
+            app()['env'] = $originalEnv;
+            config()->set('app.env', $originalEnv);
+        }
+    }
 }

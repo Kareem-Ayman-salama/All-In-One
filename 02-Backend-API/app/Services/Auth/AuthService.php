@@ -165,6 +165,10 @@ class AuthService
 
     private function demoSuperAdminMfaCode(User $user): ?string
     {
+        if (app()->environment('production')) {
+            return null;
+        }
+
         if (! config('aio.demo_access.enabled')) {
             return null;
         }
@@ -328,7 +332,10 @@ class AuthService
         $user = User::query()->findOrFail($verification->user_id);
 
         DB::transaction(function () use ($user, $password): void {
-            $user->forceFill(['password' => $password])->save();
+            $user->forceFill([
+                'password' => $password,
+                'must_change_password' => false,
+            ])->save();
             $user->tokens()->delete();
             UserSession::query()
                 ->where('user_id', $user->id)
@@ -344,7 +351,10 @@ class AuthService
     public function changePassword(User $user, string $password): void
     {
         DB::transaction(function () use ($user, $password): void {
-            $user->forceFill(['password' => $password])->save();
+            $user->forceFill([
+                'password' => $password,
+                'must_change_password' => false,
+            ])->save();
             UserSession::query()
                 ->where('user_id', $user->id)
                 ->whereNull('revoked_at')

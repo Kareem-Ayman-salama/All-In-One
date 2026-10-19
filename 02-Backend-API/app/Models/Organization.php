@@ -31,6 +31,19 @@ class Organization extends Model
         return ['settings' => 'array'];
     }
 
+    public function scopeProductionOnly($query)
+    {
+        return $query->where(function ($q): void {
+            $q->whereNull('settings->is_test')
+                ->orWhere('settings->is_test', false);
+        })->whereNotIn('type', ['pilot_demo', 'test_sandbox']);
+    }
+
+    public function getIsTestAttribute(): bool
+    {
+        return (bool) ($this->settings['is_test'] ?? false) || in_array($this->type, ['pilot_demo', 'test_sandbox'], true);
+    }
+
     public function memberships(): HasMany
     {
         return $this->hasMany(OrganizationMembership::class);

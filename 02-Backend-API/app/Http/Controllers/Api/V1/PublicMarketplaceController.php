@@ -265,6 +265,11 @@ class PublicMarketplaceController extends Controller
     {
         return $query
             ->where('status', 'active')
+            ->where(function (Builder $q): void {
+                $q->whereNull('settings->is_test')
+                    ->orWhere('settings->is_test', false);
+            })
+            ->whereNotIn('type', ['pilot_demo', 'test_sandbox'])
             ->whereHas(
                 'subscriptions',
                 fn (Builder $subscription) => $subscription

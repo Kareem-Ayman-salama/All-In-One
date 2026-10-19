@@ -13,6 +13,14 @@ export function ProtectedRoute({ allowedRoles }) {
     return <Navigate to="/login" replace state={{ from: requestedPath }} />;
   }
 
+  if (user.mustChangePassword && location.pathname !== "/change-password") {
+    return <Navigate to="/change-password" replace />;
+  }
+
+  if (!user.mustChangePassword && location.pathname === "/change-password") {
+    return <Navigate to="/workspaces" replace />;
+  }
+
   if (loading && user.role !== "super-admin") return null;
 
   if (user.role !== "super-admin" && memberships.length === 0 && !["/no-workspace", "/workspaces"].includes(location.pathname)) {

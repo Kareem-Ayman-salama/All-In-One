@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\V1\CertificateController;
 use App\Http\Controllers\Api\V1\ContentController;
 use App\Http\Controllers\Api\V1\CourseBatchController;
 use App\Http\Controllers\Api\V1\CourseController;
+use App\Http\Controllers\Api\V1\CourseCurriculumController;
 use App\Http\Controllers\Api\V1\DevicePushTokenController;
 use App\Http\Controllers\Api\V1\EventController;
 use App\Http\Controllers\Api\V1\GuardianConsentController;
@@ -304,6 +305,20 @@ Route::prefix('v1')->group(function (): void {
                     Route::get('/courses/{course}/completion-policy', [CourseController::class, 'getCompletionPolicy'])
                         ->middleware('permission:courses.view');
                     Route::put('/courses/{course}/completion-policy', [CourseController::class, 'updateCompletionPolicy'])
+                        ->middleware('permission:courses.update');
+                    Route::get('/courses/{course}/curriculum', [CourseCurriculumController::class, 'index'])
+                        ->middleware('permission:courses.view');
+                    Route::post('/courses/{course}/modules', [CourseCurriculumController::class, 'storeModule'])
+                        ->middleware('permission:courses.update');
+                    Route::patch('/courses/{course}/modules/{module}', [CourseCurriculumController::class, 'updateModule'])
+                        ->middleware('permission:courses.update');
+                    Route::delete('/courses/{course}/modules/{module}', [CourseCurriculumController::class, 'destroyModule'])
+                        ->middleware('permission:courses.update');
+                    Route::post('/courses/{course}/lessons', [CourseCurriculumController::class, 'storeLesson'])
+                        ->middleware('permission:courses.update');
+                    Route::patch('/courses/{course}/lessons/{lesson}', [CourseCurriculumController::class, 'updateLesson'])
+                        ->middleware('permission:courses.update');
+                    Route::delete('/courses/{course}/lessons/{lesson}', [CourseCurriculumController::class, 'destroyLesson'])
                         ->middleware('permission:courses.update');
                     Route::post('/courses/{course}/submit-review', [CourseController::class, 'submitForReview'])
                         ->middleware('permission:courses.publish');

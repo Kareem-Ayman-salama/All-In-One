@@ -50,7 +50,7 @@ case "$PROCESS_ROLE" in
 esac
 
 if [ "${AIO_SEED_DEMO:-false}" = "true" ] && { [ "$PROCESS_ROLE" = "all" ] || [ "$PROCESS_ROLE" = "web" ]; }; then
-    if [ "${AIO_DEPLOYMENT_MODE:-staging}" = "production" ]; then
+    if [ "${AIO_DEPLOYMENT_MODE:-staging}" = "production" ] || [ "${APP_ENV:-}" = "production" ]; then
         echo "[ERROR] Demo data cannot be seeded in production mode." >&2
         exit 1
     fi

@@ -45,7 +45,7 @@ function normalizeBatch(raw) {
     titleAr: batch.titleAr || batch.title,
     reservedSeats: Number(batch.reservedSeats || 0),
     confirmedSeats: Number(batch.confirmedSeats || 0),
-    remainingSeats: batch.remainingSeats ?? Math.max(0, Number(batch.capacity || 0) - occupied)
+    remainingSeats: batch.capacity == null ? null : (batch.remainingSeats ?? Math.max(0, Number(batch.capacity) - occupied))
   };
 }
 
@@ -179,11 +179,11 @@ function batchPayload(payload) {
     roomId: payload.roomId,
     title: payload.title,
     titleAr: payload.titleAr || null,
-    startDate: payload.startDate,
-    endDate: payload.endDate,
-    schedule: payload.schedule,
+    startDate: payload.startDate || null,
+    endDate: payload.endDate || null,
+    schedule: payload.schedule?.length ? payload.schedule : null,
     deliveryType: payload.deliveryType,
-    capacity: Number(payload.capacity),
+    capacity: payload.capacity == null || payload.capacity === "" ? null : Number(payload.capacity),
     location: payload.location || null,
     meetingReference: payload.meetingReference || null,
     enrollmentStartsAt: payload.enrollmentStartsAt || null,
@@ -353,6 +353,12 @@ export const marketplaceRepository = {
       return httpClient(`/organizations/${organizationId}/${key}/${id}`, {
         method: "PUT",
         body: JSON.stringify(payloadFor(key, changes))
+      });
+    }
+    if (key === "batches") {
+      return httpClient(`/organizations/${organizationId}/batches/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(batchPayload(changes))
       });
     }
     if (key === "invitations" && (changes.action === "resend" || changes.status === "pending")) {

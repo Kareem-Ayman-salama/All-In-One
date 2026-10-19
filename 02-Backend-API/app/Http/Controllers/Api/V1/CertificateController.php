@@ -108,6 +108,9 @@ class CertificateController extends Controller
                 'organizationName' => $org->name,
                 'organizationNameAr' => $org->name,
                 'notes' => $validated['notes'] ?? null,
+                'is_test' => (bool) ($org->is_test ?? false),
+                'is_qa_drill' => (bool) ($org->is_test ?? false),
+                'classification' => ($org->is_test ?? false) ? 'QA_TEST_CREDENTIAL' : 'ACADEMIC_CREDENTIAL',
             ],
         ]);
 
@@ -248,6 +251,18 @@ class CertificateController extends Controller
 
         if ($showGrade) {
             $payload['certificate']['gradeScore'] = $cert->grade_score;
+        }
+
+        $isTest = (bool) ($cert->metadata['is_test'] ?? false)
+            || (bool) ($cert->metadata['is_qa_drill'] ?? false)
+            || ($cert->organization?->is_test ?? false);
+
+        if ($isTest) {
+            $payload['isTestCredential'] = true;
+            $payload['classification'] = 'QA_TEST_CREDENTIAL';
+            $payload['certificate']['isTestCredential'] = true;
+            $payload['certificate']['classification'] = 'QA_TEST_CREDENTIAL';
+            $payload['message'] = 'هذه الشهادة صدرت كجزء من تدريب تقني واختبار للجودة وليست اعتماداً أكاديمياً نهائياً / This certificate is a QA/Test artifact and not an official production credential.';
         }
 
         return response()->json($payload);

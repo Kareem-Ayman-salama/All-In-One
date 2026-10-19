@@ -26,6 +26,10 @@ class DemoWorkspaceSeeder extends Seeder
      */
     public function run(): void
     {
+        if (app()->environment('production')) {
+            throw new \RuntimeException('DemoWorkspaceSeeder is strictly prohibited in production environments.');
+        }
+
         $this->call([
             AuthorizationSeeder::class,
             PlanSeeder::class,

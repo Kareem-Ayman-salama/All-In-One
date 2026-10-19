@@ -35,6 +35,12 @@ class SeedDemoWorkspaceCommand extends Command
 
     public function handle(): int
     {
+        if (app()->environment('production')) {
+            $this->error('CRITICAL: demo:seed-workspace is strictly prohibited in production environments.');
+
+            return 1;
+        }
+
         $this->newLine();
         $this->line('===========================================================');
         $this->line('         AIN PLATFORM — SALES DEMO WORKSPACE SEEDER        ');
@@ -46,7 +52,13 @@ class SeedDemoWorkspaceCommand extends Command
         if ($existingOrg) {
             if ($this->option('reset')) {
                 $this->warn('Resetting existing demo workspace...');
-                $existingOrg->payments()->delete();
+                // Delete restrictive dependants before the organization cascades.
+                // This keeps the reset deterministic on SQLite and PostgreSQL.
+                Payment::query()->where('organization_id', $existingOrg->id)->delete();
+                AttendanceRecord::query()->where('organization_id', $existingOrg->id)->delete();
+                LearningSession::query()->where('organization_id', $existingOrg->id)->delete();
+                Booking::query()->where('organization_id', $existingOrg->id)->delete();
+                CourseBatch::query()->where('organization_id', $existingOrg->id)->delete();
                 $existingOrg->forceDelete();
             } else {
                 $this->info("Demo workspace already exists: [{$existingOrg->name}]");

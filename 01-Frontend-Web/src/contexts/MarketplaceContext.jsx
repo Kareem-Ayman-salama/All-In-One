@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { marketplaceSeed } from "../data/marketplaceData";
 import { marketplaceRepository } from "../services/marketplaceRepository";
 import { shouldUseMockApi } from "../services/httpClient";
@@ -33,9 +33,11 @@ export function MarketplaceProvider({ children }) {
   const [data, setData] = useState(mock ? loadMockData : EMPTY);
   const [loading, setLoading] = useState(!mock);
   const [error, setError] = useState(null);
+  const requestSequence = useRef(0);
 
   const reload = useCallback(async () => {
     if (mock) return null;
+    const requestId = ++requestSequence.current;
     setLoading(true);
     setError(null);
     try {
@@ -44,13 +46,15 @@ export function MarketplaceProvider({ children }) {
         platformAdmin: user?.role === "super-admin",
         authenticated: Boolean(user)
       });
+      if (requestId !== requestSequence.current) return result;
       setData({ ...EMPTY, ...result });
       return result;
     } catch (nextError) {
+      if (requestId !== requestSequence.current) return EMPTY;
       setError(nextError);
       return EMPTY;
     } finally {
-      setLoading(false);
+      if (requestId === requestSequence.current) setLoading(false);
     }
   }, [activeOrganization?.id, mock, user]);
 

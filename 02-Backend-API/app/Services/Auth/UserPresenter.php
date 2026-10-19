@@ -35,6 +35,7 @@ class UserPresenter
                 ->values()
                 ->all() ?? [],
             'emailVerified' => $user->email_verified_at !== null,
+            'mustChangePassword' => (bool) $user->must_change_password,
             'locale' => $user->locale,
             'timezone' => $user->timezone,
             'workspaces' => $activeMemberships->map(

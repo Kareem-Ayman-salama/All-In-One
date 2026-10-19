@@ -61,6 +61,7 @@ import { LiveMeetingScheduler } from "../components/LiveMeetingScheduler";
 import { CertificatesHub } from "../components/CertificatesOperations";
 import { InvoicesOperations } from "../components/InvoicesOperations";
 import { InternalChatHub } from "../components/InternalChatHub";
+import { CourseCurriculumPage } from "../components/CourseCurriculumOperations";
 import {
   AcademyProfileSettingsPage,
   CourseWizardPage,
@@ -86,6 +87,7 @@ const nav = [
 
   // 2. التعليم / Education
   { id: "courses", label: "Courses", icon: "courses", path: "/tenant-admin/courses", module: "courses", group: "education" },
+  { id: "curriculum", label: "Course content", icon: "courses", path: "/tenant-admin/curriculum", module: "courses", group: "education" },
   { id: "batches", label: "Batches", icon: "batches", path: "/tenant-admin/batches", module: "batches", group: "education" },
   { id: "assignments", label: "Assignments", icon: "tasks", path: "/tenant-admin/assignments", module: "courses", group: "education" },
   { id: "quizzes", label: "Quizzes", icon: "courses", path: "/tenant-admin/quizzes", module: "courses", group: "education" },
@@ -126,6 +128,7 @@ const nav = [
 
 const pagePermissions = {
   courses: "courses.view",
+  curriculum: "courses.view",
   batches: "batches.view",
   assignments: "courses.update",
   quizzes: "courses.update",
@@ -170,7 +173,9 @@ export function TenantAdminApp({ data, user }) {
   const appUser = { ...user, roleLabel: tx(roleLabel[0], roleLabel[1]) };
   const workspace = useWorkspace();
   const appData = { ...data, rooms: workspace.rooms, files: workspace.files, members: workspace.members, notifications: workspace.notifications };
-  const visibleNav = nav.filter((item) => !pagePermissions[item.id] || can(pagePermissions[item.id]));
+  const soloInstructor = activeOrganization?.settings?.workspace_mode === "solo_instructor";
+  const soloNavigation = new Set(["dashboard", "courses", "curriculum", "files", "members", "assignments", "quizzes", "attendance", "announcements", "certificates", "rooms", "batches", "calendar", "messages", "academyProfile", "analytics", "settings"]);
+  const visibleNav = nav.filter((item) => (!soloInstructor || soloNavigation.has(item.id)) && (!pagePermissions[item.id] || can(pagePermissions[item.id])));
   const currentItem = visibleNav.find((item) => item.id === page);
   const moduleLocked = currentItem?.module && !isModuleEnabled(currentItem.module);
 
@@ -186,6 +191,7 @@ export function TenantAdminApp({ data, user }) {
       {page === "files" && <ContentLibrary files={appData.files} />}
       {page === "members" && <MembersPage members={appData.members} />}
       {!moduleLocked && page === "courses" && <CourseWizardPage />}
+      {!moduleLocked && page === "curriculum" && <CourseCurriculumPage />}
       {!moduleLocked && page === "batches" && <MarketplaceBatchesPage />}
       {!moduleLocked && page === "bookingRequests" && <MarketplaceBookingsPage />}
       {!moduleLocked && page === "attendance" && <AttendanceManagementPage />}
@@ -251,6 +257,8 @@ function Dashboard({ data, user }) {
   const { academies, instructors, courses, batches, bookings, enrollments } = useMarketplace();
   const { assignments, submissions, quizzes } = useLearning();
   const organizationId = activeOrganization?.id;
+  const soloInstructor = activeOrganization?.settings?.workspace_mode === "solo_instructor";
+  const instructorName = activeOrganization?.settings?.instructor_display_name || user?.name || "";
   const publishedCourses = courses.filter((item) => item.organizationId === organizationId && item.status === "published").length;
   const activeBatches = batches.filter((item) => item.organizationId === organizationId && ["open", "in_progress"].includes(item.status)).length;
   const pendingBookingsList = bookings.filter((item) => item.organizationId === organizationId && item.status === "pending_confirmation");
@@ -266,7 +274,7 @@ function Dashboard({ data, user }) {
     : null;
   const planName = activeOrganization?.planName || activeOrganization?.plan || tx("بدون باقة", "No plan");
   const academy = academies.find((item) => item.organizationId === organizationId);
-  const academySteps = [
+  const standardAcademySteps = [
     {
       title: tx("أكمل ملف الأكاديمية", "Complete academy profile"),
       description: tx("الاسم والوصف وبيانات التواصل التي يراها الطلاب.", "Add the public name, description, and contact details."),
@@ -310,17 +318,44 @@ function Dashboard({ data, user }) {
       done: true
     }
   ];
+  const prepared = activeOrganization?.settings?.onboarding || {};
+  const academySteps = soloInstructor ? [
+    { title: "الأكاديمية جاهزة", description: "تم ضبط اللغة والهوية ووضع الخصوصية.", href: "/tenant-admin/academyProfile", done: prepared.academy_ready !== false },
+    { title: "أول كورس تم إنشاؤه", description: "الكورس محفوظ كمسودة وغير ظاهر في السوق.", href: "/tenant-admin/courses", done: prepared.course_ready !== false },
+    { title: "الوحدات جاهزة", description: "عشر وحدات منظمة بانتظار محتوى الأستاذة وسام.", href: "/tenant-admin/curriculum", done: prepared.modules_ready !== false },
+    { title: "غرفة الكورس جاهزة", description: "مساحة خاصة وآمنة لملفات الطلاب.", href: "/tenant-admin/rooms", done: prepared.room_ready !== false },
+    { title: "أضيفي أول درس", description: "يمكنك كتابة شرح أو رفع فيديو أو PDF.", href: "/tenant-admin/curriculum", done: Boolean(prepared.first_lesson_added) },
+    { title: "ارفعي أول ملف", description: "يُحفظ الملف كمسودة حتى تختاري نشره.", href: "/tenant-admin/curriculum", done: Boolean(prepared.first_file_uploaded) },
+    { title: "حددي موعد الدفعة", description: "أضيفي الأيام والأوقات والسعة عندما تصبح جاهزة.", href: "/tenant-admin/batches", done: Boolean(prepared.batch_scheduled) },
+    { title: "انشري الكورس عندما يصبح جاهزاً", description: "الإرسال للمراجعة قرارك بعد اكتمال المحتوى.", href: "/tenant-admin/courses", done: Boolean(prepared.course_published) }
+  ] : standardAcademySteps;
   const academyProgress = Math.round((academySteps.filter((item) => item.done).length / academySteps.length) * 100);
 
   return (
     <>
       <div className="stitch-page-head">
         <div>
-          <h1>{tx(`مرحباً، ${activeOrganization?.name || ""}`, `Welcome, ${activeOrganization?.name || ""}`)}</h1>
-          <p>{tx("إليك ملخص أداء منظومتك لهذا اليوم.", "Here is your workspace performance summary for today.")}</p>
+          <h1>{soloInstructor ? `أهلاً وسهلاً ${instructorName} 🌷` : tx(`مرحباً، ${activeOrganization?.name || ""}`, `Welcome, ${activeOrganization?.name || ""}`)}</h1>
+          <p>{soloInstructor ? "تم تجهيز أكاديميتك بالكامل. يمكنك الآن إضافة دروس النحو ورفع ملفاتك وإنشاء التدريبات والاختبارات." : tx("إليك ملخص أداء منظومتك لهذا اليوم.", "Here is your workspace performance summary for today.")}</p>
         </div>
-        <Button onClick={() => setInviteOpen(true)}><Plus size={18} /> {tx("إجراء سريع", "Quick action")}</Button>
+        <Button onClick={() => soloInstructor ? window.location.assign("/tenant-admin/curriculum") : setInviteOpen(true)}><Plus size={18} /> {soloInstructor ? "إضافة أول درس" : tx("إجراء سريع", "Quick action")}</Button>
       </div>
+
+      {soloInstructor && (
+        <section className="solo-quick-actions" aria-label="إجراءات سريعة">
+          {[
+            ["إضافة درس", "/tenant-admin/curriculum", BookOpen],
+            ["رفع ملف PDF", "/tenant-admin/curriculum", FileText],
+            ["إضافة فيديو", "/tenant-admin/curriculum", CloudUpload],
+            ["إنشاء اختبار", "/tenant-admin/quizzes", CheckCircle2],
+            ["إضافة سؤال تدريبي", "/tenant-admin/quizzes", Plus],
+            ["إنشاء كورس", "/tenant-admin/courses", GraduationCap],
+            ["إضافة طالب", "/tenant-admin/members", UserPlus]
+          ].map(([label, href, Icon]) => (
+            <a href={href} key={label}><Icon size={19} /><span>{label}</span></a>
+          ))}
+        </section>
+      )}
 
       <section className={`academy-launch-guide ${guideOpen ? "expanded" : "collapsed"}`}>
         <header
