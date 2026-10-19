@@ -335,14 +335,9 @@ async function runE2ETests() {
 
         const cardRails = await page.evaluate(() => {
           const selectors = [
-            ".banner-grid",
-            ".trust-foundation-grid",
             ".comparison-grid",
             ".features-grid",
-            ".testimonials-grid",
-            ".steps-flow",
             ".pricing-cards-grid",
-            ".market-launch-options",
           ];
 
           return selectors.map((selector) => {

@@ -48,4 +48,13 @@ return [
         'fee_fixed_minor' => (int) env('PAYMOB_FEE_FIXED_MINOR', 300),
     ],
 
+    'whatsapp' => [
+        'enabled' => (bool) env('WHATSAPP_ENABLED', false),
+        'provider' => env('WHATSAPP_PROVIDER', 'webhook'),
+        'webhook_url' => env('WHATSAPP_WEBHOOK_URL', ''),
+        'token' => env('WHATSAPP_TOKEN', ''),
+        'instance_id' => env('WHATSAPP_INSTANCE_ID', ''),
+        'from_number' => env('WHATSAPP_FROM_NUMBER', ''),
+    ],
+
 ];

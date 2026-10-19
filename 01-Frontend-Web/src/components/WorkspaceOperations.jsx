@@ -1,5 +1,6 @@
 import {
   Bell,
+  Calendar,
   CalendarDays,
   Check,
   CheckCircle2,
@@ -13,6 +14,7 @@ import {
   FileText,
   Filter,
   GraduationCap,
+  LayoutGrid,
   LifeBuoy,
   MessageCircleQuestion,
   Plus,
@@ -422,12 +424,16 @@ export function BillingSubscriptionPage() {
 }
 
 export function WorkspaceCalendarPage({ allowCreate = false }) {
-  const { events, createPersonalReminder } = useWorkspace();
+  const { events, createPersonalReminder, rooms = [] } = useWorkspace();
   const tx = useBilingualText();
   const { showToast } = useToast();
-  const today = new Date();
+  const today = useMemo(() => new Date(), []);
   const initialDate = today.toISOString().slice(0, 10);
+  const [viewMode, setViewMode] = useState("weekly"); // "weekly" or "monthly"
   const [selectedDate, setSelectedDate] = useState(initialDate);
+  const [selectedRoomId, setSelectedRoomId] = useState("all");
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [weekOffset, setWeekOffset] = useState(0);
   const [reminderOpen, setReminderOpen] = useState(false);
   const [savingReminder, setSavingReminder] = useState(false);
   const [reminder, setReminder] = useState({
@@ -466,7 +472,7 @@ export function WorkspaceCalendarPage({ allowCreate = false }) {
     [`${year}-07-23`, "عيد الثورة", "Revolution Day"],
     [`${year}-10-06`, "عيد القوات المسلحة", "Armed Forces Day"]
   ];
-  const holidayEvents = officialHolidays.map(([date, titleAr, title]) => ({
+  const holidayEvents = useMemo(() => officialHolidays.map(([date, titleAr, title]) => ({
     id: `holiday-${date}`,
     titleAr,
     title,
@@ -477,8 +483,70 @@ export function WorkspaceCalendarPage({ allowCreate = false }) {
     roomName: tx("عطلة رسمية", "Official holiday"),
     type: "holiday",
     status: "published"
-  }));
-  const calendarEvents = [...events, ...holidayEvents];
+  })), [officialHolidays, tx]);
+
+  const calendarEvents = useMemo(() => [...events, ...holidayEvents], [events, holidayEvents]);
+
+  // Filtered by selected room
+  const filteredEvents = useMemo(() => {
+    if (selectedRoomId === "all") return calendarEvents;
+    return calendarEvents.filter((ev) => ev.roomId === selectedRoomId || ev.type === "holiday");
+  }, [calendarEvents, selectedRoomId]);
+
+  // Week calculation starting Saturday
+  const currentSaturday = useMemo(() => {
+    const d = new Date(today);
+    const dayOfWeek = d.getDay(); // 0 is Sun, 6 is Sat
+    const daysSinceSat = (dayOfWeek + 1) % 7;
+    d.setDate(d.getDate() - daysSinceSat + (weekOffset * 7));
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, [today, weekOffset]);
+
+  const weekDays = useMemo(() => {
+    const dayNamesAr = ["السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
+    const dayNamesEn = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(currentSaturday);
+      d.setDate(currentSaturday.getDate() + i);
+      const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      return {
+        date: iso,
+        dayNum: d.getDate(),
+        monthNum: d.getMonth() + 1,
+        nameAr: dayNamesAr[i],
+        nameEn: dayNamesEn[i],
+        isToday: iso === today.toISOString().slice(0, 10),
+      };
+    });
+  }, [currentSaturday, today]);
+
+  const weekRangeLabel = useMemo(() => {
+    if (!weekDays.length) return "";
+    const first = weekDays[0];
+    const last = weekDays[6];
+    return `${first.dayNum}/${first.monthNum} – ${last.dayNum}/${last.monthNum}`;
+  }, [weekDays]);
+
+  const timeSlots = [
+    { id: "morning", labelAr: "09:00 - 11:00 (صباحاً)", labelEn: "09:00 - 11:00 (Morning)", defaultTime: "09:00", matchHour: (h) => h < 11 },
+    { id: "midday", labelAr: "11:00 - 01:00 (ظهراً)", labelEn: "11:00 - 01:00 (Midday)", defaultTime: "11:00", matchHour: (h) => h >= 11 && h < 14 },
+    { id: "afternoon", labelAr: "02:00 - 04:00 (بعد الظهر)", labelEn: "02:00 - 04:00 (Afternoon)", defaultTime: "14:00", matchHour: (h) => h >= 14 && h < 17 },
+    { id: "evening", labelAr: "05:00 - 07:00 (مساءً)", labelEn: "05:00 - 07:00 (Evening)", defaultTime: "17:00", matchHour: (h) => h >= 17 && h < 19 },
+    { id: "night", labelAr: "07:00 - 09:00 (ليلاً)", labelEn: "07:00 - 09:00 (Night)", defaultTime: "19:00", matchHour: (h) => h >= 19 },
+  ];
+
+  const getSlotEvents = (dayDate, slot) => {
+    return filteredEvents.filter((ev) => {
+      if (ev.date !== dayDate) return false;
+      if (ev.type === "holiday") return slot.id === "morning";
+      if (!ev.time) return slot.id === "morning";
+      const h = parseInt(ev.time.split(":")[0], 10);
+      if (isNaN(h)) return slot.id === "morning";
+      return slot.matchHour(h);
+    });
+  };
+
   const monthDays = [
     ...Array.from({ length: leadingDays }, (_, index) => ({ key: `empty-${index}`, date: null, day: null })),
     ...Array.from({ length: daysInMonth }, (_, index) => {
@@ -489,14 +557,15 @@ export function WorkspaceCalendarPage({ allowCreate = false }) {
   ];
   const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
   const monthLabel = new Intl.DateTimeFormat(document.documentElement.lang || "en", { month: "long", year: "numeric" }).format(visibleMonth);
-  const dayEvents = calendarEvents.filter((event) => event.date === selectedDate);
+  const dayEvents = filteredEvents.filter((event) => event.date === selectedDate);
   const changeMonth = (offset) => setVisibleMonth(new Date(year, month + offset, 1));
   const goToday = () => {
     setSelectedDate(todayKey);
     setVisibleMonth(new Date(today.getFullYear(), today.getMonth(), 1));
+    setWeekOffset(0);
   };
-  const openReminder = (date = selectedDate) => {
-    setReminder((current) => ({ ...current, date }));
+  const openReminder = (date = selectedDate, time = "18:00") => {
+    setReminder((current) => ({ ...current, date, time }));
     setReminderOpen(true);
   };
   const saveReminder = async (event) => {
@@ -517,7 +586,7 @@ export function WorkspaceCalendarPage({ allowCreate = false }) {
           }
         }, delay);
       }
-      showToast(tx("تم حفظ التذكير وإضافته للإشعارات", "Reminder saved and added to notifications"), "success");
+      showToast(tx("تم حفظ التذكير وإضافته للجدول", "Reminder saved and added to schedule"), "success");
       setSelectedDate(reminder.date);
       setReminderOpen(false);
       setReminder({ title: "", date: reminder.date, time: "18:00", reminderMinutes: "30", notes: "" });
@@ -527,11 +596,351 @@ export function WorkspaceCalendarPage({ allowCreate = false }) {
       setSavingReminder(false);
     }
   };
+
   return (
     <>
-      <div className="stitch-page-head"><div><h1>{tx("التقويم والتذكيرات", "Calendar & reminders")}</h1><p>{tx("كل مواعيدك من جميع الأكاديميات، مع العطلات الرسمية والتذكيرات الشخصية.", "All academy schedules, official holidays, and personal reminders in one view.")}</p><a className="calendar-source-link" href="https://www.presidency.eg/ar/%D9%85%D8%B5%D8%B1/%D8%A7%D9%84%D8%B9%D8%B7%D9%84%D8%A7%D8%AA-%D8%A7%D9%84%D8%B1%D8%B3%D9%85%D9%8A%D8%A9/" target="_blank" rel="noreferrer">{tx("مصدر عطلات 2026: رئاسة الجمهورية", "2026 holiday source: Presidency of Egypt")}</a></div><div className="calendar-head-actions"><Button variant="ghost" onClick={() => openReminder()}><Bell size={17} /> {tx("إضافة تذكير", "Add reminder")}</Button>{allowCreate && <Button as="a" href="/tenant-admin/rooms?create=1"><Plus size={17} /> {tx("غرفة وموعد جديد", "New room event")}</Button>}</div></div>
-      <section className="calendar-layout"><div className="calendar-surface"><header><div><strong>{monthLabel}</strong><span>{calendarEvents.filter((event) => event.date?.startsWith(`${year}-${String(month + 1).padStart(2, "0")}`)).length} {tx("مواعيد وعطلات", "events & holidays")}</span></div><div className="calendar-nav"><button type="button" onClick={() => changeMonth(-1)} aria-label={tx("الشهر السابق", "Previous month")}><ChevronLeft size={17} /></button><button type="button" onClick={goToday}>{tx("اليوم", "Today")}</button><button type="button" onClick={() => changeMonth(1)} aria-label={tx("الشهر التالي", "Next month")}><ChevronRight size={17} /></button></div></header><div className="calendar-weekdays">{tx(["سبت", "أحد", "اثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة"], ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"]).map((day, index) => <span className={index === 0 ? "week-start" : ""} key={day}>{day}</span>)}</div><div className="calendar-days">{monthDays.map((item, index) => { if (!item.date) return <span className={`calendar-empty-day ${index % 7 === 0 ? "week-start" : ""}`} key={item.key} />; const items = calendarEvents.filter((event) => event.date === item.date); const hasHoliday = items.some((event) => event.type === "holiday"); return <button className={`${item.date === selectedDate ? "selected" : ""} ${item.date === todayKey ? "today" : ""} ${index % 7 === 0 ? "week-start" : ""} ${hasHoliday ? "holiday" : ""}`} onClick={() => setSelectedDate(item.date)} onDoubleClick={() => openReminder(item.date)} type="button" key={item.key}><span>{item.day}</span>{items.slice(0, 2).map((event) => <i className={`calendar-event-${event.type || "meeting"}`} key={event.id}>{event.time} {tx(event.titleAr, event.title)}</i>)}{items.length > 2 && <small>+{items.length - 2}</small>}</button>; })}</div></div><aside className="calendar-agenda"><header><span>{tx("جدول اليوم", "Day agenda")}</span><strong>{selectedDate}</strong></header>{dayEvents.map((event) => <article className={`agenda-${event.type || "event"}`} key={event.id}><span>{event.time}{event.duration > 0 && <small>{event.duration} min</small>}</span><div><Badge tone={event.type === "holiday" ? "warning" : event.type === "personal_reminder" ? "success" : "primary"}>{event.roomName}</Badge><h3>{tx(event.titleAr, event.title)}</h3><p>{event.description || (event.type === "holiday" ? tx("عطلة رسمية ظاهرة لكل المستخدمين.", "Official holiday shown to all users.") : tx("موعد مرتبط بالغرفة", "Scheduled room event"))}</p>{event.attendees > 0 && <small><Users size={14} /> {event.attendees} {tx("مشاركين", "attendees")}</small>}</div></article>)}{!dayEvents.length && <div className="agenda-empty"><CalendarDays size={34} /><strong>{tx("لا توجد مواعيد", "No events scheduled")}</strong><span>{tx("اضغط مرتين على اليوم أو أضف تذكيرًا شخصيًا.", "Double-click the day or add a personal reminder.")}</span><Button variant="ghost" onClick={() => openReminder(selectedDate)}><Bell size={16} /> {tx("إضافة تذكير", "Add reminder")}</Button></div>}</aside></section>
-      <Modal open={reminderOpen} onClose={() => setReminderOpen(false)} title={tx("تذكير شخصي جديد", "New personal reminder")} footer={<><Button variant="ghost" type="button" onClick={() => setReminderOpen(false)}>{tx("إلغاء", "Cancel")}</Button><Button type="submit" form="personal-reminder-form" disabled={savingReminder}>{savingReminder ? tx("جاري الحفظ...", "Saving...") : tx("حفظ وضبط التنبيه", "Save reminder")}</Button></>}><form id="personal-reminder-form" className="reminder-form" onSubmit={saveReminder}><label>{tx("عنوان التذكير", "Reminder title")}<input required value={reminder.title} onChange={(event) => setReminder((current) => ({ ...current, title: event.target.value }))} placeholder={tx("مثال: مراجعة الفصل الثالث", "e.g. Review chapter three")} /></label><div><label>{tx("التاريخ", "Date")}<input required type="date" value={reminder.date} onChange={(event) => setReminder((current) => ({ ...current, date: event.target.value }))} /></label><label>{tx("الوقت", "Time")}<input required type="time" value={reminder.time} onChange={(event) => setReminder((current) => ({ ...current, time: event.target.value }))} /></label></div><label>{tx("نبّهني قبل الموعد", "Notify me before")}<select value={reminder.reminderMinutes} onChange={(event) => setReminder((current) => ({ ...current, reminderMinutes: event.target.value }))}><option value="0">{tx("وقت الموعد", "At event time")}</option><option value="15">{tx("15 دقيقة", "15 minutes")}</option><option value="30">{tx("30 دقيقة", "30 minutes")}</option><option value="60">{tx("ساعة", "1 hour")}</option><option value="1440">{tx("يوم", "1 day")}</option></select></label><label>{tx("ملاحظات", "Notes")}<textarea rows="3" value={reminder.notes} onChange={(event) => setReminder((current) => ({ ...current, notes: event.target.value }))} /></label></form></Modal>
+      <div className="stitch-page-head">
+        <div>
+          <h1>{tx("الجدول الدراسي والتقويم", "Academic Timetable & Calendar")}</h1>
+          <p>{tx("الجدول الدراسي الأسبوعي للمحاضرات والحصص، مع التقويم الشهري والعطلات الرسمية والتذكيرات.", "Weekly lecture timetable, monthly calendar, official holidays, and reminders.")}</p>
+        </div>
+        <div className="calendar-head-actions">
+          <div className="timetable-view-toggle">
+            <button
+              type="button"
+              className={viewMode === "weekly" ? "active" : ""}
+              onClick={() => setViewMode("weekly")}
+            >
+              <LayoutGrid size={15} />
+              {tx("الجدول الأسبوعي", "Weekly Timetable")}
+            </button>
+            <button
+              type="button"
+              className={viewMode === "monthly" ? "active" : ""}
+              onClick={() => setViewMode("monthly")}
+            >
+              <Calendar size={15} />
+              {tx("التقويم الشهري", "Monthly Calendar")}
+            </button>
+          </div>
+          <Button variant="ghost" onClick={() => openReminder()}>
+            <Bell size={17} /> {tx("إضافة تذكير", "Add reminder")}
+          </Button>
+          {allowCreate && (
+            <Button as="a" href="/tenant-admin/rooms?create=1">
+              <Plus size={17} /> {tx("غرفة وموعد جديد", "New room event")}
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {viewMode === "weekly" ? (
+        <section className="timetable-container">
+          <div className="timetable-controls">
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div className="calendar-nav">
+                <button type="button" onClick={() => setWeekOffset((prev) => prev - 1)} aria-label={tx("الأسبوع السابق", "Previous week")}>
+                  <ChevronLeft size={17} />
+                </button>
+                <button type="button" onClick={goToday}>
+                  {tx("هذا الأسبوع", "This Week")}
+                </button>
+                <button type="button" onClick={() => setWeekOffset((prev) => prev + 1)} aria-label={tx("الأسبوع التالي", "Next week")}>
+                  <ChevronRight size={17} />
+                </button>
+              </div>
+              <strong style={{ fontSize: "14px", color: "var(--stitch-text, #1e293b)" }}>
+                {weekRangeLabel}
+              </strong>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <span style={{ fontSize: "13px", color: "var(--stitch-muted, #64748b)" }}>{tx("تصفية حسب القاعة:", "Filter by Room:")}</span>
+              <select
+                value={selectedRoomId}
+                onChange={(e) => setSelectedRoomId(e.target.value)}
+                style={{ fontSize: "13px", padding: "6px 10px", borderRadius: "8px", border: "1px solid var(--stitch-border, #cbd5e1)" }}
+              >
+                <option value="all">{tx("جميع القاعات والدفعات", "All Rooms & Cohorts")}</option>
+                {rooms.map((r) => (
+                  <option key={r.id} value={r.id}>{r.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="timetable-grid-wrapper">
+            <div className="timetable-grid">
+              {/* Header row: corner cell + 7 days */}
+              <div className="timetable-header-cell" style={{ background: "#f1f5f9" }}>
+                {tx("الفترة / اليوم", "Period / Day")}
+              </div>
+              {weekDays.map((day) => (
+                <div key={day.date} className={`timetable-header-cell ${day.isToday ? "today-col" : ""}`}>
+                  <div>{tx(day.nameAr, day.nameEn)}</div>
+                  <small style={{ fontWeight: 400, opacity: 0.8 }}>{day.dayNum}/{day.monthNum}</small>
+                </div>
+              ))}
+
+              {/* Time slot rows */}
+              {timeSlots.map((slot) => (
+                <div key={slot.id} style={{ display: "contents" }}>
+                  <div className="timetable-time-cell">
+                    <span>{tx(slot.labelAr, slot.labelEn)}</span>
+                  </div>
+
+                  {weekDays.map((day) => {
+                    const slotEvents = getSlotEvents(day.date, slot);
+                    return (
+                      <div
+                        key={`${day.date}-${slot.id}`}
+                        className={`timetable-slot ${day.isToday ? "today-slot" : ""}`}
+                        onClick={() => openReminder(day.date, slot.defaultTime)}
+                      >
+                        {slotEvents.map((ev) => (
+                          <div
+                            key={ev.id}
+                            className={`timetable-event-card ${ev.type || "lecture"}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedEvent(ev);
+                            }}
+                          >
+                            <header>
+                              <span>{ev.time}</span>
+                              <Badge size="xs" tone={ev.type === "holiday" ? "warning" : ev.type === "personal_reminder" ? "neutral" : "primary"}>
+                                {ev.roomName}
+                              </Badge>
+                            </header>
+                            <strong>{tx(ev.titleAr, ev.title)}</strong>
+                            {ev.attendees > 0 && (
+                              <small style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "10.5px" }}>
+                                <Users size={12} /> {ev.attendees} {tx("طالب", "students")}
+                              </small>
+                            )}
+                          </div>
+                        ))}
+                        {slotEvents.length === 0 && (
+                          <span className="timetable-add-hint">
+                            + {tx("إضافة", "Add")}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : (
+        <section className="calendar-layout">
+          <div className="calendar-surface">
+            <header>
+              <div>
+                <strong>{monthLabel}</strong>
+                <span>{filteredEvents.filter((event) => event.date?.startsWith(`${year}-${String(month + 1).padStart(2, "0")}`)).length} {tx("مواعيد وعطلات", "events & holidays")}</span>
+              </div>
+              <div className="calendar-nav">
+                <button type="button" onClick={() => changeMonth(-1)} aria-label={tx("الشهر السابق", "Previous month")}>
+                  <ChevronLeft size={17} />
+                </button>
+                <button type="button" onClick={goToday}>{tx("اليوم", "Today")}</button>
+                <button type="button" onClick={() => changeMonth(1)} aria-label={tx("الشهر التالي", "Next month")}>
+                  <ChevronRight size={17} />
+                </button>
+              </div>
+            </header>
+            <div className="calendar-weekdays">
+              {tx(["سبت", "أحد", "اثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة"], ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"]).map((day, index) => (
+                <span className={index === 0 ? "week-start" : ""} key={day}>{day}</span>
+              ))}
+            </div>
+            <div className="calendar-days">
+              {monthDays.map((item, index) => {
+                if (!item.date) return <span className={`calendar-empty-day ${index % 7 === 0 ? "week-start" : ""}`} key={item.key} />;
+                const items = filteredEvents.filter((event) => event.date === item.date);
+                const hasHoliday = items.some((event) => event.type === "holiday");
+                return (
+                  <button
+                    className={`${item.date === selectedDate ? "selected" : ""} ${item.date === todayKey ? "today" : ""} ${index % 7 === 0 ? "week-start" : ""} ${hasHoliday ? "holiday" : ""}`}
+                    onClick={() => setSelectedDate(item.date)}
+                    onDoubleClick={() => openReminder(item.date)}
+                    type="button"
+                    key={item.key}
+                  >
+                    <span>{item.day}</span>
+                    {items.slice(0, 2).map((event) => (
+                      <i className={`calendar-event-${event.type || "meeting"}`} key={event.id}>
+                        {event.time} {tx(event.titleAr, event.title)}
+                      </i>
+                    ))}
+                    {items.length > 2 && <small>+{items.length - 2}</small>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <aside className="calendar-agenda">
+            <header>
+              <span>{tx("جدول اليوم", "Day agenda")}</span>
+              <strong>{selectedDate}</strong>
+            </header>
+            {dayEvents.map((event) => (
+              <article
+                className={`agenda-${event.type || "event"}`}
+                key={event.id}
+                onClick={() => setSelectedEvent(event)}
+                style={{ cursor: "pointer" }}
+              >
+                <span>{event.time}{event.duration > 0 && <small>{event.duration} min</small>}</span>
+                <div>
+                  <Badge tone={event.type === "holiday" ? "warning" : event.type === "personal_reminder" ? "success" : "primary"}>
+                    {event.roomName}
+                  </Badge>
+                  <h3>{tx(event.titleAr, event.title)}</h3>
+                  <p>{event.description || (event.type === "holiday" ? tx("عطلة رسمية ظاهرة لكل المستخدمين.", "Official holiday shown to all users.") : tx("موعد مرتبط بالغرفة", "Scheduled room event"))}</p>
+                  {event.attendees > 0 && <small><Users size={14} /> {event.attendees} {tx("مشاركين", "attendees")}</small>}
+                </div>
+              </article>
+            ))}
+            {!dayEvents.length && (
+              <div className="agenda-empty">
+                <CalendarDays size={34} />
+                <strong>{tx("لا توجد مواعيد", "No events scheduled")}</strong>
+                <span>{tx("اضغط مرتين على اليوم أو أضف تذكيرًا شخصيًا.", "Double-click the day or add a personal reminder.")}</span>
+                <Button variant="ghost" onClick={() => openReminder(selectedDate)}>
+                  <Bell size={16} /> {tx("إضافة تذكير", "Add reminder")}
+                </Button>
+              </div>
+            )}
+          </aside>
+        </section>
+      )}
+
+      {/* EVENT DETAILS MODAL */}
+      <Modal
+        open={Boolean(selectedEvent)}
+        onClose={() => setSelectedEvent(null)}
+        title={tx("تفاصيل الحصة / الموعد", "Session / Event Details")}
+      >
+        {selectedEvent && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <Badge tone={selectedEvent.type === "holiday" ? "warning" : selectedEvent.type === "personal_reminder" ? "neutral" : "primary"}>
+                {selectedEvent.roomName || tx("جلسة دراسية", "Study Session")}
+              </Badge>
+              <span style={{ fontSize: "13px", color: "var(--stitch-muted, #64748b)" }}>
+                {selectedEvent.date} {selectedEvent.time ? `• ${selectedEvent.time}` : ""}
+              </span>
+            </div>
+
+            <h2 style={{ fontSize: "18px", margin: "0", fontWeight: "700" }}>
+              {tx(selectedEvent.titleAr, selectedEvent.title)}
+            </h2>
+
+            {selectedEvent.description && (
+              <p style={{ fontSize: "14px", color: "#334155", lineHeight: "1.6", margin: "0" }}>
+                {selectedEvent.description}
+              </p>
+            )}
+
+            <dl style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", background: "#f8fafc", padding: "12px", borderRadius: "8px", margin: 0 }}>
+              <div>
+                <dt style={{ fontSize: "11px", color: "#64748b" }}>{tx("المدة الزمنية", "Duration")}</dt>
+                <dd style={{ margin: "4px 0 0", fontWeight: "600", fontSize: "13px" }}>{selectedEvent.duration ? `${selectedEvent.duration} ${tx("دقيقة", "min")}` : "—"}</dd>
+              </div>
+              <div>
+                <dt style={{ fontSize: "11px", color: "#64748b" }}>{tx("عدد الطلاب المسجلين", "Enrolled Students")}</dt>
+                <dd style={{ margin: "4px 0 0", fontWeight: "600", fontSize: "13px" }}>{selectedEvent.attendees || "—"}</dd>
+              </div>
+            </dl>
+
+            <div className="learning-form-actions">
+              <Button variant="ghost" onClick={() => setSelectedEvent(null)}>
+                {tx("إغلاق", "Close")}
+              </Button>
+              {selectedEvent.roomId && (
+                <Button as="a" href={`/tenant-admin/rooms`}>
+                  <ExternalLink size={15} />
+                  {tx("الانتقال إلى القاعة", "Go to Room")}
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* PERSONAL REMINDER MODAL */}
+      <Modal
+        open={reminderOpen}
+        onClose={() => setReminderOpen(false)}
+        title={tx("تذكير شخصي جديد", "New personal reminder")}
+        footer={
+          <>
+            <Button variant="ghost" type="button" onClick={() => setReminderOpen(false)}>
+              {tx("إلغاء", "Cancel")}
+            </Button>
+            <Button type="submit" form="personal-reminder-form" disabled={savingReminder}>
+              {savingReminder ? tx("جاري الحفظ...", "Saving...") : tx("حفظ وضبط التنبيه", "Save reminder")}
+            </Button>
+          </>
+        }
+      >
+        <form id="personal-reminder-form" className="reminder-form" onSubmit={saveReminder}>
+          <label>
+            {tx("عنوان التذكير", "Reminder title")}
+            <input
+              required
+              value={reminder.title}
+              onChange={(event) => setReminder((current) => ({ ...current, title: event.target.value }))}
+              placeholder={tx("مثال: مراجعة الفصل الثالث", "e.g. Review chapter three")}
+            />
+          </label>
+          <div>
+            <label>
+              {tx("التاريخ", "Date")}
+              <input
+                required
+                type="date"
+                value={reminder.date}
+                onChange={(event) => setReminder((current) => ({ ...current, date: event.target.value }))}
+              />
+            </label>
+            <label>
+              {tx("الوقت", "Time")}
+              <input
+                required
+                type="time"
+                value={reminder.time}
+                onChange={(event) => setReminder((current) => ({ ...current, time: event.target.value }))}
+              />
+            </label>
+          </div>
+          <label>
+            {tx("نبّهني قبل الموعد", "Notify me before")}
+            <select
+              value={reminder.reminderMinutes}
+              onChange={(event) => setReminder((current) => ({ ...current, reminderMinutes: event.target.value }))}
+            >
+              <option value="0">{tx("وقت الموعد", "At event time")}</option>
+              <option value="15">{tx("15 دقيقة", "15 minutes")}</option>
+              <option value="30">{tx("30 دقيقة", "30 minutes")}</option>
+              <option value="60">{tx("ساعة", "1 hour")}</option>
+              <option value="1440">{tx("يوم", "1 day")}</option>
+            </select>
+          </label>
+          <label>
+            {tx("ملاحظات", "Notes")}
+            <textarea
+              rows="3"
+              value={reminder.notes}
+              onChange={(event) => setReminder((current) => ({ ...current, notes: event.target.value }))}
+            />
+          </label>
+        </form>
+      </Modal>
     </>
   );
 }

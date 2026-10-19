@@ -171,6 +171,37 @@ class AssignmentsAndQuizzesTest extends TestCase
             ->assertJsonPath('error.code', 'MAX_ATTEMPTS_REACHED');
     }
 
+    public function test_bulk_quiz_questions_import_via_csv_and_json(): void
+    {
+        $this->seed();
+        [$org, $instructor] = $this->workspace('Cairo Coding Academy');
+        Sanctum::actingAs($instructor);
+
+        $quiz = Quiz::query()->create([
+            'organization_id' => $org->id,
+            'created_by' => $instructor->id,
+            'title' => 'Bulk Questions Target Quiz',
+            'duration_minutes' => 30,
+            'passing_score' => 70,
+            'max_attempts' => 2,
+            'questions' => [],
+        ]);
+
+        $csvContent = "What is PHP?, mcq, Language, Food, Car, Animal, A, 10\nPHP is open source, tf, True, 10";
+
+        $res = $this->postJson("/api/v1/organizations/{$org->id}/quizzes/{$quiz->id}/bulk-import", [
+            'csv' => $csvContent,
+        ])->assertCreated();
+
+        $this->assertSame(2, $res->json('data.importedCount'));
+        $this->assertCount(2, $res->json('data.quiz.questions'));
+
+        $fresh = $quiz->fresh();
+        $this->assertCount(2, $fresh->questions);
+        $this->assertSame('What is PHP?', $fresh->questions[0]->question_text);
+        $this->assertSame('PHP is open source', $fresh->questions[1]->question_text);
+    }
+
     private function workspace(string $name): array
     {
         $owner = User::factory()->create();

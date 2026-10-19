@@ -4,6 +4,7 @@ import { Loading } from "./components/Loading";
 import { ForbiddenPage } from "./pages/ForbiddenPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { ScrollToTop } from "./components/ScrollToTop";
+import { PwaInstallBanner } from "./components/PwaInstallBanner";
 import { useAuth } from "./contexts/AuthContext";
 import { useLanguage, useBilingualText } from "./contexts/LanguageContext";
 import { WorkspaceProvider } from "./contexts/WorkspaceContext";
@@ -42,6 +43,7 @@ export function App() {
   return (
     <>
       <ScrollToTop />
+      <PwaInstallBanner />
       <Suspense fallback={<Loading />}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
@@ -67,6 +69,9 @@ export function App() {
           <Route path="/academies/:academySlug" element={<AcademyProfilePage />} />
           <Route path="/booking/:courseId" element={<PublicBookingPage />} />
           <Route path="/booking/success" element={<BookingSuccessPage />} />
+          <Route path="/guardian" element={<Navigate to="/end-user/guardianAttendance" replace />} />
+          <Route path="/guardian/attendance" element={<Navigate to="/end-user/guardianAttendance" replace />} />
+          <Route path="/parent" element={<Navigate to="/end-user/guardianAttendance" replace />} />
           <Route path="/403" element={<ForbiddenPage />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/change-password" element={<ForcePasswordChangePage />} />

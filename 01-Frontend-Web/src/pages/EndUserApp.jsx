@@ -40,7 +40,7 @@ const nav = [
   { id: "invoices", label: "Invoices & Receipts", icon: "subscription", path: "/end-user/invoices", primary: true },
   { id: "messages", label: "Internal chat", icon: "messages", path: "/end-user/messages", primary: true },
   { id: "settings", label: "Settings", icon: "settings", path: "/end-user/settings", primary: true },
-  { id: "guardianAttendance", label: "Family & Guardian Portal", icon: "guardians", path: "/end-user/guardianAttendance", roles: ["guardian"], primary: true },
+  { id: "guardianAttendance", label: "Family & Guardian Portal", icon: "guardians", path: "/end-user/guardianAttendance", roles: ["guardian", "parent"], primary: true },
   { id: "bookings", label: "Book a teacher", icon: "bookings", path: "/end-user/bookings", roles: ["student"] },
   { id: "meetings", label: "Live Meetings", icon: "meetings", path: "/end-user/meetings" },
   { id: "announcements", label: "Announcements", icon: "announcements", path: "/end-user/announcements", module: "announcements" },

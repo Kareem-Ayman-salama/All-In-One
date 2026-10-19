@@ -357,6 +357,8 @@ Route::prefix('v1')->group(function (): void {
                         ->middleware('permission:courses.update');
                     Route::get('/quizzes/{quiz}/attempts', [QuizController::class, 'attempts'])
                         ->middleware('permission:courses.view');
+                    Route::post('/quizzes/{quiz}/bulk-import', [QuizController::class, 'bulkImportQuestions'])
+                        ->middleware('permission:courses.update');
                 });
 
                 Route::middleware('module:bookings')->group(function (): void {

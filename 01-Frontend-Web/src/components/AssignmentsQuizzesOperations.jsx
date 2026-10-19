@@ -8,6 +8,7 @@ import {
   Clock,
   ExternalLink,
   FileCheck,
+  FileSpreadsheet,
   FileText,
   HelpCircle,
   ListOrdered,
@@ -331,6 +332,71 @@ export function QuizzesManagementPage() {
     setQuestions(next);
   };
 
+  const [bulkModalOpen, setBulkModalOpen] = useState(false);
+  const [csvInput, setCsvInput] = useState("");
+
+  const handleBulkImport = () => {
+    if (!csvInput.trim()) return;
+    const lines = csvInput.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    const parsed = [];
+
+    lines.forEach((line, idx) => {
+      const delimiter = line.includes("\t") ? "\t" : line.includes("|") ? "|" : ",";
+      const parts = line.split(delimiter).map((p) => p.trim());
+      if (idx === 0 && (parts[0].toLowerCase().includes("question") || parts[0].includes("سؤال"))) {
+        return;
+      }
+      if (parts.length >= 3) {
+        const qText = parts[0];
+        const rawType = parts[1].toLowerCase();
+        const isTf = rawType.includes("tf") || rawType.includes("true") || rawType.includes("صح");
+        if (isTf) {
+          const ans = parts[2].toLowerCase().includes("true") || parts[2].includes("صح") || parts[2] === "1" ? "True" : "False";
+          parsed.push({
+            id: `q-bulk-${Date.now()}-${idx}`,
+            questionText: qText,
+            questionTextAr: qText,
+            type: "true_false",
+            options: [
+              { id: "True", text: tx("صحيح", "True") },
+              { id: "False", text: tx("خطأ", "False") }
+            ],
+            correctAnswer: ans,
+            points: Number(parts[3]) || 10
+          });
+        } else {
+          const opts = [];
+          if (parts[2]) opts.push({ id: "A", text: parts[2] });
+          if (parts[3]) opts.push({ id: "B", text: parts[3] });
+          if (parts[4]) opts.push({ id: "C", text: parts[4] });
+          if (parts[5]) opts.push({ id: "D", text: parts[5] });
+          const ans = parts[6] ? parts[6].toUpperCase().trim() : (opts[0]?.id || "A");
+          const pts = Number(parts[7]) || 10;
+          parsed.push({
+            id: `q-bulk-${Date.now()}-${idx}`,
+            questionText: qText,
+            questionTextAr: qText,
+            type: "mcq",
+            options: opts.length > 0 ? opts : [{ id: "A", text: "" }, { id: "B", text: "" }],
+            correctAnswer: ans,
+            points: pts
+          });
+        }
+      }
+    });
+
+    if (parsed.length === 0) {
+      showToast(tx("لم يتم العثور على أسئلة صالحة. يرجى مراجعة التنسيق.", "No valid questions detected. Check format."), "error");
+      return;
+    }
+
+    const existing = (questions.length === 1 && !questions[0].questionText.trim()) ? [] : questions;
+    setQuestions([...existing, ...parsed]);
+    showToast(tx(`تم استيراد ${parsed.length} سؤالاً بنجاح!`, `Successfully imported ${parsed.length} questions!`), "success");
+    setBulkModalOpen(false);
+    setCsvInput("");
+  };
+
   const handleCreate = async (e) => {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
@@ -432,10 +498,16 @@ export function QuizzesManagementPage() {
           <div style={{ marginTop: "1.5rem", borderTop: "1px solid #e2e8f0", paddingTop: "1rem" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
               <h3 style={{ fontSize: "16px", fontWeight: "700" }}>{tx("بنك الأسئلة والخيارات", "Questions Bank")} ({questions.length})</h3>
-              <Button type="button" size="sm" onClick={addQuestion}>
-                <Plus size={15} />
-                {tx("إضافة سؤال", "Add Question")}
-              </Button>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <Button type="button" size="sm" variant="outline" onClick={() => setBulkModalOpen(true)}>
+                  <FileSpreadsheet size={15} />
+                  {tx("استيراد من Excel / CSV", "Import CSV / Excel")}
+                </Button>
+                <Button type="button" size="sm" onClick={addQuestion}>
+                  <Plus size={15} />
+                  {tx("إضافة سؤال", "Add Question")}
+                </Button>
+              </div>
             </div>
 
             {questions.map((q, qIdx) => (
@@ -519,6 +591,53 @@ export function QuizzesManagementPage() {
             <Button type="submit">{tx("نشر الاختبار", "Publish Quiz")}</Button>
           </div>
         </form>
+      </Modal>
+
+      {/* BULK IMPORT QUESTIONS MODAL */}
+      <Modal
+        title={tx("استيراد بنك الأسئلة دفعة واحدة (Excel / Sheets / CSV)", "Bulk Import Question Bank (Excel / Sheets / CSV)")}
+        open={bulkModalOpen}
+        onClose={() => setBulkModalOpen(false)}
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <div style={{ background: "#f1f5f9", padding: "12px", borderRadius: "8px", fontSize: "13px", color: "#334155" }}>
+            <p style={{ margin: "0 0 6px 0", fontWeight: "bold" }}>
+              {tx("📋 كيفية الاستيراد السريع:", "📋 Quick Import Instructions:")}
+            </p>
+            <p style={{ margin: "0 0 6px 0" }}>
+              {tx(
+                "يمكنك نسخ ولصق صفوف مباشرة من Excel أو Google Sheets أو ملف CSV.",
+                "You can copy and paste rows directly from Excel, Google Sheets, or a CSV file."
+              )}
+            </p>
+            <div style={{ background: "#fff", padding: "8px", borderRadius: "6px", fontFamily: "monospace", fontSize: "12px", border: "1px dashed #cbd5e1" }}>
+              <strong>MCQ ({tx("اختيار من متعدد", "Multiple Choice")}):</strong><br />
+              {tx("نص السؤال, mcq, خيار أ, خيار ب, خيار ج, خيار د, A, 10", "Question text, mcq, Option A, Option B, Option C, Option D, A, 10")}<br /><br />
+              <strong>True / False ({tx("صح أو خطأ", "True / False")}):</strong><br />
+              {tx("نص السؤال, tf, True, 10", "Question text, tf, True, 10")}
+            </div>
+          </div>
+
+          <FormField label={tx("الصق محتوى الجدول أو ملف CSV هنا:", "Paste Spreadsheet or CSV Content Here:")}>
+            <textarea
+              rows={8}
+              value={csvInput}
+              onChange={(e) => setCsvInput(e.target.value)}
+              placeholder={`عاصمة مصر هي القاهرة, tf, True, 10\nما هي لغة برمجة رياكت؟, mcq, JavaScript, Python, C++, Java, A, 10`}
+              style={{ fontFamily: "monospace", fontSize: "12.5px" }}
+            />
+          </FormField>
+
+          <div className="learning-form-actions">
+            <Button variant="ghost" type="button" onClick={() => setBulkModalOpen(false)}>
+              {tx("إلغاء", "Cancel")}
+            </Button>
+            <Button type="button" onClick={handleBulkImport}>
+              <FileSpreadsheet size={16} />
+              {tx("تحليل وإضافة للأسئلة", "Parse & Add Questions")}
+            </Button>
+          </div>
+        </div>
       </Modal>
 
       {/* ATTEMPTS RESULTS MODAL */}

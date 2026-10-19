@@ -1,0 +1,32 @@
+{
+  "name": "منصة عين التعليمية | AIN Educational Platform",
+  "short_name": "AIN Platform",
+  "description": "المنصة التعليمية المتكاملة للطلاب والمعلمين وإدارة الأكاديميات ومتابعة الحضور والشهادات",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8FAFC",
+  "theme_color": "#1E40AF",
+  "dir": "rtl",
+  "lang": "ar",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/images/aio-logo-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/aio-logo-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/ain-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["education", "productivity"]
+}

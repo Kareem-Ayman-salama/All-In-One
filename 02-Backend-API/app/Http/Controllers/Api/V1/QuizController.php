@@ -291,6 +291,114 @@ class QuizController extends Controller
         ], status: 201);
     }
 
+    public function bulkImportQuestions(
+        Request $request,
+        string $organization,
+        string $quiz,
+        OperationRecorder $recorder,
+    ): JsonResponse {
+        $org = $this->organization($request);
+        $model = $this->quiz($request, $quiz);
+
+        $validated = $request->validate([
+            'questions' => ['nullable', 'array'],
+            'questions.*.questionText' => ['required_with:questions', 'string'],
+            'questions.*.questionTextAr' => ['nullable', 'string'],
+            'questions.*.type' => ['nullable', Rule::in(['mcq', 'true_false', 'short_answer'])],
+            'questions.*.options' => ['nullable', 'array'],
+            'questions.*.correctAnswer' => ['required_with:questions', 'string'],
+            'questions.*.points' => ['nullable', 'integer', 'min:1'],
+            'questions.*.explanation' => ['nullable', 'string'],
+            'csvText' => ['nullable', 'string', 'max:500000'],
+            'csv' => ['nullable', 'string', 'max:500000'],
+        ]);
+
+        $questionsToCreate = [];
+        $rawCsv = $validated['csvText'] ?? $validated['csv'] ?? null;
+
+        if (! empty($validated['questions'])) {
+            $questionsToCreate = $validated['questions'];
+        } elseif (! empty($rawCsv)) {
+            $lines = explode("\n", str_replace(["\r\n", "\r"], "\n", (string) $rawCsv));
+            foreach ($lines as $lineIndex => $line) {
+                $line = trim($line);
+                if ($line === '') {
+                    continue;
+                }
+                $cols = str_getcsv($line);
+                if ($lineIndex === 0 && (str_contains(mb_strtolower($cols[0]), 'question') || str_contains($cols[0], 'سؤال'))) {
+                    continue;
+                }
+                if (count($cols) >= 3) {
+                    $qText = trim($cols[0]);
+                    $rawType = mb_strtolower(trim($cols[1]));
+                    $type = in_array($rawType, ['true_false', 'tf', 'صح_خطأ', 'صح/خطأ'], true) ? 'true_false' : 'mcq';
+
+                    if ($type === 'true_false') {
+                        $opts = ['True', 'False'];
+                        $ans = (isset($cols[2]) && in_array(mb_strtolower(trim($cols[2])), ['true', 'صح', '1', 't'], true)) ? 'True' : 'False';
+                        $pts = isset($cols[3]) ? (int) $cols[3] : 10;
+                        $exp = isset($cols[4]) ? trim($cols[4]) : null;
+                    } else {
+                        $optA = isset($cols[2]) ? trim($cols[2]) : '';
+                        $optB = isset($cols[3]) ? trim($cols[3]) : '';
+                        $optC = isset($cols[4]) ? trim($cols[4]) : '';
+                        $optD = isset($cols[5]) ? trim($cols[5]) : '';
+                        $opts = array_values(array_filter([$optA, $optB, $optC, $optD], fn ($o) => $o !== ''));
+                        $ans = isset($cols[6]) ? trim($cols[6]) : ($opts[0] ?? 'A');
+                        $pts = isset($cols[7]) ? (int) $cols[7] : 10;
+                        $exp = isset($cols[8]) ? trim($cols[8]) : null;
+                    }
+
+                    $questionsToCreate[] = [
+                        'questionText' => $qText,
+                        'questionTextAr' => $qText,
+                        'type' => $type,
+                        'options' => $opts,
+                        'correctAnswer' => $ans,
+                        'points' => $pts > 0 ? $pts : 10,
+                        'explanation' => $exp,
+                    ];
+                }
+            }
+        }
+
+        if (empty($questionsToCreate)) {
+            throw new ApiException('EMPTY_IMPORT', 'No valid questions found to import. Check format or data.', 422);
+        }
+
+        $currentMaxOrder = (int) $model->questions()->max('order');
+
+        $created = DB::transaction(function () use ($model, $questionsToCreate, $currentMaxOrder) {
+            $createdList = [];
+            foreach ($questionsToCreate as $idx => $q) {
+                $createdList[] = QuizQuestion::query()->create([
+                    'quiz_id' => $model->id,
+                    'question_text' => $q['questionText'],
+                    'question_text_ar' => $q['questionTextAr'] ?? $q['questionText'],
+                    'type' => $q['type'] ?? 'mcq',
+                    'options' => $q['options'] ?? [],
+                    'correct_answer' => $q['correctAnswer'],
+                    'points' => $q['points'] ?? 10,
+                    'order' => $currentMaxOrder + $idx + 1,
+                    'explanation' => $q['explanation'] ?? null,
+                ]);
+            }
+
+            return $createdList;
+        });
+
+        $recorder->record('quiz.questions_imported', 'quiz', $model->id, $org->id, $request->user()->id, [
+            'count' => count($created),
+        ], ['quizId' => $model->id], $request);
+
+        return ApiResponse::success($request, [
+            'importedCount' => count($created),
+            'totalQuestions' => $model->questions()->count(),
+            'quiz' => $model->fresh()->load('questions'),
+        ], status: 201);
+    }
+
     private function organization(Request $request): Organization
     {
         return $request->attributes->get('active_organization');
