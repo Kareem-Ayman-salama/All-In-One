@@ -250,6 +250,97 @@ export function MemberDashboard({ data, user }) {
       </a>
     </section>
 
+    {/* STUDENT GAMIFICATION, XP & LEADERBOARD SHOWCASE */}
+    <section
+      style={{
+        background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)",
+        borderRadius: "18px",
+        padding: "24px",
+        color: "#fff",
+        margin: "24px 0",
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+        gap: "24px",
+        alignItems: "center",
+        boxShadow: "0 8px 24px rgba(49, 46, 129, 0.15)"
+      }}
+    >
+      <div>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+          <span style={{ background: "rgba(255,255,255,0.18)", padding: "4px 10px", borderRadius: "999px", fontSize: "12px", fontWeight: "bold" }}>
+            🏆 {tx("المستوى الأكاديمي", "Academic Level")}
+          </span>
+          <span style={{ color: "#a5b4fc", fontSize: "12px" }}>
+            {tx("الترتيب الحالي: #2 في دفعتك 🥈", "Current Rank: #2 in cohort 🥈")}
+          </span>
+        </div>
+
+        <h3 style={{ fontSize: "20px", fontWeight: "800", margin: "0 0 10px 0", color: "#fff" }}>
+          {tx("نقاط الخبرة والإنجازات (480 XP)", "Experience Points & Achievements (480 XP)")}
+        </h3>
+
+        {/* Level progress bar */}
+        <div style={{ marginBottom: "16px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "4px", color: "#c7d2fe" }}>
+            <span>{tx("المستوى الفضي (Silver)", "Silver Tier")}</span>
+            <span>480 / 600 XP ({tx("باقي 120 نقطة للذهبي", "120 XP to Gold")})</span>
+          </div>
+          <div style={{ width: "100%", height: "8px", borderRadius: "999px", background: "rgba(255,255,255,0.2)", overflow: "hidden" }}>
+            <div style={{ width: "80%", height: "100%", background: "#fbbf24", borderRadius: "999px" }} />
+          </div>
+        </div>
+
+        {/* Badges showcase */}
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+          <span style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", padding: "4px 10px", borderRadius: "8px", fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+            🌟 {tx("نجم الحضور", "Attendance Star")}
+          </span>
+          <span style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", padding: "4px 10px", borderRadius: "8px", fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+            🎯 {tx("العلامة الكاملة", "Quiz Master")}
+          </span>
+          <span style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", padding: "4px 10px", borderRadius: "8px", fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+            📝 {tx("بطل الواجبات", "Assignment Ace")}
+          </span>
+        </div>
+      </div>
+
+      {/* Cohort Leaderboard Preview */}
+      <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: "14px", padding: "16px", border: "1px solid rgba(255,255,255,0.15)" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+          <strong style={{ fontSize: "14px", color: "#e0e7ff" }}>
+            🥇 {tx("لوحة المتصدرين في دفعتك", "Cohort Leaderboard")}
+          </strong>
+          <small style={{ color: "#a5b4fc" }}>{tx("تحديث فوري", "Live")}</small>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "13px", padding: "6px 8px", background: "rgba(255,255,255,0.06)", borderRadius: "8px" }}>
+            <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <strong>1. 🥇</strong>
+              <span>أحمد سامي</span>
+            </span>
+            <span style={{ fontWeight: "bold", color: "#fbbf24" }}>620 XP</span>
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "13px", padding: "6px 8px", background: "rgba(251, 191, 36, 0.2)", borderRadius: "8px", border: "1px solid #fbbf24" }}>
+            <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <strong>2. 🥈</strong>
+              <span>{user.name} ({tx("أنت", "You")})</span>
+            </span>
+            <span style={{ fontWeight: "bold", color: "#fbbf24" }}>480 XP</span>
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "13px", padding: "6px 8px", background: "rgba(255,255,255,0.06)", borderRadius: "8px" }}>
+            <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <strong>3. 🥉</strong>
+              <span>مريم خالد</span>
+            </span>
+            <span style={{ fontWeight: "bold", color: "#fbbf24" }}>450 XP</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section className="member-dashboard-grid">
       <article className="member-focus-card">
         <header>

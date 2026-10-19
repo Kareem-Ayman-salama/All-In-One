@@ -67,6 +67,8 @@ export function App() {
           <Route path="/courses/:courseSlug" element={<CourseDetailsPage />} />
           <Route path="/academies" element={<AcademiesPage />} />
           <Route path="/academies/:academySlug" element={<AcademyProfilePage />} />
+          <Route path="/a/:academySlug" element={<AcademyProfilePage />} />
+          <Route path="/academy/:academySlug" element={<AcademyProfilePage />} />
           <Route path="/booking/:courseId" element={<PublicBookingPage />} />
           <Route path="/booking/success" element={<BookingSuccessPage />} />
           <Route path="/guardian" element={<Navigate to="/end-user/guardianAttendance" replace />} />

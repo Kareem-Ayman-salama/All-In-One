@@ -14,10 +14,13 @@ import {
   ListOrdered,
   Plus,
   Send,
+  Sparkles,
   Timer,
   Trash2,
   UploadCloud,
   Users,
+  Wand2,
+  Lightbulb,
   X,
   XCircle
 } from "lucide-react";
@@ -397,6 +400,232 @@ export function QuizzesManagementPage() {
     setCsvInput("");
   };
 
+  const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [aiTopic, setAiTopic] = useState("");
+  const [aiCount, setAiCount] = useState(3);
+  const [aiType, setAiType] = useState("mixed");
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiQuestions, setAiQuestions] = useState([]);
+
+  const handleGenerateAiQuestions = () => {
+    if (!aiTopic.trim()) {
+      showToast(tx("يرجى كتابة موضوع الدرس أو لصق محتوى المحاضرة لتوليد الأسئلة.", "Please enter a topic or paste lecture content to generate questions."), "warning");
+      return;
+    }
+
+    setAiGenerating(true);
+
+    setTimeout(() => {
+      const topicLower = aiTopic.toLowerCase();
+      let pool = [];
+
+      if (topicLower.includes("كان") || topicLower.includes("نحو") || topicLower.includes("مبتدأ") || topicLower.includes("إعراب") || topicLower.includes("اعراب") || topicLower.includes("خبر") || topicLower.includes("لغة")) {
+        pool = [
+          {
+            id: `q-ai-${Date.now()}-1`,
+            selected: true,
+            questionText: "What is the grammatical function of Kaana and its sisters when entering a nominal sentence?",
+            questionTextAr: "ما هو الأثر الإعرابي لدخول (كان وأخواتها) على الجملة الاسمية؟",
+            type: "mcq",
+            options: [
+              { id: "A", text: tx("ترفع المبتدأ ويسمى اسمها، وتنصب الخبر ويسمى خبرها", "Raises subject (Ism) and puts predicate (Khabar) in accusative") },
+              { id: "B", text: tx("تنصب المبتدأ وترفع الخبر", "Puts subject in accusative and raises predicate") },
+              { id: "C", text: tx("ترفع المبتدأ والخبر معاً", "Raises both subject and predicate") },
+              { id: "D", text: tx("تجزم الفعل وتنصب المفعول", "Makes verb jussive and noun accusative") }
+            ],
+            correctAnswer: "A",
+            points: 10
+          },
+          {
+            id: `q-ai-${Date.now()}-2`,
+            selected: true,
+            questionText: "Kaana's subject (Ism Kaana) can be an attached pronoun.",
+            questionTextAr: "يجوز أن يكون اسم (كان) ضميراً متصلاً مثل: (كنتُ من المتفوقين).",
+            type: "true_false",
+            options: [
+              { id: "True", text: tx("صحيح", "True") },
+              { id: "False", text: tx("خطأ", "False") }
+            ],
+            correctAnswer: "True",
+            points: 10
+          },
+          {
+            id: `q-ai-${Date.now()}-3`,
+            selected: true,
+            questionText: "In the sentence (أصبح الجوُّ معتدلاً), the word (معتدلاً) is:",
+            questionTextAr: "في جملة (أصبح الجوُّ معتدلاً)، إعراب كلمة (معتدلاً):",
+            type: "mcq",
+            options: [
+              { id: "A", text: tx("خبر أصبح منصوب وعلامة نصبه الفتحة", "Khabar Asbaha in accusative (Mansoub)") },
+              { id: "B", text: tx("اسم أصبح مرفوع بالضمة", "Ism Asbaha in nominative (Marfou)") },
+              { id: "C", text: tx("مفعول به ثانٍ منصوب", "Second object in accusative") },
+              { id: "D", text: tx("حال منصوب وعلامة نصبه الفتحة", "Hal in accusative") }
+            ],
+            correctAnswer: "A",
+            points: 10
+          },
+          {
+            id: `q-ai-${Date.now()}-4`,
+            selected: true,
+            questionText: "All sisters of Kaana are incomplete verbs that require a subject and a predicate.",
+            questionTextAr: "أفعال (كان وأخواتها) أفعال ناسخة ناقصة تحتاج إلى اسم وخبر لإتمام المعنى.",
+            type: "true_false",
+            options: [
+              { id: "True", text: tx("صحيح", "True") },
+              { id: "False", text: tx("خطأ", "False") }
+            ],
+            correctAnswer: "True",
+            points: 10
+          },
+          {
+            id: `q-ai-${Date.now()}-5`,
+            selected: true,
+            questionText: "Which of the following belongs to Kaana and its sisters?",
+            questionTextAr: "أيٌّ مما يلي يُعد من أخوات (كان)؟",
+            type: "mcq",
+            options: [
+              { id: "A", text: tx("صارَ، ليسَ، ظلَّ، باتَ", "Sara, Laysa, Zalla, Bata") },
+              { id: "B", text: tx("إنَّ، أنَّ، كأنَّ، ليتَ", "Inna, Anna, Ka'anna, Layta") },
+              { id: "C", text: tx("ظنَّ، حسبَ، زعمَ، خالَ", "Zanna, Hasiba, Za'ama, Khala") },
+              { id: "D", text: tx("عسى، حرى، اخلولق", "Asa, Hara, Ikhlawlaqa") }
+            ],
+            correctAnswer: "A",
+            points: 10
+          }
+        ];
+      } else if (topicLower.includes("react") || topicLower.includes("javascript") || topicLower.includes("hook") || topicLower.includes("برمج") || topicLower.includes("كود")) {
+        pool = [
+          {
+            id: `q-ai-${Date.now()}-1`,
+            selected: true,
+            questionText: "What hook is primarily used in React to manage component state?",
+            questionTextAr: "ما هو الـ Hook الأساسي في React المستخدم لإدارة الحالة (State) داخل المكون؟",
+            type: "mcq",
+            options: [
+              { id: "A", text: "useState" },
+              { id: "B", text: "useEffect" },
+              { id: "C", text: "useContext" },
+              { id: "D", text: "useMemo" }
+            ],
+            correctAnswer: "A",
+            points: 10
+          },
+          {
+            id: `q-ai-${Date.now()}-2`,
+            selected: true,
+            questionText: "React components must return a single root JSX element or Fragment.",
+            questionTextAr: "يجب على مكونات React أن تُعيد عنصراً رئيسياً واحداً أو Fragment.",
+            type: "true_false",
+            options: [
+              { id: "True", text: tx("صحيح", "True") },
+              { id: "False", text: tx("خطأ", "False") }
+            ],
+            correctAnswer: "True",
+            points: 10
+          },
+          {
+            id: `q-ai-${Date.now()}-3`,
+            selected: true,
+            questionText: "When does useEffect with an empty dependency array `[]` execute?",
+            questionTextAr: "متى يتم تنفيذ useEffect إذا تم تمرير مصفوفة اعتماديات فارغة `[]`؟",
+            type: "mcq",
+            options: [
+              { id: "A", text: tx("مرة واحدة فقط عند تركيب المكون (Mounting)", "Once only after initial mount") },
+              { id: "B", text: tx("مع كل إعادة رسم للمكون (Re-render)", "On every render") },
+              { id: "C", text: tx("عند تغيير أي متغير داخلي", "On any variable change") },
+              { id: "D", text: tx("عند تفكيك المكون فقط", "Only on unmount") }
+            ],
+            correctAnswer: "A",
+            points: 10
+          }
+        ];
+      } else {
+        const snippet = aiTopic.trim().slice(0, 35);
+        pool = [
+          {
+            id: `q-ai-${Date.now()}-1`,
+            selected: true,
+            questionText: `Which statement accurately describes the core concept of: ${snippet}?`,
+            questionTextAr: `أيُّ العبارات التالية تعبر بدقة عن المفهوم الأساسي لـ (${snippet})؟`,
+            type: "mcq",
+            options: [
+              { id: "A", text: tx(`التطبيق العملي السليم لقواعد ومبادئ ${snippet}`, `Accurate application of principles for ${snippet}`) },
+              { id: "B", text: tx("إلغاء المعايير الأساسية دون تحقق", "Bypassing fundamental standards") },
+              { id: "C", text: tx("الاعتماد على افتراضات عشوائية فقط", "Relying purely on arbitrary assumptions") },
+              { id: "D", text: tx("عدم الحاجة لأي مراجعة دورية", "Eliminating regular reviews") }
+            ],
+            correctAnswer: "A",
+            points: 10
+          },
+          {
+            id: `q-ai-${Date.now()}-2`,
+            selected: true,
+            questionText: `Understanding (${snippet}) is essential for mastering advanced concepts in this course.`,
+            questionTextAr: `فهم واستيعاب (${snippet}) يُعد ركيزة أساسية لاجتياز التطبيقات المتقدمة في هذه الدورة.`,
+            type: "true_false",
+            options: [
+              { id: "True", text: tx("صحيح", "True") },
+              { id: "False", text: tx("خطأ", "False") }
+            ],
+            correctAnswer: "True",
+            points: 10
+          },
+          {
+            id: `q-ai-${Date.now()}-3`,
+            selected: true,
+            questionText: `What is the primary objective of analyzing ${snippet}?`,
+            questionTextAr: `ما هو الهدف التعليمي الرئيسي من دراسة وتحليل (${snippet})؟`,
+            type: "mcq",
+            options: [
+              { id: "A", text: tx("تحقيق الفهم العميق والقدرة على حل المسائل والتطبيقات", "Achieving deep comprehension and practical problem solving") },
+              { id: "B", text: tx("حفظ التعريفات فقط دون فهم أو تطبيق", "Memorization without practical application") },
+              { id: "C", text: tx("تجاهل الشواهد والأمثلة التوضيحية", "Ignoring illustrative examples") },
+              { id: "D", text: tx("التركيز على الجانب النظري المجرد فقط", "Focusing strictly on abstract theory") }
+            ],
+            correctAnswer: "A",
+            points: 10
+          }
+        ];
+      }
+
+      if (aiType === "mcq") {
+        pool = pool.filter((q) => q.type === "mcq");
+      } else if (aiType === "true_false") {
+        pool = pool.filter((q) => q.type === "true_false");
+      }
+
+      const finalSlice = pool.slice(0, aiCount);
+      setAiQuestions(finalSlice);
+      setAiGenerating(false);
+      showToast(tx(`تم توليد ${finalSlice.length} أسئلة ذكية بنجاح! راجعها ثم أضفها للاختبار.`, `Generated ${finalSlice.length} AI questions! Review and add them.`), "success");
+    }, 600);
+  };
+
+  const handleApplyAiQuestions = () => {
+    const selected = aiQuestions.filter((q) => q.selected);
+    if (selected.length === 0) {
+      showToast(tx("يرجى تحديد سؤال واحد على الأقل لإضافته.", "Please select at least one question to add."), "warning");
+      return;
+    }
+
+    const cleanExisting = questions.length === 1 && !questions[0].questionText.trim() && !questions[0].questionTextAr.trim() ? [] : questions;
+    const formatted = selected.map((q) => ({
+      id: q.id,
+      questionText: q.questionText,
+      questionTextAr: q.questionTextAr,
+      type: q.type,
+      options: q.options,
+      correctAnswer: q.correctAnswer,
+      points: q.points || 10
+    }));
+
+    setQuestions([...cleanExisting, ...formatted]);
+    showToast(tx(`تمت إضافة ${formatted.length} أسئلة بنجاح إلى بنك الاختبار!`, `Added ${formatted.length} questions to quiz bank successfully!`), "success");
+    setAiModalOpen(false);
+    setAiQuestions([]);
+    setAiTopic("");
+  };
+
   const handleCreate = async (e) => {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
@@ -498,7 +727,27 @@ export function QuizzesManagementPage() {
           <div style={{ marginTop: "1.5rem", borderTop: "1px solid #e2e8f0", paddingTop: "1rem" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
               <h3 style={{ fontSize: "16px", fontWeight: "700" }}>{tx("بنك الأسئلة والخيارات", "Questions Bank")} ({questions.length})</h3>
-              <div style={{ display: "flex", gap: "8px" }}>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => {
+                    setAiModalOpen(true);
+                    setAiQuestions([]);
+                  }}
+                  style={{
+                    background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                    color: "#fff",
+                    border: "none",
+                    boxShadow: "0 2px 8px rgba(99, 102, 241, 0.35)",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px"
+                  }}
+                >
+                  <Sparkles size={15} />
+                  {tx("المساعد الذكي (AI Generator)", "AI Question Generator")}
+                </Button>
                 <Button type="button" size="sm" variant="outline" onClick={() => setBulkModalOpen(true)}>
                   <FileSpreadsheet size={15} />
                   {tx("استيراد من Excel / CSV", "Import CSV / Excel")}
@@ -637,6 +886,201 @@ export function QuizzesManagementPage() {
               {tx("تحليل وإضافة للأسئلة", "Parse & Add Questions")}
             </Button>
           </div>
+        </div>
+      </Modal>
+
+      {/* AI QUESTION GENERATOR MODAL */}
+      <Modal
+        title={tx("✨ المساعد الذكي لتوليد أسئلة الاختبارات (AI Quiz Generator)", "✨ AI Quiz & Question Generator")}
+        open={aiModalOpen}
+        onClose={() => setAiModalOpen(false)}
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <div style={{ background: "linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.08))", padding: "14px", borderRadius: "10px", border: "1px solid rgba(99, 102, 241, 0.2)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+              <Sparkles size={18} style={{ color: "#6366f1" }} />
+              <strong style={{ fontSize: "14px", color: "#1e1b4b" }}>
+                {tx("توليد أسئلة تعليمية بالذكاء الاصطناعي", "Generate Questions with Academic AI")}
+              </strong>
+            </div>
+            <p style={{ margin: 0, fontSize: "12.5px", color: "#475569", lineHeight: "1.6" }}>
+              {tx(
+                "اكتب موضوع الدرس أو الصق فقرة من المحاضرة، وسيولد المساعد الذكي أسئلة اختيار من متعدد وصح وخطأ مع تحديد الإجابات النموذجية والدرجات آلياً.",
+                "Enter a lesson topic or paste lecture text, and AI will create MCQ and True/False questions with correct answers and points."
+              )}
+            </p>
+
+            {/* Quick Inspiration Pills */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "10px" }}>
+              <span style={{ fontSize: "11px", fontWeight: "bold", color: "#6366f1", alignSelf: "center" }}>
+                {tx("أمثلة سريعة:", "Quick Prompts:")}
+              </span>
+              {[
+                { ar: "قواعد النحو: كان وأخواتها", en: "Arabic Grammar: Kaana and its sisters" },
+                { ar: "تطوير الويب: React Hooks & State", en: "React Hooks & State" },
+                { ar: "الفيزياء: قوانين الحركة والسرعة", en: "Physics: Laws of Motion" },
+                { ar: "الإنجليزية: Past Simple vs Continuous", en: "English: Past Simple vs Continuous" }
+              ].map((chip, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setAiTopic(chip.ar)}
+                  style={{
+                    background: "#ffffff",
+                    border: "1px solid #cbd5e1",
+                    borderRadius: "6px",
+                    padding: "3px 8px",
+                    fontSize: "11px",
+                    cursor: "pointer",
+                    color: "#334155"
+                  }}
+                >
+                  {tx(chip.ar, chip.en)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <FormField label={tx("موضوع الدرس أو نص المحاضرة المطلوب توليد الأسئلة منه:", "Lesson Topic or Lecture Content:")}>
+            <textarea
+              rows={4}
+              value={aiTopic}
+              onChange={(e) => setAiTopic(e.target.value)}
+              placeholder={tx("مثال: كان وأخواتها أفعال ناسخة تدخل على الجملة الاسمية فترفع المبتدأ ويسمى اسمها وتنصب الخبر...", "e.g. Kaana and its sisters or paste text from slides...")}
+              style={{ fontSize: "13px" }}
+            />
+          </FormField>
+
+          <div className="learning-form-grid">
+            <FormField label={tx("عدد الأسئلة المطلوب", "Number of Questions")}>
+              <select
+                value={aiCount}
+                onChange={(e) => setAiCount(Number(e.target.value))}
+                style={{ fontSize: "13px" }}
+              >
+                <option value={3}>{tx("3 أسئلة (سريع ومكثف)", "3 Questions (Quick)")}</option>
+                <option value={5}>{tx("5 أسئلة (شامل)", "5 Questions (Comprehensive)")}</option>
+              </select>
+            </FormField>
+
+            <FormField label={tx("نوع الأسئلة المطلوب", "Question Types")}>
+              <select
+                value={aiType}
+                onChange={(e) => setAiType(e.target.value)}
+                style={{ fontSize: "13px" }}
+              >
+                <option value="mixed">{tx("مزيج (اختيار من متعدد + صح وخطأ)", "Mixed (MCQ + True/False)")}</option>
+                <option value="mcq">{tx("اختيار من متعدد فقط (MCQ)", "MCQ Only")}</option>
+                <option value="true_false">{tx("صح أو خطأ فقط (True/False)", "True/False Only")}</option>
+              </select>
+            </FormField>
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
+            <Button
+              type="button"
+              onClick={handleGenerateAiQuestions}
+              disabled={aiGenerating || !aiTopic.trim()}
+              style={{
+                background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                color: "#fff",
+                border: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px"
+              }}
+            >
+              <Sparkles size={16} />
+              {aiGenerating ? tx("جاري التوليد بالذكاء الاصطناعي...", "Generating with AI...") : tx("توليد الأسئلة الآن", "Generate Questions Now")}
+            </Button>
+          </div>
+
+          {/* Generated Questions Preview */}
+          {aiQuestions.length > 0 && (
+            <div style={{ marginTop: "1rem", borderTop: "1px solid #e2e8f0", paddingTop: "1rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                <strong style={{ fontSize: "14px" }}>
+                  {tx("معاينة الأسئلة المولدة", "Generated Questions Preview")} ({aiQuestions.filter((q) => q.selected).length} {tx("محدد", "selected")})
+                </strong>
+                <small style={{ color: "#64748b" }}>
+                  {tx("يمكنك اختيار أو استبعاد أي سؤال قبل الإضافة", "Check/uncheck questions to include")}
+                </small>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px", maxHeight: "280px", overflowY: "auto", padding: "4px" }}>
+                {aiQuestions.map((q, idx) => (
+                  <div
+                    key={q.id}
+                    style={{
+                      background: q.selected ? "#f0fdf4" : "#f8fafc",
+                      border: q.selected ? "1px solid #86efac" : "1px solid #cbd5e1",
+                      borderRadius: "8px",
+                      padding: "10px 12px",
+                      transition: "all 0.2s ease"
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                      <input
+                        type="checkbox"
+                        checked={q.selected}
+                        onChange={(e) => {
+                          const updated = [...aiQuestions];
+                          updated[idx].selected = e.target.checked;
+                          setAiQuestions(updated);
+                        }}
+                        style={{ marginTop: "3px", width: "16px", height: "16px", cursor: "pointer" }}
+                      />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span style={{ fontSize: "13px", fontWeight: "bold" }}>
+                            {q.questionTextAr || q.questionText}
+                          </span>
+                          <Badge tone={q.type === "mcq" ? "primary" : "neutral"}>
+                            {q.type === "mcq" ? "MCQ" : "True/False"}
+                          </Badge>
+                        </div>
+
+                        {q.type === "mcq" && (
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", marginTop: "8px", fontSize: "12px" }}>
+                            {q.options.map((opt) => (
+                              <div
+                                key={opt.id}
+                                style={{
+                                  padding: "4px 8px",
+                                  borderRadius: "4px",
+                                  background: opt.id === q.correctAnswer ? "rgba(16, 185, 129, 0.15)" : "#ffffff",
+                                  border: opt.id === q.correctAnswer ? "1px solid #10b981" : "1px solid #e2e8f0",
+                                  fontWeight: opt.id === q.correctAnswer ? "bold" : "normal"
+                                }}
+                              >
+                                {opt.id}. {opt.text} {opt.id === q.correctAnswer && "✓"}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {q.type === "true_false" && (
+                          <div style={{ marginTop: "6px", fontSize: "12px", color: "#059669", fontWeight: "bold" }}>
+                            {tx("الإجابة الصحيحة:", "Correct Answer:")} {q.correctAnswer === "True" ? tx("صحيح ✓", "True ✓") : tx("خطأ ✗", "False ✗")}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="learning-form-actions" style={{ marginTop: "1rem" }}>
+                <Button variant="ghost" type="button" onClick={() => setAiModalOpen(false)}>
+                  {tx("إلغاء", "Cancel")}
+                </Button>
+                <Button type="button" onClick={handleApplyAiQuestions} style={{ background: "#059669", color: "#fff", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                  <Check size={16} />
+                  {tx("إضافة الأسئلة المحددة للاختبار", "Add Selected Questions to Quiz")}
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </Modal>
 

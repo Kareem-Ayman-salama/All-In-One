@@ -658,6 +658,9 @@ export const api = {
   toggleDiscussionPin: (discussionId) => shouldUseMockApi()
     ? delay({ id: discussionId, isPinned: true })
     : httpClient(`/discussions/${discussionId}/pin`, { method: "POST" }).then(camelize),
+  likeRoomDiscussion: (discussionId) => shouldUseMockApi()
+    ? delay({ id: discussionId, success: true })
+    : httpClient(`/discussions/${discussionId}/like`, { method: "POST" }).then(camelize),
 
   saveVideoProgress: (payload) => shouldUseMockApi()
     ? delay({ contentId: payload.contentId, lastPositionSeconds: payload.lastPositionSeconds, completionPercentage: Math.min(100, Math.round((payload.watchedSeconds / (payload.totalDurationSeconds || 1)) * 100)), isCompleted: (payload.watchedSeconds / (payload.totalDurationSeconds || 1)) >= 0.85 })
@@ -804,6 +807,7 @@ export const apiService = {
   createRoomDiscussion: api.createRoomDiscussion,
   addDiscussionComment: api.addDiscussionComment,
   toggleDiscussionPin: api.toggleDiscussionPin,
+  likeRoomDiscussion: api.likeRoomDiscussion,
   verifyCertificatePublic: api.verifyCertificatePublic,
   getVideoProgress: api.getVideoProgress,
   saveVideoProgress: api.saveVideoProgress,

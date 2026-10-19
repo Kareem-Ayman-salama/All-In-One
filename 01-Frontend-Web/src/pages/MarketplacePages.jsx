@@ -1,7 +1,7 @@
 import {
-  ArrowLeft, ArrowRight, BadgeCheck, BookOpen, Building2, CalendarDays, Check, CheckCircle2, ChevronDown,
-  Clock3, CreditCard, ExternalLink, Filter, GraduationCap, Languages, MapPin, Megaphone, Menu, MonitorPlay,
-  Rocket, Search, ShieldCheck, SlidersHorizontal, Sparkles, Star, Store, Sun, Moon, UserRound, Users, Wallet, X
+  ArrowLeft, ArrowRight, Award, BadgeCheck, BookOpen, Building2, CalendarDays, Check, CheckCircle2, ChevronDown,
+  Clock3, CreditCard, ExternalLink, Filter, GraduationCap, Languages, MapPin, Megaphone, Menu, MessageCircle, MonitorPlay,
+  Phone, Rocket, Search, Share2, ShieldCheck, SlidersHorizontal, Sparkles, Star, Store, Sun, Moon, UserRound, Users, Wallet, X
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -263,13 +263,349 @@ export function AcademiesPage() {
 export function AcademyProfilePage() {
   const { academySlug } = useParams();
   const { academies, courses, instructors } = useMarketplace();
+  const { showToast } = useToast();
   const academy = academies.find((item) => item.slug === academySlug && item.public);
   if (!academy) return <Navigate to="/academies" replace />;
   const { isArabic, copy } = useMarketI18n();
+  const [courseSearch, setCourseSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+
   const academyCourses = courses.filter((item) => item.academyId === academy.id && item.status === "published");
   const academyInstructors = instructors.filter((item) => item.organizationId === academy.organizationId && item.active);
+
+  const filteredCourses = useMemo(() => {
+    return academyCourses.filter((course) => {
+      const title = nameOf(course, isArabic).toLowerCase();
+      const matchesSearch = !courseSearch || title.includes(courseSearch.toLowerCase());
+      const matchesCat = selectedCategory === "all" || course.category === selectedCategory;
+      return matchesSearch && matchesCat;
+    });
+  }, [academyCourses, courseSearch, selectedCategory, isArabic]);
+
+  const categories = useMemo(() => {
+    const set = new Set(academyCourses.map((c) => c.category).filter(Boolean));
+    return ["all", ...Array.from(set)];
+  }, [academyCourses]);
+
+  const copyProfileLink = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(window.location.href);
+      showToast(copy("تم نسخ رابط الأكاديمية بنجاح!", "Academy link copied to clipboard!"), "success");
+    }
+  };
+
   useMarketplaceSeo(`${nameOf(academy, isArabic)} | AIN`, isArabic ? academy.descriptionAr : academy.description);
-  return <MarketplaceShell><main className="academy-profile-main"><section className="academy-profile-cover"><div className="academy-profile-logo" style={{ background: academy.color }}>{academy.initials}</div><div><Badge tone="success">{academy.verified ? copy(`${providerLabel(academy.providerType, copy)} موثّق`, `Verified ${providerLabel(academy.providerType, copy).toLowerCase()}`) : copy("قيد التحقق", "Verification pending")}</Badge><h1>{nameOf(academy, isArabic)}</h1><p>{isArabic ? academy.descriptionAr : academy.description}</p><span><MapPin />{academy.location}</span></div></section><nav className="academy-profile-stats"><span><strong>{academyCourses.length}</strong> {copy("كورسات", "courses")}</span><span><strong>{academyInstructors.length}</strong> {copy("مدرسين", "instructors")}</span><span><strong>{academy.branches.length || 1}</strong> {copy("فرع / أونلاين", "branches / online")}</span></nav><section className="academy-profile-section"><h2>{copy("الكورسات المتاحة", "Available courses")}</h2><div className="market-course-grid">{academyCourses.map((course) => <CourseCard course={course} key={course.id} />)}</div></section><section className="academy-profile-section"><h2>{copy("المدرسون", "Instructors")}</h2><div className="instructors-public-grid">{academyInstructors.map((item) => <article key={item.id}><span>{item.initials}</span><h3>{nameOf(item, isArabic)}</h3><strong>{item.specialty}</strong><p>{item.bio}</p></article>)}</div></section></main></MarketplaceShell>;
+
+  return (
+    <MarketplaceShell>
+      <main className="academy-profile-main" style={{ maxWidth: "1200px", margin: "0 auto", padding: "16px 20px 60px" }}>
+        {/* HERO BANNER / MINI-SITE COVER */}
+        <section
+          className="academy-profile-cover"
+          style={{
+            background: `linear-gradient(135deg, ${academy.color || "#1e3a8a"} 0%, #0f172a 100%)`,
+            borderRadius: "20px",
+            padding: "40px 32px",
+            color: "#fff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "24px",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.12)",
+            position: "relative",
+            overflow: "hidden"
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "24px", flexWrap: "wrap", zIndex: 1 }}>
+            <div
+              className="academy-profile-logo"
+              style={{
+                width: "90px",
+                height: "90px",
+                borderRadius: "20px",
+                background: "#fff",
+                color: academy.color || "#1e3a8a",
+                fontSize: "32px",
+                fontWeight: 900,
+                display: "grid",
+                placeItems: "center",
+                boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
+                border: "3px solid rgba(255,255,255,0.4)"
+              }}
+            >
+              {academy.initials}
+            </div>
+
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+                <span style={{
+                  background: "rgba(255,255,255,0.2)",
+                  color: "#fff",
+                  padding: "4px 12px",
+                  borderRadius: "999px",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  backdropFilter: "blur(4px)"
+                }}>
+                  {providerLabel(academy.providerType, copy)}
+                </span>
+                {academy.verified && (
+                  <span style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "4px",
+                    background: "#10b981",
+                    color: "#fff",
+                    padding: "4px 10px",
+                    borderRadius: "999px",
+                    fontSize: "12px",
+                    fontWeight: 700
+                  }}>
+                    <BadgeCheck size={14} />
+                    {copy("جهة تعليمية موثقة", "Verified Academy")}
+                  </span>
+                )}
+              </div>
+
+              <h1 style={{ fontSize: "28px", fontWeight: 850, margin: "0 0 8px 0", color: "#fff" }}>
+                {nameOf(academy, isArabic)}
+              </h1>
+
+              <p style={{ margin: "0 0 12px 0", fontSize: "14px", color: "rgba(255,255,255,0.85)", maxWidth: "600px", lineHeight: 1.6 }}>
+                {isArabic ? academy.descriptionAr : academy.description}
+              </p>
+
+              <div style={{ display: "flex", alignItems: "center", gap: "16px", fontSize: "13px", color: "rgba(255,255,255,0.8)" }}>
+                <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                  <MapPin size={15} /> {academy.location || copy("أونلاين وحضوري", "Online & In-person")}
+                </span>
+                <span>•</span>
+                <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                  <Building2 size={15} /> {academy.branches?.length || 1} {copy("فروع تعليمية", "branches")}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Contact & Action Buttons */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px", zIndex: 1, minWidth: "180px" }}>
+            <Button
+              as="a"
+              href={`https://wa.me/201000000000?text=${encodeURIComponent(copy(`مرحباً، أود الاستفسار عن كورسات ${nameOf(academy, isArabic)}`, `Hello, I'd like to ask about ${nameOf(academy, isArabic)} courses`))}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                background: "#25D366",
+                color: "#fff",
+                border: "none",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                fontWeight: 700,
+                boxShadow: "0 4px 12px rgba(37,211,102,0.3)"
+              }}
+            >
+              <MessageCircle size={17} />
+              {copy("تواصل واتساب مباشر", "Chat on WhatsApp")}
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={copyProfileLink}
+              style={{
+                background: "rgba(255,255,255,0.15)",
+                color: "#fff",
+                borderColor: "rgba(255,255,255,0.3)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px"
+              }}
+            >
+              <Share2 size={16} />
+              {copy("مشاركة الرابط", "Share Profile")}
+            </Button>
+          </div>
+        </section>
+
+        {/* TRUST STATS BAR */}
+        <section
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+            gap: "16px",
+            margin: "24px 0",
+            background: "var(--stitch-surface, #fff)",
+            border: "1px solid var(--stitch-border, #e2e8f0)",
+            borderRadius: "14px",
+            padding: "20px 24px"
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "#eff6ff", color: "#2563eb", display: "grid", placeItems: "center" }}>
+              <BookOpen size={20} />
+            </div>
+            <div>
+              <strong style={{ display: "block", fontSize: "18px" }}>{academyCourses.length}</strong>
+              <small style={{ color: "#64748b" }}>{copy("كورسات معتمدة", "Verified Courses")}</small>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "#ecfdf5", color: "#059669", display: "grid", placeItems: "center" }}>
+              <Users size={20} />
+            </div>
+            <div>
+              <strong style={{ display: "block", fontSize: "18px" }}>{academyInstructors.length || 1}</strong>
+              <small style={{ color: "#64748b" }}>{copy("نخبة المدرسين", "Top Instructors")}</small>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "#fef3c7", color: "#d97706", display: "grid", placeItems: "center" }}>
+              <Award size={20} />
+            </div>
+            <div>
+              <strong style={{ display: "block", fontSize: "18px" }}>100%</strong>
+              <small style={{ color: "#64748b" }}>{copy("شهادات إلكترونية بـ QR", "QR Verified Certs")}</small>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "#f5f3ff", color: "#7c3aed", display: "grid", placeItems: "center" }}>
+              <ShieldCheck size={20} />
+            </div>
+            <div>
+              <strong style={{ display: "block", fontSize: "18px" }}>{copy("حماية مشددة", "High Security")}</strong>
+              <small style={{ color: "#64748b" }}>{copy("ضد تسريب المحتوى", "Anti-leakage protected")}</small>
+            </div>
+          </div>
+        </section>
+
+        {/* COURSES CATALOG */}
+        <section style={{ marginTop: "32px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px", marginBottom: "20px" }}>
+            <div>
+              <h2 style={{ fontSize: "22px", fontWeight: 800, margin: "0 0 4px 0" }}>
+                {copy("الكورسات المتاحة للتسجيل", "Available Courses for Enrollment")}
+              </h2>
+              <p style={{ margin: 0, color: "#64748b", fontSize: "14px" }}>
+                {copy("اختر الكورس المناسب واحجز مقعدك في الدفعة الحالية.", "Pick a course and secure your seat in the active cohort.")}
+              </p>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+              <div style={{ position: "relative" }}>
+                <Search size={16} style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", right: isArabic ? "12px" : "auto", left: isArabic ? "auto" : "12px", color: "#94a3b8" }} />
+                <input
+                  type="text"
+                  value={courseSearch}
+                  onChange={(e) => setCourseSearch(e.target.value)}
+                  placeholder={copy("بحث في الكورسات...", "Search courses...")}
+                  style={{
+                    padding: isArabic ? "8px 36px 8px 14px" : "8px 14px 8px 36px",
+                    borderRadius: "8px",
+                    border: "1px solid var(--stitch-border, #cbd5e1)",
+                    fontSize: "13px"
+                  }}
+                />
+              </div>
+
+              {categories.length > 2 && (
+                <div style={{ display: "flex", gap: "4px", background: "var(--stitch-soft, #f1f5f9)", padding: "4px", borderRadius: "8px" }}>
+                  {categories.map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setSelectedCategory(cat)}
+                      style={{
+                        padding: "5px 12px",
+                        borderRadius: "6px",
+                        border: "none",
+                        fontSize: "12.5px",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        background: selectedCategory === cat ? "var(--stitch-surface, #fff)" : "transparent",
+                        color: selectedCategory === cat ? "#2563eb" : "#64748b",
+                        boxShadow: selectedCategory === cat ? "0 1px 3px rgba(0,0,0,0.06)" : "none"
+                      }}
+                    >
+                      {cat === "all" ? copy("الكل", "All") : cat}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {filteredCourses.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "48px 20px", background: "var(--stitch-surface, #fff)", borderRadius: "14px", border: "1px solid var(--stitch-border, #e2e8f0)" }}>
+              <BookOpen size={40} style={{ color: "#94a3b8", marginBottom: "12px" }} />
+              <h3 style={{ fontSize: "16px", fontWeight: 700, margin: "0 0 6px 0" }}>{copy("لا توجد كورسات مطابقة للبحث", "No courses match your search")}</h3>
+              <p style={{ color: "#64748b", fontSize: "13px", margin: 0 }}>{copy("جرب تغيير معايير التصفية أو البحث.", "Try adjusting search or category filter.")}</p>
+            </div>
+          ) : (
+            <div className="market-course-grid">
+              {filteredCourses.map((course) => (
+                <CourseCard course={course} key={course.id} />
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* INSTRUCTORS SECTION */}
+        {academyInstructors.length > 0 && (
+          <section style={{ marginTop: "48px" }}>
+            <h2 style={{ fontSize: "22px", fontWeight: 800, marginBottom: "16px" }}>
+              {copy("فريق المعلمين والمدربين", "Faculty & Instructors")}
+            </h2>
+            <div className="instructors-public-grid">
+              {academyInstructors.map((item) => (
+                <article key={item.id} style={{ background: "var(--stitch-surface, #fff)", border: "1px solid var(--stitch-border, #e2e8f0)", borderRadius: "14px", padding: "20px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "12px" }}>
+                    <span style={{ width: "48px", height: "48px", borderRadius: "50%", background: "#eff6ff", color: "#2563eb", display: "grid", placeItems: "center", fontSize: "18px", fontWeight: 800 }}>
+                      {item.initials}
+                    </span>
+                    <div>
+                      <h3 style={{ margin: "0 0 4px 0", fontSize: "16px", fontWeight: 700 }}>{nameOf(item, isArabic)}</h3>
+                      <strong style={{ color: "#2563eb", fontSize: "12.5px" }}>{item.specialty}</strong>
+                    </div>
+                  </div>
+                  <p style={{ margin: 0, fontSize: "13px", color: "#64748b", lineHeight: 1.6 }}>{item.bio}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* WHY STUDY WITH THIS ACADEMY */}
+        <section style={{ marginTop: "48px", background: "var(--stitch-soft, #f8fafc)", borderRadius: "18px", padding: "32px 28px", border: "1px solid var(--stitch-border, #e2e8f0)" }}>
+          <h2 style={{ fontSize: "20px", fontWeight: 800, textAlign: "center", marginBottom: "24px" }}>
+            {copy("لماذا تختار الدراسة معنا عبر منصة AIN؟", "Why Choose to Study with Us on AIN?")}
+          </h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "20px" }}>
+            <div style={{ background: "var(--stitch-surface, #fff)", padding: "18px", borderRadius: "12px", border: "1px solid var(--stitch-border, #e2e8f0)" }}>
+              <div style={{ color: "#2563eb", marginBottom: "10px" }}><MonitorPlay size={24} /></div>
+              <h4 style={{ margin: "0 0 6px 0", fontSize: "15px", fontWeight: 700 }}>{copy("قاعات تفاعلية وحضور مباشر", "Live Interactive Classrooms")}</h4>
+              <p style={{ margin: 0, fontSize: "13px", color: "#64748b", lineHeight: 1.5 }}>{copy("متابعة مستمرة للحضور والغياب برمز الاستجابة السريعة (QR Code).", "Real-time attendance tracking and seamless session access via QR code.")}</p>
+            </div>
+            <div style={{ background: "var(--stitch-surface, #fff)", padding: "18px", borderRadius: "12px", border: "1px solid var(--stitch-border, #e2e8f0)" }}>
+              <div style={{ color: "#059669", marginBottom: "10px" }}><Award size={24} /></div>
+              <h4 style={{ margin: "0 0 6px 0", fontSize: "15px", fontWeight: 700 }}>{copy("شهادات إتمام موثقة برمز QR", "Verifiable QR Completion Certificates")}</h4>
+              <p style={{ margin: 0, fontSize: "13px", color: "#64748b", lineHeight: 1.5 }}>{copy("إصدار شهادات رقمية فورية عند استيفاء متطلبات النجاح مع رابط تدقيق رسمي.", "Instant digital certificates upon meeting criteria with a public verification URL.")}</p>
+            </div>
+            <div style={{ background: "var(--stitch-surface, #fff)", padding: "18px", borderRadius: "12px", border: "1px solid var(--stitch-border, #e2e8f0)" }}>
+              <div style={{ color: "#d97706", marginBottom: "10px" }}><Users size={24} /></div>
+              <h4 style={{ margin: "0 0 6px 0", fontSize: "15px", fontWeight: 700 }}>{copy("بوابة متابعة شاملة لولي الأمر", "Dedicated Guardian Tracking Portal")}</h4>
+              <p style={{ margin: 0, fontSize: "13px", color: "#64748b", lineHeight: 1.5 }}>{copy("متابعة درجات الاختبارات ونسب الحضور وتنبيهات واتساب دورية.", "Live tracking of quiz scores, attendance logs, and regular WhatsApp alerts.")}</p>
+            </div>
+          </div>
+        </section>
+      </main>
+    </MarketplaceShell>
+  );
 }
 
 export function PublicBookingPage() {
@@ -290,6 +626,41 @@ export function PublicBookingPage() {
   const [paymentPreference, setPaymentPreference] = useState("paymob");
   const [accepted, setAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState("");
+
+  const basePrice = Number(course?.discountedPrice || course?.price || 0);
+  const discountAmount = useMemo(() => {
+    if (!appliedCoupon) return 0;
+    if (appliedCoupon.type === "percent") {
+      return Math.round((basePrice * appliedCoupon.value) / 100);
+    }
+    return Math.min(basePrice, appliedCoupon.value);
+  }, [appliedCoupon, basePrice]);
+
+  const finalPrice = Math.max(0, basePrice - discountAmount);
+
+  const handleApplyCoupon = (e) => {
+    if (e) e.preventDefault();
+    setCouponError("");
+    const code = couponCode.trim().toUpperCase();
+    if (!code) return;
+
+    const validCoupons = {
+      "AIN20": { code: "AIN20", type: "percent", value: 20, desc: isArabic ? "خصم 20% للطلاب الجدد" : "20% off for new students" },
+      "WESAM100": { code: "WESAM100", type: "fixed", value: 100, desc: isArabic ? "خصم 100 ج.م من أكاديمية وسام" : "100 EGP off" },
+      "START2026": { code: "START2026", type: "percent", value: 15, desc: isArabic ? "خصم بداية العام 15%" : "15% seasonal discount" },
+      "EID2026": { code: "EID2026", type: "percent", value: 25, desc: isArabic ? "عروض العيد 25%" : "25% Eid promotion" }
+    };
+
+    if (validCoupons[code]) {
+      setAppliedCoupon(validCoupons[code]);
+      showToast(copy(`تم تطبيق كود الخصم: ${validCoupons[code].desc}`, `Promo code applied: ${validCoupons[code].code}`), "success");
+    } else {
+      setCouponError(copy("كود الخصم غير صالح أو منتهي الصلاحية", "Invalid or expired promo code"));
+    }
+  };
 
   useEffect(() => {
     if (available.length > 0 && !available.some((item) => item.id === batchId)) {
@@ -339,8 +710,8 @@ export function PublicBookingPage() {
         studentName: form.get("name"),
         email: form.get("email"),
         phone: form.get("phone"),
-        amount: course.discountedPrice || course.price,
-        note: form.get("note"),
+        amount: finalPrice,
+        note: appliedCoupon ? `${form.get("note") || ""} [Coupon: ${appliedCoupon.code}]`.trim() : form.get("note"),
         idempotencyKey: globalThis.crypto?.randomUUID?.() || `booking-${Date.now()}`,
       });
       if (!result.ok) {
@@ -464,11 +835,63 @@ export function PublicBookingPage() {
             <span className="academy-mini-logo" style={{ background: academy?.color }}>{academy?.initials}</span>
             <small>{nameOf(academy, isArabic)}</small>
             <h2>{nameOf(course, isArabic)}</h2>
-            <div>
-              <span>{copy("سعر الكورس", "Course price")}</span>
-              <strong>{(course.discountedPrice || course.price).toLocaleString()} {copy("ج.م", "EGP")}</strong>
+
+            {/* PROMO CODE SECTION */}
+            <div style={{ margin: "16px 0", borderTop: "1px solid var(--border, #e2e8f0)", paddingTop: "14px" }}>
+              <label style={{ fontSize: "12.5px", fontWeight: "bold", display: "block", marginBottom: "6px" }}>
+                🏷️ {copy("هل لديك كود خصم أو كوبون؟", "Have a promo code?")}
+              </label>
+              <div style={{ display: "flex", gap: "6px" }}>
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  placeholder="مثال: AIN20"
+                  style={{
+                    flex: 1,
+                    padding: "8px 10px",
+                    borderRadius: "6px",
+                    border: "1px solid var(--border, #cbd5e1)",
+                    fontSize: "13px",
+                    fontFamily: "monospace",
+                    textTransform: "uppercase"
+                  }}
+                />
+                <Button type="button" size="sm" onClick={handleApplyCoupon}>
+                  {copy("تطبيق", "Apply")}
+                </Button>
+              </div>
+              {couponError && (
+                <small style={{ color: "#ef4444", display: "block", marginTop: "4px", fontSize: "11.5px" }}>
+                  {couponError}
+                </small>
+              )}
+              {appliedCoupon && (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "6px", background: "#ecfdf5", padding: "6px 8px", borderRadius: "6px", fontSize: "12px", color: "#065f46" }}>
+                  <span>✓ {appliedCoupon.code} ({appliedCoupon.desc})</span>
+                  <button type="button" onClick={() => setAppliedCoupon(null)} style={{ border: "none", background: "none", color: "#991b1b", cursor: "pointer", fontSize: "11px", fontWeight: "bold" }}>✕</button>
+                </div>
+              )}
             </div>
-            <p>
+
+            <div style={{ borderTop: "1px solid var(--border, #e2e8f0)", paddingTop: "12px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#64748b" }}>
+                <span>{copy("السعر الأساسي", "Base price")}</span>
+                <span>{basePrice.toLocaleString()} {copy("ج.م", "EGP")}</span>
+              </div>
+              {discountAmount > 0 && (
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#059669", fontWeight: "bold", margin: "4px 0" }}>
+                  <span>{copy("الخصم المطبق", "Discount")}</span>
+                  <span>- {discountAmount.toLocaleString()} {copy("ج.م", "EGP")}</span>
+                </div>
+              )}
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "16px", fontWeight: "800", marginTop: "8px", paddingTop: "8px", borderTop: "1px dashed var(--border, #cbd5e1)" }}>
+                <span>{copy("المبلغ النهائي المطلوب", "Total to pay")}</span>
+                <strong style={{ color: "var(--primary, #16458F)" }}>{finalPrice.toLocaleString()} {copy("ج.م", "EGP")}</strong>
+              </div>
+            </div>
+
+            <p style={{ marginTop: "16px" }}>
               <ShieldCheck />
               {paymentPreference === "paymob"
                 ? copy("سداد إلكتروني مشفر ومحمي عبر Paymob Egypt.", "Secure encrypted electronic payment powered by Paymob Egypt.")
