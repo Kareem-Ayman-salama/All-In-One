@@ -624,6 +624,7 @@ export function PublicBookingPage() {
   });
   const [batchId, setBatchId] = useState("");
   const [paymentPreference, setPaymentPreference] = useState("paymob");
+  const [offlineRef, setOfflineRef] = useState("");
   const [accepted, setAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [couponCode, setCouponCode] = useState("");
@@ -682,13 +683,32 @@ export function PublicBookingPage() {
     return (
       <MarketplaceShell>
         <main className="booking-page">
-          <section className="market-empty booking-auth-gate">
-            <ShieldCheck />
-            <h1>{copy("سجّل الدخول لإتمام الحجز", "Sign in to complete booking")}</h1>
-            <p>{copy("نحتاج حسابًا موثّقًا لربط الحجز والدفع والكورس بك، ثم سنرجعك لنفس الصفحة.", "A verified account keeps your booking, payment, and course access linked. We will return you to this page.")}</p>
-            <div>
-              <Button as={Link} to={`/login?next=${encodeURIComponent(next)}`}>{copy("تسجيل الدخول والمتابعة", "Sign in and continue")}</Button>
-              <Button as={Link} variant="ghost" to={`/create-account?next=${encodeURIComponent(next)}`}>{copy("إنشاء حساب جديد", "Create an account")}</Button>
+          <section className="market-empty booking-auth-gate" style={{ maxWidth: "620px", margin: "40px auto", padding: "40px 30px", background: "var(--panel)", borderRadius: "18px", border: "1px solid var(--border)", boxShadow: "0 10px 30px rgba(0,0,0,0.06)", textAlign: "center" }}>
+            <div style={{ width: "64px", height: "64px", borderRadius: "50%", background: "rgba(22, 69, 143, 0.1)", color: "var(--primary, #16458F)", display: "grid", placeItems: "center", margin: "0 auto 16px" }}>
+              <GraduationCap size={32} />
+            </div>
+            <h1 style={{ fontSize: "24px", fontWeight: "800", marginBottom: "8px" }}>
+              {copy("خطوة واحدة تفصلك عن مقعدك في الكورس!", "One Step Away from Your Course Seat!")}
+            </h1>
+            <p style={{ color: "var(--text-muted, #64748b)", fontSize: "14px", lineHeight: "1.6", marginBottom: "20px" }}>
+              {copy(
+                "سجّل دخولك أو أنشئ حساباً سريعاً لربط حجز الكورس والمواد التعليمية وجدول الحصص باسمك مباشرة.",
+                "Sign in or create a quick account to link your course booking, schedule, and learning materials."
+              )}
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", textAlign: isArabic ? "right" : "left", margin: "0 0 24px", background: "var(--panel-soft, #f8fafc)", padding: "14px 18px", borderRadius: "12px", fontSize: "13px", border: "1px solid var(--border)" }}>
+              <div>✓ {copy("جدول الحصص والتنبيهات", "Class schedules & alerts")}</div>
+              <div>✓ {copy("حماية المشاهدة والعلامة المائية", "Protected video access")}</div>
+              <div>✓ {copy("تسليم الواجبات والتصحيح", "Assignments & feedback")}</div>
+              <div>✓ {copy("شهادة إتمام معتمدة بـ QR", "QR Verified Certificate")}</div>
+            </div>
+            <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+              <Button as={Link} to={`/login?next=${encodeURIComponent(next)}`} style={{ padding: "12px 28px", fontSize: "15px" }}>
+                {copy("تسجيل الدخول والمتابعة", "Sign in and continue")}
+              </Button>
+              <Button as={Link} variant="outline" to={`/create-account?next=${encodeURIComponent(next)}`} style={{ padding: "12px 28px", fontSize: "15px" }}>
+                {copy("إنشاء حساب طالب جديد", "Create Student Account")}
+              </Button>
             </div>
           </section>
         </main>
@@ -711,7 +731,12 @@ export function PublicBookingPage() {
         email: form.get("email"),
         phone: form.get("phone"),
         amount: finalPrice,
-        note: appliedCoupon ? `${form.get("note") || ""} [Coupon: ${appliedCoupon.code}]`.trim() : form.get("note"),
+        note: [
+          form.get("note") || "",
+          appliedCoupon ? `[Coupon: ${appliedCoupon.code}]` : "",
+          paymentPreference !== "paymob" ? `[Method: ${paymentPreference}]` : "",
+          offlineRef ? `[Ref: ${offlineRef}]` : ""
+        ].filter(Boolean).join(" ").trim(),
         idempotencyKey: globalThis.crypto?.randomUUID?.() || `booking-${Date.now()}`,
       });
       if (!result.ok) {
@@ -772,53 +797,102 @@ export function PublicBookingPage() {
             </div>
 
             {/* Payment Method Selector */}
-            <div style={{ margin: "14px 0", display: "grid", gap: "10px" }}>
-              <label style={{ fontWeight: "600", fontSize: "14px" }}>
+            <div style={{ margin: "16px 0", display: "grid", gap: "10px" }}>
+              <label style={{ fontWeight: "700", fontSize: "14px" }}>
                 {copy("طريقة الدفع وتأكيد المقعد:", "Payment Method & Seat Confirmation:")}
               </label>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "10px" }}>
                 <div
                   onClick={() => setPaymentPreference("paymob")}
                   style={{
                     padding: "14px",
-                    borderRadius: "8px",
+                    borderRadius: "10px",
                     border: `2px solid ${paymentPreference === "paymob" ? "var(--primary, #16458F)" : "var(--border)"}`,
                     background: paymentPreference === "paymob" ? "rgba(22, 69, 143, 0.05)" : "var(--panel)",
                     cursor: "pointer",
                     display: "grid",
                     gap: "6px",
+                    transition: "all 0.2s ease"
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "bold", fontSize: "14px", color: paymentPreference === "paymob" ? "var(--primary, #16458F)" : "inherit" }}>
                     <CreditCard size={18} />
-                    {copy("دفع إلكتروني فوري (Paymob)", "Instant Paymob Online")}
+                    {copy("دفع فوري ببطاقة / محفظة (Paymob)", "Instant Paymob Online")}
                   </div>
                   <small style={{ color: "var(--text-muted, #777)", lineHeight: "1.4" }}>
-                    {copy("تأكيد فوري بالفيزا، ماستركارد، ميزة والمحافظ الإلكترونية.", "Instant confirmation via Cards, Meeza & Mobile Wallets.")}
+                    {copy("تأكيد فوري بالفيزا، ماستركارد، ميزة، فودافون كاش.", "Instant confirmation via Cards, Meeza & Mobile Wallets.")}
                   </small>
                 </div>
 
                 <div
-                  onClick={() => setPaymentPreference("later")}
+                  onClick={() => setPaymentPreference("instapay")}
                   style={{
                     padding: "14px",
-                    borderRadius: "8px",
-                    border: `2px solid ${paymentPreference === "later" ? "var(--primary, #16458F)" : "var(--border)"}`,
-                    background: paymentPreference === "later" ? "rgba(22, 69, 143, 0.05)" : "var(--panel)",
+                    borderRadius: "10px",
+                    border: `2px solid ${paymentPreference === "instapay" ? "var(--primary, #16458F)" : "var(--border)"}`,
+                    background: paymentPreference === "instapay" ? "rgba(22, 69, 143, 0.05)" : "var(--panel)",
                     cursor: "pointer",
                     display: "grid",
                     gap: "6px",
+                    transition: "all 0.2s ease"
                   }}
                 >
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "bold", fontSize: "14px", color: paymentPreference === "later" ? "var(--primary, #16458F)" : "inherit" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "bold", fontSize: "14px", color: paymentPreference === "instapay" ? "var(--primary, #16458F)" : "inherit" }}>
                     <Wallet size={18} />
-                    {copy("الدفع لاحقاً مع الأكاديمية", "Pay Later with Academy")}
+                    {copy("تحويل InstaPay / كاش", "InstaPay / Mobile Transfer")}
                   </div>
                   <small style={{ color: "var(--text-muted, #777)", lineHeight: "1.4" }}>
-                    {copy("حجز مبدئي والتواصل مع إدارة الأكاديمية لتأكيد السداد.", "Reserve seat now; pay via bank transfer or cash at academy.")}
+                    {copy("تحويل مباشر لمعرّف انستاباي أو محفظة الأكاديمية.", "Transfer directly to academy InstaPay or wallet.")}
+                  </small>
+                </div>
+
+                <div
+                  onClick={() => setPaymentPreference("cash")}
+                  style={{
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: `2px solid ${paymentPreference === "cash" ? "var(--primary, #16458F)" : "var(--border)"}`,
+                    background: paymentPreference === "cash" ? "rgba(22, 69, 143, 0.05)" : "var(--panel)",
+                    cursor: "pointer",
+                    display: "grid",
+                    gap: "6px",
+                    transition: "all 0.2s ease"
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "bold", fontSize: "14px", color: paymentPreference === "cash" ? "var(--primary, #16458F)" : "inherit" }}>
+                    <Building2 size={18} />
+                    {copy("دفع نقدي بمقر الأكاديمية", "Cash at Academy")}
+                  </div>
+                  <small style={{ color: "var(--text-muted, #777)", lineHeight: "1.4" }}>
+                    {copy("سداد الرسوم نقداً بالاستقبال قبل أول حصة لتأكيد مقعدك.", "Pay cash at reception desk before your first session.")}
                   </small>
                 </div>
               </div>
+
+              {/* InstaPay Transfer Instructions */}
+              {paymentPreference === "instapay" && (
+                <div style={{ marginTop: "6px", padding: "14px", background: "rgba(16, 185, 129, 0.08)", border: "1px solid rgba(16, 185, 129, 0.3)", borderRadius: "10px", fontSize: "13px" }}>
+                  <strong style={{ color: "#065f46", display: "block", marginBottom: "6px" }}>
+                    {copy("⚡ بيانات التحويل المعتمدة للأكاديمية:", "⚡ Official Academy Transfer Details:")}
+                  </strong>
+                  <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "10px", margin: "6px 0", color: "#1e293b" }}>
+                    <span>📱 {copy("محفظة فودافون كاش / أورنج:", "Vodafone/Orange Cash:")} <strong>01000000000</strong></span>
+                    <span>⚡ {copy("عنوان InstaPay:", "InstaPay Address:")} <strong>academy@instapay</strong></span>
+                  </div>
+                  <div style={{ marginTop: "10px" }}>
+                    <label style={{ display: "block", fontSize: "12px", fontWeight: "bold", color: "#374151", marginBottom: "4px" }}>
+                      {copy("رقم العملية المرجعي / اسم المحوّل (لتسريع تفعيل حسابك):", "Transaction Ref / Sender Name:")}
+                    </label>
+                    <input
+                      type="text"
+                      value={offlineRef}
+                      onChange={(e) => setOfflineRef(e.target.value)}
+                      placeholder={copy("مثال: Ref #109482 أو محول من رقم 010xxxxxxxx", "e.g. Ref #109482 or sent from 010xxxxxxxx")}
+                      style={{ width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "13px" }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             <label className="booking-terms">

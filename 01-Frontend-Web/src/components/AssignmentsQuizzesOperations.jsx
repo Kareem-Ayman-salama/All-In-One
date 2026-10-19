@@ -1031,10 +1031,29 @@ export function QuizzesManagementPage() {
                         style={{ marginTop: "3px", width: "16px", height: "16px", cursor: "pointer" }}
                       />
                       <div style={{ flex: 1 }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <span style={{ fontSize: "13px", fontWeight: "bold" }}>
-                            {q.questionTextAr || q.questionText}
-                          </span>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px" }}>
+                          <input
+                            type="text"
+                            value={q.questionTextAr || q.questionText}
+                            onChange={(e) => {
+                              const updated = [...aiQuestions];
+                              updated[idx].questionTextAr = e.target.value;
+                              updated[idx].questionText = e.target.value;
+                              setAiQuestions(updated);
+                            }}
+                            style={{
+                              fontSize: "13px",
+                              fontWeight: "bold",
+                              border: "1px dashed #cbd5e1",
+                              background: "#ffffff",
+                              padding: "4px 8px",
+                              borderRadius: "6px",
+                              flex: 1,
+                              color: "#1e293b",
+                              cursor: "text"
+                            }}
+                            title={tx("انقر لتعديل نص السؤال", "Click to edit question text")}
+                          />
                           <Badge tone={q.type === "mcq" ? "primary" : "neutral"}>
                             {q.type === "mcq" ? "MCQ" : "True/False"}
                           </Badge>
@@ -1154,7 +1173,7 @@ export function StudentAssignmentsWorkspaceTab({ roomId, courseId }) {
     const fileName = form.get("fileName") || "submission.pdf";
 
     await submitAssignment(activeSubmitModal.id, { submissionText, attachmentUrl, fileName });
-    showToast(tx("تم تسليم الواجب بنجاح!", "Assignment submitted successfully!"), "success");
+    showToast(tx("تم تسليم الواجب بنجاح! سيتم إشعارك فور رصد المعلم لدرجتك وملاحظاته 🚀", "Assignment submitted successfully! You will be notified once graded 🚀"), "success");
     setActiveSubmitModal(null);
   };
 
@@ -1189,10 +1208,10 @@ export function StudentAssignmentsWorkspaceTab({ roomId, courseId }) {
                     <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "6px" }}>
                       <Badge tone={userSub?.status === "graded" ? "success" : userSub ? "warning" : "primary"}>
                         {userSub?.status === "graded"
-                          ? `${tx("تم التصحيح:", "Graded:")} ${userSub.score}/${assignment.maxScore}`
+                          ? `${tx("تم التصحيح والاعتماد 🌟", "Graded & Approved 🌟")}: ${userSub.score}/${assignment.maxScore}`
                           : userSub
-                            ? tx("تم التسليم", "Submitted")
-                            : tx("مطلوب تسليمه", "Pending Submission")}
+                            ? tx("تم التسليم — بانتظار تصحيح المعلم ⏳", "Submitted — Awaiting Review ⏳")
+                            : tx("مطلوب تسليمه 📝", "Pending Submission 📝")}
                       </Badge>
                       <span style={{ fontSize: "12px", color: "#64748b" }}>
                         <Calendar size={13} style={{ display: "inline", verticalAlign: "middle", marginInlineEnd: 4 }} />
@@ -1215,8 +1234,23 @@ export function StudentAssignmentsWorkspaceTab({ roomId, courseId }) {
                   )}
                 </div>
 
+                {userSub && (
+                  <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", padding: "10px 14px", borderRadius: "8px", marginTop: "12px", fontSize: "13px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                      <span style={{ color: "#475569", fontWeight: "600" }}>{tx("حلك المرفوع:", "Your Submission:")}</span>
+                      <small style={{ color: "#94a3b8" }}>{userSub.submittedAt ? new Date(userSub.submittedAt).toLocaleDateString() : tx("مؤخراً", "Recently")}</small>
+                    </div>
+                    {userSub.submissionText && <p style={{ margin: "4px 0", color: "#1e293b", lineHeight: "1.5" }}>{userSub.submissionText}</p>}
+                    {userSub.attachmentUrl && (
+                      <a href={userSub.attachmentUrl} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "4px", color: "#2563eb", fontWeight: "600", marginTop: "4px" }}>
+                        <ExternalLink size={13} /> {userSub.fileName || tx("معاينة الملف المرفق", "View submitted attachment")}
+                      </a>
+                    )}
+                  </div>
+                )}
+
                 {userSub?.feedback && (
-                  <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", padding: "10px 14px", borderRadius: "8px", marginTop: "12px" }}>
+                  <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", padding: "10px 14px", borderRadius: "8px", marginTop: "10px" }}>
                     <strong style={{ color: "#166534", fontSize: "13px" }}>{tx("تقييم وملاحظات المدرس:", "Instructor Feedback:")}</strong>
                     <p style={{ margin: "4px 0 0", color: "#14532d", fontSize: "13px" }}>{userSub.feedback}</p>
                   </div>

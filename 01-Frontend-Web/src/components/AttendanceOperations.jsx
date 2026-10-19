@@ -129,6 +129,7 @@ function dateTime(value, isArabic = true) {
 }
 
 export function AttendanceManagementPage() {
+  const navigate = useNavigate();
   const { language, t } = useLanguage();
   const isArabic = language === "ar";
   const statusLabels = getStatusLabels(isArabic);
@@ -289,7 +290,14 @@ export function AttendanceManagementPage() {
           <h1>{t.attendance?.title || (isArabic ? "الحضور والغياب" : "Attendance & Check-in")}</h1>
           <p>{t.attendance?.subtitle || (isArabic ? "أنشئ الحصة، سجّل الجميع بسرعة، وأرسل تنبيهًا واضحًا لولي الأمر." : "Create sessions, check in students instantly, and notify guardians.")}</p>
         </div>
-        <div style={{ display: "flex", gap: "10px" }}>
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+          <Button
+            variant="outline"
+            onClick={() => navigate("/tenant-admin/reports")}
+            title={isArabic ? "تصدير كشف الحضور والتقارير الأكاديمية" : "Export Attendance and Academic Reports"}
+          >
+            <Download size={17} /> {isArabic ? "تصدير كشف الحضور (Excel)" : "Export Attendance (Excel)"}
+          </Button>
           <Button variant="ghost" onClick={() => { playSuccessChime(); showToast(isArabic ? "صوت التحضير يعمل بنجاح 🔊" : "Attendance chime is working 🔊", "success"); }} title={isArabic ? "اختبار نغمة الحضور" : "Test Chime"}>
             <Volume2 size={17} /> {t.attendance?.chimeBtn || (isArabic ? "صوت الحضور" : "Audio Chime")}
           </Button>

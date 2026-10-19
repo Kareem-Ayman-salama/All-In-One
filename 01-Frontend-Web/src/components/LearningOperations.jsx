@@ -154,6 +154,30 @@ export function MemberDashboard({ data, user }) {
         </div>
         <h1>{tx("مرحباً", "Welcome")}, {user.name} 👋</h1>
         <p>{isCompany ? tx("كل ما تحتاجه للعمل والتدريب والتواصل داخل شركتك في مكان واحد.", "Your work, training, and company updates in one focused workspace.") : tx("تابع كورساتك وحصصك المباشرة، سلّم واجباتك، واستعد للاختبارات القادمة بكل سهولة.", "Keep up with your courses, live sessions, assignments, and test preparation seamlessly.")}</p>
+        <div
+          className="member-quote-box"
+          style={{
+            margin: "12px 0 16px 0",
+            padding: "10px 16px",
+            borderRadius: "10px",
+            background: "rgba(255, 255, 255, 0.12)",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
+            backdropFilter: "blur(6px)",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            fontSize: "0.88rem",
+            color: "rgba(255, 255, 255, 0.95)"
+          }}
+        >
+          <Sparkles size={18} style={{ color: "#fef08a", flexShrink: 0 }} />
+          <span>
+            {tx(
+              "💡 حكمة اليوم: «اصبر على مُرِّ الجَفَا مِن مُعَلِّمٍ.. فإنَّ رُسُوبَ العِلمِ في نَفَرَاتِهِ» — خطوتك التالية تقربك من التميز والشهادة المعتمدة 🌟",
+              "💡 Daily Inspiration: \"Continuous learning is the minimum requirement for success in any field.\" — Every step brings you closer to certified excellence 🌟"
+            )}
+          </span>
+        </div>
         <div className="member-quick-links">
           <Link to="/end-user/courses" className="quick-link-btn primary">
             <BookOpen size={16} />
