@@ -178,6 +178,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   ) {
     final demoAccounts = [
       (
+        title: strings.isArabic ? 'حساب كريم الموحد' : 'Kareem Master',
+        email: 'kareem@ainplatform.com',
+        icon: Icons.verified_user_rounded,
+        color: AinColors.brand,
+      ),
+      (
         title: strings.isArabic ? 'مسؤول المنصة' : 'Platform Admin',
         email: 'super@ain.test',
         icon: Icons.admin_panel_settings_rounded,
@@ -245,7 +251,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     : () {
                         setState(() {
                           _emailController.text = account.email;
-                          _passwordController.text = 'password';
+                          _passwordController.text = '12345678';
                         });
                         _submit();
                       },

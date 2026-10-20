@@ -13,6 +13,17 @@ import { getAuthErrorMessage } from "../services/authErrors";
 
 const demoAccounts = [
   {
+    role: "kareem-master",
+    email: "kareem@ainplatform.com",
+    icon: ShieldCheck,
+    color: "#2563EB",
+    badgeBg: "rgba(37, 99, 235, 0.12)",
+    titleAr: "حساب كريم (شامل كل الصلاحيات والأكاديميات)",
+    titleEn: "Kareem Master Account (All Academies)",
+    descAr: "حسابك الموحد للتجربة: إدارة الأكاديميات، الكورسات، الحضور وتجربة الطالب",
+    descEn: "Unified testing account: manage academies, courses, attendance, and student experience"
+  },
+  {
     role: "super-admin",
     email: "super@ain.test",
     icon: ShieldCheck,

@@ -71,6 +71,18 @@ class DemoWorkspaceSeeder extends Seeder
         $this->membership($techCorp, $employee, 'member');
         $this->membership($academy, $student, 'student');
 
+        $kareem = $this->user(
+            'كريم أيمن',
+            'kareem@ainplatform.com',
+        );
+        $kareemAdmin = $this->user(
+            'كريم أيمن (مدير المنصة العام)',
+            'kareem.admin@ainplatform.com',
+            platformRole: 'super_admin',
+        );
+        $this->membership($techCorp, $kareem, 'organization_owner');
+        $this->membership($academy, $kareem, 'student');
+
         $this->seedMarketplace($academy, $student);
 
         $superAdmin->tokens()->delete();
