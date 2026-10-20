@@ -165,6 +165,67 @@ class BookingFlowTest extends TestCase
             ->assertJsonPath('error.code', 'COURSE_NOT_BOOKABLE');
     }
 
+    public function test_free_recorded_course_enrolls_immediately_with_lifetime_access(): void
+    {
+        [$organization, , $course, $batch] = $this->marketplace();
+        $course->update([
+            'delivery_type' => 'recorded',
+            'price_minor' => 0,
+            'discounted_price_minor' => null,
+        ]);
+        $batch->update([
+            'start_date' => null,
+            'end_date' => null,
+            'schedule' => null,
+            'capacity' => null,
+            'status' => BatchStatus::Open,
+        ]);
+        $student = User::factory()->create([
+            'email' => 'recorded.student@example.com',
+        ]);
+        Sanctum::actingAs($student);
+
+        $response = $this->postJson('/api/v1/public/bookings', [
+            'courseId' => $course->id,
+            'batchId' => $batch->id,
+            'studentName' => 'Recorded Student',
+            'email' => 'recorded.student@example.com',
+            'phone' => '+201000000000',
+            'termsAccepted' => true,
+            'idempotencyKey' => 'free-recorded-booking-0001',
+        ])
+            ->assertCreated()
+            ->assertJsonPath('data.booking.status', 'confirmed')
+            ->assertJsonPath('data.booking.payment_status', 'not_required');
+
+        $bookingId = $response->json('data.booking.id');
+        $this->assertDatabaseHas('course_enrollments', [
+            'booking_id' => $bookingId,
+            'student_id' => $student->id,
+            'access_ends_at' => null,
+            'status' => 'active',
+        ]);
+        $this->assertDatabaseHas('student_subscriptions', [
+            'student_id' => $student->id,
+            'ends_at' => null,
+            'status' => 'active',
+        ]);
+        $this->assertDatabaseHas('course_batches', [
+            'id' => $batch->id,
+            'reserved_seats' => 0,
+            'confirmed_seats' => 1,
+            'status' => BatchStatus::Open->value,
+        ]);
+
+        $enrollmentId = $response->json('data.booking.enrollment.id');
+        $this->getJson("/api/v1/student/enrollments/{$enrollmentId}")
+            ->assertOk()
+            ->assertJsonPath('data.access.allowed', true);
+        $this->getJson(
+            "/api/v1/organizations/{$organization->id}/rooms/{$batch->room_id}",
+        )->assertOk();
+    }
+
     public function test_public_courses_expose_and_filter_provider_type(): void
     {
         [$organization, , $course] = $this->marketplace();

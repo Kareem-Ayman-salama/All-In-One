@@ -38,6 +38,33 @@ class WesamGrammarAcademyProvisioner
         bool $forcePasswordChange = true,
     ): array {
         return DB::transaction(function () use ($email, $temporaryPassword, $rotatePassword, $forcePasswordChange): array {
+            $existingOrganization = Organization::query()
+                ->where('slug', self::SLUG)
+                ->first();
+            $defaultSettings = [
+                'workspace_mode' => 'solo_instructor',
+                'marketplace_enabled' => false,
+                'setup_mode' => true,
+                'country' => 'EG',
+                'currency' => 'EGP',
+                'default_direction' => 'rtl',
+                'secondary_locale' => 'en',
+                'subject' => 'Arabic Language',
+                'specialization' => 'Arabic Grammar / النحو',
+                'english_name' => 'Wesam Arabic Grammar Academy',
+                'instructor_display_name' => 'أ. وسام',
+                'tagline' => 'النحو ببساطة… من الفهم إلى الإتقان',
+                'onboarding' => [
+                    'academy_ready' => true,
+                    'course_ready' => true,
+                    'modules_ready' => true,
+                    'room_ready' => true,
+                    'first_lesson_added' => false,
+                    'first_file_uploaded' => false,
+                    'batch_scheduled' => false,
+                    'course_published' => false,
+                ],
+            ];
             $organization = Organization::query()->updateOrCreate(
                 ['slug' => self::SLUG],
                 [
@@ -48,33 +75,16 @@ class WesamGrammarAcademyProvisioner
                     'bio' => 'النحو ببساطة… من الفهم إلى الإتقان',
                     'locale' => 'ar',
                     'timezone' => 'Africa/Cairo',
-                    'settings' => [
-                        'workspace_mode' => 'solo_instructor',
-                        'marketplace_enabled' => false,
-                        'setup_mode' => true,
-                        'country' => 'EG',
-                        'currency' => 'EGP',
-                        'default_direction' => 'rtl',
-                        'secondary_locale' => 'en',
-                        'subject' => 'Arabic Language',
-                        'specialization' => 'Arabic Grammar / النحو',
-                        'english_name' => 'Wesam Arabic Grammar Academy',
-                        'instructor_display_name' => 'أ. وسام',
-                        'tagline' => 'النحو ببساطة… من الفهم إلى الإتقان',
-                        'onboarding' => [
-                            'academy_ready' => true,
-                            'course_ready' => true,
-                            'modules_ready' => true,
-                            'room_ready' => true,
-                            'first_lesson_added' => false,
-                            'first_file_uploaded' => false,
-                            'batch_scheduled' => false,
-                            'course_published' => false,
-                        ],
-                    ],
+                    'settings' => array_replace_recursive(
+                        $defaultSettings,
+                        $existingOrganization?->settings ?? [],
+                    ),
                 ],
             );
 
+            $existingProfile = AcademyProfile::query()
+                ->where('organization_id', $organization->id)
+                ->first();
             $profile = AcademyProfile::query()->updateOrCreate(
                 ['organization_id' => $organization->id],
                 [
@@ -88,10 +98,10 @@ class WesamGrammarAcademyProvisioner
                     'website' => null,
                     'location' => null,
                     'branches' => [],
-                    'delivery_methods' => ['online'],
-                    'is_public' => false,
-                    'verification_status' => 'verified',
-                    'verified_at' => now(),
+                    'delivery_methods' => $existingProfile?->delivery_methods ?? ['online'],
+                    'is_public' => $existingProfile?->is_public ?? false,
+                    'verification_status' => $existingProfile?->verification_status ?? 'verified',
+                    'verified_at' => $existingProfile?->verified_at ?? now(),
                 ],
             );
 
@@ -152,6 +162,10 @@ class WesamGrammarAcademyProvisioner
                 ],
             );
 
+            $existingCourse = Course::query()
+                ->where('organization_id', $organization->id)
+                ->where('slug', 'nahw-from-foundations-to-mastery')
+                ->first();
             $course = Course::query()->updateOrCreate(
                 ['organization_id' => $organization->id, 'slug' => 'nahw-from-foundations-to-mastery'],
                 [
@@ -164,13 +178,13 @@ class WesamGrammarAcademyProvisioner
                     'description_ar' => 'دورة متدرجة لتعلّم النحو العربي بطريقة مبسطة وعملية، تبدأ من المفاهيم الأساسية ثم تنتقل تدريجياً إلى القواعد والتطبيقات الأكثر تقدماً، مع تدريبات واختبارات تساعد الطالب على الفهم والتطبيق وليس الحفظ فقط.',
                     'education_level' => 'all_levels',
                     'subject' => 'Arabic Language / النحو',
-                    'delivery_type' => 'online',
-                    'price_minor' => 0,
+                    'delivery_type' => $existingCourse?->delivery_type ?? 'online',
+                    'price_minor' => $existingCourse?->price_minor ?? 0,
                     'currency' => 'EGP',
                     'learning_outcomes' => [],
                     'requirements' => [],
-                    'status' => 'draft',
-                    'published_at' => null,
+                    'status' => $existingCourse?->status ?? 'draft',
+                    'published_at' => $existingCourse?->published_at,
                     'completion_policy' => [
                         'require_lessons_completion' => true,
                         'minimum_lesson_completion_percentage' => 80,
@@ -236,19 +250,24 @@ class WesamGrammarAcademyProvisioner
                 ],
             );
 
+            $existingBatch = CourseBatch::query()
+                ->where('organization_id', $organization->id)
+                ->where('course_id', $course->id)
+                ->where('title', 'الدفعة الأولى')
+                ->first();
             $batch = CourseBatch::query()->updateOrCreate(
                 ['organization_id' => $organization->id, 'course_id' => $course->id, 'title' => 'الدفعة الأولى'],
                 [
                     'room_id' => $room->id,
                     'title_ar' => 'الدفعة الأولى',
-                    'start_date' => null,
-                    'end_date' => null,
-                    'schedule' => null,
-                    'delivery_type' => 'online',
-                    'capacity' => null,
-                    'reserved_seats' => 0,
-                    'confirmed_seats' => 0,
-                    'status' => 'draft',
+                    'start_date' => $existingBatch?->start_date,
+                    'end_date' => $existingBatch?->end_date,
+                    'schedule' => $existingBatch?->schedule,
+                    'delivery_type' => $existingBatch?->delivery_type ?? 'online',
+                    'capacity' => $existingBatch?->capacity,
+                    'reserved_seats' => $existingBatch?->reserved_seats ?? 0,
+                    'confirmed_seats' => $existingBatch?->confirmed_seats ?? 0,
+                    'status' => $existingBatch?->status ?? 'draft',
                 ],
             );
 
@@ -258,7 +277,10 @@ class WesamGrammarAcademyProvisioner
                 $organization->id,
                 $organization->id,
                 $user->id,
-                ['slug' => self::SLUG, 'marketplaceEnabled' => false],
+                [
+                    'slug' => self::SLUG,
+                    'marketplaceEnabled' => (bool) ($organization->settings['marketplace_enabled'] ?? false),
+                ],
                 ['courseId' => $course->id, 'roomId' => $room->id, 'batchId' => $batch->id],
             );
 
@@ -273,7 +295,7 @@ class WesamGrammarAcademyProvisioner
                 'lessons' => array_sum(array_map(fn (array $item): int => count($item['topics']), $outline)),
                 'room' => $room->name,
                 'batch' => $batch->title,
-                'marketplaceEnabled' => false,
+                'marketplaceEnabled' => (bool) ($organization->settings['marketplace_enabled'] ?? false),
                 'mustChangePassword' => (bool) $user->must_change_password,
             ];
         });

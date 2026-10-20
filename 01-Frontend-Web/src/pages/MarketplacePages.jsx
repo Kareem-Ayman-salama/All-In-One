@@ -1009,6 +1009,7 @@ export function BookingSuccessPage() {
   if (!booking) return <Navigate to="/courses" replace />;
   const course = courses.find((item) => item.id === booking.courseId);
   const batch = batches.find((item) => item.id === booking.batchId);
+  const isFree = Number(booking.amount ?? course?.discountedPrice ?? course?.price ?? 0) === 0;
 
   const startCheckout = async () => {
     setLoadingCheckout(true);
@@ -1061,14 +1062,14 @@ export function BookingSuccessPage() {
         </span>
 
         <Badge tone={isPaid ? "success" : "warning"}>
-          {isPaid ? copy("حجز مؤكد ومدفوع", "Confirmed & Paid") : copy("قيد تأكيد الأكاديمية / انتظار السداد", "Pending Confirmation / Unpaid")}
+          {isPaid ? (isFree ? copy("تم الاشتراك مجانًا", "Free enrollment active") : copy("حجز مؤكد ومدفوع", "Confirmed & Paid")) : copy("قيد تأكيد الأكاديمية / انتظار السداد", "Pending Confirmation / Unpaid")}
         </Badge>
 
-        <h1>{isPaid ? copy("تم تأكيد حجزك واشتراكك بنجاح!", "Booking & Enrollment Confirmed!") : copy("تم استلام طلب الحجز بنجاح", "Booking Request Received")}</h1>
+        <h1>{isPaid ? (isFree ? copy("تم تفعيل الكورس في حسابك!", "Your course is now active!") : copy("تم تأكيد حجزك واشتراكك بنجاح!", "Booking & Enrollment Confirmed!")) : copy("تم استلام طلب الحجز بنجاح", "Booking Request Received")}</h1>
 
         <p>
           {isPaid
-            ? copy("تم تفعيل الكورس في حسابك تلقائياً ويمكنك الآن الوصول إلى المواد والفيديوهات المشفرة.", "Course access is activated. You can now access your course materials and encrypted content.")
+            ? copy("تم تفعيل الكورس في حسابك تلقائياً ويمكنك الآن الوصول إلى الدروس والمواد المتاحة.", "Course access is activated. You can now access the available lessons and materials.")
             : copy("تم حفظ مقعدك المبدئي. يمكنك السداد الفوري إلكترونياً عبر Paymob لتأكيد الاشتراك مباشرة، أو انتظار تواصل إدارة الأكاديمية.", "Your seat is held. Complete instant payment via Paymob to confirm immediately, or wait for academy follow-up.")}
         </p>
 
@@ -1102,7 +1103,7 @@ export function BookingSuccessPage() {
           <small>{copy("الدفعة", "Batch")}</small>
           <strong>{nameOf(batch, isArabic)}</strong>
           <small>{copy("حالة السداد", "Payment Status")}</small>
-          <strong>{isPaid ? copy("مدفوع بالكامل", "Paid in full") : copy("غير مدفوع", "Unpaid")}</strong>
+          <strong>{isFree ? copy("مجاني — لا توجد رسوم", "Free — no payment required") : (isPaid ? copy("مدفوع بالكامل", "Paid in full") : copy("غير مدفوع", "Unpaid"))}</strong>
         </div>
 
         <nav>

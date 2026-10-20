@@ -189,7 +189,8 @@ class CourseController extends Controller
                 409,
             );
         }
-        if (! $model->description || ! $model->instructor_id) {
+        if ((! $model->description && ! $model->description_ar)
+            || ! $model->instructor_id) {
             throw new ApiException(
                 'COURSE_INCOMPLETE',
                 'Add a description and instructor before submitting.',
