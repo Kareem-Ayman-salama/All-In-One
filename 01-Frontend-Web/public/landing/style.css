@@ -4124,14 +4124,15 @@ body > main { padding-top: 74px; }
 .preview-player-video {
   height: 140px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.45) 0%, rgba(15, 23, 42, 0.85) 100%), url('/images/courses/coding.jpg') center/cover no-repeat;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.6);
 }
 
 .preview-play-icon {
@@ -4279,6 +4280,30 @@ body > main { padding-top: 74px; }
   border-color: var(--blue-soft-border);
 }
 
+.pathway-card-illustration {
+  width: calc(100% + 56px);
+  margin: -36px -28px 24px -28px;
+  height: 190px;
+  border-top-left-radius: var(--radius-xl);
+  border-top-right-radius: var(--radius-xl);
+  overflow: hidden;
+  background: #f8fafc;
+  position: relative;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.pathway-card-illustration img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pathway-card:hover .pathway-card-illustration img {
+  transform: scale(1.05);
+}
+
 .featured-pathway {
   border: 2px solid var(--blue-electric);
   box-shadow: 0 12px 30px rgba(37, 99, 235, 0.12);
@@ -4297,6 +4322,7 @@ body > main { padding-top: 74px; }
   border-radius: var(--radius-full);
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
   letter-spacing: 0.02em;
+  z-index: 10;
 }
 
 .pathway-card-icon {
@@ -5342,6 +5368,31 @@ body > main { padding-top: 74px; }
   transform: translateY(-4px);
   border-color: #cbd5e1;
   box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+}
+
+.journey-card-illustration {
+  width: 100%;
+  height: 150px;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 18px;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #f1f5f9;
+}
+
+.journey-card-illustration img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.journey-step-card:hover .journey-card-illustration img {
+  transform: scale(1.05);
 }
 
 .journey-step-header {
