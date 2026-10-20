@@ -36,6 +36,7 @@
       <!-- Clean Floating Island Nav Menu -->
       <div class="nav-menu">
         <a href="/courses" class="nav-highlight" data-i18n="nav_marketplace"><i class="ti ti-books"></i> سوق الكورسات</a>
+        <button type="button" onclick="scrollToId('student-journey')" data-i18n="nav_journey">رحلة الطالب</button>
         <button type="button" onclick="scrollToId('pathways')" data-i18n="nav_pathways">اختر مسارك</button>
         <button type="button" onclick="scrollToId('curricula')" data-i18n="nav_curricula">المناهج والكورسات</button>
         <button type="button" onclick="scrollToId('features')" data-i18n="nav_features">المميزات</button>
@@ -81,6 +82,7 @@
     </div>
     <div class="drawer-body">
       <a href="/courses" class="drawer-link active"><i class="ti ti-books"></i> <span data-i18n="nav_marketplace">سوق الكورسات</span></a>
+      <button type="button" onclick="toggleMobileMenu(); scrollToId('student-journey')" data-i18n="nav_journey">رحلة الطالب الأكاديمية</button>
       <button type="button" onclick="toggleMobileMenu(); scrollToId('pathways')" data-i18n="nav_pathways">اختر مسارك التعليمي</button>
       <button type="button" onclick="toggleMobileMenu(); scrollToId('curricula')" data-i18n="nav_curricula">المناهج والكورسات</button>
       <button type="button" onclick="toggleMobileMenu(); scrollToId('features')" data-i18n="nav_features">المميزات التعليمية</button>
@@ -101,6 +103,15 @@
   <main>
     <!-- HERO SECTION -->
     <section class="hero-section">
+      <!-- Floating Academic Decorative Icons -->
+      <div class="ambient-academic-icons" aria-hidden="true">
+        <span class="academic-doodle doodle-1" title="Graduation Cap"><i class="ti ti-school"></i></span>
+        <span class="academic-doodle doodle-2" title="Open Book"><i class="ti ti-books"></i></span>
+        <span class="academic-doodle doodle-3" title="Science Atom"><i class="ti ti-atom"></i></span>
+        <span class="academic-doodle doodle-4" title="Smart Calculator"><i class="ti ti-calculator"></i></span>
+        <span class="academic-doodle doodle-5" title="Medal & Trophy"><i class="ti ti-award"></i></span>
+      </div>
+
       <div class="hero-container">
         <div class="hero-copy">
           <div class="hero-header-badge">
@@ -235,14 +246,21 @@
           <div class="preview-floating-card top-float">
             <i class="ti ti-qrcode"></i>
             <div>
-              <strong>حضور الحصة اليوم</strong>
+              <strong data-i18n="preview_qr_title">حضور الحصة اليوم</strong>
               <span data-i18n="preview_qr_status">تم تسجيل حضورك بنجاح بالـ QR Code</span>
             </div>
           </div>
-          <div class="preview-floating-card bottom-float">
-            <i class="ti ti-certificate"></i>
+          <div class="preview-floating-card center-float">
+            <i class="ti ti-trophy" style="background: #fef3c7; color: #d97706;"></i>
             <div>
-              <strong>شهادة إتمام معتمدة</strong>
+              <strong data-i18n="preview_xp_title">+120 XP • لوحة الشرف 🏆</strong>
+              <span data-i18n="preview_xp_status">أكملت كويز الدوال بدرجة 10/10</span>
+            </div>
+          </div>
+          <div class="preview-floating-card bottom-float">
+            <i class="ti ti-certificate" style="background: #ede9fe; color: #7c3aed;"></i>
+            <div>
+              <strong data-i18n="preview_cert_title">شهادة إتمام معتمدة</strong>
               <span data-i18n="preview_cert_status">جاهزة للتحميل فور إكمال متطلبات الكورس</span>
             </div>
           </div>
@@ -552,6 +570,112 @@
                   </div>
                   <span class="item-tag action"><i class="ti ti-eye"></i> مراجعة الطلبات</span>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2.5: STUDENT LEARNING JOURNEY (Interactive 4-Step Academic Roadmap) -->
+    <section class="section student-journey-section" id="student-journey">
+      <div class="wrap">
+        <div class="section-badge-center">
+          <i class="ti ti-route"></i>
+          <span data-i18n="journey_badge">رحلة الطالب الأكاديمية</span>
+        </div>
+        <h2 class="section-title-center" data-i18n="journey_title">كيف يخوض طالبك تجربة تعلّم متكاملة داخل AIN؟</h2>
+        <p class="section-desc-center" data-i18n="journey_desc">من لحظة حجز الكورس واختيار المدرس، مروراً بالحضور التفاعلي والواجبات، وحتى استلام الشهادة المعتمدة.</p>
+
+        <div class="journey-roadmap-grid">
+          <!-- Step 1 -->
+          <div class="journey-step-card">
+            <div class="journey-step-header">
+              <span class="journey-step-number">01</span>
+              <div class="journey-step-icon blue">
+                <i class="ti ti-compass"></i>
+              </div>
+            </div>
+            <span class="journey-step-tag blue" data-i18n="journey_s1_tag">المحطة الأولى: الحجز والتسجيل</span>
+            <h3 data-i18n="journey_s1_title">اختيار الكورس والدفعة المناسبة</h3>
+            <p data-i18n="journey_s1_desc">يتصفح الطالب الكورسات والمحاضرين، ويختار المواعيد المناسبة (حضوري بالسنتر أو أونلاين) مع خيارات دفع مرنة (إلكتروني، InstaPay، أو نقدي بالاستقبال).</p>
+            <div class="journey-step-visual">
+              <div class="j-mini-card">
+                <i class="ti ti-calendar"></i>
+                <span data-i18n="journey_s1_v1">مواعيد مرنة محددة</span>
+              </div>
+              <div class="j-mini-card">
+                <i class="ti ti-wallet"></i>
+                <span data-i18n="journey_s1_v2">سداد فوري أو بالسنتر</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="journey-step-card">
+            <div class="journey-step-header">
+              <span class="journey-step-number">02</span>
+              <div class="journey-step-icon emerald">
+                <i class="ti ti-qrcode"></i>
+              </div>
+            </div>
+            <span class="journey-step-tag emerald" data-i18n="journey_s2_tag">المحطة الثانية: الحضور والمتابعة</span>
+            <h3 data-i18n="journey_s2_title">حضور ذكي وإشعار فوري لولي الأمر</h3>
+            <p data-i18n="journey_s2_desc">مسح QR Code سريع بدون طوابير بالسنتر أو تسجيل الحضور في الحصص المباشرة، مع إشعار فوري يطمئن ولي الأمر عبر واتساب أو النظام.</p>
+            <div class="journey-step-visual">
+              <div class="j-mini-card green">
+                <i class="ti ti-circle-check-filled"></i>
+                <span data-i18n="journey_s2_v1">حاضر 07:02 م ✓</span>
+              </div>
+              <div class="j-mini-card green">
+                <i class="ti ti-brand-whatsapp"></i>
+                <span data-i18n="journey_s2_v2">إشعار ولي الأمر فوراً</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="journey-step-card">
+            <div class="journey-step-header">
+              <span class="journey-step-number">03</span>
+              <div class="journey-step-icon amber">
+                <i class="ti ti-clipboard-check"></i>
+              </div>
+            </div>
+            <span class="journey-step-tag amber" data-i18n="journey_s3_tag">المحطة الثالثة: التدريب والتقييم</span>
+            <h3 data-i18n="journey_s3_title">حل الواجبات وكويزات الذكاء الاصطناعي</h3>
+            <p data-i18n="journey_s3_desc">تسليم حلول الواجبات وملفات PDF ومراجعة ملاحظات المعلم الفردية، وحل اختبارات تفاعلية بتصحيح آلي فوري وجمع نقاط XP التنافسية.</p>
+            <div class="journey-step-visual">
+              <div class="j-mini-card amber">
+                <i class="ti ti-sparkles"></i>
+                <span data-i18n="journey_s3_v1">تصحيح ذكي 10/10</span>
+              </div>
+              <div class="j-mini-card amber">
+                <i class="ti ti-trophy"></i>
+                <span data-i18n="journey_s3_v2">+50 XP لكل إنجاز</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="journey-step-card">
+            <div class="journey-step-header">
+              <span class="journey-step-number">04</span>
+              <div class="journey-step-icon purple">
+                <i class="ti ti-certificate"></i>
+              </div>
+            </div>
+            <span class="journey-step-tag purple" data-i18n="journey_s4_tag">المحطة الرابعة: التخرج والتكريم</span>
+            <h3 data-i18n="journey_s4_title">شهادة معتمدة ولوحة الشرف</h3>
+            <p data-i18n="journey_s4_desc">إصدار فوري لشهادة إتمام الكورس الرقمية بختم الأكاديمية الرسمي ورمز QR للتحقق المشفر، مع تصدّر لوحة شرف المتميزين في الدفعة.</p>
+            <div class="journey-step-visual">
+              <div class="j-mini-card purple">
+                <i class="ti ti-medal"></i>
+                <span data-i18n="journey_s4_v1">شهادة موثقة بـ QR</span>
+              </div>
+              <div class="j-mini-card purple">
+                <i class="ti ti-star"></i>
+                <span data-i18n="journey_s4_v2">لوحة المتصدرين 🥇</span>
               </div>
             </div>
           </div>

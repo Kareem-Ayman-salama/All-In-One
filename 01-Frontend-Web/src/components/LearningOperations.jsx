@@ -203,6 +203,39 @@ export function MemberDashboard({ data, user }) {
       </div>
     </section>
 
+    {/* DAILY ACADEMIC FOCUS & STREAK BAR */}
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: "16px",
+        flexWrap: "wrap",
+        background: "linear-gradient(90deg, rgba(37,99,235,0.08) 0%, rgba(245,158,11,0.08) 100%)",
+        border: "1px solid rgba(37,99,235,0.18)",
+        borderRadius: "14px",
+        padding: "12px 18px",
+        margin: "18px 0"
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <span style={{ fontSize: "24px" }}>🔥</span>
+        <div>
+          <strong style={{ display: "block", fontSize: "14px", color: "var(--text-heading, #0f172a)" }}>
+            {tx("شعلة الالتزام الأكاديمي (4 أيام متتالية)", "Academic Study Streak (4 Consecutive Days)")}
+          </strong>
+          <span style={{ fontSize: "12px", color: "var(--text-muted, #64748b)" }}>
+            {tx("استمر في المذاكرة اليوم للحفاظ على شعلتك ومضاعفة نقاط خبرتك (XP Boost x1.5)!", "Study today to keep your streak alive and unlock an XP multiplier (1.5x)!")}
+          </span>
+        </div>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <span style={{ background: "rgba(16,185,129,0.12)", color: "#065f46", padding: "4px 10px", borderRadius: "999px", fontSize: "12px", fontWeight: "bold", border: "1px solid rgba(16,185,129,0.25)" }}>
+          {tx("🎯 هدف اليوم: مراجعة الدرس 04 وحل الكويز", "🎯 Today's Goal: Review Lesson 04 & Quiz")}
+        </span>
+      </div>
+    </div>
+
     {primaryCourse && (
       <section className="member-continue-learning-card">
         <div className="continue-learning-badge">

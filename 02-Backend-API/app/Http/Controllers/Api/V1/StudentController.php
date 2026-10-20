@@ -74,9 +74,11 @@ class StudentController extends Controller
         }
         $active = $model->status === 'active'
             && $model->access_starts_at->lte(now())
-            && $model->access_ends_at->gte(now())
+            && ($model->access_ends_at === null
+                || $model->access_ends_at->gte(now()))
             && $model->subscription?->status === 'active'
-            && $model->subscription?->ends_at?->gte(now());
+            && ($model->subscription?->ends_at === null
+                || $model->subscription->ends_at->gte(now()));
 
         return ApiResponse::success($request, [
             'enrollment' => $model,

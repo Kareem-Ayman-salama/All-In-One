@@ -145,14 +145,22 @@ class RoomAccessService
                             '<=',
                             $now,
                         )
-                        ->where(
-                            'course_enrollments.access_ends_at',
-                            '>=',
-                            $now,
-                        )
+                        ->where(fn ($accessWindow) => $accessWindow
+                            ->whereNull('course_enrollments.access_ends_at')
+                            ->orWhere(
+                                'course_enrollments.access_ends_at',
+                                '>=',
+                                $now,
+                            ))
                         ->where('student_subscriptions.status', 'active')
                         ->where('student_subscriptions.starts_at', '<=', $now)
-                        ->where('student_subscriptions.ends_at', '>=', $now),
+                        ->where(fn ($subscriptionWindow) => $subscriptionWindow
+                            ->whereNull('student_subscriptions.ends_at')
+                            ->orWhere(
+                                'student_subscriptions.ends_at',
+                                '>=',
+                                $now,
+                            )),
                 );
         });
     }

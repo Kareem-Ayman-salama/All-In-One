@@ -41,7 +41,7 @@ class BookingService
         array $attributes,
         ?Request $request = null,
     ): Booking {
-        return DB::transaction(function () use (
+        $booking = DB::transaction(function () use (
             $student,
             $attributes,
             $request,
@@ -108,10 +108,12 @@ class BookingService
                 );
             }
 
-            $remaining = $batch->capacity
-                - $batch->reserved_seats
-                - $batch->confirmed_seats;
-            if ($remaining <= 0) {
+            $remaining = $batch->capacity === null
+                ? null
+                : $batch->capacity
+                    - $batch->reserved_seats
+                    - $batch->confirmed_seats;
+            if ($remaining !== null && $remaining <= 0) {
                 $batch->update(['status' => BatchStatus::Full]);
                 throw new ApiException(
                     'CAPACITY_FULL',
@@ -182,6 +184,21 @@ class BookingService
 
             return $booking->load('batch.course');
         }, attempts: 3);
+
+        $isFreeRecordedCourse = $booking->amount_minor === 0
+            && $booking->batch?->course?->delivery_type === 'recorded';
+        if ($booking->status === BookingStatus::PendingConfirmation
+            && $isFreeRecordedCourse) {
+            return $this->confirm(
+                $booking,
+                null,
+                false,
+                'Automatic enrollment for a free recorded course.',
+                $request,
+            );
+        }
+
+        return $booking;
     }
 
     public function confirm(
@@ -218,7 +235,8 @@ class BookingService
                 ->whereKey($locked->batch_id)
                 ->lockForUpdate()
                 ->firstOrFail();
-            if ($batch->confirmed_seats >= $batch->capacity) {
+            if ($batch->capacity !== null
+                && $batch->confirmed_seats >= $batch->capacity) {
                 throw new ApiException(
                     'CAPACITY_FULL',
                     'The batch has reached its confirmed capacity.',
@@ -270,7 +288,7 @@ class BookingService
             ]);
 
             $accessStartsAt = now();
-            $accessEndsAt = $batch->end_date->copy()->endOfDay();
+            $accessEndsAt = $batch->end_date?->copy()->endOfDay();
             $enrollment = CourseEnrollment::query()->firstOrCreate([
                 'booking_id' => $locked->id,
             ], [
@@ -293,10 +311,12 @@ class BookingService
                 'ends_at' => $accessEndsAt,
             ]);
 
+            $batchIsFull = $batch->capacity !== null
+                && $batch->confirmed_seats + 1 >= $batch->capacity;
             $batch->update([
                 'reserved_seats' => max(0, $batch->reserved_seats - 1),
                 'confirmed_seats' => $batch->confirmed_seats + 1,
-                'status' => $batch->confirmed_seats + 1 >= $batch->capacity
+                'status' => $batchIsFull
                     ? BatchStatus::Full
                     : BatchStatus::Open,
             ]);

@@ -40,9 +40,23 @@ class StoreBatchRequest extends FormRequest
             ],
             'title' => ['required', 'string', 'max:160'],
             'titleAr' => ['nullable', 'string', 'max:160'],
-            'startDate' => ['nullable', 'date', 'required_unless:status,draft'],
-            'endDate' => ['nullable', 'date', 'after_or_equal:startDate', 'required_unless:status,draft'],
-            'schedule' => ['nullable', 'array', 'max:50', 'required_unless:status,draft'],
+            'startDate' => [
+                'nullable',
+                'date',
+                Rule::requiredIf(fn (): bool => $this->requiresSchedule()),
+            ],
+            'endDate' => [
+                'nullable',
+                'date',
+                'after_or_equal:startDate',
+                Rule::requiredIf(fn (): bool => $this->requiresSchedule()),
+            ],
+            'schedule' => [
+                'nullable',
+                'array',
+                'max:50',
+                Rule::requiredIf(fn (): bool => $this->requiresSchedule()),
+            ],
             'schedule.*.day' => ['required_with:schedule', 'string', 'max:20'],
             'schedule.*.startTime' => ['required_with:schedule', 'date_format:H:i'],
             'schedule.*.endTime' => ['required_with:schedule', 'date_format:H:i'],
@@ -50,7 +64,13 @@ class StoreBatchRequest extends FormRequest
                 'required',
                 Rule::in(['online', 'offline', 'hybrid', 'recorded']),
             ],
-            'capacity' => ['nullable', 'integer', 'min:1', 'max:100000', 'required_unless:status,draft'],
+            'capacity' => [
+                'nullable',
+                'integer',
+                'min:1',
+                'max:100000',
+                Rule::requiredIf(fn (): bool => $this->requiresSchedule()),
+            ],
             'location' => ['nullable', 'string', 'max:500'],
             'meetingReference' => ['nullable', 'string', 'max:2048'],
             'enrollmentStartsAt' => ['nullable', 'date'],
@@ -64,5 +84,11 @@ class StoreBatchRequest extends FormRequest
                 Rule::in(['draft', 'open', 'full', 'in_progress', 'completed', 'cancelled']),
             ],
         ];
+    }
+
+    private function requiresSchedule(): bool
+    {
+        return $this->input('status', 'draft') !== 'draft'
+            && $this->input('deliveryType') !== 'recorded';
     }
 }

@@ -120,15 +120,19 @@ function CourseCard({ course }) {
   const instructor = instructors.find((item) => item.id === course.instructorId);
   const batch = batches.find((item) => item.courseId === course.id && item.status === "open");
   const category = categories.find((item) => item.id === course.categoryId);
-  const remaining = batch ? Math.max(0, batch.capacity - batch.confirmedSeats - batch.reservedSeats) : 0;
+  const unlimitedEnrollment = batch?.capacity == null;
+  const remaining = batch && !unlimitedEnrollment
+    ? Math.max(0, batch.capacity - batch.confirmedSeats - batch.reservedSeats)
+    : null;
+  const isFree = Number(course.discountedPrice ?? course.price ?? 0) === 0;
   const { isArabic, copy } = useMarketI18n();
   const providerType = providerTypeFor(course, academy);
   return <article className="market-course-card">
     <Link className="market-course-cover" to={`/courses/${course.slug}`}>{course.coverUrl ? <img src={course.coverUrl} alt="" loading="lazy" /> : <BookOpen />}<div>{course.sponsored && <Badge tone="warning">{copy("إعلان ممول", "Sponsored")}</Badge>}{course.featured && <Badge tone="primary">{copy("مميز", "Featured")}</Badge>}</div></Link>
     <div className="market-course-body"><span>{nameOf(category, isArabic)} · {translateLevel(course.level, isArabic)}</span><Link to={`/courses/${course.slug}`}><h2>{nameOf(course, isArabic)}</h2></Link><p>{isArabic ? course.shortDescriptionAr : course.shortDescription}</p>
       <div className="market-course-owner"><span style={{ background: academy?.color }}>{academy?.initials}</span><div><strong>{instructor ? nameOf(instructor, isArabic) : copy("فريق التعليم", "Education team")}</strong><small>{nameOf(academy, isArabic)} {academy?.verified && <BadgeCheck size={14} />} · {providerLabel(providerType, copy)}</small></div></div>
-      <div className="market-course-meta"><span><MonitorPlay />{translateDelivery(course.deliveryType, isArabic)}</span><span><CalendarDays />{batch?.startDate || copy("قريبًا", "Soon")}</span><span><Users />{remaining} {copy("مكان متبقٍ", "seats left")}</span></div>
-      <footer><div>{course.discountedPrice && <del>{course.price.toLocaleString()} {copy("ج.م", "EGP")}</del>}<strong>{(course.discountedPrice || course.price).toLocaleString()} {copy("ج.م", "EGP")}</strong></div><Button as={Link} to={`/courses/${course.slug}`}>{copy("عرض التفاصيل", "View details")}</Button></footer>
+      <div className="market-course-meta"><span><MonitorPlay />{translateDelivery(course.deliveryType, isArabic)}</span><span><CalendarDays />{course.deliveryType === "recorded" ? copy("متاح الآن", "Available now") : (batch?.startDate || copy("قريبًا", "Soon"))}</span><span><Users />{unlimitedEnrollment ? copy("تسجيل مفتوح", "Open enrollment") : `${remaining} ${copy("مكان متبقٍ", "seats left")}`}</span></div>
+      <footer><div>{!isFree && course.discountedPrice && <del>{course.price.toLocaleString()} {copy("ج.م", "EGP")}</del>}<strong>{isFree ? copy("مجاني", "Free") : `${(course.discountedPrice || course.price).toLocaleString()} ${copy("ج.م", "EGP")}`}</strong></div><Button as={Link} to={`/courses/${course.slug}`}>{copy("عرض التفاصيل", "View details")}</Button></footer>
     </div>
   </article>;
 }
@@ -245,8 +249,8 @@ export function CourseDetailsPage() {
   return <MarketplaceShell><main className="course-detail-main">
     <div className="market-breadcrumbs"><Link to="/courses">{copy("الكورسات", "Courses")}</Link><span>/</span><span>{nameOf(category, isArabic)}</span><span>/</span><strong>{nameOf(course, isArabic)}</strong></div>
     <section className="course-detail-hero"><div><Badge tone="primary">{nameOf(category, isArabic)}</Badge><h1>{nameOf(course, isArabic)}</h1><p>{isArabic ? course.shortDescriptionAr : course.shortDescription}</p><div className="course-detail-owner"><span style={{ background: academy?.color }}>{academy?.initials}</span><div><strong>{nameOf(academy, isArabic)} {academy?.verified && <BadgeCheck />}</strong><small>{copy("بواسطة", "By")} {nameOf(instructor, isArabic)}</small></div></div><div className="course-detail-facts"><span><Clock3 />{course.duration}</span><span><BookOpen />{course.sessions} {copy("حصة", "sessions")}</span><span><MonitorPlay />{translateDelivery(course.deliveryType, isArabic)}</span></div></div><div className="course-visual">{course.coverUrl ? <img src={course.coverUrl} alt="" /> : <GraduationCap />}</div></section>
-    <div className="course-detail-layout"><div className="course-detail-content"><section><h2>{copy("عن الكورس", "About this course")}</h2><p>{isArabic ? course.descriptionAr : course.description}</p></section>{(detailsLoading || learningOutcomes.length > 0) && <section><h2>{copy("ماذا ستتعلم؟", "What you will learn")}</h2>{detailsLoading ? <p>{copy("جارٍ تحميل تفاصيل الكورس...", "Loading course details...")}</p> : <div className="outcomes-grid">{learningOutcomes.map((item) => <span key={item}><Check />{item}</span>)}</div>}</section>}<section><h2>{copy("المدرس", "Instructor")}</h2><div className="instructor-profile"><span>{instructor?.initials}</span><div><h3>{nameOf(instructor, isArabic)}</h3><strong>{instructor?.specialty}</strong><p>{instructor?.bio}</p></div></div></section><section><h2>{copy("الدفعات المتاحة", "Available batches")}</h2><div className="batch-public-list">{courseBatches.map((batch) => <article key={batch.id}><CalendarDays /><div><strong>{nameOf(batch, isArabic)}</strong><span>{formatBatchSchedule(batch.schedule, isArabic)} · {copy("يبدأ", "Starts")} {formatMarketDate(batch.startDate, isArabic)}</span><small><MapPin />{batch.location}</small></div><Badge tone="success">{batch.remainingSeats ?? Math.max(0, Number(batch.capacity || 0) - Number(batch.confirmedSeats || 0) - Number(batch.reservedSeats || 0))} {copy("مكان", "seats")}</Badge></article>)}</div></section></div>
-      <aside className="course-booking-card"><span>{copy("السعر يبدأ من", "Price starts at")}</span>{course.discountedPrice && <del>{course.price.toLocaleString()} {copy("ج.م", "EGP")}</del>}<strong>{(course.discountedPrice || course.price).toLocaleString()} {copy("ج.م", "EGP")}</strong><p>{copy("الحجز الآن والدفع لاحقًا بعد تأكيد الأكاديمية.", "Reserve now and pay after academy confirmation.")}</p><Button as={Link} to={`/booking/${course.id}`}>{copy("احجز مكانك الآن", "Reserve your seat")}</Button><div><ShieldCheck />{copy("لن يتم تحصيل أي مبلغ في هذه المرحلة.", "No payment is collected at this stage.")}</div></aside>
+    <div className="course-detail-layout"><div className="course-detail-content"><section><h2>{copy("عن الكورس", "About this course")}</h2><p>{isArabic ? course.descriptionAr : course.description}</p></section>{(detailsLoading || learningOutcomes.length > 0) && <section><h2>{copy("ماذا ستتعلم؟", "What you will learn")}</h2>{detailsLoading ? <p>{copy("جارٍ تحميل تفاصيل الكورس...", "Loading course details...")}</p> : <div className="outcomes-grid">{learningOutcomes.map((item) => <span key={item}><Check />{item}</span>)}</div>}</section>}<section><h2>{copy("المدرس", "Instructor")}</h2><div className="instructor-profile"><span>{instructor?.initials}</span><div><h3>{nameOf(instructor, isArabic)}</h3><strong>{instructor?.specialty}</strong><p>{instructor?.bio}</p></div></div></section><section><h2>{copy(course.deliveryType === "recorded" ? "التسجيل" : "الدفعات المتاحة", course.deliveryType === "recorded" ? "Enrollment" : "Available batches")}</h2><div className="batch-public-list">{courseBatches.map((batch) => { const unlimited = batch.capacity == null; const remaining = unlimited ? null : (batch.remainingSeats ?? Math.max(0, Number(batch.capacity || 0) - Number(batch.confirmedSeats || 0) - Number(batch.reservedSeats || 0))); return <article key={batch.id}><CalendarDays /><div><strong>{nameOf(batch, isArabic)}</strong><span>{course.deliveryType === "recorded" ? copy("دراسة ذاتية · متاح فورًا", "Self-paced · Instant access") : `${formatBatchSchedule(batch.schedule, isArabic)} · ${copy("يبدأ", "Starts")} ${formatMarketDate(batch.startDate, isArabic)}`}</span>{batch.location && <small><MapPin />{batch.location}</small>}</div><Badge tone="success">{unlimited ? copy("تسجيل مفتوح", "Open enrollment") : `${remaining} ${copy("مكان", "seats")}`}</Badge></article>; })}</div></section></div>
+      <aside className="course-booking-card"><span>{Number(course.discountedPrice ?? course.price ?? 0) === 0 ? copy("سعر الكورس", "Course price") : copy("السعر يبدأ من", "Price starts at")}</span>{Number(course.discountedPrice ?? course.price ?? 0) > 0 && course.discountedPrice && <del>{course.price.toLocaleString()} {copy("ج.م", "EGP")}</del>}<strong>{Number(course.discountedPrice ?? course.price ?? 0) === 0 ? copy("مجاني", "Free") : `${(course.discountedPrice || course.price).toLocaleString()} ${copy("ج.م", "EGP")}`}</strong><p>{Number(course.discountedPrice ?? course.price ?? 0) === 0 ? copy("أنشئ حساب طالب أو سجّل الدخول لتحصل على وصول فوري للكورس.", "Create a student account or sign in for instant course access.") : copy("الحجز الآن والدفع لاحقًا بعد تأكيد الأكاديمية.", "Reserve now and pay after academy confirmation.")}</p><Button as={Link} to={`/booking/${course.id}`}>{Number(course.discountedPrice ?? course.price ?? 0) === 0 ? copy("اشترك مجانًا", "Enroll for free") : copy("احجز مكانك الآن", "Reserve your seat")}</Button><div><ShieldCheck />{Number(course.discountedPrice ?? course.price ?? 0) === 0 ? copy("لن يُطلب منك إدخال أي بيانات دفع.", "No payment details are required.") : copy("لن يتم تحصيل أي مبلغ في هذه المرحلة.", "No payment is collected at this stage.")}</div></aside>
     </div>
   </main></MarketplaceShell>;
 }
@@ -618,9 +622,13 @@ export function PublicBookingPage() {
   const { isArabic, copy } = useMarketI18n();
   const course = courses.find((item) => item.id === courseId && item.status === "published");
   const available = batches.filter((item) => {
-    const remainingSeats = item.remainingSeats
-      ?? Math.max(0, Number(item.capacity || 0) - Number(item.confirmedSeats || 0) - Number(item.reservedSeats || 0));
-    return item.courseId === courseId && item.status === "open" && remainingSeats > 0;
+    const unlimitedEnrollment = item.capacity == null;
+    const remainingSeats = unlimitedEnrollment
+      ? null
+      : (item.remainingSeats ?? Math.max(0, Number(item.capacity) - Number(item.confirmedSeats || 0) - Number(item.reservedSeats || 0)));
+    return item.courseId === courseId
+      && item.status === "open"
+      && (unlimitedEnrollment || remainingSeats > 0);
   });
   const [batchId, setBatchId] = useState("");
   const [paymentPreference, setPaymentPreference] = useState("paymob");
@@ -734,7 +742,7 @@ export function PublicBookingPage() {
         note: [
           form.get("note") || "",
           appliedCoupon ? `[Coupon: ${appliedCoupon.code}]` : "",
-          paymentPreference !== "paymob" ? `[Method: ${paymentPreference}]` : "",
+        basePrice > 0 && paymentPreference !== "paymob" ? `[Method: ${paymentPreference}]` : "",
           offlineRef ? `[Ref: ${offlineRef}]` : ""
         ].filter(Boolean).join(" ").trim(),
         idempotencyKey: globalThis.crypto?.randomUUID?.() || `booking-${Date.now()}`,
@@ -749,7 +757,7 @@ export function PublicBookingPage() {
         showToast(messages[result.reason] || result.error?.message || copy("تعذر إتمام الحجز", "Could not complete booking"), "error");
         return;
       }
-      navigate(`/booking/success?booking=${result.booking.id}&pay=${paymentPreference}`);
+      navigate(`/booking/success?booking=${result.booking.id}&pay=${basePrice === 0 ? "free" : paymentPreference}`);
     } finally {
       setSubmitting(false);
     }
@@ -760,14 +768,14 @@ export function PublicBookingPage() {
       <main className="booking-page">
         <div className="booking-progress">
           <span className="active">1 {copy("اختيار الدفعة", "Select batch")}</span>
-          <span className="active">2 {copy("بيانات الطالب والدفع", "Student & Payment")}</span>
+          <span className="active">2 {basePrice === 0 ? copy("بيانات الطالب", "Student details") : copy("بيانات الطالب والدفع", "Student & Payment")}</span>
           <span>3 {copy("تأكيد الطلب", "Confirmation")}</span>
         </div>
         <div className="booking-layout">
           <form className="booking-form" onSubmit={submit}>
             <header>
-              <h1>{copy("إتمام الحجز والتسجيل", "Complete Booking & Enrollment")}</h1>
-              <p>{copy("أدخل بياناتك واختر طريقة الدفع المناسبة لتأكيد مقعدك في الكورس.", "Enter your details and select your preferred payment method to secure your seat.")}</p>
+              <h1>{basePrice === 0 ? copy("الاشتراك المجاني", "Free enrollment") : copy("إتمام الحجز والتسجيل", "Complete Booking & Enrollment")}</h1>
+              <p>{basePrice === 0 ? copy("أكمل بياناتك لتحصل على وصول فوري إلى الكورس المسجّل.", "Complete your details for instant access to the recorded course.") : copy("أدخل بياناتك واختر طريقة الدفع المناسبة لتأكيد مقعدك في الكورس.", "Enter your details and select your preferred payment method to secure your seat.")}</p>
             </header>
 
             <FormField label={copy("اختر الدفعة المناسبة", "Select batch")}>
@@ -775,7 +783,7 @@ export function PublicBookingPage() {
                 {available.length === 0 && <option value="">{copy("لا توجد دفعات متاحة حاليًا", "No batches are currently available")}</option>}
                 {available.map((batch) => (
                   <option value={batch.id} key={batch.id}>
-                    {nameOf(batch, isArabic)} - {formatBatchSchedule(batch.schedule, isArabic)}
+                    {nameOf(batch, isArabic)} - {course.deliveryType === "recorded" ? copy("دراسة ذاتية متاحة فورًا", "Instant self-paced access") : formatBatchSchedule(batch.schedule, isArabic)}
                   </option>
                 ))}
               </select>
@@ -796,8 +804,7 @@ export function PublicBookingPage() {
               </FormField>
             </div>
 
-            {/* Payment Method Selector */}
-            <div style={{ margin: "16px 0", display: "grid", gap: "10px" }}>
+            {basePrice > 0 && <div style={{ margin: "16px 0", display: "grid", gap: "10px" }}>
               <label style={{ fontWeight: "700", fontSize: "14px" }}>
                 {copy("طريقة الدفع وتأكيد المقعد:", "Payment Method & Seat Confirmation:")}
               </label>
@@ -893,15 +900,15 @@ export function PublicBookingPage() {
                   </div>
                 </div>
               )}
-            </div>
+            </div>}
 
             <label className="booking-terms">
               <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} />
-              {copy("أوافق على شروط الحجز وسياسة الإلغاء وحماية المحتوى لمنصة عين.", "I accept AIN Platform's booking, cancellation, and protected content policy.")}
+              {basePrice === 0 ? copy("أوافق على شروط الاستخدام وسياسة حماية المحتوى لمنصة عين.", "I accept AIN Platform's terms of use and content protection policy.") : copy("أوافق على شروط الحجز وسياسة الإلغاء وحماية المحتوى لمنصة عين.", "I accept AIN Platform's booking, cancellation, and protected content policy.")}
             </label>
 
             <Button type="submit" disabled={!batchId || submitting} style={{ width: "100%", padding: "12px", fontSize: "15px" }}>
-              {submitting ? copy("جاري إرسال الطلب...", "Submitting...") : copy("متابعة وتأكيد الحجز", "Proceed to Confirmation")}
+              {submitting ? copy("جاري إنشاء اشتراكك...", "Creating your enrollment...") : (basePrice === 0 ? copy("اشترك مجانًا وابدأ الآن", "Enroll free and start now") : copy("متابعة وتأكيد الحجز", "Proceed to Confirmation"))}
             </Button>
           </form>
 
@@ -910,8 +917,7 @@ export function PublicBookingPage() {
             <small>{nameOf(academy, isArabic)}</small>
             <h2>{nameOf(course, isArabic)}</h2>
 
-            {/* PROMO CODE SECTION */}
-            <div style={{ margin: "16px 0", borderTop: "1px solid var(--border, #e2e8f0)", paddingTop: "14px" }}>
+            {basePrice > 0 && <div style={{ margin: "16px 0", borderTop: "1px solid var(--border, #e2e8f0)", paddingTop: "14px" }}>
               <label style={{ fontSize: "12.5px", fontWeight: "bold", display: "block", marginBottom: "6px" }}>
                 🏷️ {copy("هل لديك كود خصم أو كوبون؟", "Have a promo code?")}
               </label>
@@ -946,12 +952,12 @@ export function PublicBookingPage() {
                   <button type="button" onClick={() => setAppliedCoupon(null)} style={{ border: "none", background: "none", color: "#991b1b", cursor: "pointer", fontSize: "11px", fontWeight: "bold" }}>✕</button>
                 </div>
               )}
-            </div>
+            </div>}
 
             <div style={{ borderTop: "1px solid var(--border, #e2e8f0)", paddingTop: "12px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#64748b" }}>
-                <span>{copy("السعر الأساسي", "Base price")}</span>
-                <span>{basePrice.toLocaleString()} {copy("ج.م", "EGP")}</span>
+                <span>{copy("سعر الكورس", "Course price")}</span>
+                <span>{basePrice === 0 ? copy("مجاني", "Free") : `${basePrice.toLocaleString()} ${copy("ج.م", "EGP")}`}</span>
               </div>
               {discountAmount > 0 && (
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#059669", fontWeight: "bold", margin: "4px 0" }}>
@@ -959,15 +965,17 @@ export function PublicBookingPage() {
                   <span>- {discountAmount.toLocaleString()} {copy("ج.م", "EGP")}</span>
                 </div>
               )}
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "16px", fontWeight: "800", marginTop: "8px", paddingTop: "8px", borderTop: "1px dashed var(--border, #cbd5e1)" }}>
+              {basePrice > 0 && <div style={{ display: "flex", justifyContent: "space-between", fontSize: "16px", fontWeight: "800", marginTop: "8px", paddingTop: "8px", borderTop: "1px dashed var(--border, #cbd5e1)" }}>
                 <span>{copy("المبلغ النهائي المطلوب", "Total to pay")}</span>
                 <strong style={{ color: "var(--primary, #16458F)" }}>{finalPrice.toLocaleString()} {copy("ج.م", "EGP")}</strong>
-              </div>
+              </div>}
             </div>
 
             <p style={{ marginTop: "16px" }}>
               <ShieldCheck />
-              {paymentPreference === "paymob"
+              {basePrice === 0
+                ? copy("لا توجد أي رسوم أو بيانات دفع مطلوبة لهذا الكورس.", "No fees or payment details are required for this course.")
+                : paymentPreference === "paymob"
                 ? copy("سداد إلكتروني مشفر ومحمي عبر Paymob Egypt.", "Secure encrypted electronic payment powered by Paymob Egypt.")
                 : copy("حجز مبدئي. ستتواصل الأكاديمية معك لتأكيد المقعد.", "Seat hold. The academy will contact you to confirm.")}
             </p>
