@@ -18,17 +18,47 @@ import {
   Star,
   Target,
   Trophy,
-  UserRoundCheck
+  UserRoundCheck,
+  XCircle
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Badge } from "../components/Badge";
 import { Button } from "../components/Button";
+import { useAuth } from "../contexts/AuthContext";
 import { useLanguage } from "../contexts/LanguageContext";
 import { WESAM_COURSE_SLUG, wesamNahwJourney } from "../data/wesamNahwJourneyData";
 import { MarketplaceShell } from "./MarketplacePages";
 
 const stageIcons = [BookOpen, Map, Trophy];
+const practiceStorageKey = "ain:wesam-nahw-practice:v1";
+
+function normalizeArabicAnswer(value) {
+  return String(value || "")
+    .trim()
+    .toLocaleLowerCase("ar")
+    .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, "")
+    .replace(/[أإآٱ]/g, "ا")
+    .replace(/ى/g, "ي")
+    .replace(/ة/g, "ه")
+    .replace(/ـ/g, "")
+    .replace(/[^\p{L}\p{N}\s]/gu, "")
+    .replace(/\s+/g, " ");
+}
+
+function isPracticeAnswerCorrect(question, answer) {
+  const accepted = question.acceptedAnswers || [question.correctAnswer];
+  const normalizedAnswer = normalizeArabicAnswer(answer);
+  return accepted.some((item) => normalizeArabicAnswer(item) === normalizedAnswer);
+}
+
+function loadPracticeProgress() {
+  try {
+    return JSON.parse(window.localStorage.getItem(practiceStorageKey)) || {};
+  } catch {
+    return {};
+  }
+}
 
 function DemoNotice() {
   return (
@@ -234,6 +264,197 @@ function ParsingLab() {
   );
 }
 
+function PracticeStudio() {
+  const { isAuthenticated } = useAuth();
+  const tracks = wesamNahwJourney.practiceTracks;
+  const [progress, setProgress] = useState(loadPracticeProgress);
+  const [activeTrackId, setActiveTrackId] = useState(tracks[0].id);
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [draftAnswer, setDraftAnswer] = useState("");
+  const activeTrack = tracks.find((track) => track.id === activeTrackId) || tracks[0];
+  const trackProgress = progress[activeTrack.id] || { answers: {} };
+  const answers = trackProgress.answers || {};
+  const currentQuestion = activeTrack.questions[questionIndex];
+  const currentAnswer = currentQuestion ? answers[currentQuestion.id] : null;
+  const answeredCount = Object.keys(answers).length;
+  const correctCount = activeTrack.questions.filter((question) => (
+    answers[question.id] != null && isPracticeAnswerCorrect(question, answers[question.id])
+  )).length;
+  const completed = answeredCount === activeTrack.questions.length;
+  const showingResult = questionIndex >= activeTrack.questions.length;
+  const percentage = Math.round((correctCount / activeTrack.questions.length) * 100);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(practiceStorageKey, JSON.stringify(progress));
+    } catch {
+      // Practice remains usable when storage is unavailable.
+    }
+  }, [progress]);
+
+  const openTrack = (track) => {
+    const savedAnswers = progress[track.id]?.answers || {};
+    const nextQuestion = track.questions.findIndex((question) => savedAnswers[question.id] == null);
+    setActiveTrackId(track.id);
+    setQuestionIndex(nextQuestion === -1 ? track.questions.length : nextQuestion);
+    setDraftAnswer("");
+  };
+
+  const submitAnswer = (answer) => {
+    const value = String(answer || "").trim();
+    if (!currentQuestion || currentAnswer != null || !value) return;
+    setProgress((current) => ({
+      ...current,
+      [activeTrack.id]: {
+        ...(current[activeTrack.id] || {}),
+        answers: {
+          ...(current[activeTrack.id]?.answers || {}),
+          [currentQuestion.id]: value
+        },
+        updatedAt: new Date().toISOString()
+      }
+    }));
+    setDraftAnswer("");
+  };
+
+  const moveNext = () => {
+    setQuestionIndex((current) => Math.min(current + 1, activeTrack.questions.length));
+    setDraftAnswer("");
+  };
+
+  const resetTrack = () => {
+    setProgress((current) => {
+      const next = { ...current };
+      delete next[activeTrack.id];
+      return next;
+    });
+    setQuestionIndex(0);
+    setDraftAnswer("");
+  };
+
+  return (
+    <section className="nahw-practice-section" id="practice">
+      <div className="nahw-section-heading">
+        <span>تدريبات مجانية بتصحيح فوري</span>
+        <h2>اختبر نفسك وتعلّم من كل إجابة</h2>
+        <p>اختر المستوى، راجع القاعدة، ثم حل التدريب. نتيجتك تحفظ على هذا الجهاز ويمكنك إعادة أي مجموعة لتحسين مستواك.</p>
+      </div>
+      <div className="nahw-practice-layout">
+        <aside className="nahw-practice-tracks" aria-label="مجموعات التدريب">
+          {tracks.map((track, index) => {
+            const savedAnswers = progress[track.id]?.answers || {};
+            const trackScore = track.questions.filter((question) => (
+              savedAnswers[question.id] != null && isPracticeAnswerCorrect(question, savedAnswers[question.id])
+            )).length;
+            const trackComplete = Object.keys(savedAnswers).length === track.questions.length;
+            return (
+              <button
+                className={track.id === activeTrack.id ? "active" : ""}
+                key={track.id}
+                onClick={() => openTrack(track)}
+                type="button"
+              >
+                <span>{index + 1}</span>
+                <div><strong>{track.title}</strong><small>{track.level} · {track.duration}</small></div>
+                {trackComplete ? <b>{trackScore}/{track.questions.length}</b> : <em>{Object.keys(savedAnswers).length}/{track.questions.length}</em>}
+              </button>
+            );
+          })}
+          <div className="nahw-practice-save-note">
+            <CheckCircle2 />
+            <div><strong>تقدمك محفوظ</strong><small>{isAuthenticated ? "يمكنك متابعة اختباراتك المسجلة من لوحة الطالب." : "أنشئ حسابًا مجانيًا لحفظ الدرجات على حسابك."}</small></div>
+          </div>
+        </aside>
+
+        <div className="nahw-practice-player">
+          <header>
+            <div><Badge tone="primary">{activeTrack.level}</Badge><h3>{activeTrack.title}</h3><p>{activeTrack.description}</p></div>
+            <span>{answeredCount}/{activeTrack.questions.length}</span>
+          </header>
+          <div className="nahw-practice-progress" aria-label={`أكملت ${answeredCount} من ${activeTrack.questions.length}`}>
+            <span style={{ width: `${(answeredCount / activeTrack.questions.length) * 100}%` }} />
+          </div>
+
+          {!showingResult && currentQuestion && (
+            <>
+              <div className="nahw-practice-lesson">
+                <div><BookOpen /><strong>راجع القاعدة</strong></div>
+                <p>{activeTrack.lesson.rule}</p>
+                <small><Lightbulb />{activeTrack.lesson.example}</small>
+              </div>
+              <div className="nahw-practice-question">
+                <div className="nahw-question-meta"><span>السؤال {questionIndex + 1} من {activeTrack.questions.length}</span><strong>10 نقاط</strong></div>
+                <h3>{currentQuestion.prompt}</h3>
+                {currentQuestion.type === "text" ? (
+                  <form onSubmit={(event) => { event.preventDefault(); submitAnswer(draftAnswer); }}>
+                    <input
+                      aria-label="اكتب إجابتك"
+                      disabled={currentAnswer != null}
+                      onChange={(event) => setDraftAnswer(event.target.value)}
+                      placeholder="اكتب إجابتك هنا..."
+                      value={currentAnswer ?? draftAnswer}
+                    />
+                    {currentAnswer == null && <Button type="submit" disabled={!draftAnswer.trim()}>تحقق من الإجابة</Button>}
+                  </form>
+                ) : (
+                  <div className="nahw-practice-options">
+                    {currentQuestion.options.map((option) => {
+                      const answered = currentAnswer != null;
+                      const selected = currentAnswer === option;
+                      const correct = answered && option === currentQuestion.correctAnswer;
+                      const wrong = answered && selected && !correct;
+                      return (
+                        <button
+                          className={`${selected ? "selected" : ""} ${correct ? "correct" : ""} ${wrong ? "wrong" : ""}`}
+                          disabled={answered}
+                          key={option}
+                          onClick={() => submitAnswer(option)}
+                          type="button"
+                        >
+                          <span>{option}</span>{correct && <CheckCircle2 />}{wrong && <XCircle />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+              {currentAnswer != null && (
+                <div className={`nahw-practice-feedback ${isPracticeAnswerCorrect(currentQuestion, currentAnswer) ? "success" : "error"}`} role="status" aria-live="polite">
+                  {isPracticeAnswerCorrect(currentQuestion, currentAnswer) ? <CheckCircle2 /> : <XCircle />}
+                  <div>
+                    <strong>{isPracticeAnswerCorrect(currentQuestion, currentAnswer) ? "إجابة صحيحة، أحسنت!" : `الإجابة الصحيحة: ${currentQuestion.correctAnswer}`}</strong>
+                    <p>{currentQuestion.explanation}</p>
+                  </div>
+                </div>
+              )}
+              <footer className="nahw-practice-actions">
+                <button type="button" onClick={resetTrack}><RotateCcw /> ابدأ المجموعة من جديد</button>
+                {currentAnswer != null && <Button onClick={moveNext}>{questionIndex === activeTrack.questions.length - 1 ? "اعرض النتيجة" : "السؤال التالي"}<ArrowLeft /></Button>}
+              </footer>
+            </>
+          )}
+
+          {showingResult && completed && (
+            <div className="nahw-practice-result" role="status" aria-live="polite">
+              <span className={percentage >= 70 ? "success" : "needs-work"}><Trophy /></span>
+              <small>نتيجة مجموعة {activeTrack.title}</small>
+              <strong>{percentage}%</strong>
+              <h3>{percentage >= 85 ? "ممتاز، أتقنت هذه المهارة" : percentage >= 70 ? "أحسنت، أنت جاهز للخطوة التالية" : "بداية جيدة، راجع القاعدة وحاول مرة أخرى"}</h3>
+              <p>أجبت عن {correctCount} إجابات صحيحة من أصل {activeTrack.questions.length}. التصحيح والشرح يظلان متاحين عند إعادة المجموعة.</p>
+              <div>
+                <Button variant="ghost" onClick={resetTrack}><RotateCcw /> إعادة التدريب</Button>
+                {isAuthenticated
+                  ? <Button as={Link} to="/end-user/quizzes">اختباراتي المسجلة <ArrowLeft /></Button>
+                  : <Button as={Link} to="/create-account">أنشئ حسابًا واحفظ نتائجك <ArrowLeft /></Button>}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function StudentPreview() {
   return (
     <section className="nahw-student-preview" id="student-view">
@@ -278,7 +499,7 @@ export function WesamNahwJourneyPage() {
     document.title = "رحلة النحو مع وسام | تجربة تعليمية تفاعلية";
     const meta = document.querySelector('meta[name="description"]');
     if (meta) {
-      meta.content = "استعرض نموذج رحلة النحو التفاعلية مع الأستاذة وسام: 15 وحدة، درس تطبيقي، معمل إعراب ولوحة متابعة للطالب.";
+      meta.content = "جرّب رحلة النحو التفاعلية مع الأستاذة وسام: 15 وحدة، معمل إعراب، و18 سؤالًا بتصحيح وشرح فوري.";
     }
   }, []);
 
@@ -314,12 +535,13 @@ export function WesamNahwJourneyPage() {
           </div>
         </section>
         <nav className="nahw-local-nav" aria-label="أقسام العرض">
-          <a href="#overview">فكرة البرنامج</a><a href="#curriculum">خريطة المنهج</a><a href="#sample-lesson">نموذج الدرس</a><a href="#e3rab-lab">معمل الإعراب</a><a href="#student-view">لوحة الطالب</a>
+          <a href="#overview">فكرة البرنامج</a><a href="#curriculum">خريطة المنهج</a><a href="#sample-lesson">نموذج الدرس</a><a href="#e3rab-lab">معمل الإعراب</a><a href="#practice">التدريبات</a><a href="#student-view">لوحة الطالب</a>
         </nav>
         <ProgramOverview />
         <CurriculumJourney />
         <SampleLesson />
         <ParsingLab />
+        <PracticeStudio />
         <StudentPreview />
         <section className="nahw-final-cta">
           <div><span><Sparkles /></span><h2>هذا هو التصور الأول للبرنامج</h2><p>بعد مراجعة الأستاذة وسام نثبت ترتيب الوحدات، نعتمد أسلوب الشرح، ونبدأ إدخال المحتوى الحقيقي درسًا بعد درس.</p></div>

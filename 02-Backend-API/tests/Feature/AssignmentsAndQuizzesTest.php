@@ -129,8 +129,15 @@ class AssignmentsAndQuizzesTest extends TestCase
         $q1Id = $createQuizRes->json('data.questions.0.id');
         $q2Id = $createQuizRes->json('data.questions.1.id');
 
-        // 2. Student fetches quiz: verify correct answers are NOT exposed
+        // 2. Private tenant quizzes are not visible outside their academy.
+        $outsider = User::factory()->create();
+        Sanctum::actingAs($outsider);
+        $this->getJson("/api/v1/student/quizzes/{$quizId}")
+            ->assertNotFound();
+
+        // 3. Academy student fetches quiz: verify correct answers are NOT exposed.
         $student = User::factory()->create();
+        $this->addStudentMembership($org, $student);
         Sanctum::actingAs($student);
 
         $studentQuizRes = $this->getJson("/api/v1/student/quizzes/{$quizId}")
@@ -139,7 +146,7 @@ class AssignmentsAndQuizzesTest extends TestCase
         $this->assertNull($studentQuizRes->json('data.questions.0.correct_answer'));
         $this->assertNull($studentQuizRes->json('data.questions.1.correct_answer'));
 
-        // 3. Student takes the quiz with 1 correct answer and 1 wrong answer (10/20 = 50% -> Fail)
+        // 4. Student takes the quiz with 1 correct answer and 1 wrong answer (10/20 = 50% -> Fail)
         $attemptFailRes = $this->postJson("/api/v1/student/quizzes/{$quizId}/attempt", [
             'answers' => [
                 $q1Id => 'A', // correct
@@ -152,7 +159,7 @@ class AssignmentsAndQuizzesTest extends TestCase
         $this->assertEquals(50, $attemptFailRes->json('data.percentage'));
         $this->assertFalse($attemptFailRes->json('data.passed'));
 
-        // 4. Student uses second attempt with both correct answers (20/20 = 100% -> Pass)
+        // 5. Student uses second attempt with both correct answers (20/20 = 100% -> Pass)
         $attemptPassRes = $this->postJson("/api/v1/student/quizzes/{$quizId}/attempt", [
             'answers' => [
                 $q1Id => 'A',
@@ -164,11 +171,46 @@ class AssignmentsAndQuizzesTest extends TestCase
         $this->assertEquals(100, $attemptPassRes->json('data.percentage'));
         $this->assertTrue($attemptPassRes->json('data.passed'));
 
-        // 5. Max attempts reached (max is 2) - 3rd attempt must be rejected
+        // 6. Max attempts reached (max is 2) - 3rd attempt must be rejected
         $this->postJson("/api/v1/student/quizzes/{$quizId}/attempt", [
             'answers' => [$q1Id => 'A'],
         ])->assertStatus(422)
             ->assertJsonPath('error.code', 'MAX_ATTEMPTS_REACHED');
+    }
+
+    public function test_short_arabic_answers_ignore_diacritics_alef_variants_and_extra_spaces(): void
+    {
+        $this->seed();
+        [$org, $instructor] = $this->workspace('Arabic Grammar Academy');
+        Sanctum::actingAs($instructor);
+
+        $response = $this->postJson("/api/v1/organizations/{$org->id}/quizzes", [
+            'title' => 'Arabic short-answer practice',
+            'titleAr' => 'تدريب الإجابة القصيرة',
+            'passingScore' => 70,
+            'maxAttempts' => 2,
+            'questions' => [[
+                'questionText' => 'What is the grammatical role?',
+                'questionTextAr' => 'ما الموقع الإعرابي؟',
+                'type' => 'short_answer',
+                'correctAnswer' => 'إِنَّ  العِلْمَ',
+                'points' => 10,
+                'explanation' => 'التشكيل لا يغيّر صحة المصطلح المكتوب.',
+            ]],
+        ])->assertCreated();
+
+        $quizId = $response->json('data.id');
+        $questionId = $response->json('data.questions.0.id');
+        $student = User::factory()->create();
+        $this->addStudentMembership($org, $student);
+        Sanctum::actingAs($student);
+
+        $this->postJson("/api/v1/student/quizzes/{$quizId}/attempt", [
+            'answers' => [$questionId => '  ان العلم  '],
+        ])->assertCreated()
+            ->assertJsonPath('data.percentage', 100)
+            ->assertJsonPath('data.passed', true)
+            ->assertJsonPath('data.breakdown.0.isCorrect', true);
     }
 
     public function test_bulk_quiz_questions_import_via_csv_and_json(): void
@@ -233,5 +275,21 @@ class AssignmentsAndQuizzesTest extends TestCase
         ]);
 
         return [$organization, $owner];
+    }
+
+    private function addStudentMembership(Organization $organization, User $student): void
+    {
+        $role = Role::query()
+            ->whereNull('organization_id')
+            ->where('name', OrganizationRole::Student->value)
+            ->firstOrFail();
+
+        OrganizationMembership::query()->create([
+            'organization_id' => $organization->id,
+            'user_id' => $student->id,
+            'role_id' => $role->id,
+            'status' => 'active',
+            'joined_at' => now(),
+        ]);
     }
 }

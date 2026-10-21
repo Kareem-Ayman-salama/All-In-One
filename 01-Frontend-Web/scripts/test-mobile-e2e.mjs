@@ -585,6 +585,70 @@ async function runE2ETests() {
       await courseDetailsPage.close();
     }
 
+    // 5. Regress the public grammar practice flow and its responsive layout.
+    const grammarPracticePage = await context.newPage();
+    await grammarPracticePage.setViewportSize({ width: vp.width, height: vp.height });
+    const grammarPracticeErrors = [];
+    grammarPracticePage.on("pageerror", (error) => grammarPracticeErrors.push(error.message));
+    try {
+      await grammarPracticePage.addInitScript(() => {
+        window.localStorage.removeItem("ain:wesam-nahw-practice:v1");
+      });
+      await grammarPracticePage.goto(
+        `${baseUrl}/courses/nahw-from-foundations-to-mastery/journey`,
+        { waitUntil: "domcontentloaded", timeout: 15000 }
+      );
+      await grammarPracticePage.waitForSelector(".nahw-practice-player", { timeout: 5000 });
+
+      const practiceLayout = await grammarPracticePage.evaluate(() => ({
+        doc: document.documentElement.scrollWidth,
+        body: document.body.scrollWidth,
+        inner: window.innerWidth,
+        tracks: document.querySelectorAll(".nahw-practice-tracks > button").length,
+        question: document.querySelector(".nahw-practice-question h3")?.textContent || ""
+      }));
+      assert(
+        grammarPracticeErrors.length === 0
+          && practiceLayout.tracks === 3
+          && practiceLayout.question.includes("كتبَ"),
+        "/courses/:slug/journey renders the three interactive practice tracks"
+      );
+      assert(
+        practiceLayout.doc <= practiceLayout.inner && practiceLayout.body <= practiceLayout.inner,
+        `/courses/:slug/journey fits viewport (${vp.width}px): doc=${practiceLayout.doc}px, body=${practiceLayout.body}px, win=${practiceLayout.inner}px`
+      );
+
+      if (vp.width === 390) {
+        await grammarPracticePage.getByRole("button", { name: "اسم", exact: true }).click();
+        assert(
+          (await grammarPracticePage.locator(".nahw-practice-feedback").innerText()).includes("الإجابة الصحيحة: فعل ماضٍ"),
+          "Grammar practice explains an incorrect answer immediately"
+        );
+        await grammarPracticePage.getByRole("button", { name: "السؤال التالي", exact: true }).click();
+        await grammarPracticePage.getByRole("button", { name: "في", exact: true }).click();
+        await grammarPracticePage.getByRole("button", { name: "السؤال التالي", exact: true }).click();
+        await grammarPracticePage.getByRole("button", { name: "مدرسة", exact: true }).click();
+        await grammarPracticePage.getByRole("button", { name: "السؤال التالي", exact: true }).click();
+        await grammarPracticePage.getByRole("button", { name: "صحيح", exact: true }).click();
+        await grammarPracticePage.getByRole("button", { name: "السؤال التالي", exact: true }).click();
+        await grammarPracticePage.getByLabel("اكتب إجابتك", { exact: true }).fill("حَرْفُ جَرٍّ");
+        await grammarPracticePage.getByRole("button", { name: "تحقق من الإجابة", exact: true }).click();
+        assert(
+          (await grammarPracticePage.locator(".nahw-practice-feedback").innerText()).includes("إجابة صحيحة"),
+          "Grammar practice normalizes and grades Arabic short answers"
+        );
+        await grammarPracticePage.getByRole("button", { name: "السؤال التالي", exact: true }).click();
+        await grammarPracticePage.getByRole("button", { name: "خطأ", exact: true }).click();
+        await grammarPracticePage.getByRole("button", { name: "اعرض النتيجة", exact: true }).click();
+        assert(
+          (await grammarPracticePage.locator(".nahw-practice-result").innerText()).includes("83%"),
+          "Grammar practice completes with the expected persisted score"
+        );
+      }
+    } finally {
+      await grammarPracticePage.close();
+    }
+
     const bookingPage = await context.newPage();
     await bookingPage.setViewportSize({ width: vp.width, height: vp.height });
     const bookingPageErrors = [];

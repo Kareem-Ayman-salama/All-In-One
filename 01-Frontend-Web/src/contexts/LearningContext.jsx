@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { useOrganization } from "./OrganizationContext";
 import { useAuth } from "./AuthContext";
 import { isLearningMembership } from "../domain/organization";
+import { shouldUseMockApi } from "../services/httpClient";
 import { learningRepository } from "../services/learningRepository";
 
 const LearningContext = createContext(null);
@@ -175,7 +176,60 @@ export function LearningProvider({ children }) {
     commit({ ...data, quizzes });
   }, [commit, data]);
 
+  const getQuizForAttempt = useCallback(async (quizId) => {
+    if (shouldUseMockApi()) return (data.quizzes || []).find((quiz) => quiz.id === quizId) || null;
+    const quiz = await learningRepository.getStudentQuiz(quizId);
+    setData((current) => ({
+      ...current,
+      quizzes: (current.quizzes || []).map((item) => item.id === quizId ? { ...item, ...quiz } : item)
+    }));
+    return quiz;
+  }, [data.quizzes]);
+
+  const loadQuizAttempts = useCallback(async (quizId) => {
+    if (shouldUseMockApi()) return (data.quizAttempts || []).filter((attempt) => attempt.quizId === quizId);
+    const attempts = await learningRepository.getQuizAttempts(activeOrganization?.id, quizId);
+    const decorated = attempts.map((attempt) => ({
+      ...attempt,
+      quizId,
+      studentName: attempt.student?.name || attempt.studentName || "Student",
+      studentEmail: attempt.student?.email || attempt.studentEmail
+    }));
+    setData((current) => ({
+      ...current,
+      quizAttempts: [
+        ...decorated,
+        ...(current.quizAttempts || []).filter((attempt) => attempt.quizId !== quizId)
+      ]
+    }));
+    return decorated;
+  }, [activeOrganization?.id, data.quizAttempts]);
+
   const submitQuizAttempt = useCallback(async (quizId, answers) => {
+    if (!shouldUseMockApi()) {
+      const result = await learningRepository.submitQuizAttempt(quizId, answers);
+      const attempt = {
+        ...result.attempt,
+        quizId,
+        studentId: user?.id,
+        studentEmail: user?.email,
+        studentName: user?.name
+      };
+      setData((current) => ({
+        ...current,
+        quizAttempts: [attempt, ...(current.quizAttempts || [])],
+        quizzes: (current.quizzes || []).map((quiz) => quiz.id === quizId ? {
+          ...quiz,
+          attemptsCount: Number(quiz.attemptsCount || 0) + 1,
+          bestAttempt: !quiz.bestAttempt || result.percentage > quiz.bestAttempt.percentage
+            ? attempt
+            : quiz.bestAttempt,
+          canAttempt: Number(quiz.attemptsCount || 0) + 1 < Number(quiz.maxAttempts || 1)
+        } : quiz)
+      }));
+      return result;
+    }
+
     const quiz = (data.quizzes || []).find((q) => q.id === quizId);
     let earned = 0;
     let total = 0;
@@ -266,6 +320,8 @@ export function LearningProvider({ children }) {
     gradeSubmission,
     createQuiz,
     deleteQuiz,
+    getQuizForAttempt,
+    loadQuizAttempts,
     submitQuizAttempt
   }), [
     createAnnouncement,
@@ -280,7 +336,9 @@ export function LearningProvider({ children }) {
     deleteAssignment,
     deleteQuiz,
     gradeSubmission,
+    getQuizForAttempt,
     loading,
+    loadQuizAttempts,
     submitAssignment,
     submitQuizAttempt,
     updateBookingStatus,

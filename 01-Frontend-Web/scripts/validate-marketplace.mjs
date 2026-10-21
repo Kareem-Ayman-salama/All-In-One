@@ -36,11 +36,17 @@ for (const booking of marketplaceSeed.bookings) {
 }
 
 const wesamUnits = wesamNahwJourney.stages.flatMap((stage) => stage.units);
+const wesamPracticeQuestions = wesamNahwJourney.practiceTracks.flatMap((track) => track.questions);
 assert.equal(wesamNahwJourney.stages.length, 3, "Wesam grammar journey must contain three learning stages");
 assert.equal(wesamUnits.length, wesamNahwJourney.unitsCount, "Wesam unit count must match the published overview");
 assert.equal(new Set(wesamUnits.map((unit) => unit.number)).size, wesamUnits.length, "Wesam units must have unique numbers");
 assert.ok(wesamUnits.every((unit) => unit.lessons.length >= 3), "Every Wesam unit must contain at least three lessons");
 assert.ok(WESAM_COURSE_SLUG, "Wesam journey must be linked to a public course slug");
 assert.equal(wesamNahwJourney.parsingExercise.words.length, 3, "The parsing demo must contain a complete sample sentence");
+assert.equal(wesamNahwJourney.practiceTracks.length, 3, "Wesam practice studio must contain three skill tracks");
+assert.equal(wesamPracticeQuestions.length, 18, "Wesam practice studio must contain eighteen reviewed sample questions");
+assert.equal(new Set(wesamPracticeQuestions.map((question) => question.id)).size, wesamPracticeQuestions.length, "Wesam practice question IDs must be unique");
+assert.ok(wesamPracticeQuestions.every((question) => question.prompt && question.correctAnswer && question.explanation), "Every Wesam practice question must include a prompt, answer, and explanation");
+assert.ok(wesamPracticeQuestions.filter((question) => question.type === "text").every((question) => question.acceptedAnswers?.length), "Text practice questions must define accepted answers");
 
-console.log(`Marketplace validation passed: ${marketplaceSeed.courses.length} courses, ${marketplaceSeed.batches.length} batches, ${marketplaceSeed.academies.length} academies, and ${wesamUnits.length} Wesam grammar units.`);
+console.log(`Marketplace validation passed: ${marketplaceSeed.courses.length} courses, ${marketplaceSeed.batches.length} batches, ${marketplaceSeed.academies.length} academies, ${wesamUnits.length} Wesam grammar units, and ${wesamPracticeQuestions.length} practice questions.`);

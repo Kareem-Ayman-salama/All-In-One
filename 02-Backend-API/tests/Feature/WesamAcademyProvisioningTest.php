@@ -45,6 +45,15 @@ class WesamAcademyProvisioningTest extends TestCase
         ]);
         $this->assertSame(10, CourseModule::query()->where('organization_id', $organization->id)->count());
         $this->assertSame(41, CourseLesson::query()->where('organization_id', $organization->id)->count());
+        $this->assertSame(3, $first['practiceQuizzes']);
+        $this->assertDatabaseCount('quizzes', 3);
+        $this->assertDatabaseCount('quiz_questions', 18);
+        $this->assertDatabaseHas('quizzes', [
+            'organization_id' => $organization->id,
+            'title_ar' => 'تدريب المبتدأ والخبر',
+            'is_published' => true,
+            'passing_score' => 70,
+        ]);
         $this->assertDatabaseHas('rooms', ['organization_id' => $organization->id, 'name' => 'غرفة أكاديمية النحو']);
         $this->assertDatabaseHas('course_batches', [
             'organization_id' => $organization->id,

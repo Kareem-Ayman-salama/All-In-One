@@ -275,13 +275,14 @@ export function AssignmentsManagementPage() {
    2. INSTRUCTOR / ADMIN: QUIZZES MANAGEMENT PAGE
    ========================================================================= */
 export function QuizzesManagementPage() {
-  const { quizzes, quizAttempts, createQuiz, deleteQuiz } = useLearning();
+  const { quizzes, quizAttempts, createQuiz, deleteQuiz, loadQuizAttempts } = useLearning();
   const { activeOrganization } = useOrganization();
   const { showToast } = useToast();
   const tx = useBilingualText();
 
   const [createOpen, setCreateOpen] = useState(false);
   const [activeQuizAttempts, setActiveQuizAttempts] = useState(null);
+  const [attemptsLoading, setAttemptsLoading] = useState(false);
   const [questions, setQuestions] = useState([
     {
       id: "q-1",
@@ -647,6 +648,18 @@ export function QuizzesManagementPage() {
     return (quizAttempts || []).filter((a) => a.quizId === activeQuizAttempts.id);
   }, [quizAttempts, activeQuizAttempts]);
 
+  const openQuizAttempts = async (quiz) => {
+    setActiveQuizAttempts(quiz);
+    setAttemptsLoading(true);
+    try {
+      await loadQuizAttempts(quiz.id);
+    } catch (error) {
+      showToast(error.message || tx("تعذر تحميل النتائج", "Could not load results"), "error");
+    } finally {
+      setAttemptsLoading(false);
+    }
+  };
+
   return (
     <>
       <div className="stitch-page-head">
@@ -675,7 +688,7 @@ export function QuizzesManagementPage() {
                 <Award size={24} color="#fff" />
               </div>
               <div className="learning-card-badges">
-                <Badge tone="primary">{quiz.questions?.length || 0} {tx("أسئلة", "questions")}</Badge>
+                <Badge tone="primary">{quiz.questions?.length || quiz.questionsCount || 0} {tx("أسئلة", "questions")}</Badge>
                 <Badge tone="neutral"><Timer size={13} style={{ display: "inline", verticalAlign: "middle", marginInlineEnd: 4 }} />{quiz.durationMinutes} min</Badge>
               </div>
               <h2>{titleFor(quiz, tx)}</h2>
@@ -685,7 +698,7 @@ export function QuizzesManagementPage() {
                 <span><CheckCircle2 size={15} />{quiz.maxAttempts} {tx("محاولات مسموحة", "attempts allowed")}</span>
               </div>
               <footer>
-                <Button variant="outline" onClick={() => setActiveQuizAttempts(quiz)}>
+                <Button variant="outline" onClick={() => openQuizAttempts(quiz)}>
                   <Users size={16} />
                   {tx("نتائج المحاولات", "View Results")}
                 </Button>
@@ -1110,7 +1123,11 @@ export function QuizzesManagementPage() {
         onClose={() => setActiveQuizAttempts(null)}
       >
         <div className="stitch-table-card learning-table" style={{ maxHeight: "400px", overflowY: "auto" }}>
-          {attemptsForQuiz.length === 0 ? (
+          {attemptsLoading ? (
+            <p style={{ padding: "2rem", textAlign: "center", color: "#64748b" }}>
+              {tx("جاري تحميل نتائج الطلاب...", "Loading student results...")}
+            </p>
+          ) : attemptsForQuiz.length === 0 ? (
             <p style={{ padding: "2rem", textAlign: "center", color: "#64748b" }}>
               {tx("لم يقم أي طالب بإجراء هذا الاختبار بعد.", "No student has attempted this quiz yet.")}
             </p>
@@ -1294,7 +1311,7 @@ export function StudentAssignmentsWorkspaceTab({ roomId, courseId }) {
    4. STUDENT VIEW: QUIZZES PLAYER WITH COUNTDOWN TIMER & INSTANT RESULTS
    ========================================================================= */
 export function StudentQuizzesWorkspaceTab({ roomId, courseId }) {
-  const { quizzes, quizAttempts, submitQuizAttempt } = useLearning();
+  const { quizzes, quizAttempts, getQuizForAttempt, submitQuizAttempt } = useLearning();
   const { user } = useAuth();
   const tx = useBilingualText();
   const { showToast } = useToast();
@@ -1303,6 +1320,7 @@ export function StudentQuizzesWorkspaceTab({ roomId, courseId }) {
   const [answers, setAnswers] = useState({});
   const [timeLeft, setTimeLeft] = useState(0);
   const [quizResult, setQuizResult] = useState(null);
+  const [quizLoadingId, setQuizLoadingId] = useState(null);
 
   const roomQuizzes = useMemo(() => {
     return (quizzes || []).filter(
@@ -1311,11 +1329,19 @@ export function StudentQuizzesWorkspaceTab({ roomId, courseId }) {
   }, [quizzes, roomId, courseId]);
 
   // Start Quiz
-  const startQuiz = (quiz) => {
-    setActiveQuizPlayer(quiz);
-    setAnswers({});
-    setQuizResult(null);
-    setTimeLeft((quiz.durationMinutes || 20) * 60);
+  const startQuiz = async (quiz) => {
+    setQuizLoadingId(quiz.id);
+    try {
+      const playableQuiz = quiz.questions?.length ? quiz : await getQuizForAttempt(quiz.id);
+      setActiveQuizPlayer(playableQuiz || quiz);
+      setAnswers({});
+      setQuizResult(null);
+      setTimeLeft((playableQuiz?.durationMinutes || quiz.durationMinutes || 20) * 60);
+    } catch (error) {
+      showToast(error.message || tx("تعذر تحميل الاختبار الآن", "Could not load the quiz"), "error");
+    } finally {
+      setQuizLoadingId(null);
+    }
   };
 
   // Timer Countdown
@@ -1361,8 +1387,9 @@ export function StudentQuizzesWorkspaceTab({ roomId, courseId }) {
             const userAttempts = (quizAttempts || []).filter(
               (a) => a.quizId === quiz.id && a.studentEmail === user?.email
             );
-            const bestAttempt = userAttempts.sort((a, b) => b.percentage - a.percentage)[0];
-            const attemptsLeft = (quiz.maxAttempts || 2) - userAttempts.length;
+            const bestAttempt = [...userAttempts, quiz.bestAttempt].filter(Boolean).sort((a, b) => b.percentage - a.percentage)[0];
+            const attemptsCount = Math.max(userAttempts.length, Number(quiz.attemptsCount || 0));
+            const attemptsLeft = (quiz.maxAttempts || 2) - attemptsCount;
 
             return (
               <article
@@ -1398,9 +1425,9 @@ export function StudentQuizzesWorkspaceTab({ roomId, courseId }) {
                   </div>
 
                   {attemptsLeft > 0 ? (
-                    <Button onClick={() => startQuiz(quiz)}>
+                    <Button disabled={quizLoadingId === quiz.id} onClick={() => startQuiz(quiz)}>
                       <Timer size={16} />
-                      {bestAttempt ? tx("إعادة المحاولة", "Retake Quiz") : tx("بدء الاختبار", "Start Quiz")}
+                      {quizLoadingId === quiz.id ? tx("جاري التحميل...", "Loading...") : bestAttempt ? tx("إعادة المحاولة", "Retake Quiz") : tx("بدء الاختبار", "Start Quiz")}
                     </Button>
                   ) : (
                     <Badge tone="neutral">{tx("اكتملت المحاولات", "Max attempts reached")}</Badge>
@@ -1441,17 +1468,28 @@ export function StudentQuizzesWorkspaceTab({ roomId, courseId }) {
                     <small style={{ color: "#64748b" }}>{q.points || 10} {tx("درجات", "pts")}</small>
                   </div>
 
-                  <div style={{ display: "grid", gap: "8px", marginTop: "8px" }}>
-                    {(q.options || []).map((opt) => (
+                  {q.type === "short_answer" ? (
+                    <input
+                      aria-label={tx("الإجابة القصيرة", "Short answer")}
+                      value={answers[q.id] || ""}
+                      onChange={(event) => setAnswers({ ...answers, [q.id]: event.target.value })}
+                      placeholder={tx("اكتب إجابتك هنا...", "Type your answer...")}
+                      style={{ width: "100%", minHeight: "44px", padding: "10px 12px", border: "1px solid #cbd5e1", borderRadius: "8px", font: "inherit" }}
+                    />
+                  ) : <div style={{ display: "grid", gap: "8px", marginTop: "8px" }}>
+                    {(q.options || []).map((opt, optionIndex) => {
+                      const optionId = typeof opt === "object" ? opt.id : String.fromCharCode(65 + optionIndex);
+                      const optionText = typeof opt === "object" ? opt.text : String(opt);
+                      return (
                       <label
-                        key={opt.id}
+                        key={optionId}
                         style={{
                           display: "flex",
                           alignItems: "center",
                           gap: "10px",
                           padding: "8px 12px",
-                          background: answers[q.id] === opt.id ? "#e0e7ff" : "#ffffff",
-                          border: answers[q.id] === opt.id ? "1.5px solid #4f46e5" : "1px solid #cbd5e1",
+                          background: answers[q.id] === optionId ? "#e0e7ff" : "#ffffff",
+                          border: answers[q.id] === optionId ? "1.5px solid #4f46e5" : "1px solid #cbd5e1",
                           borderRadius: "8px",
                           cursor: "pointer"
                         }}
@@ -1459,13 +1497,13 @@ export function StudentQuizzesWorkspaceTab({ roomId, courseId }) {
                         <input
                           type="radio"
                           name={`answer-${q.id}`}
-                          checked={answers[q.id] === opt.id}
-                          onChange={() => setAnswers({ ...answers, [q.id]: opt.id })}
+                          checked={answers[q.id] === optionId}
+                          onChange={() => setAnswers({ ...answers, [q.id]: optionId })}
                         />
-                        <span style={{ fontSize: "14px", color: "#1e293b" }}>{opt.text}</span>
+                        <span style={{ fontSize: "14px", color: "#1e293b" }}>{optionText}</span>
                       </label>
-                    ))}
-                  </div>
+                    );})}
+                  </div>}
                 </div>
               ))}
             </div>
@@ -1511,6 +1549,24 @@ export function StudentQuizzesWorkspaceTab({ roomId, courseId }) {
                 {quizResult.passed ? tx("حالة الاعتماد: ناجح", "Status: Passed") : tx("حالة الاعتماد: يحتاج إعادة", "Status: Needs Retake")}
               </Badge>
             </div>
+
+            {quizResult.breakdown?.length > 0 && (
+              <div style={{ display: "grid", gap: "10px", margin: "0 0 1.5rem", textAlign: "start" }}>
+                {quizResult.breakdown.map((item, index) => {
+                  const question = activeQuizPlayer.questions?.find((entry) => entry.id === item.questionId);
+                  const questionText = tx(
+                    question?.questionTextAr || question?.questionText,
+                    question?.questionText || question?.questionTextAr || "—"
+                  );
+                  return (
+                    <article key={item.questionId} style={{ padding: "12px", color: item.isCorrect ? "#065f46" : "#991b1b", background: item.isCorrect ? "#ecfdf5" : "#fef2f2", border: `1px solid ${item.isCorrect ? "#a7f3d0" : "#fecaca"}`, borderRadius: "10px" }}>
+                      <strong>{index + 1}. {questionText}</strong>
+                      <p style={{ margin: "5px 0 0", fontSize: "13px", lineHeight: 1.6 }}>{item.isCorrect ? tx("إجابة صحيحة", "Correct answer") : `${tx("الإجابة الصحيحة:", "Correct answer:")} ${item.correctAnswer}`}{item.explanation ? ` — ${item.explanation}` : ""}</p>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
 
             <div>
               <Button onClick={() => setActiveQuizPlayer(null)}>

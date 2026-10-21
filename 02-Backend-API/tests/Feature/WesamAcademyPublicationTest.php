@@ -5,9 +5,12 @@ namespace Tests\Feature;
 use App\Models\Course;
 use App\Models\CourseBatch;
 use App\Models\Organization;
+use App\Models\Quiz;
+use App\Models\User;
 use App\Services\Provisioning\WesamGrammarAcademyProvisioner;
 use App\Services\Provisioning\WesamGrammarAcademyPublisher;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class WesamAcademyPublicationTest extends TestCase
@@ -72,6 +75,16 @@ class WesamAcademyPublicationTest extends TestCase
         $this->getJson('/api/v1/public/academies')
             ->assertOk()
             ->assertJsonFragment(['slug' => WesamGrammarAcademyProvisioner::SLUG]);
+
+        $student = User::factory()->create();
+        Sanctum::actingAs($student);
+        $quiz = Quiz::query()->where('course_id', $course->id)->firstOrFail();
+        $this->getJson('/api/v1/student/quizzes')
+            ->assertOk()
+            ->assertJsonFragment(['id' => $quiz->id]);
+        $this->getJson("/api/v1/student/quizzes/{$quiz->id}")
+            ->assertOk()
+            ->assertJsonCount(6, 'data.questions');
 
         $reconciled = app(WesamGrammarAcademyProvisioner::class)->provision(
             'wesam@ainplatform.test',

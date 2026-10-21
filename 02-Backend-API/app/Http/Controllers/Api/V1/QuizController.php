@@ -8,12 +8,15 @@ use App\Models\Organization;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use App\Models\QuizQuestion;
+use App\Models\User;
 use App\Services\Operations\OperationRecorder;
 use App\Support\ApiResponse;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class QuizController extends Controller
 {
@@ -54,12 +57,20 @@ class QuizController extends Controller
             'questions' => ['nullable', 'array'],
             'questions.*.questionText' => ['required_with:questions', 'string'],
             'questions.*.questionTextAr' => ['nullable', 'string'],
-            'questions.*.type' => ['required_with:questions', Rule::in(['mcq', 'true_false'])],
-            'questions.*.options' => ['required_with:questions', 'array'],
+            'questions.*.type' => ['required_with:questions', Rule::in(['mcq', 'true_false', 'short_answer'])],
+            'questions.*.options' => ['nullable', 'array'],
             'questions.*.correctAnswer' => ['required_with:questions', 'string'],
             'questions.*.points' => ['nullable', 'integer', 'min:1'],
             'questions.*.explanation' => ['nullable', 'string'],
         ]);
+
+        foreach ($validated['questions'] ?? [] as $index => $question) {
+            if ($question['type'] !== 'short_answer' && empty($question['options'])) {
+                throw ValidationException::withMessages([
+                    "questions.{$index}.options" => ['Answer options are required for multiple-choice and true/false questions.'],
+                ]);
+            }
+        }
 
         $quiz = DB::transaction(function () use ($validated, $org, $request): Quiz {
             $quiz = Quiz::query()->create([
@@ -83,7 +94,7 @@ class QuizController extends Controller
                         'question_text' => $q['questionText'],
                         'question_text_ar' => $q['questionTextAr'] ?? null,
                         'type' => $q['type'] ?? 'mcq',
-                        'options' => $q['options'],
+                        'options' => $q['options'] ?? [],
                         'correct_answer' => $q['correctAnswer'],
                         'points' => $q['points'] ?? 10,
                         'order' => $index,
@@ -141,10 +152,9 @@ class QuizController extends Controller
     {
         $user = $request->user();
 
-        $query = Quiz::query()
+        $query = $this->studentAccessibleQuizzes($user)
             ->with(['room:id,name', 'course:id,title,title_ar'])
             ->withCount('questions')
-            ->where('is_published', true)
             ->when($request->filled('roomId'), fn ($q) => $q->where('room_id', $request->string('roomId')))
             ->when($request->filled('courseId'), fn ($q) => $q->where('course_id', $request->string('courseId')))
             ->orderByDesc('created_at');
@@ -178,9 +188,8 @@ class QuizController extends Controller
 
     public function studentShow(Request $request, string $quiz): JsonResponse
     {
-        $model = Quiz::query()
+        $model = $this->studentAccessibleQuizzes($request->user())
             ->with(['room:id,name', 'course:id,title,title_ar'])
-            ->where('is_published', true)
             ->find($quiz);
 
         if (! $model) {
@@ -211,9 +220,11 @@ class QuizController extends Controller
     public function submitAttempt(Request $request, string $quiz, OperationRecorder $recorder): JsonResponse
     {
         $user = $request->user();
-        $model = Quiz::query()->with('questions')->find($quiz);
+        $model = $this->studentAccessibleQuizzes($user)
+            ->with('questions')
+            ->find($quiz);
 
-        if (! $model || ! $model->is_published) {
+        if (! $model) {
             throw new ApiException('RESOURCE_NOT_FOUND', 'Quiz not found or not published.', 404);
         }
 
@@ -239,7 +250,11 @@ class QuizController extends Controller
         foreach ($model->questions as $question) {
             $totalPoints += $question->points;
             $userAns = $submittedAnswers[$question->id] ?? null;
-            $isCorrect = (string) $userAns === (string) $question->correct_answer;
+            $isCorrect = $this->answersMatch(
+                (string) $question->type,
+                $userAns,
+                $question->correct_answer,
+            );
 
             if ($isCorrect) {
                 $earnedPoints += $question->points;
@@ -415,5 +430,69 @@ class QuizController extends Controller
         }
 
         return $quiz;
+    }
+
+    /**
+     * Build the student-visible quiz query without leaking private tenant content.
+     *
+     * A quiz is available when the student belongs to its academy, has an active
+     * course enrollment, or the quiz belongs to a verified public free course.
+     */
+    private function studentAccessibleQuizzes(User $user): Builder
+    {
+        return Quiz::query()
+            ->where('is_published', true)
+            ->where(function (Builder $query) use ($user): void {
+                $query->whereHas('organization.memberships', function (Builder $membership) use ($user): void {
+                    $membership
+                        ->where('user_id', $user->id)
+                        ->where('status', 'active');
+                })->orWhereHas('course', function (Builder $course) use ($user): void {
+                    $course->where(function (Builder $accessibleCourse) use ($user): void {
+                        $accessibleCourse
+                            ->whereHas('academyProfile', function (Builder $profile): void {
+                                $profile
+                                    ->where('is_public', true)
+                                    ->where('verification_status', 'verified');
+                            })
+                            ->where('status', 'published')
+                            ->whereRaw('COALESCE(discounted_price_minor, price_minor) = 0')
+                            ->orWhereHas('enrollments', function (Builder $enrollment) use ($user): void {
+                                $enrollment
+                                    ->where('student_id', $user->id)
+                                    ->whereIn('status', ['active', 'completed'])
+                                    ->where(function (Builder $starts): void {
+                                        $starts
+                                            ->whereNull('access_starts_at')
+                                            ->orWhere('access_starts_at', '<=', now());
+                                    })
+                                    ->where(function (Builder $ends): void {
+                                        $ends
+                                            ->whereNull('access_ends_at')
+                                            ->orWhere('access_ends_at', '>=', now());
+                                    });
+                            });
+                    });
+                });
+            });
+    }
+
+    private function answersMatch(string $type, mixed $submitted, mixed $expected): bool
+    {
+        if ($type !== 'short_answer') {
+            return (string) $submitted === (string) $expected;
+        }
+
+        return $this->normalizeArabicAnswer($submitted) === $this->normalizeArabicAnswer($expected);
+    }
+
+    private function normalizeArabicAnswer(mixed $value): string
+    {
+        $answer = mb_strtolower(trim((string) $value), 'UTF-8');
+        $answer = preg_replace('/[\x{064B}-\x{065F}\x{0670}\x{06D6}-\x{06ED}]/u', '', $answer) ?? $answer;
+        $answer = str_replace(['أ', 'إ', 'آ', 'ٱ', 'ى', 'ـ'], ['ا', 'ا', 'ا', 'ا', 'ي', ''], $answer);
+        $answer = preg_replace('/[^\p{L}\p{N}\s]/u', '', $answer) ?? $answer;
+
+        return preg_replace('/\s+/u', ' ', $answer) ?? $answer;
     }
 }

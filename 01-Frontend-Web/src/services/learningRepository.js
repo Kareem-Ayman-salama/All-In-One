@@ -15,6 +15,21 @@ function camelize(value) {
   );
 }
 
+function normalizeQuiz(raw) {
+  const quiz = camelize(raw);
+  return {
+    ...quiz,
+    questions: (quiz.questions || []).map((question) => ({
+      ...question,
+      options: (question.options || []).map((option, index) => (
+        typeof option === "object"
+          ? option
+          : { id: String.fromCharCode(65 + index), text: String(option) }
+      ))
+    }))
+  };
+}
+
 function storageKey(organizationId) {
   return `ain-learning-workspace:${organizationId}`;
 }
@@ -48,7 +63,7 @@ export const learningRepository = {
         enrollments: [],
         announcements: camelize(announcements),
         assignments: camelize(assignments),
-        quizzes: camelize(quizzes),
+        quizzes: camelize(quizzes).map(normalizeQuiz),
         submissions: [],
         quizAttempts: [],
         meetings: camelize(events).map((event) => ({
@@ -178,10 +193,20 @@ export const learningRepository = {
 
   async submitQuizAttempt(quizId, answers) {
     if (shouldUseMockApi()) return { quizId, answers };
-    return httpClient(`/student/quizzes/${quizId}/attempt`, {
+    return camelize(await httpClient(`/student/quizzes/${quizId}/attempt`, {
       method: "POST",
       body: JSON.stringify({ answers })
-    });
+    }));
+  },
+
+  async getStudentQuiz(quizId) {
+    if (shouldUseMockApi()) return null;
+    return normalizeQuiz(await httpClient(`/student/quizzes/${quizId}`));
+  },
+
+  async getQuizAttempts(organizationId, quizId) {
+    if (shouldUseMockApi()) return [];
+    return camelize(await httpClient(`/organizations/${organizationId}/quizzes/${quizId}/attempts?perPage=100`));
   }
 };
 

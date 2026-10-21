@@ -15,6 +15,8 @@ use App\Models\OrganizationMembership;
 use App\Models\OrganizationSubscription;
 use App\Models\Plan;
 use App\Models\QuestionBankCategory;
+use App\Models\Quiz;
+use App\Models\QuizQuestion;
 use App\Models\Role;
 use App\Models\Room;
 use App\Models\User;
@@ -271,6 +273,7 @@ class WesamGrammarAcademyProvisioner
                     'status' => $existingBatch?->status ?? 'draft',
                 ],
             );
+            $practiceQuizCount = $this->provisionPracticeQuizzes($organization, $course, $room, $user);
 
             app(OperationRecorder::class)->record(
                 'academy.wesam.provisioned',
@@ -294,6 +297,7 @@ class WesamGrammarAcademyProvisioner
                 'course' => $course->title_ar,
                 'modules' => count($outline),
                 'lessons' => array_sum(array_map(fn (array $item): int => count($item['topics']), $outline)),
+                'practiceQuizzes' => $practiceQuizCount,
                 'room' => $room->name,
                 'batch' => $batch->title,
                 'marketplaceEnabled' => (bool) ($organization->settings['marketplace_enabled'] ?? false),
@@ -335,5 +339,136 @@ class WesamGrammarAcademyProvisioner
                 );
             }
         }
+    }
+
+    private function provisionPracticeQuizzes(
+        Organization $organization,
+        Course $course,
+        Room $room,
+        User $owner,
+    ): int {
+        $definitions = $this->practiceQuizDefinitions();
+
+        foreach ($definitions as $definition) {
+            $quiz = Quiz::query()->updateOrCreate(
+                [
+                    'organization_id' => $organization->id,
+                    'course_id' => $course->id,
+                    'title_ar' => $definition['title'],
+                ],
+                [
+                    'room_id' => $room->id,
+                    'created_by' => $owner->id,
+                    'title' => $definition['title'],
+                    'description' => $definition['description'],
+                    'duration_minutes' => $definition['duration'],
+                    'passing_score' => 70,
+                    'max_attempts' => 5,
+                    'is_published' => true,
+                ],
+            );
+
+            foreach ($definition['questions'] as $index => $question) {
+                QuizQuestion::query()->updateOrCreate(
+                    ['quiz_id' => $quiz->id, 'order' => $index + 1],
+                    [
+                        'question_text' => $question['prompt'],
+                        'question_text_ar' => $question['prompt'],
+                        'type' => $question['type'],
+                        'options' => $question['options'],
+                        'correct_answer' => $question['answer'],
+                        'points' => 10,
+                        'explanation' => $question['explanation'],
+                    ],
+                );
+            }
+
+            $quiz->questions()->where('order', '>', count($definition['questions']))->delete();
+        }
+
+        return count($definitions);
+    }
+
+    /**
+     * @return array<int, array{
+     *     title: string,
+     *     description: string,
+     *     duration: int,
+     *     questions: array<int, array{
+     *         prompt: string,
+     *         type: string,
+     *         options: array<int, array{id: string, text: string}>,
+     *         answer: string,
+     *         explanation: string
+     *     }>
+     * }>
+     */
+    private function practiceQuizDefinitions(): array
+    {
+        return [
+            [
+                'title' => 'تدريب أقسام الكلمة',
+                'description' => 'تدريب تأسيسي مجاني لتمييز الاسم والفعل والحرف مع تصحيح وشرح فوري.',
+                'duration' => 6,
+                'questions' => [
+                    $this->practiceQuestion('ما نوع كلمة «كتبَ» في جملة: كتبَ الطالبُ الدرسَ؟', ['اسم', 'فعل ماضٍ', 'حرف'], 'B', '«كتبَ» تدل على حدث وقع في الزمن الماضي، ولذلك هي فعل ماضٍ.'),
+                    $this->practiceQuestion('أيُّ الكلمات الآتية حرف جر؟', ['في', 'كتاب', 'يقرأ'], 'A', '«في» حرف جر يربط الكلمات ويُكسب الجملة معنى الظرفية.'),
+                    $this->practiceQuestion('أيُّ الكلمات تقبل دخول «الـ» عليها؟', ['مدرسة', 'ذهبَ', 'من'], 'A', 'دخول «الـ» من علامات الاسم، فنقول: المدرسة.'),
+                    $this->practiceQuestion('كلمة «يكتبُ» فعل مضارع لأنها تدل على حدث يقع الآن أو في المستقبل.', ['صحيح', 'خطأ'], 'A', 'الفعل المضارع يدل غالبًا على حدث يقع في الحال أو الاستقبال.', 'true_false'),
+                    $this->practiceQuestion('ما نوع كلمة «إلى» في جملة: ذهبتُ إلى المدرسة؟', ['حرف جر', 'اسم', 'فعل'], 'A', '«إلى» حرف جر، والاسم الذي بعدها يكون مجرورًا.'),
+                    $this->practiceQuestion('الحرف يدل على معنى كامل مستقل حتى إذا جاء وحده.', ['صحيح', 'خطأ'], 'B', 'الحرف يظهر معناه عند دخوله في تركيب مع كلمات أخرى.', 'true_false'),
+                ],
+            ],
+            [
+                'title' => 'تدريب المبتدأ والخبر',
+                'description' => 'تدريب مجاني على ركني الجملة الاسمية وأنواع الخبر وعلامات الرفع.',
+                'duration' => 7,
+                'questions' => [
+                    $this->practiceQuestion('ما المبتدأ في جملة: السماءُ صافيةٌ؟', ['السماءُ', 'صافيةٌ', 'الجملة كلها'], 'A', '«السماءُ» الاسم الذي بدأنا به الحديث، ولذلك هي المبتدأ.'),
+                    $this->practiceQuestion('ما الخبر في جملة: الطالبُ مجتهدٌ؟', ['الطالبُ', 'مجتهدٌ', 'لا يوجد خبر'], 'B', '«مجتهدٌ» أكملت المعنى وأخبرتنا عن الطالب، فهي الخبر.'),
+                    $this->practiceQuestion('المبتدأ والخبر في الأصل مرفوعان.', ['صحيح', 'خطأ'], 'A', 'الأصل أن المبتدأ والخبر مرفوعان ما لم يدخل على الجملة ناسخ.', 'true_false'),
+                    $this->practiceQuestion('ما نوع الخبر في جملة: الكتابُ فوقَ الطاولةِ؟', ['مفرد', 'جملة فعلية', 'شبه جملة'], 'C', '«فوقَ الطاولةِ» ظرف ومضاف إليه، وشبه الجملة في محل رفع خبر.'),
+                    $this->practiceQuestion('ما الخبر في جملة: الأمانةُ فضيلةٌ؟', ['الأمانةُ', 'فضيلةٌ', 'لا يوجد خبر'], 'B', '«فضيلةٌ» هي التي تممت معنى المبتدأ «الأمانةُ».'),
+                    $this->practiceQuestion('علامة رفع المبتدأ في جملة «الطالبانِ حاضرانِ» هي:', ['الضمة', 'الألف', 'الواو'], 'B', '«الطالبانِ» مبتدأ مرفوع بالألف لأنه مثنى.'),
+                ],
+            ],
+            [
+                'title' => 'تدريب الإعراب الأساسي',
+                'description' => 'تدريب مجاني على تحديد وظيفة الكلمة وحكمها وعلامة إعرابها.',
+                'duration' => 8,
+                'questions' => [
+                    $this->practiceQuestion('ما إعراب «محمدٌ» في جملة: قرأَ محمدٌ الكتابَ؟', ['مبتدأ مرفوع', 'فاعل مرفوع', 'مفعول به منصوب'], 'B', 'محمد هو الذي قام بفعل القراءة، فهو فاعل مرفوع بالضمة.'),
+                    $this->practiceQuestion('ما إعراب «الكتابَ» في الجملة نفسها؟', ['فاعل مرفوع', 'مفعول به منصوب', 'اسم مجرور'], 'B', 'وقع فعل القراءة على الكتاب، ولذلك هو مفعول به منصوب بالفتحة.'),
+                    $this->practiceQuestion('ما إعراب «الطالبِ» في جملة: مررتُ بالطالبِ؟', ['اسم مجرور', 'فاعل', 'خبر'], 'A', 'دخل حرف الجر الباء على «الطالبِ»، فأصبح اسمًا مجرورًا بالكسرة.'),
+                    $this->practiceQuestion('الفتحة هي علامة النصب الأصلية.', ['صحيح', 'خطأ'], 'A', 'الفتحة هي علامة النصب الأصلية في الاسم المفرد وجمع التكسير.', 'true_false'),
+                    $this->practiceQuestion('ما الموقع الإعرابي لكلمة «العلمَ» في جملة: إنَّ العلمَ نورٌ؟', ['اسم إنَّ منصوب', 'خبر إنَّ مرفوع', 'فاعل مرفوع'], 'A', '«إنَّ» تنصب المبتدأ ويسمى اسمها، وترفع الخبر ويسمى خبرها.'),
+                    $this->practiceQuestion('أي ترتيب يساعدك على الإعراب بطريقة صحيحة؟', ['العلامة ثم المعنى فقط', 'نوع الكلمة ثم موقعها ثم حكمها ثم علامتها', 'حفظ آخر الكلمة دون فهم'], 'B', 'الإعراب السليم يبدأ بالفهم وتحديد الوظيفة قبل اختيار العلامة.'),
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @param  array<int, string>  $options
+     * @return array{prompt: string, type: string, options: array<int, array{id: string, text: string}>, answer: string, explanation: string}
+     */
+    private function practiceQuestion(
+        string $prompt,
+        array $options,
+        string $answer,
+        string $explanation,
+        string $type = 'mcq',
+    ): array {
+        return [
+            'prompt' => $prompt,
+            'type' => $type,
+            'options' => array_map(
+                fn (string $option, int $index): array => ['id' => chr(65 + $index), 'text' => $option],
+                $options,
+                array_keys($options),
+            ),
+            'answer' => $answer,
+            'explanation' => $explanation,
+        ];
     }
 }
