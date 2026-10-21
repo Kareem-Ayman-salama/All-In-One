@@ -38,7 +38,11 @@ class WesamAcademyProvisioningTest extends TestCase
         $this->assertSame('organization_owner', $owner->memberships()->firstOrFail()->role->name);
         $this->assertDatabaseHas('academy_profiles', ['organization_id' => $organization->id, 'is_public' => false]);
         $this->assertDatabaseHas('instructors', ['organization_id' => $organization->id, 'user_id' => $owner->id]);
-        $this->assertDatabaseHas('courses', ['organization_id' => $organization->id, 'status' => 'draft']);
+        $this->assertDatabaseHas('courses', [
+            'organization_id' => $organization->id,
+            'status' => 'draft',
+            'cover_path' => '/images/courses/wesam-nahw-journey.jpg',
+        ]);
         $this->assertSame(10, CourseModule::query()->where('organization_id', $organization->id)->count());
         $this->assertSame(41, CourseLesson::query()->where('organization_id', $organization->id)->count());
         $this->assertDatabaseHas('rooms', ['organization_id' => $organization->id, 'name' => 'غرفة أكاديمية النحو']);

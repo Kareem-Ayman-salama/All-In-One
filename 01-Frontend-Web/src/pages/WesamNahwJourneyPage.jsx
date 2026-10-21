@@ -298,12 +298,16 @@ export function WesamNahwJourneyPage() {
             </div>
             <div className="nahw-trust-row"><span><CheckCircle2 /> مجاني للتجربة</span><span><CheckCircle2 /> تعلّم ذاتي</span><span><CheckCircle2 /> مناسب للموبايل</span></div>
           </div>
-          <div className="nahw-hero-visual" aria-hidden="true">
+          <div className="nahw-hero-visual">
             <div className="nahw-book-cover">
-              <small>الأستاذة وسام</small>
-              <strong>رِحْلَةُ<br />النَّحْوِ</strong>
-              <span>من الصفر إلى الإعراب بثقة</span>
-              <div>نحوٌ نفهمه… لا نحفظه</div>
+              <img
+                src="/images/courses/wesam-nahw-journey.jpg"
+                alt="كتاب عربي مفتوح يرمز إلى رحلة تعلم النحو"
+              />
+              <div className="nahw-book-caption" aria-hidden="true">
+                <small>الأستاذة وسام</small>
+                <strong>رِحْلَةُ النَّحْوِ</strong>
+              </div>
             </div>
             <div className="nahw-floating-card grammar"><span>مبتدأ</span><strong>العِلْمُ</strong><small>مرفوع بالضمة</small></div>
             <div className="nahw-floating-card points"><Trophy /><strong>+20</strong><small>نقطة إتقان</small></div>

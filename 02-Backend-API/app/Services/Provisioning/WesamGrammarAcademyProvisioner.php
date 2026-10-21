@@ -176,6 +176,7 @@ class WesamGrammarAcademyProvisioner
                     'title_ar' => 'النحو من البداية إلى الاحتراف',
                     'short_description_ar' => 'دورة متدرجة لتعلّم النحو العربي بطريقة مبسطة وعملية.',
                     'description_ar' => 'دورة متدرجة لتعلّم النحو العربي بطريقة مبسطة وعملية، تبدأ من المفاهيم الأساسية ثم تنتقل تدريجياً إلى القواعد والتطبيقات الأكثر تقدماً، مع تدريبات واختبارات تساعد الطالب على الفهم والتطبيق وليس الحفظ فقط.',
+                    'cover_path' => '/images/courses/wesam-nahw-journey.jpg',
                     'education_level' => 'all_levels',
                     'subject' => 'Arabic Language / النحو',
                     'delivery_type' => $existingCourse?->delivery_type ?? 'online',

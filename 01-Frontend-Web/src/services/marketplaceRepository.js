@@ -1,5 +1,9 @@
 import { httpClient } from "./httpClient";
 
+const COURSE_COVER_FALLBACKS = {
+  "nahw-from-foundations-to-mastery": "/images/courses/wesam-nahw-journey.jpg"
+};
+
 function camelKey(key) {
   return key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
 }
@@ -23,7 +27,7 @@ function normalizeCourse(raw) {
     academyId: course.academyId || course.academy?.id || course.academyProfileId,
     instructorId: course.instructorId || course.instructor?.id,
     categoryId: course.categoryId || course.category?.id,
-    coverUrl: course.coverUrl || course.cover,
+    coverUrl: course.coverUrl || course.cover || COURSE_COVER_FALLBACKS[course.slug],
     level: course.level || course.educationLevel || "All",
     price: money(course.priceMinor) ?? Number(course.price || 0),
     discountedPrice: money(course.discountedPriceMinor),
