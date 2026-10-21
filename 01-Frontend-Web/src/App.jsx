@@ -25,6 +25,7 @@ const TenantAdminApp = lazy(() => import("./pages/TenantAdminApp").then((m) => (
 const CoursesMarketplacePage = lazy(() => import("./pages/MarketplacePages").then((m) => ({ default: m.CoursesMarketplacePage })));
 const CourseSellerPage = lazy(() => import("./pages/MarketplacePages").then((m) => ({ default: m.CourseSellerPage })));
 const CourseDetailsPage = lazy(() => import("./pages/MarketplacePages").then((m) => ({ default: m.CourseDetailsPage })));
+const WesamNahwJourneyPage = lazy(() => import("./pages/WesamNahwJourneyPage").then((m) => ({ default: m.WesamNahwJourneyPage })));
 const AcademiesPage = lazy(() => import("./pages/MarketplacePages").then((m) => ({ default: m.AcademiesPage })));
 const AcademyProfilePage = lazy(() => import("./pages/MarketplacePages").then((m) => ({ default: m.AcademyProfilePage })));
 const PublicBookingPage = lazy(() => import("./pages/MarketplacePages").then((m) => ({ default: m.PublicBookingPage })));
@@ -64,6 +65,7 @@ export function App() {
           <Route path="/support" element={<LegalPage type="support" />} />
           <Route path="/courses" element={<CoursesMarketplacePage />} />
           <Route path="/sell-courses" element={<CourseSellerPage />} />
+          <Route path="/courses/nahw-from-foundations-to-mastery/journey" element={<WesamNahwJourneyPage />} />
           <Route path="/courses/:courseSlug" element={<CourseDetailsPage />} />
           <Route path="/academies" element={<AcademiesPage />} />
           <Route path="/academies/:academySlug" element={<AcademyProfilePage />} />

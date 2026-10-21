@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { marketplaceSeed } from "../src/data/marketplaceData.js";
+import { WESAM_COURSE_SLUG, wesamNahwJourney } from "../src/data/wesamNahwJourneyData.js";
 
 function assertUniqueIds(items, entityName) {
   const ids = items.map((item) => item.id);
@@ -34,4 +35,12 @@ for (const booking of marketplaceSeed.bookings) {
   assert.ok(booking.organizationId, `Booking ${booking.id} must be tenant-scoped`);
 }
 
-console.log(`Marketplace validation passed: ${marketplaceSeed.courses.length} courses, ${marketplaceSeed.batches.length} batches, ${marketplaceSeed.academies.length} academies.`);
+const wesamUnits = wesamNahwJourney.stages.flatMap((stage) => stage.units);
+assert.equal(wesamNahwJourney.stages.length, 3, "Wesam grammar journey must contain three learning stages");
+assert.equal(wesamUnits.length, wesamNahwJourney.unitsCount, "Wesam unit count must match the published overview");
+assert.equal(new Set(wesamUnits.map((unit) => unit.number)).size, wesamUnits.length, "Wesam units must have unique numbers");
+assert.ok(wesamUnits.every((unit) => unit.lessons.length >= 3), "Every Wesam unit must contain at least three lessons");
+assert.ok(WESAM_COURSE_SLUG, "Wesam journey must be linked to a public course slug");
+assert.equal(wesamNahwJourney.parsingExercise.words.length, 3, "The parsing demo must contain a complete sample sentence");
+
+console.log(`Marketplace validation passed: ${marketplaceSeed.courses.length} courses, ${marketplaceSeed.batches.length} batches, ${marketplaceSeed.academies.length} academies, and ${wesamUnits.length} Wesam grammar units.`);
